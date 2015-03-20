@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<implementation>
+  <functions>
+  </functions>
+  <files>L_ALTUI.lua</files>
+  <startup>initstatus</startup>
+  <actionList>
+    <action>
+	 <serviceId>urn:upnp-org:serviceId:altui1</serviceId>
+	 <name>SetDebug</name>
+	  <run>
+			setDebugMode(lul_device,lul_settings.newDebugMode)
+	  </run>
+	</action>
+	<action>
+		<serviceId>urn:upnp-org:serviceId:altui1</serviceId>
+		<name>Reset</name>
+		<run>
+			resetDevice(lul_device,true)
+		</run>    
+	</action>
+	
+</actionList>
+</implementation>
