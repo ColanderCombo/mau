@@ -1474,7 +1474,7 @@ var UIManager  = ( function( window, undefined ) {
 		var infotbl=[];
 		for( var key in info) { infotbl.push( info[key] || "") };
 		$("small#altui-footer").html( "AltUI {0}, amg0, {1}".format(_version,infotbl.join(", ")));
-		$("small#altui-footer").append( "<p>$Revision: 395 $,$Date: 2015-03-18 01:03:07 +0100 (mer., 18 mars 2015) $</p>");
+		$("small#altui-footer").append( "<p>$Revision$,$Date$</p>");
 	};
 	
 	function _refreshUI( bFull, bFirstTime ) {
