@@ -667,41 +667,47 @@ var VeraBox = ( function( window, undefined ) {
 			url:url,
 		})
 		.done(function(data) {
-			if ($.isPlainObject( data ) ==false)
-				data=JSON.parse(data);
-			_status_data_DataVersion = data.DataVersion;
-			_status_data_LoadTime = data.LoadTime;
-			if (data.devices != undefined)
+			if ((data) && (data != "NO_CHANGES") && (data != "Exiting") )
 			{
-				$.each(data.devices, function( idx, device) {
-					userdata_device_idx = _findDeviceIdxByID(device.id);
-					_user_data.devices[userdata_device_idx].status = device.status;
-					_user_data.devices[userdata_device_idx].Jobs = device.Jobs;
-					_user_data.devices[userdata_device_idx].dirty = true;
+				if ($.isPlainObject( data ) ==false)
+					data=JSON.parse(data);
+				_status_data_DataVersion = data.DataVersion;
+				_status_data_LoadTime = data.LoadTime;
+				if (data.devices != undefined)
+				{
+					$.each(data.devices, function( idx, device) {
+						userdata_device_idx = _findDeviceIdxByID(device.id);
+						_user_data.devices[userdata_device_idx].status = device.status;
+						_user_data.devices[userdata_device_idx].Jobs = device.Jobs;
+						_user_data.devices[userdata_device_idx].dirty = true;
 
-					if (device.states !=null) {
-						$.each(device.states, function( idx, state) {
-							$.each( _user_data.devices[userdata_device_idx].states , function( idx, userdata_state)
-							{
-								if ((userdata_state.service == state.service) && (userdata_state.variable == state.variable))
+						if (device.states !=null) {
+							$.each(device.states, function( idx, state) {
+								$.each( _user_data.devices[userdata_device_idx].states , function( idx, userdata_state)
 								{
-									_user_data.devices[userdata_device_idx].states[idx].value = state.value;
-									return false; // break from the $.each()
-								}
+									if ((userdata_state.service == state.service) && (userdata_state.variable == state.variable))
+									{
+										_user_data.devices[userdata_device_idx].states[idx].value = state.value;
+										return false; // break from the $.each()
+									}
+								});
 							});
-						});
-					}
-				});
-			}
-			UIManager.refreshUI( false , false );	// partial and not first time
-			
-			// if user_data has changed, reload it
-			if (_user_data_DataVersion != data.UserData_DataVersion) {
-				//console.log( "{0}:Full Refresh".format(Date.now()));
-				_initDataEngine();
+						}
+					});
+				}
+				UIManager.refreshUI( false , false );	// partial and not first time
+				
+				// if user_data has changed, reload it
+				if (_user_data_DataVersion != data.UserData_DataVersion) {
+					//console.log( "{0}:Full Refresh".format(Date.now()));
+					_initDataEngine();
+				}
+				else {
+					setTimeout( _refreshEngine, 10 );
+				}
 			}
 			else {
-				setTimeout( _refreshEngine, 10 );
+					setTimeout( _refreshEngine, 10 );
 			}
 		})
 		.fail(function(jqXHR, textStatus) {
@@ -714,7 +720,7 @@ var VeraBox = ( function( window, undefined ) {
 	
 	
 	function _loadUserData(data) {
-		if ((data) && (data != "NO_CHANGES"))
+		if ((data) && (data != "NO_CHANGES") && (data != "Exiting") )
 		{
 			if ($.isPlainObject( data )==false)
 				data = JSON.parse(data);

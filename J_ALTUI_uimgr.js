@@ -2684,7 +2684,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	pageDevices : function ()
 	{
 		var _deviceDisplayFilter = {
-			filtervisible 	: false,
+			filterformvisible 	: false,
 			room			: 0,
 			invisible 		: (MyLocalStorage.getSettings("ShowInvisibleDevice")==true),
 			batterydevice	: false,
@@ -2866,9 +2866,9 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 			});
 			$("#altui-device-filter").html($("#altui-device-category option:selected" ).text() + " <span class='caret'></span>");
 					
-			$("#altui-device-filter-form").toggle(_deviceDisplayFilter.filtervisible);
+			$("#altui-device-filter-form").toggle(_deviceDisplayFilter.filterformvisible);
 			$("#altui-device-filter").click( function() {
-				_deviceDisplayFilter.filtervisible = !_deviceDisplayFilter.filtervisible;
+				_deviceDisplayFilter.filterformvisible = !_deviceDisplayFilter.filterformvisible;
 				$("#altui-device-filter-form").toggle();
 				$("#altui-device-filter span.caret").toggleClass( "caret-reversed" );
 			});

@@ -1,6 +1,6 @@
 {
-  "flashicon": "http://code.mios.com/svn_public/mios_ipx800/trunk/AltUI/iconALTUI.png",
-  "default_icon": "http://code.mios.com/svn_public/mios_ipx800/trunk/AltUI/iconALTUI.png",
+  "flashicon": "http://code.mios.com/svn_public/mios_alternate_ui/iconALTUI.png",
+  "default_icon": "http://code.mios.com/svn_public/mios_alternate_ui/iconALTUI.png",
   "halloIconsDir": "pics\/hallo",
   "x": "2",
   "y": "4",
