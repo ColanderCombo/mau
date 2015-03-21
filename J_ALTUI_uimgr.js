@@ -1737,7 +1737,7 @@ var UIManager  = ( function( window, undefined ) {
 	
 	function _widgetDialogAddLine(dialog, name, value)
 	{
-		value = value ||'';
+		value = (value==undefined) ? '' : value ;
 		var propertyline = "";
 		propertyline += "<div class='form-group'>";
 		propertyline += "	<label for='altui-widget-"+name+"'>"+name+"</label>";
@@ -2108,6 +2108,11 @@ var UIManager  = ( function( window, undefined ) {
 		_widgetDialogAddDevices( dialog , widget, function() {
 			_widgetDialogAddVariables(dialog, widget, function() {
 				_widgetDialogAddLine(dialog,'Label', widget.properties.label);
+				_widgetDialogAddLine(dialog,'Min', widget.properties.min);
+				_widgetDialogAddLine(dialog,'Green', widget.properties.greenfrom);
+				_widgetDialogAddLine(dialog,'Orange', widget.properties.orangefrom);
+				_widgetDialogAddLine(dialog,'Red', widget.properties.redfrom);
+				_widgetDialogAddLine(dialog,'Max', widget.properties.max);
 				// run the show
 				$('div#dialogModal').modal();
 			});
@@ -2123,26 +2128,56 @@ var UIManager  = ( function( window, undefined ) {
 			real_widget.properties.variable = selected.variable;
 			real_widget.properties.service = selected.service;
 			real_widget.properties.label = $("#altui-widget-Label").val();
+			real_widget.properties.min = $("#altui-widget-Min").val();
+			real_widget.properties.max = $("#altui-widget-Max").val();
+			real_widget.properties.greenfrom = $("#altui-widget-Green").val();
+			real_widget.properties.orangefrom = $("#altui-widget-Orange").val();
+			real_widget.properties.redfrom = $("#altui-widget-Red").val();
 			$('div#dialogModal').modal('hide');
-			$(".altui-custompage-canvas .altui-widget#"+real_widget.id).find("p").text( VeraBox.getStatus( real_widget.properties.deviceid , real_widget.properties.service, real_widget.properties.variable ) );
+			
+			// refresh widget
+			var pagename = _getActivePageName();
+			var page = PageManager.getPageFromName( pagename );
+			_onDisplayGauge(page,real_widget.id,true);
+			// $(".altui-custompage-canvas .altui-widget#"+real_widget.id).find("p").text( VeraBox.getStatus( real_widget.properties.deviceid , real_widget.properties.service, real_widget.properties.variable ) );
 		});
 	}
 
 	function _onDisplayGauge(page,widgetid,bEdit)
 	{
 		var widget=PageManager.getWidgetByID( page, widgetid );
+		var value = parseInt( VeraBox.getStatus(widget.properties.deviceid, widget.properties.service, widget.properties.variable) || 0 );
 		var data = google.visualization.arrayToDataTable([
 		  ['Label', 'Value'],
-		  [widget.properties.label || '', 
-		  parseInt( VeraBox.getStatus(widget.properties.deviceid, widget.properties.service, widget.properties.variable) ||0)],
+		  [widget.properties.label || '', value],
 		]);
-
+		if (value > widget.properties.max)
+			widget.properties.max = value;
+		if (value < widget.properties.min)
+			widget.properties.min = value;
+		
 		var options = {
 		  width: 400, height: 120,
-		  redFrom: 90, redTo: 100,
-		  yellowFrom:75, yellowTo: 90,
-		  minorTicks: 5
+		  minorTicks: 5,
+		  min: widget.properties.min,
+		  max: widget.properties.max
 		};
+
+		if ($.isNumeric(widget.properties.greenfrom))
+			options = $.extend(options, {
+				greenFrom:	widget.properties.greenfrom, 
+				greenTo: 	$.isNumeric(widget.properties.orangefrom) ? widget.properties.orangefrom : widget.properties.max
+			});
+		if ($.isNumeric(widget.properties.orangefrom))
+			options = $.extend(options, {
+				yellowFrom:	widget.properties.orangefrom, 
+				yellowTo: 	$.isNumeric(widget.properties.redfrom) ? widget.properties.redfrom : widget.properties.max
+			});
+		if ($.isNumeric(widget.properties.redfrom))
+			options = $.extend(options, {
+				redFrom:	widget.properties.redfrom, 
+				redTo: 		widget.properties.max
+			});
 
 		var chart = new google.visualization.Gauge(document.getElementById("altui-gauge-"+widgetid));
 		chart.draw(data, options);
@@ -2400,6 +2435,11 @@ var UIManager  = ( function( window, undefined ) {
 			properties: {	//( deviceID, service, action, params, cbfunc )
 				label:'',
 				deviceid:0,
+				min:0,
+				max:100,
+				greenfrom:'',
+				orangefrom:'',
+				redfrom:'',
 				service:'',
 				variable:''
 			} 
