@@ -640,13 +640,18 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 			function(params)
 				local name = lul_parameters["name"]
 				local npage = lul_parameters["npage"]
+				debug(string.format("ALTUI_Handler: save_data( name:%s npage:%s)",name,npage))
 				local variablename = "Data_"..name.."_"..npage
 				if (lul_parameters["data"]=="") then
+					debug(string.format("ALTUI_Handler: save_data( ) - Empty data",name,npage))
 					luup.variable_set(service, variablename, "", deviceID)
 					return "ok"
 				else
+					debug(string.format("ALTUI_Handler: save_data( ) - Not Empty data",name,npage))
 					local data = url_decode( lul_parameters["data"] )
+					debug(string.format("ALTUI_Handler: save_data( ) - url decoded",name,npage))
 					luup.variable_set(service, variablename, data, deviceID)
+					debug(string.format("ALTUI_Handler: save_data( ) - returns:%s",data))
 					return data
 				end
 			end,

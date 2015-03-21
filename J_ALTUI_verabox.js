@@ -986,6 +986,7 @@ var VeraBox = ( function( window, undefined ) {
 	};
 	
 	function _clearData(name, npage, cbfunc) {
+		AltuiDebug.debug("_clearData( {0}, page:{1} )".format(name,npage));
 		var result = "";
 		var url = "data_request?id=lr_ALTUI_Handler&command=clear_data";//&pages="+encodeURIComponent(JSON.stringify(pages));
 		var jqxhr = $.ajax( {
@@ -1012,6 +1013,7 @@ var VeraBox = ( function( window, undefined ) {
 	};
 	
 	function _saveDataChunk(name, npage, data, cbfunc) {
+		AltuiDebug.debug("_saveDataChunk( {0}, page:{1}, data:{2} chars  )".format(name,npage,data.length));
 		var result = "";
 		var url = "data_request?id=lr_ALTUI_Handler&command=save_data";//&pages="+encodeURIComponent(JSON.stringify(pages));
 		var jqxhr = $.ajax( {
@@ -1024,7 +1026,8 @@ var VeraBox = ( function( window, undefined ) {
 				data: encodeURIComponent(data)
 			}
 		})
-		.done(function(data) {
+		.done(function(data, textStatus, jqXHR) {
+			AltuiDebug.debug("_saveDataChunk( {0}, page:{1}, data:{2} chars  ) => Res:{3}".format(name,npage,data.length,JSON.stringify(data)));
 			if ( $.isFunction( cbfunc ) )  {
 				cbfunc(data);			
 			}
@@ -1039,12 +1042,12 @@ var VeraBox = ( function( window, undefined ) {
 	};
 
 	function _saveData( name, data , cbfunc) {
-		AltuiDebug.debug("_saveData( {0}, {1} )".format(name,data));
+		AltuiDebug.debug("_saveData( {0}, {1} chars )".format(name,data.length));
 
 		// we need a workaround to pass data via a POST but for now, all we have is a Get
 		// we know that 5400 char is ok, above it fails
 		var result="ok";
-		var maxchar = 3000;
+		var maxchar = 2400;
 		var todo = data.length;
 		var done = 0;
 		var npage = 0;

@@ -2117,6 +2117,7 @@ var UIManager  = ( function( window, undefined ) {
 				_widgetDialogAddLine(dialog,'Orange', widget.properties.orangefrom);
 				_widgetDialogAddLine(dialog,'Red', widget.properties.redfrom);
 				_widgetDialogAddLine(dialog,'Max', widget.properties.max);
+				_widgetDialogAddLine(dialog,'Ticks', widget.properties.majorTicks.join(','));
 				// run the show
 				$('div#dialogModal').modal();
 			});
@@ -2137,20 +2138,21 @@ var UIManager  = ( function( window, undefined ) {
 			real_widget.properties.greenfrom = $("#altui-widget-Green").val();
 			real_widget.properties.orangefrom = $("#altui-widget-Orange").val();
 			real_widget.properties.redfrom = $("#altui-widget-Red").val();
+			var ticks = $("#altui-widget-Ticks").val();
+			real_widget.properties.majorTicks = ticks.split(',');
 			$('div#dialogModal').modal('hide');
 			
 			// refresh widget
 			var pagename = _getActivePageName();
 			var page = PageManager.getPageFromName( pagename );
 			_onDisplayGauge(page,real_widget.id,true);
-			// $(".altui-custompage-canvas .altui-widget#"+real_widget.id).find("p").text( VeraBox.getStatus( real_widget.properties.deviceid , real_widget.properties.service, real_widget.properties.variable ) );
 		});
 	}
 
 	function _onDisplayGauge(page,widgetid,bEdit)
 	{
 		var widget=PageManager.getWidgetByID( page, widgetid );
-		var value = parseInt( VeraBox.getStatus(widget.properties.deviceid, widget.properties.service, widget.properties.variable) || 0 );
+		var value = parseFloat( VeraBox.getStatus(widget.properties.deviceid, widget.properties.service, widget.properties.variable) || 0 );
 		var data = google.visualization.arrayToDataTable([
 		  ['Label', 'Value'],
 		  [widget.properties.label || '', value],
@@ -2166,6 +2168,11 @@ var UIManager  = ( function( window, undefined ) {
 		  min: widget.properties.min,
 		  max: widget.properties.max
 		};
+
+		if (widget.properties.majorTicks.length>0)
+			options = $.extend(options, {
+				majorTicks:	widget.properties.majorTicks
+			});				
 
 		if ($.isNumeric(widget.properties.greenfrom))
 			options = $.extend(options, {
@@ -2444,6 +2451,7 @@ var UIManager  = ( function( window, undefined ) {
 				greenfrom:'',
 				orangefrom:'',
 				redfrom:'',
+				majorTicks:[],
 				service:'',
 				variable:''
 			} 
