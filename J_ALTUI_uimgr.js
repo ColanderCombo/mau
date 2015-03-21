@@ -694,6 +694,7 @@ var UIManager  = ( function( window, undefined ) {
 						}
 						return (bFound==false);
 					});
+					// in UI7 if icon path starts with .. it is relative to skins/default/img/devices/device_states/
 				}
 				else	// UI5 style
 					if (dt.ui_static_data.flashicon != undefined)
