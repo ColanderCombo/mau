@@ -870,16 +870,21 @@ var UIManager  = ( function( window, undefined ) {
 	function _cameraDraw(id,size) // size:1,2,3,... 1=220px
 	{
 		var obj = null;
-		if (size==undefined)
-			size=2;
+		// if (size==undefined)
+			// size={
+				// width: 220,
+				// height:265
+			// };
 			
 		var device = VeraBox.getDeviceByID(id);
 		if (VeraBox.isRemoteAccess())
 		{
 			obj = $("<img></img>")
 				.attr('src',"data_request?id=request_image&res=low&cam="+device.id+"&t="+ new Date().getTime())
-				.height(220*size)
-				.width(265*size);
+				.css("max-width","100%")
+				.css("max-width","100%")
+				.css("width","100%")
+				.css("height","100%");
 			var timeout = null;
 			function _resfreshIt() {
 				$("div#dialogModal img").attr('src',"data_request?id=request_image&res=low&cam="+device.id+"&t="+ new Date().getTime());
@@ -898,8 +903,11 @@ var UIManager  = ( function( window, undefined ) {
 							"background-size": "contain",
 							"background-repeat": "no-repeat"
 						})
-				.height(220*size)
-				.width(265*size);
+				.css("max-width","100%")
+				.css("max-width","100%")
+				.css("width","100%")
+				.css("height","100%");
+				// .width(size.width);
 		}
 		return obj.wrap( "<div></div>" ).parent().html();
 	};
@@ -1869,6 +1877,9 @@ var UIManager  = ( function( window, undefined ) {
 		});
 	};
 		
+	function _onResizeImage(page, widgetid, position, size) {
+	};
+	
 	function _onPropertyImage(real_widget) {
 		// clone for temporary storage
 		var widget = $.extend( true, {}, real_widget );
@@ -2076,6 +2087,10 @@ var UIManager  = ( function( window, undefined ) {
 			$('div#dialogModal').modal('hide');
 			_replaceElementKeepAttributes( $(".altui-custompage-canvas .altui-widget#"+real_widget.id) , _getWidgetHtml(real_widget,true) );
 		});
+	};
+	
+	function _onResizeCamera(page, widgetid, position, size)
+	{
 	};
 	
 	function _onPropertyCamera(real_widget)
@@ -2312,9 +2327,9 @@ var UIManager  = ( function( window, undefined ) {
 			cls:'altui-widget-image', 
 			html: _toolHtml(picGlyph,"Image"),
 			property: _onPropertyImage, 
-			resizable: true,
+			onWidgetResize: _onResizeImage,
 			widgetdisplay: function(widget,bEdit)	{ 
-				return "<img src='{0}'></img>".format( widget.properties.url);
+				return "<img src='{0}' style='max-height:100%; max-width:100%;'></img>".format( widget.properties.url);
 			},
 			properties: {
 				url:'data:image/png;base64,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'
@@ -2425,11 +2440,11 @@ var UIManager  = ( function( window, undefined ) {
 		{ 	id:70, 
 			cls:'altui-widget-camera', 
 			html: _toolHtml(cameraGlyph,"Camera"),
-			resizable: true,
+			onWidgetResize: _onResizeCamera,
 			aspectRatio: true,
 			property: _onPropertyCamera, 
 			widgetdisplay: function(widget,bEdit)	{ 
-				return (widget.properties.deviceid>0) ? _cameraDraw(widget.properties.deviceid,1) : "<img src='{0}'></img>".format(cameraURI);	//"<div class='altui-camera-div'>xxx</div>";
+				return (widget.properties.deviceid>0) ? _cameraDraw(widget.properties.deviceid,widget.size) : "<img src='{0}' style='max-height:100%; max-width:100%;'></img>".format(cameraURI);	//"<div class='altui-camera-div'>xxx</div>";
 			},
 			properties: {	//( deviceID, service, action, params, cbfunc )
 				deviceid:0
@@ -3364,14 +3379,16 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 
 			// add resizable & gauges
 			$.each(tools, function(idx,tool){
-				if (tool.resizable==true) {
+				if ($.isFunction( tool.onWidgetResize) ) {
+				// if (tool.resizable==true) {
 					$(".altui-custompage-canvas ."+tool.cls).resizable({
-						aspectRatio: tool.aspectRatio ||false,	// no aspect ratio by default
+						aspectRatio: tool.aspectRatio || false,	// no aspect ratio by default
 						containment: "parent",
 						stop: function( event, ui ) {
 							var pagename = _getActivePageName();
 							var page = PageManager.getPageFromName( pagename );
 							var widgetid = $(ui.helper).prop('id');
+							(tool.onWidgetResize)(page,widgetid,ui.position,ui.size);
 							PageManager.updateChildrenInPage( page, widgetid, ui.position, ui.size );
 						}
 					});
@@ -3399,8 +3416,10 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 					{
 						// internal drag and drop on the page canvas
 						widgetid = $(ui.helper).prop('id');
-						if (tool.resizable)
+						if ($.isFunction( tool.onWidgetResize) ) {
+							(tool.onWidgetResize)(page, widgetid, position, size);
 							PageManager.updateChildrenInPage( page, widgetid, position, size );
+						}
 						else
 							PageManager.updateChildrenInPage( page, widgetid, position );
 						
@@ -3432,12 +3451,13 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 								left: position.left
 							})
 							.draggable(_widgetOnCanvasDraggableOptions);
-						if (tool.resizable==true)
+						if ($.isFunction( tool.onWidgetResize) ) 
 						{	
 							obj.resizable({
 								aspectRatio: tool.aspectRatio ||false,	// no aspect ratio by default
 								containment: "parent",
 								stop: function( event, ui ) {
+									(tool.onWidgetResize)(page,widgetid,ui.position,ui.size);
 									PageManager.updateChildrenInPage( page, widgetid, ui.position, ui.size );
 								}
 							});
