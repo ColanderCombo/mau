@@ -119,9 +119,25 @@ var MyLocalStorage = ( function (undefined) {
 			localStorage.removeItem(key);
 		};
 		
+		_setSettings=function(key, val) {
+			var settings = _get("ALTUI_Settings");
+			if (settings==null) {
+				settings = {};
+			}
+			settings[key] = val;
+			return _set("ALTUI_Settings",settings);
+		};
+		
+		_getSettings=function(key) {
+			var settings = _get("ALTUI_Settings");
+			return (settings) ? settings[key] : null;
+		};
+		
 	return {
 		set: _set,
 		get: _get,
+		setSettings: _setSettings,
+		getSettings: _getSettings,
 		clear: _clear,
 	}
 })( );

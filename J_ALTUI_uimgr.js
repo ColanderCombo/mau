@@ -2686,7 +2686,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		var _deviceDisplayFilter = {
 			filtervisible 	: false,
 			room			: 0,
-			invisible 		: true,
+			invisible 		: (MyLocalStorage.getSettings("ShowInvisibleDevice")==true),
 			batterydevice	: false,
 			category		: 0,
 			filtername		: ""
@@ -2887,6 +2887,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 			$("#altui-show-invisible").prop('checked',_deviceDisplayFilter.invisible);
 			$("#altui-show-invisible").click( function() {
 				_deviceDisplayFilter.invisible = $(this).prop('checked');
+				MyLocalStorage.setSettings("ShowInvisibleDevice",_deviceDisplayFilter.invisible);
 				_drawDevices(deviceFilter);
 			});
 
