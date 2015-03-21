@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.34"
+local version = "v0.35"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 -- local updateFrequencySec = 120	-- refreshes every x seconds
 -- local socket = require("socket")
@@ -843,7 +843,7 @@ function startupDeferred(lul_device)
 	local config = getSetVariableIfEmpty(service, "PluginConfig", lul_device, default)
 	
 	-- NOTHING to start 
-	
+	luup.set_failure(false,lul_device)	-- should be 0 in UI7
 	log("startup completed")
 end
 		

@@ -28,6 +28,7 @@ var runGlyph = glyphTemplate.format( "play", "Run Scene" );
 var cameraGlyph = glyphTemplate.format( "facetime-video", "Camera" );
 var onoffGlyph = glyphTemplate.format( "off", "On Off" );
 var scaleGlyph = glyphTemplate.format( "scale", "Gauge" );
+var helpGlyph = glyphTemplate.format( "question-sign", "" );
 var smallbuttonTemplate = "<button id='{0}' type='button' class='{1} btn btn-default btn-sm' aria-label='tbd' title='{3}'>{2}</button>";
 var buttonTemplate 		= "<button id='{0}' type='button' class='{1} btn btn-{3}' aria-label='tbd'>{2}</button>";
 var buttonDebugHtml = "<button type='button' class='btn btn-default' id='altui-debug-btn' >Debug<span class='caret'></span></button>";
@@ -1747,12 +1748,14 @@ var UIManager  = ( function( window, undefined ) {
 		$(dialog).find("form").append(propertyline);
 	};
 	
-	function _widgetDialogAddLine(dialog, name, value)
+	function _widgetDialogAddLine(dialog, name, value,help)
 	{
 		value = (value==undefined) ? '' : value ;
 		var propertyline = "";
 		propertyline += "<div class='form-group'>";
-		propertyline += "	<label for='altui-widget-"+name+"'>"+name+"</label>";
+		propertyline += "	<label for='altui-widget-"+name+"' title='"+(help || '')+"'>"+name+"</label>";
+		if (help)
+			propertyline += "	<span title='"+(help || '')+"'>"+helpGlyph+"</span>";
 		propertyline += "	<input id='altui-widget-"+name+"' class='form-control' type='text' value='"+value+"' placeholder='enter "+name+"' ></input>";
 		propertyline += "</div>";
 		$(dialog).find("form").append(propertyline);
@@ -2132,7 +2135,7 @@ var UIManager  = ( function( window, undefined ) {
 				_widgetDialogAddLine(dialog,'Orange', widget.properties.orangefrom);
 				_widgetDialogAddLine(dialog,'Red', widget.properties.redfrom);
 				_widgetDialogAddLine(dialog,'Max', widget.properties.max);
-				_widgetDialogAddLine(dialog,'Ticks', widget.properties.majorTicks.join(','));
+				_widgetDialogAddLine(dialog,'Ticks', widget.properties.majorTicks.join(','),'nn,nn,nn');
 				// run the show
 				$('div#dialogModal').modal();
 			});
