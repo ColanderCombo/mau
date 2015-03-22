@@ -22,6 +22,7 @@ var searchGlyph="<span class='glyphicon glyphicon-search' aria-hidden='true' dat
 var plusGlyph="<span class='glyphicon glyphicon-plus' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Add'></span>";
 var saveGlyph="<span class='glyphicon glyphicon-save' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Save'></span>";
 var labelGlyph="<span class='glyphicon glyphicon-font' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Label'></span>";
+var loadGlyph = glyphTemplate.format( "open", "Load" );
 var infoGlyph = glyphTemplate.format( "info-sign", "Info" );
 var picGlyph = glyphTemplate.format( "picture", "Image" );
 var runGlyph = glyphTemplate.format( "play", "Run Scene" );
@@ -1544,7 +1545,7 @@ var UIManager  = ( function( window, undefined ) {
 		if ($(".altui-page-contents").length>0)
 		{
 			var activepage = $(".altui-page-contents .active").prop('id');
-			PageManager.init(g_CustomPages);
+			// PageManager.init(g_CustomPages);
 			var Html="";
 			PageManager.forEachPage( function( idx, page) {
 				Html += _getPageHtml(page,false)	// no edit mode
@@ -1598,6 +1599,7 @@ var UIManager  = ( function( window, undefined ) {
 	};
 
 	function _initCustomPages( custompages ) {
+		PageManager.init(custompages);
 	};
 
 	//------------------------------------------------------------	
@@ -3271,7 +3273,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	pageUsePages: function ()
 	{
 		// var pages = g_CustomPages;
-		PageManager.init(g_CustomPages);
+		// PageManager.init(g_CustomPages);
 		UIManager.clearPage();
 		$("#altui-pagetitle").text("Your Custom Pages");
 
@@ -3335,7 +3337,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		};
 		
 		// var pages = g_CustomPages;
-		PageManager.init(g_CustomPages);
+		// PageManager.init(g_CustomPages);
 
 		function _createPageEditorHtml() {
 			var pageTabs = _createPageTabsHtml( true );		// edit mode
@@ -3726,6 +3728,9 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		color = VeraBox.isEngineCached() ? "text-success" : "text-danger";
 		var okGlyph3 = glyphTemplate.format( "ok-sign", "OK" , color );
 		
+		color =  MyLocalStorage.get("Pages")!=null ? "text-success" : "text-danger";
+		var okGlyph4 = glyphTemplate.format( "ok-sign", "OK" , color );
+		
 		var html = "<div class='btn-group' role='group' aria-label='Icon DB'>";
 		html += "<button class='btn btn-default altui-save-IconDB' type='submit'>"+saveGlyph+" Save Icon DB</button>";
 		html += "<button class='btn btn-default altui-clear-IconDB' type='submit'>"+okGlyph+" Clear Icon DB</button>";
@@ -3737,6 +3742,11 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		html += "<div class='btn-group' role='group' aria-label='User Data DB'>";
 		html += "<button class='btn btn-default altui-save-userdata' type='submit'>"+saveGlyph+"Save UserData</button>";
 		html += "<button class='btn btn-default altui-clear-userdata' type='submit'>"+okGlyph3+" Clear UserData</button>";
+		html += "</div>";
+		html += "<div class='btn-group' role='group' aria-label='User Pages DB'>";
+		html += "<button class='btn btn-default altui-save-userpage' type='submit'>"+saveGlyph+"Save User Pages</button>";
+		html += "<button class='btn btn-default altui-restore-userpage' type='submit'>"+loadGlyph+"Restore From User Pages Cache</button>";
+		html += "<button class='btn btn-default altui-clear-userpage' type='submit'>"+okGlyph4+" Clear User Pages Cache</button>";
 		html += "</div>";
 		$(".altui-mainpanel").append(html);
 		$(".altui-save-IconDB").click( function() {
@@ -3761,6 +3771,17 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		});
 		$(".altui-clear-userdata").click( function() {
 			MyLocalStorage.clear("VeraBox"); 
+			UIManager.pageOptimize();
+		});
+		$(".altui-save-userpage").click( function() {
+			PageManager.savePages();
+		});
+		$(".altui-restore-userpage").click( function() {
+			PageManager.recoverFromStorage();
+			UIManager.pageOptimize();
+		});
+		$(".altui-clear-userpage").click( function() {
+			PageManager.clearStorage();
 			UIManager.pageOptimize();
 		});
 	}

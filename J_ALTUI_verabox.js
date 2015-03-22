@@ -1214,12 +1214,19 @@ var PageManager = (function() {
 			$.each( pages, function(idx,page) {
 				_pages.push( $.extend( true, {id:0, name:'', background:''}, page) );
 			});
-			// _pages = pages;
 		}
+	};
+	
+	function _recoverFromStorage() {
+		_pages = MyLocalStorage.get("Pages");
+	};
+	function _clearStorage() {
+		MyLocalStorage.clear("Pages");
 	};
 	
 	function _savePages() {
 		AltuiDebug.debug("PageManager.savePages(), pages="+JSON.stringify(_pages));
+		MyLocalStorage.set("Pages",_pages);
 		var names = $.map( _pages, function(page,idx) {	return page.name;	} );
 		VeraBox.saveData( "CustomPages", JSON.stringify(names), function(data) {
 			if (data!="")
@@ -1337,6 +1344,8 @@ var PageManager = (function() {
 	
 	return {
 		init :_init,
+		recoverFromStorage : _recoverFromStorage,
+		clearStorage : _clearStorage,
 		forEachPage: _forEachPage,
 		getPageFromName: _getPageFromName,
 		savePages: _savePages,
