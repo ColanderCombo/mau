@@ -187,6 +187,9 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		
 		// load level
 		var level = parseInt(VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:Dimming1', 'LoadLevelTarget' )); 
+		if (isNaN(level)==true) 
+			level = parseInt(VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:Dimming1', 'LoadLevelStatus' )); 
+		
 		html += ("<span id='slider-val-"+devid+"' class='altui-dimmable' >"+level+"% </span>");
 
 		// on off button
