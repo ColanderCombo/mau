@@ -23,6 +23,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	function _getStyle() {
 		var style="";
 		style += ".altui-watts {font-size: 16px;}";
+		style += ".altui-volts {font-size: 16px;}";
 		style += ".altui-temperature {font-size: 18px;}";
 		style += ".altui-humidity {font-size: 18px;}";
 		style += ".altui-dimmable {font-size: 16px;}";
@@ -283,6 +284,19 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		return html;
 	};
 
+	function _drawPowerMeter(devid, device) {
+		var html ="";
+		var wattTemplate = "<div class='altui-watts '>{0} <small>Watts</small></div>";		
+		var watts = parseFloat(VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'Watts' )); 
+		if (isNaN(watts)==false) 
+			html += wattTemplate.format(watts);
+		var voltTemplate = "<div class='altui-volts '>{0} <small>Volts</small></div>";
+		var volts = parseFloat(VeraBox.getStatus( devid, 'urn:brultech-com:serviceId:PowerMeter1', 'Volts' ));
+		if (isNaN(volts)==false) 
+			html += voltTemplate .format(volts);
+		return html;
+	};
+	
 	function _drawBinLightControlPanel(devid, device, domparent) {
 
 		var html = "Any thing can go here<hr>";
@@ -314,6 +328,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawMotion 	   : _drawMotion,
 	drawHumidity   : _drawHumidity,
 	drawWindowCover : _drawWindowCover,
+	drawPowerMeter : _drawPowerMeter,
 	toggleButton   : _toggleButton,
 	toggleOnOffButton : function (devid,htmlid) {
 		_toggleButton(devid, htmlid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status', function(id,newval) {

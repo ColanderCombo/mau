@@ -18,6 +18,19 @@ var ALTUI_IPhoneLocator= ( function( window, undefined ) {
 		return style;
 	};
 
+
+	function _drawAltUI(devid, device) {
+		var debug = VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:altui1', 'Debug' ); 
+		
+		var html ="";
+		html += ALTUI_PluginDisplays.createOnOffButton( debug,"altui-onoffbtn-"+devid, "Normal,Debug" , "pull-right");
+		html += "<script type='text/javascript'>";
+		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_IPhoneLocator.toggleDebug({0},'div#altui-onoffbtn-{0}'); } );".format(devid);
+		html += "</script>";
+		
+		return html;
+	};
+	
 	// return the html string inside the .panel-body of the .altui-device#id panel
 	function _drawIPhone(devid, device) {
 		var dist = parseFloat(VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:IPhoneLocator1', 'Distance' )); 
@@ -59,15 +72,21 @@ var ALTUI_IPhoneLocator= ( function( window, undefined ) {
 	//---------------------------------------------------------
 	// PUBLIC  functions
 	//---------------------------------------------------------
-	getStyle : _getStyle,
-	drawIPhone : _drawIPhone,
+	getStyle 	: _getStyle,
+	drawIPhone 	: _drawIPhone,
+	drawAltUI 	: _drawAltUI,
+	drawCanalplus : _drawCanalplus,
 	// drawControlPanel : _drawControlPanel,
+	toggleDebug : function (devid,htmlid) {
+		ALTUI_PluginDisplays.toggleButton(devid, htmlid, 'urn:upnp-org:serviceId:altui1', 'Debug', function(id,newval) {
+			UPnPHelper.UPnPAction( devid, 'urn:upnp-org:serviceId:altui1', 'SetDebug', {newDebugMode:newval} );
+		});
+	},
 	toggleMute : function (devid,htmlid) {
 		ALTUI_PluginDisplays.toggleButton(devid, htmlid, 'urn:upnp-org:serviceId:IPhoneLocator1', 'Muted', function(id,newval) {
 			UPnPHelper.UPnPAction( devid, 'urn:upnp-org:serviceId:IPhoneLocator1', 'SetMute', {newMuteStatus:newval} );
 		});
 	},
-	drawCanalplus : _drawCanalplus,
 	toggleCplusOnOff : function (devid,htmlid) {
 		ALTUI_PluginDisplays.toggleButton(devid, htmlid, 'urn:upnp-org:serviceId:cplus1', 'Present', function(id,newval) {
 			UPnPHelper.UPnPAction( devid, 'urn:upnp-org:serviceId:cplus1', 'SetPower', {newPowerState:newval} );

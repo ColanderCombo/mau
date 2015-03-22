@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.35"
+local version = "v0.36"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 -- local updateFrequencySec = 120	-- refreshes every x seconds
 -- local socket = require("socket")
@@ -783,6 +783,14 @@ local function getDefaultConfig()
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawWindowCover",
 	}
+	tbl["urn:schemas-micasaverde-com:device:PowerMeter:1"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawPowerMeter",
+	}
+	tbl["urn:schemas-micasaverde-com:device:PowerMeter:2"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawPowerMeter",
+	}
 	tbl["urn:schemas-upnp-org:device:DigitalSecurityCamera:2"]= {
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawCamera",
@@ -790,6 +798,10 @@ local function getDefaultConfig()
 	tbl["urn:schemas-upnp-org:device:cplus:1"]= {
 		["ScriptFile"]="J_ALTUI_iphone.js",
 		["DeviceDrawFunc"]="ALTUI_IPhoneLocator.drawCanalplus",
+	}
+	tbl["urn:schemas-upnp-org:device:altui:1"]= {
+		["ScriptFile"]="J_ALTUI_iphone.js",
+		["DeviceDrawFunc"]="ALTUI_IPhoneLocator.drawAltUI",
 	}
 	tbl["urn:schemas-upnp-org:device:IPhoneLocator:1"]= {
 		["ScriptFile"]="J_ALTUI_iphone.js",
