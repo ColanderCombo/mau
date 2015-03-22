@@ -749,6 +749,8 @@ var VeraBox = ( function( window, undefined ) {
 			});		
 		}
 	};
+
+	function _isEngineCached() {	return MyLocalStorage.get("VeraBox")!=null; }
 	
 	function _saveEngine() {
 		AltuiDebug.debug("_saveEngine()");
@@ -1188,6 +1190,7 @@ var VeraBox = ( function( window, undefined ) {
 	saveData		: _saveData,		//  name, data , cbfunc
 	saveEngine 		: _saveEngine, 
 	loadEngine 		: _loadEngine, 
+	isEngineCached	: _isEngineCached,
 	initEngine		: function() 	{
 							_loadEngine();
 							_initDataEngine();				// init the data collection engine
@@ -1379,7 +1382,8 @@ var IconDB = ( function (window, undefined) {
 	
 	return {
 		getIconContent  : _getIconContent,
-		saveDB			: function() 	{	MyLocalStorage.set("IconDB", _dbIcon);	  },
+		isDB			: function()	{ 	return MyLocalStorage.get("IconDB")!=null;			},
+		saveDB			: function() 	{	MyLocalStorage.set("IconDB", _dbIcon);	  	},
 		resetDB			: function() 	{	MyLocalStorage.clear("IconDB"); _dbIcon = {}; }
 	}
 } )( window );
@@ -1415,7 +1419,8 @@ var FileDB = ( function (window, undefined) {
 	
 	return {
 		getFileContent  : _getFileContent,
-		saveDB			: function(db) 	{	MyLocalStorage.set("FileDB", _dbFile);	  },
+		isDB			: function()	{ 	return MyLocalStorage.get("FileDB")!=null;			},
+		saveDB			: function(db) 	{	MyLocalStorage.set("FileDB", _dbFile);	  	},
 		resetDB			: function(db) 	{	MyLocalStorage.clear("FileDB"); _dbFile = {}; }
 	}
 } )( window );

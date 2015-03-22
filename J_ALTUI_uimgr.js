@@ -11,7 +11,7 @@
 
 var leftNavButtonTemplate = "<button id='{0}' type='button' class='altui-leftbutton btn btn-default'>{1}</button>";
 var deleteGlyph = "<span class='glyphicon glyphicon-trash text-danger' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Delete'></span>";
-var glyphTemplate = "<span class='glyphicon glyphicon-{0}' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='{1}'></span>";
+var glyphTemplate = "<span class='glyphicon glyphicon-{0} {2}' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='{1}' ></span>";
 var hiddenGlyph = "<span class='glyphicon glyphicon-eye-close' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Hidden'></span>";
 var invisibleGlyph = "<span class='glyphicon glyphicon-ban-circle' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Invisible'></span>";
 var timeGlyph="<span class='glyphicon glyphicon-time' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='time'></span>";
@@ -3716,36 +3716,52 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	pageOptimize: function() {
 		UIManager.clearPage();
 		$("#altui-pagetitle").text("Optimizations");
+
+		var color = IconDB.isDB() ? "text-success" : "text-danger";
+		var okGlyph = glyphTemplate.format( "ok-sign", "OK" , color );
+		
+		color = FileDB.isDB() ? "text-success" : "text-danger";
+		var okGlyph2 = glyphTemplate.format( "ok-sign", "OK" , color );
+		
+		color = VeraBox.isEngineCached() ? "text-success" : "text-danger";
+		var okGlyph3 = glyphTemplate.format( "ok-sign", "OK" , color );
+		
 		var html = "<div class='btn-group' role='group' aria-label='Icon DB'>";
-		html += "<button class='btn btn-default altui-save-IconDB' type='submit'>"+saveGlyph+"Save Icon DB</button>";
-		html += "<button class='btn btn-default altui-clear-IconDB' type='submit'>Clear Icon DB</button>";
+		html += "<button class='btn btn-default altui-save-IconDB' type='submit'>"+saveGlyph+" Save Icon DB</button>";
+		html += "<button class='btn btn-default altui-clear-IconDB' type='submit'>"+okGlyph+" Clear Icon DB</button>";
 		html += "</div>";
 		html += "<div class='btn-group' role='group' aria-label='File DB'>";
-		html += "<button class='btn btn-default altui-save-FileDB' type='submit'>"+saveGlyph+"Save File DB</button>";
-		html += "<button class='btn btn-default altui-clear-FileDB' type='submit'>Clear File DB</button>";
+		html += "<button class='btn btn-default altui-save-FileDB' type='submit'>"+saveGlyph+" Save File DB</button>";
+		html += "<button class='btn btn-default altui-clear-FileDB' type='submit'>"+okGlyph2+" Clear File DB</button>";
 		html += "</div>";
 		html += "<div class='btn-group' role='group' aria-label='User Data DB'>";
 		html += "<button class='btn btn-default altui-save-userdata' type='submit'>"+saveGlyph+"Save UserData</button>";
-		html += "<button class='btn btn-default altui-clear-userdata' type='submit'>Clear UserData</button>";
+		html += "<button class='btn btn-default altui-clear-userdata' type='submit'>"+okGlyph3+" Clear UserData</button>";
 		html += "</div>";
 		$(".altui-mainpanel").append(html);
 		$(".altui-save-IconDB").click( function() {
 			IconDB.saveDB();
+			UIManager.pageOptimize();
 		});
 		$(".altui-clear-IconDB").click( function() {
 			IconDB.resetDB();
+			UIManager.pageOptimize();
 		});
 		$(".altui-save-FileDB").click( function() {
 			FileDB.saveDB();
+			UIManager.pageOptimize();
 		});
 		$(".altui-clear-FileDB").click( function() {
 			FileDB.resetDB();
+			UIManager.pageOptimize();
 		});
 		$(".altui-save-userdata").click( function() {
 			VeraBox.saveEngine();
+			UIManager.pageOptimize();
 		});
 		$(".altui-clear-userdata").click( function() {
 			MyLocalStorage.clear("VeraBox"); 
+			UIManager.pageOptimize();
 		});
 	}
 	
