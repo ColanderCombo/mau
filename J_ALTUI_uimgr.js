@@ -1416,6 +1416,7 @@ var UIManager  = ( function( window, undefined ) {
 		};
 
 		var htmlSceneEditButton = "  <button type='submit' class='btn btn-default altui-scene-editbutton'>Submit</button>";
+		var htmlActionAddButton = "  <button type='submit' class='btn btn-default altui-scene-add-action'>Add</button>";
 		var rooms = VeraBox.getRoomsSync();
 		
 		var htmlRoomSelect = "<select id='altui-room-list' class='form-control'>";
@@ -1462,7 +1463,7 @@ var UIManager  = ( function( window, undefined ) {
 			html +="error happened during decoding";
 		}
 
-		html += "<h3>Actions <span id='group' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+"</h3>";	
+		html += "<h3>Actions <span id='group' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+htmlActionAddButton+"</h3>";	
 		html += _displayJson( 'group', scene.groups );
 		try {
 			if (scene.groups)
@@ -1555,14 +1556,18 @@ var UIManager  = ( function( window, undefined ) {
 		// refresh custom pages
 		if ($(".altui-page-contents").length>0)
 		{
-			var activepage = $(".altui-page-contents .active").prop('id');
-			// PageManager.init(g_CustomPages);
-			var Html="";
-			PageManager.forEachPage( function( idx, page) {
-				Html += _getPageHtml(page,false)	// no edit mode
+			var pagename = _getActivePageName();
+			var page = PageManager.getPageFromName( pagename );
+			// for all widget present which need refresh
+			$(".altui-widget").each( function (idx,elem) {
+				var widgetid = $(elem).prop('id');
+				var widget = PageManager.getWidgetByID( page, widgetid );
+				var tool = _getToolByClass( widget.cls );
+				if (tool.no_refresh !=true) {
+					var html = _getWidgetHtml( widget, false );	// not edit mode
+					$(elem).replaceWith( html );
+				}
 			});
-			$(".altui-mainpanel div.altui-page-contents").html( Html );
-			$("#"+activepage).addClass("active");
 			_updateDynamicDisplayTools( false );
 		}
 	
@@ -2316,6 +2321,7 @@ var UIManager  = ( function( window, undefined ) {
 	var tools = [
 		{ 	id:10, 
 			cls:'altui-widget-label', 
+			no_refresh:true,
 			html: _toolHtml(labelGlyph,"Label"),
 			property: _onPropertyLabel, 
 			widgetdisplay: function(widget,bEdit)	{ return "<p>{0}</p>".format(widget.properties.label); },
@@ -2341,6 +2347,7 @@ var UIManager  = ( function( window, undefined ) {
 		},
 		{ 	id:30, 
 			cls:'altui-widget-image', 
+			no_refresh:true,
 			html: _toolHtml(picGlyph,"Image"),
 			property: _onPropertyImage, 
 			onWidgetResize: _onResizeImage,
@@ -2364,6 +2371,7 @@ var UIManager  = ( function( window, undefined ) {
 		},
 		{ 	id:50, 
 			cls:'altui-widget-runscene', 
+			no_refresh:true,
 			html: _toolHtml(runGlyph,"Scene"),
 			property: _onPropertyRunscene, 
 			widgetdisplay: function(widget,bEdit)	{ 
@@ -2380,6 +2388,7 @@ var UIManager  = ( function( window, undefined ) {
 		},
 		{ 	id:60, 
 			cls:'altui-widget-upnpaction', 
+			no_refresh:true,
 			html: _toolHtml(runGlyph,"Action"),
 			property: _onPropertyUpnpAction, 
 			widgetdisplay: function(widget,bEdit)	{ 
@@ -2455,6 +2464,7 @@ var UIManager  = ( function( window, undefined ) {
 		},
 		{ 	id:70, 
 			cls:'altui-widget-camera', 
+			no_refresh:true,
 			html: _toolHtml(cameraGlyph,"Camera"),
 			onWidgetResize: _onResizeCamera,
 			aspectRatio: true,
@@ -2541,6 +2551,15 @@ var UIManager  = ( function( window, undefined ) {
 			html += ("<div class='altui-widget {0} ' id='{1}' data-type='{0}' {2}>").format(widget.cls,widget.id,style);
 			html += (tool.widgetdisplay)(widget,bEditMode);
 			html +="</div>";
+
+			var temp = $(html)
+				.css({ 
+					position:'absolute',
+					overflow: 'hidden',
+					top: widget.position.top,
+					left: widget.position.left
+				});	
+			html = $(temp).wrap( "<div></div>" ).parent().html();
 		}
 		return html;
 	};
@@ -2548,18 +2567,8 @@ var UIManager  = ( function( window, undefined ) {
 	function _getPageHtml(page,bEditMode) {
 		var pageHtml = "<div class='altui-custompage-canvas'>";
 		if (page.children)
-			$.each(page.children, function(idx,child) {
-				// var widget=PageManager.getWidgetByID( page, child.id );
-				var html = _getWidgetHtml( child, bEditMode );			
-				var temp = $(html)
-								.prop('id',child.id)
-								.css({ 
-									position:'absolute',
-									overflow: 'hidden',
-									top: child.position.top,
-									left: child.position.left
-								});								
-				pageHtml += $(temp).wrap( "<div></div>" ).parent().html();
+			$.each(page.children, function(idx,child) {							
+				pageHtml += _getWidgetHtml( child, bEditMode );
 			});
 		pageHtml += "</div>";
 		var str = "<div role='tabpanel' class='tab-pane' id='altui-page-content-{0}' >{1}</div>".format(page.name,pageHtml);
@@ -3459,13 +3468,6 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 						var html = _getWidgetHtml( widget , true);		// edit mode
 						var obj = $(html)
 							.appendTo(parent)
-							.prop('id',widgetid)
-							.css({ 
-								position:'absolute',
-								overflow: 'hidden',
-								top: position.top,
-								left: position.left
-							})
 							.draggable(_widgetOnCanvasDraggableOptions);
 						if ($.isFunction( tool.onWidgetResize) ) 
 						{	
