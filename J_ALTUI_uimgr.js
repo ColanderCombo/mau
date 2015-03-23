@@ -22,14 +22,14 @@ var searchGlyph="<span class='glyphicon glyphicon-search' aria-hidden='true' dat
 var plusGlyph="<span class='glyphicon glyphicon-plus' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Add'></span>";
 var saveGlyph="<span class='glyphicon glyphicon-save' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Save'></span>";
 var labelGlyph="<span class='glyphicon glyphicon-font' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Label'></span>";
-var loadGlyph = glyphTemplate.format( "open", "Load" );
-var infoGlyph = glyphTemplate.format( "info-sign", "Info" );
-var picGlyph = glyphTemplate.format( "picture", "Image" );
-var runGlyph = glyphTemplate.format( "play", "Run Scene" );
-var cameraGlyph = glyphTemplate.format( "facetime-video", "Camera" );
-var onoffGlyph = glyphTemplate.format( "off", "On Off" );
-var scaleGlyph = glyphTemplate.format( "scale", "Gauge" );
-var helpGlyph = glyphTemplate.format( "question-sign", "" );
+var loadGlyph = glyphTemplate.format( "open", "Load" , "");
+var infoGlyph = glyphTemplate.format( "info-sign", "Info" , "");
+var picGlyph = glyphTemplate.format( "picture", "Image" , "");
+var runGlyph = glyphTemplate.format( "play", "Run Scene" , "");
+var cameraGlyph = glyphTemplate.format( "facetime-video", "Camera" , "");
+var onoffGlyph = glyphTemplate.format( "off", "On Off" , "");
+var scaleGlyph = glyphTemplate.format( "scale", "Gauge" , "");
+var helpGlyph = glyphTemplate.format( "question-sign", "" , "");
 var smallbuttonTemplate = "<button id='{0}' type='button' class='{1} btn btn-default btn-sm' aria-label='tbd' title='{3}'>{2}</button>";
 var buttonTemplate 		= "<button id='{0}' type='button' class='{1} btn btn-{3}' aria-label='tbd'>{2}</button>";
 var buttonDebugHtml = "<button type='button' class='btn btn-default' id='altui-debug-btn' >Debug<span class='caret'></span></button>";
@@ -2367,7 +2367,7 @@ var UIManager  = ( function( window, undefined ) {
 			html: _toolHtml(runGlyph,"Scene"),
 			property: _onPropertyRunscene, 
 			widgetdisplay: function(widget,bEdit)	{ 
-				return "<button {3} id='{0}' type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='VeraBox.runScene({0})' >{2}</button>".format(
+				return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='VeraBox.runScene({0})' >{2}</button>".format(
 					widget.properties.sceneid,
 					'altui-widget-runscene-button',
 					runGlyph,
@@ -2383,7 +2383,7 @@ var UIManager  = ( function( window, undefined ) {
 			html: _toolHtml(runGlyph,"Action"),
 			property: _onPropertyUpnpAction, 
 			widgetdisplay: function(widget,bEdit)	{ 
-				return "<button {3} id='{0}' type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='UPnPHelper.UPnPAction( {0}, \"{4}\", \"{5}\", {6} )' >{2}</button>".format(
+				return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='UPnPHelper.UPnPAction( {0}, \"{4}\", \"{5}\", {6} )' >{2}</button>".format(
 					widget.properties.deviceid,
 					'altui-widget-upnpaction-button',
 					runGlyph,
@@ -2423,7 +2423,7 @@ var UIManager  = ( function( window, undefined ) {
 					htmlLabels.append( $("<small class='pull-left'></small>").text(widget.properties.labels[1]));
 				htmlLabels = htmlLabels.wrap( "<div></div>" ).parent().html();
 				
-				return "<button {3} id='{0}' type='button' style='color:{4};' class='{1} btn btn-default' aria-label='Run Scene' onclick='UIManager.onoffOnClick( {5})' >{2}</button>".format(
+				return "<button {3}  type='button' style='color:{4};' class='{1} btn btn-default' aria-label='Run Scene' onclick='UIManager.onoffOnClick( {5})' >{2}</button>".format(
 					widget.properties.deviceid,					// id
 					'altui-widget-2statebtn',					// class
 					onoffGlyph,									// content
@@ -3240,9 +3240,9 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 
 		function drawPlugin(idx, plugin) {
 			var iconTemplate = "<img class='altui-plugin-icon' src='https://apps.mios.com/{0}'></img>";
-			var helpbutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-question-sign',  glyphTemplate.format("question-sign","Help"));
-			var infobutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-info-sign',  glyphTemplate.format("info-sign","Information"));
-			var updatebutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-retweet',  glyphTemplate.format("retweet","Update Now"));
+			var helpbutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-question-sign',  glyphTemplate.format("question-sign","Help",""));
+			var infobutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-info-sign',  glyphTemplate.format("info-sign","Information",""));
+			var updatebutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-retweet',  glyphTemplate.format("retweet","Update Now",""));
 
 			var pluginTemplate = "<tr><td>{6}</td><td>{0}</td><td>{1}.{2}</td><td>{3} {4}</td><td>{5}</td></tr>";
 			var pluginTxt = pluginTemplate.format(
@@ -3376,7 +3376,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 			var editBoxTemplate = "<div class='row'><div class='altui-edittoolbox col-xs-11' aria-label=''>{0}</div></div>";
 			var editBoxLines = new Array();
 			$.each(edittools , function(idx,tool) {
-				var glyph = glyphTemplate.format( tool.glyph, tool.glyph );
+				var glyph = glyphTemplate.format( tool.glyph, tool.glyph,"" );
 				editBoxLines.push("<div id='"+tool.glyph+"' class='altui-edittools'>"+glyph+"</div>");
 			});
 			lines.push(editBoxTemplate.format( editBoxLines.join('') ) );
