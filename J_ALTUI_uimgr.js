@@ -673,6 +673,7 @@ var UIManager  = ( function( window, undefined ) {
 		// var str = "binary_light_default.png";
 		var src = defaultIconSrc;
 		var dt = _devicetypesDB[ device.device_type ];
+		AltuiDebug.debug("Icon for device id:"+id+"  device.type:"+device.device_type);
 		if ((dt != undefined) && (dt.ui_static_data!=undefined))
 		{
 			//dt.ui_static_data.DisplayStatus
@@ -730,8 +731,9 @@ var UIManager  = ( function( window, undefined ) {
 				// no state icons found
 				str = (dt.ui_static_data.default_icon != undefined) ? dt.ui_static_data.default_icon : dt.ui_static_data.flashicon;
 				if (str == undefined) {
-					AltuiDebug.debug("undefined icon, device.type:"+device.device_type);
+					AltuiDebug.debug("Undefined icon in ui_static_data, device.type:"+device.device_type);
 					AltuiDebug.debug("dt.ui_static_data:"+JSON.stringify(dt.ui_static_data));
+					AltuiDebug.debug("Setting default icon");
 					str = "icons/generic_sensor.png";
 				}
 				str = str.replace(".swf",".png");
@@ -743,12 +745,18 @@ var UIManager  = ( function( window, undefined ) {
 					str = "../../../"+str;
 			}	
 		}
+		else {
+			str = defaultIconSrc;
+		}
+		
 		//console.log("type:{0} icon:{1}".format(device.device_type,str));
-		if( str.substring(0,4)=="http")
+		if( str.substring(0,4)=="http") {
+			AltuiDebug.debug("Icon for device id:"+id+"  IconPath:"+str);
 			return str;
+		}
 		
 		var icon = (str.substring(0,14)=="data:image/png") ? str : ("//{0}/cmh/skins/default/img/devices/device_states/{1}".format(window.location.hostname, str));
-
+		AltuiDebug.debug("Icon for device id:"+id+"  IconPath:"+icon);
 		return icon;
 	};
 
