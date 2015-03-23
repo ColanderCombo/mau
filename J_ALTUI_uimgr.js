@@ -730,6 +730,7 @@ var UIManager  = ( function( window, undefined ) {
 			else {
 				// no state icons found
 				str = (dt.ui_static_data.default_icon != undefined) ? dt.ui_static_data.default_icon : dt.ui_static_data.flashicon;
+				AltuiDebug.debug("Icon for device id:"+id+"  string from json:"+str);
 				if (str == undefined) {
 					AltuiDebug.debug("Undefined icon in ui_static_data, device.type:"+device.device_type);
 					AltuiDebug.debug("dt.ui_static_data:"+JSON.stringify(dt.ui_static_data));
@@ -743,9 +744,11 @@ var UIManager  = ( function( window, undefined ) {
 					str = (_ui7Check==true) ? "../../icons/Window_Covering.png" : "../../../icons/Window_Covering.png";
 				else if (str.substr(0,6) == "icons/")
 					str = "../../../"+str;
+				AltuiDebug.debug("Icon for device id:"+id+"  string after correction:"+str);
 			}	
 		}
 		else {
+			AltuiDebug.debug("Icon for device id:"+id+"  DeviceType unknown or not static data");
 			str = defaultIconSrc;
 		}
 		
