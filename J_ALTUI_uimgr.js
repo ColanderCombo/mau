@@ -736,7 +736,8 @@ var UIManager  = ( function( window, undefined ) {
 			}
 			else {
 				// no state icons found
-				str = (dt.ui_static_data.default_icon != undefined) ? dt.ui_static_data.default_icon : dt.ui_static_data.flashicon;
+				//str = (dt.ui_static_data.default_icon != undefined) ? dt.ui_static_data.default_icon : dt.ui_static_data.flashicon;
+				str = (dt.ui_static_data.flashicon != undefined) ? dt.ui_static_data.flashicon : dt.ui_static_data.default_icon;
 				AltuiDebug.debug("Icon for device id:"+id+"  string from json:"+str);
 				if (str == undefined) {
 					AltuiDebug.debug("Undefined icon in ui_static_data, device.type:"+device.device_type);
