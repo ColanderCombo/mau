@@ -425,7 +425,8 @@ var DialogManager = ( function() {
 		dlgAddVariables:_dlgAddVariables,
 		dlgAddDevices:_dlgAddDevices,
 		dlgAddScenes:_dlgAddScenes,
-		dlgAddActions:_dlgAddActions
+		dlgAddActions:_dlgAddActions,
+		getDialogActionValue: _getDialogActionValue
 	};
 })();
 
@@ -579,9 +580,60 @@ var SceneEditor = ( function (undefined) {
 		return html;
 	};
 	
+	function _editAction(action, jqButton) {
+		function _translateArgumentsToTbl( arguments ) {
+			var res = [];
+			$.each(arguments, function(idx,arg) { res[arg.name] = arg.value; } );
+			return res;
+		};
+		
+		var dialog = DialogManager.createPropertyDialog('Group Action');
+		DialogManager.dlgAddDevices( dialog , action.device, function() {
+			var widget = {
+				properties: {
+					deviceid: action.device,
+					action: {
+						service:action.service,
+						action:action.action,
+						params:_translateArgumentsToTbl(action.arguments)
+					}
+				}
+			};
+			DialogManager.dlgAddActions("altui-select-action",dialog, widget, widget.properties.action, 'Action', function() {
+				$('div#dialogModal').modal();
+			});
+		});
+		
+		$('div#dialogs')
+		.off('click',"div#dialogModal button.btn-primary")
+		.on( 'click',"div#dialogModal button.btn-primary", 
+			{ button: jqButton },
+			function( event ) {
+				// save for real this time
+				action.device = $("#altui-select-device").val();
+				action = $.extend(action , DialogManager.getDialogActionValue("altui-select-action") );
+				action.arguments = [];
+				// read params
+				$(".altui-select-action-parameters input").each( function(idx,elem) {
+					action.arguments.push({
+						name: $(elem).prop('id').substring( "altui-widget-action-parameters-".length ),
+						value: $(elem).val()
+					});
+				} );		
+				$('div#dialogModal').modal('hide');
+				
+				// now update UI
+				var ids = $(event.data.button).prop("id").split(".");	// groupidx.actionidx
+				var parent = $(event.data.button).closest("tr");
+				parent.replaceWith( _displayAction(action,ids[1],ids[0]) );
+				_showSaveNeeded();
+			}
+		);
+	};
+		
 	function _displayGroup(group,idx) {
 		var html="";
-		html += "<tr>";
+		html += "<tr data-group-idx='"+idx+"'>";
 		html += "<td>";
 		html +="<h4>{0} sec</h4>".format(group.delay);
 		html += "</td>";
@@ -619,41 +671,14 @@ var SceneEditor = ( function (undefined) {
 						$('div#dialogModal').modal('hide');
 						var group  = event.data.group;
 						group.delay = duration;
-						event.data.button.parents("tr").find(">td:first-child h4").text(duration+" sec");
+						
+						// now update UI
+						var parent = event.data.button.parents("tr");
+						var idx = parent.data("group-idx");
+						parent.replaceWith( _displayGroup(group,idx) );
 						_showSaveNeeded();
 					});
 			$('div#dialogModal').modal();
-		};
-		
-	function _editAction(action) {
-			function _translateArgumentsToTbl( arguments ) {
-				var res = [];
-				$.each(arguments, function(idx,arg) { res[arg.name] = arg.value; } );
-				return res;
-			};
-			
-			var dialog = DialogManager.createPropertyDialog('Group Action');
-			DialogManager.dlgAddDevices( dialog , action.device, function() {
-				var widget = {
-					properties: {
-						deviceid: action.device,
-						action: {
-							service:action.service,
-							action:action.action,
-							params:_translateArgumentsToTbl(action.arguments)
-						}
-					}
-				};
-				DialogManager.dlgAddActions("xxx",dialog, widget, widget.properties.action, 'Action', function() {
-					$('div#dialogs')
-						.off('click',"div#dialogModal button.btn-primary")
-						.on( 'click',"div#dialogModal button.btn-primary", function() {
-							// save for real this time
-							$('div#dialogModal').modal('hide');
-						});
-					$('div#dialogModal').modal();
-				});
-			});
 		};
 		
 	function _showSaveNeeded( bNormal ) {
@@ -819,7 +844,7 @@ var SceneEditor = ( function (undefined) {
 				var ids = $(this).prop('id').split('.');
 				var group = scene.groups[ ids[0] ];
 				var action = group.actions[ ids[1] ];
-				_editAction(action);
+				_editAction(action,$(this));
 			});
 
 		$(".altui-mainpanel")
