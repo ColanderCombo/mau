@@ -119,6 +119,7 @@ deviceActionModalTemplate += "</div><!-- /.modal -->";
 // 0: title, 1: body
 var defaultDialogModalTemplate = "<div id='dialogModal' class='modal fade'>";
 defaultDialogModalTemplate += "  <div class='modal-dialog modal-lg'>";
+defaultDialogModalTemplate += "    <form data-toggle='validator' onsubmit='return false;'>";
 defaultDialogModalTemplate += "    <div class='modal-content'>";
 defaultDialogModalTemplate += "      <div class='modal-header'>";
 defaultDialogModalTemplate += "        <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
@@ -131,9 +132,10 @@ defaultDialogModalTemplate += "      </div>";
 defaultDialogModalTemplate += "      </div>";
 defaultDialogModalTemplate += "      <div class='modal-footer'>";
 defaultDialogModalTemplate += "        <button type='button' class='btn btn-default' data-dismiss='modal'>Close</button>";
-defaultDialogModalTemplate += "        <button type='button' class='btn btn-primary'>Save changes</button>";
+defaultDialogModalTemplate += "        <button type='submit' class='btn btn-primary'>Save changes</button>";
 defaultDialogModalTemplate += "      </div>";
 defaultDialogModalTemplate += "    </div><!-- /.modal-content -->";
+defaultDialogModalTemplate += "    </form>";
 defaultDialogModalTemplate += "  </div><!-- /.modal-dialog -->";
 defaultDialogModalTemplate += "</div><!-- /.modal -->";
 
@@ -213,7 +215,7 @@ var DialogManager = ( function() {
 								var curvalue = actiondescriptor.params[param] || '';
 								// Html += "<div class='form-group'>";
 								Html += ("	<label for='"+id+"-"+param+"'>"+param+"</label>");
-								Html += ("	<input id='"+id+"-"+param+"' class='form-control' type='text' value='"+curvalue+"' placeholder='enter parameter value'></input>");
+								Html += ("	<input id='"+id+"-"+param+"' class='form-control' type='text' required value='"+curvalue+"' placeholder='enter parameter value'></input>");
 								// Html += "</div>";
 							});
 						}
@@ -271,7 +273,8 @@ var DialogManager = ( function() {
 		$('div#dialogModal')
 			.replaceWith(defaultDialogModalTemplate.format( 
 				title, 			// title
-				"<form></form>"	// body
+				""
+				// "<form data-toggle='validator'></form>"	// body
 				));
 		return $('div#dialogModal');
 	};
@@ -284,20 +287,35 @@ var DialogManager = ( function() {
 		propertyline +=("  <input type='checkbox' id='altui-widget-"+name+"' " + ( (value==true) ? 'checked' : '') +" value='"+value+"' title='check to invert status value'>"+name);
 		propertyline +="</label>";
 		// propertyline += "</div>";
-		$(dialog).find("form").append(propertyline);
+		$(dialog).find(".row-fluid").append(propertyline);
 	};
 	
-	function _dlgAddLine(dialog, name, value,help)
+	function _optionsToString(options)
 	{
+		var tbl=[];
+		options = $.extend( { type:'text' },options);
+		
+		$.each( options, function(key,val) {
+			var typ = Object.prototype.toString.call(val);
+			if ((typ!="[object Object]") && (typ!="[object Array]")){
+				tbl.push("{0}='{1}'".format(key,val)); 
+			}
+		});
+		return tbl.join(' ');
+	};
+	
+	function _dlgAddLine(dialog, name, value,help, options)
+	{
+		var optstr = _optionsToString(options);
 		value = (value==undefined) ? '' : value ;
 		var propertyline = "";
 		propertyline += "<div class='form-group'>";
 		propertyline += "	<label for='altui-widget-"+name+"' title='"+(help || '')+"'>"+name+"</label>";
 		if (help)
 			propertyline += "	<span title='"+(help || '')+"'>"+helpGlyph+"</span>";
-		propertyline += "	<input id='altui-widget-"+name+"' class='form-control' type='text' value='"+value+"' placeholder='enter "+name+"' ></input>";
+		propertyline += "	<input id='altui-widget-"+name+"' class='form-control' "+optstr+" value='"+value+"' placeholder='enter "+name+"' ></input>";
 		propertyline += "</div>";
-		$(dialog).find("form").append(propertyline);
+		$(dialog).find(".row-fluid").append(propertyline);
 	}
 	
 
@@ -314,7 +332,7 @@ var DialogManager = ( function() {
 		propertyline += "	<label for='altui-widget-servicevariable'>Variable</label>";
 		propertyline +=     _getDeviceServiceVariableSelect( widget.properties.deviceid , widget.properties.service, widget.properties.variable );
 		propertyline += "</div>";
-		$(dialog).find("form").append(propertyline);
+		$(dialog).find(".row-fluid").append(propertyline);
 		cbfunc();
 	};
 	
@@ -335,7 +353,7 @@ var DialogManager = ( function() {
 				propertyline +=     select.wrap( "<div></div>" ).parent().html();
 				propertyline += "</div>";
 				
-				$(dialog).find("form").append(propertyline);
+				$(dialog).find(".row-fluid").append(propertyline);
 				cbfunc();
 			}
 		);
@@ -356,7 +374,7 @@ var DialogManager = ( function() {
 				propertyline += "      		<label for='altui-widget-sceneid'>Scene to Run</label>";
 				propertyline += 			select.wrap( "<div></div>" ).parent().html();
 				propertyline += "      	</div>";
-				$(dialog).find("form").append(propertyline);
+				$(dialog).find(".row-fluid").append(propertyline);
 				cbfunc();
 			} 
 		);
@@ -411,7 +429,7 @@ var DialogManager = ( function() {
 			propertyline +=     result;
 			propertyline += "</div>";
 			
-			$(dialog).find("form").append(propertyline);
+			$(dialog).find(".row-fluid").append(propertyline);
 			
 			//callback, if select action changes, we need to update parameters
 			$("#"+id).on("change", _onChangeAction );
@@ -565,7 +583,7 @@ var SceneEditor = ( function (undefined) {
 		return html.join(',');
 	};
 	
-	function _displayAction(action,idx,groupidx) {
+	function _displayAction(action,ida,idg) {
 		var html="";
 		html +="<tr>";
 		html += "<td>{0}</td><td>{1} ({2})</td>".format(
@@ -573,14 +591,14 @@ var SceneEditor = ( function (undefined) {
 			action.action, 
 			_displayArguments(action.arguments));
 		html +="<td>";
-		html += smallbuttonTemplate.format( "{0}.{1}".format(groupidx,idx), 'altui-delaction', deleteGlyph);
-		html += smallbuttonTemplate.format( "{0}.{1}".format(groupidx,idx), 'altui-editaction', editGlyph);
+		html += smallbuttonTemplate.format( "{0}.{1}".format(idg,ida), 'altui-delaction', deleteGlyph);
+		html += smallbuttonTemplate.format( "{0}.{1}".format(idg,ida), 'altui-editaction', editGlyph);
 		html +="</td>";
 		html +="</tr>";
 		return html;
 	};
 	
-	function _editAction(action, jqButton) {
+	function _editAction(scene, action, ida, idg, jqButton) {
 		function _translateArgumentsToTbl( arguments ) {
 			var res = [];
 			$.each(arguments, function(idx,arg) { res[arg.name] = arg.value; } );
@@ -605,9 +623,9 @@ var SceneEditor = ( function (undefined) {
 		});
 		
 		$('div#dialogs')
-		.off('click',"div#dialogModal button.btn-primary")
-		.on( 'click',"div#dialogModal button.btn-primary", 
-			{ button: jqButton },
+			.off('submit',"div#dialogModal form")
+			.on( 'submit',"div#dialogModal form", 
+			{ scene: scene, button: jqButton },
 			function( event ) {
 				// save for real this time
 				action.device = $("#altui-select-device").val();
@@ -623,9 +641,17 @@ var SceneEditor = ( function (undefined) {
 				$('div#dialogModal').modal('hide');
 				
 				// now update UI
-				var ids = $(event.data.button).prop("id").split(".");	// groupidx.actionidx
+				// var ids = $(event.data.button).prop("id").split(".");	// groupidx.actionidx
 				var parent = $(event.data.button).closest("tr");
-				parent.replaceWith( _displayAction(action,ids[1],ids[0]) );
+				if (ida>=0) {
+					//edit
+					parent.replaceWith( _displayAction(action,ida,idg) );
+				}
+				else {
+					//add
+					scene.groups[ idg ].actions.push( action );
+					parent.before( _displayAction(action,scene.groups[ idg ].actions.length - 1 ,idg) );
+				}
 				_showSaveNeeded();
 			}
 		);
@@ -645,11 +671,12 @@ var SceneEditor = ( function (undefined) {
 		}
 		html +="</td>";			
 		html += "<td>";
-		html +="<table class='table table-condensed'>";
+		html +="<table class='table table-condensed' data-group-idx='"+idx+"'>";
 		html +="<tbody>";
-		$.each(group.actions, function(idx2,action) {
-			html += _displayAction(action,idx2,idx);
+		$.each(group.actions, function(ida,action) {
+			html += _displayAction(action,ida,idx);
 		});
+		html +=("<tr><td colspan='3'>"+smallbuttonTemplate.format( idx, 'altui-addaction', plusGlyph)+"</td></tr>");
 		html +="</tbody>";
 		html +="</table>";
 		html += "</td>";
@@ -658,24 +685,51 @@ var SceneEditor = ( function (undefined) {
 		return html;
 	};
 
-	function _editGroup( _group , _button ) {
+	function _editGroup( idx, scene, _group , _button ) {
 			var dialog = DialogManager.createPropertyDialog('Scene Group');
-			DialogManager.dlgAddLine(dialog, "Delay", _group.delay ,"delay in seconds");
+			DialogManager.dlgAddLine(dialog, "Delay", _group.delay ,"delay in seconds",{
+				type:'number',
+				min:1,
+				required:''
+			});
 			$('div#dialogs')
-				.off('click',"div#dialogModal button.btn-primary")
-				.on( 'click',"div#dialogModal button.btn-primary", 
-					{ group:_group, button:_button },
+				.off('submit',"div#dialogModal form")
+				.on( 'submit',"div#dialogModal form", 
+					{ scene: scene, group:_group, button:_button },
 					function( event ) {
 						// save for real this time
 						var duration = $("#altui-widget-Delay").val();
+						var bOK = true;
+						$.each(scene.groups, function(ifx,grp) {
+							if (grp.delay == duration)	// cannot have twice the same duration
+							{
+								bOK = false; 
+								return false;
+							}
+						});
+						if (bOK==false) {
+							alert("cannot have twice the same duration");
+							return ;
+						}
 						$('div#dialogModal').modal('hide');
 						var group  = event.data.group;
 						group.delay = duration;
 						
 						// now update UI
-						var parent = event.data.button.parents("tr");
-						var idx = parent.data("group-idx");
-						parent.replaceWith( _displayGroup(group,idx) );
+						if (idx>0) {
+							// Edit
+							var parent = event.data.button.parents("tr");
+							parent.replaceWith( _displayGroup(group,idx) );
+						} else {
+							// Add 
+							scene.groups.push( group );
+							var table = $(event.data.button).parent().nextAll("table");
+							var html="";
+							$.each(scene.groups, function(idx,group){
+								html += _displayGroup(group,idx);
+							});
+							table.find("tbody").first().html( html );
+						}
 						_showSaveNeeded();
 					});
 			$('div#dialogModal').modal();
@@ -691,7 +745,7 @@ var SceneEditor = ( function (undefined) {
 	function _sceneEditDraw(id,scene) {
 
 		var htmlSceneEditButton = "  <button type='submit' class='btn btn-default altui-scene-editbutton'>Submit</button>";
-		var htmlActionAddButton = "  <button type='submit' class='btn btn-default altui-scene-add-action'>Add</button>";
+		var htmlSceneAddButtonTmpl = "  <button type='submit' class='btn btn-default {0}'>"+plusGlyph+"</button>";
 		var rooms = VeraBox.getRoomsSync();
 		
 		var htmlRoomSelect = "<select id='altui-room-list' class='form-control'>";
@@ -738,7 +792,7 @@ var SceneEditor = ( function (undefined) {
 			html +="error happened during decoding";
 		}
 
-		html += "<h3>Actions <span id='group' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+htmlActionAddButton+"</h3>";	
+		html += "<h3>Actions <span id='group' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+htmlSceneAddButtonTmpl.format("altui-add-group")+"</h3>";	
 		html += _displayJson( 'group', scene.groups );
 		try {
 			if (scene.groups)
@@ -789,13 +843,14 @@ var SceneEditor = ( function (undefined) {
 			$(type).toggle();
 		});
 		
-		$(".altui-mainpanel").off("click",".altui-scene-editbutton");
-		$(".altui-mainpanel").on("click",".altui-scene-editbutton",function(){ 
+		$(".altui-mainpanel")
+		.off("click",".altui-scene-editbutton")
+		.on("click",".altui-scene-editbutton",function(){ 
 			scene.lua = $("#altui-luascene").val();
 			VeraBox.editScene(sceneid,scene);
 			_showSaveNeeded(true);
 		});
-		
+
 		$(".altui-mainpanel").off("click",".altui-deltrigger");
 		$(".altui-mainpanel").on("click",".altui-deltrigger",function(){ 
 			scene.triggers.splice( $(this).prop('id') , 1 );
@@ -839,28 +894,46 @@ var SceneEditor = ( function (undefined) {
 			});
 
 		$(".altui-mainpanel")
-			.off("click",".altui-editaction")
-			.on("click",".altui-editaction",function(){ 
-				var ids = $(this).prop('id').split('.');
-				var group = scene.groups[ ids[0] ];
-				var action = group.actions[ ids[1] ];
-				_editAction(action,$(this));
-			});
+		.off("click",".altui-editaction")
+		.on("click",".altui-editaction",function(){ 
+			var ids = $(this).prop('id').split('.');
+			var group = scene.groups[ ids[0] ];
+			var action = group.actions[ ids[1] ];
+			_editAction(scene,action,ids[1],ids[0],$(this));
+		});
 
 		$(".altui-mainpanel")
-			.off("click",".altui-delgroup")
-			.on("click",".altui-delgroup",function(){ 
-				var id = parseInt($(this).prop('id'));
-				$(this).parents("tr").remove();
-				scene.groups.splice( id , 1 );
-				_showSaveNeeded();
-				UIManager.pageMessage( "Group of actions deleted, remember to save your changes", "info");
-			})
-			.off("click",".altui-editgroup")
-			.on("click",".altui-editgroup",function(){ 
-				var id = parseInt($(this).prop('id'));
-				_editGroup( scene.groups[ id ] , $(this) );
-			});
+		.off("click",".altui-addaction")
+		.on("click",".altui-addaction",function(){ 
+			var newaction = {
+				device:'',
+				service:'',
+				action:'',
+				arguments:[]
+			};
+			var idg = $(this).parents("table[data-group-idx]").data("group-idx");
+			_editAction(scene,newaction,-1,idg,$(this));
+		});
+
+		$(".altui-mainpanel")
+		.off("click",".altui-delgroup")
+		.on("click",".altui-delgroup",function(){ 
+			var id = parseInt($(this).prop('id'));
+			$(this).parents("tr").remove();
+			scene.groups.splice( id , 1 );
+			_showSaveNeeded();
+			UIManager.pageMessage( "Group of actions deleted, remember to save your changes", "info");
+		})
+		.off("click",".altui-editgroup")
+		.on("click",".altui-editgroup",function(){ 
+			var id = parseInt($(this).prop('id'));
+			_editGroup( id, scene, scene.groups[ id ] , $(this) );
+		})
+		.off("click",".altui-add-group")
+		.on("click",".altui-add-group",function(){ 
+			var group = {"delay":'',"actions":[]};
+			_editGroup( -1 , scene, group , $(this) );
+		});
 
 		$("#altui-room-list").change( function() {
 			scene.room = $(this).val();
@@ -1152,17 +1225,7 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		_devicetypesDB[devtype].ui_static_data = ui_definitions;
 	};
-	
-	function _sortByVariableName(a,b)
-	{
-		if (a.variable > b.variable)
-			return 1;
-		if (a.variable < b.variable)
-			return -1;
-		// a doit être égale à b
-		return 0;
-	};
-	
+
 	function _enhanceValue(value) 
 	{
 		function _format(d) {
@@ -2152,8 +2215,8 @@ var UIManager  = ( function( window, undefined ) {
 				));
 				
 		// buttons
-		$('div#dialogModal button.btn-primary').off('click');
-		$('div#dialogModal button.btn-primary').on( 'click', function() {
+		$('div#dialogModal form').off('submit');
+		$('div#dialogModal form').on( 'submit', function() {
 			real_widget.properties.url = $('#altui-widget-imgsource').val();
 			$('div#dialogModal').modal('hide');
 			$(".altui-custompage-canvas .altui-widget#"+real_widget.id).find("img").attr("src",real_widget.properties.url);
@@ -2166,7 +2229,7 @@ var UIManager  = ( function( window, undefined ) {
 		
 		// clone for temporary storage
 		var widget = $.extend( true, {}, real_widget );
-		var dialog = _createPropertyDialog('Device Variable Properties');
+		var dialog = DialogManager.createPropertyDialog('Device Variable Properties');
 		DialogManager.dlgAddDevices( dialog , widget.properties.deviceid, function() {
 			DialogManager.dlgAddVariables(dialog, widget, function() {
 				// run the show
@@ -2175,8 +2238,9 @@ var UIManager  = ( function( window, undefined ) {
 		});		
 		
 		// buttons
-		$('div#dialogs').off('click',"div#dialogModal button.btn-primary");
-		$('div#dialogs').on( 'click',"div#dialogModal button.btn-primary", function() {
+		$('div#dialogs')
+		.off('submit',"div#dialogModal form")
+		.on( 'submit',"div#dialogModal form", function() {
 			// save for real this time
 			real_widget.properties.deviceid = widget.properties.deviceid;
 			var states = VeraBox.getStates( widget.properties.deviceid );
@@ -2202,8 +2266,9 @@ var UIManager  = ( function( window, undefined ) {
 				));
 
 		// buttons
-		$('div#dialogs').off('click',"div#dialogModal button.btn-primary");
-		$('div#dialogs').on( 'click',"div#dialogModal button.btn-primary", function() {
+		$('div#dialogs')
+		.off('submit',"div#dialogModal form")
+		.on( 'submit',"div#dialogModal form", function() {
 			widget.properties.label = $('#altui-widget-labeltext').val();
 			$('div.altui-widget-label#'+widget.id).find("p").text(widget.properties.label);
 			$('div#dialogModal button.btn-primary').off('click');
@@ -2217,15 +2282,16 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		// clone for temporary storage
 		var widget = $.extend( true, {}, real_widget );
-		var dialog = _createPropertyDialog('Run Scene Properties');
+		var dialog = DialogManager.createPropertyDialog('Run Scene Properties');
 		DialogManager.dlgAddScenes( dialog , widget, function() {
 			// run the show
 			$('div#dialogModal').modal();
 		});
 		
 		// buttons
-		$('div#dialogs').off('click',"div#dialogModal button.btn-primary");
-		$('div#dialogs').on( 'click',"div#dialogModal button.btn-primary", function() {
+		$('div#dialogs')		
+		.off('submit',"div#dialogModal form")
+		.on( 'submit',"div#dialogModal form", function() {
 			$('div#dialogModal button.btn-primary').off('click');
 			real_widget.properties.sceneid = $('#altui-widget-sceneid').val();
 			$('div#dialogModal').modal('hide');
@@ -2237,7 +2303,7 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		// clone for temporary storage
 		var widget = $.extend( true, {}, real_widget );
-		var dialog = _createPropertyDialog('UPnP Action Properties');
+		var dialog = DialogManager.createPropertyDialog('UPnP Action Properties');
 		DialogManager.dlgAddDevices( dialog , widget.properties.deviceid, function() {
 			DialogManager.dlgAddActions("altui-widget-action",dialog, widget, widget.properties, 'Action', function() {
 				// run the show
@@ -2246,8 +2312,9 @@ var UIManager  = ( function( window, undefined ) {
 		});
 		
 		// dialog Save Button
-		$('div#dialogs').off('click',"div#dialogModal button.btn-primary");
-		$('div#dialogs').on( 'click',"div#dialogModal button.btn-primary", function() {
+		$('div#dialogs')		
+		.off('submit',"div#dialogModal form")
+		.on( 'submit',"div#dialogModal form", function() {
 			// save for real this time
 			real_widget.properties.deviceid = widget.properties.deviceid;
 			real_widget.properties.service = widget.properties.service;
@@ -2270,7 +2337,7 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		// clone for temporary storage
 		var widget = $.extend( true, {}, real_widget );
-		var dialog = _createPropertyDialog('OnOff Button Properties');
+		var dialog = DialogManager.createPropertyDialog('OnOff Button Properties');
 		
 		DialogManager.dlgAddDevices( dialog , widget.properties.deviceid, function() {
 			DialogManager.dlgAddVariables(dialog, widget, function() {
@@ -2287,8 +2354,9 @@ var UIManager  = ( function( window, undefined ) {
 		});
 		
 		// dialog Save Button
-		$('div#dialogs').off('click',"div#dialogModal button.btn-primary");
-		$('div#dialogs').on( 'click',"div#dialogModal button.btn-primary", function() {
+		$('div#dialogs')		
+			.off('submit',"div#dialogModal form")
+			.on( 'submit',"div#dialogModal form", function() {
 			// save for real this time
 			real_widget.properties.deviceid = widget.properties.deviceid;
 			real_widget.properties.inverted = $("#altui-widget-Inverted").is(':checked');
@@ -2327,7 +2395,7 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		// clone for temporary storage
 		var widget = $.extend( true, {}, real_widget );
-		var dialog = _createPropertyDialog('Device Icon Properties');
+		var dialog = DialogManager.createPropertyDialog('Device Icon Properties');
 		
 		DialogManager.dlgAddDevices( dialog , widget.properties.deviceid, function() {
 			// run the show
@@ -2335,8 +2403,9 @@ var UIManager  = ( function( window, undefined ) {
 		});
 		
 		// buttons
-		$('div#dialogs').off('click',"div#dialogModal button.btn-primary");
-		$('div#dialogs').on( 'click',"div#dialogModal button.btn-primary", function() {
+		$('div#dialogs')		
+			.off('submit',"div#dialogModal form")
+			.on( 'submit',"div#dialogModal form", function() {
 			// save for real this time
 			real_widget.properties.deviceid = $("#altui-select-device").val();
 			$('div#dialogModal button.btn-primary').off('click');
@@ -2353,7 +2422,7 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		// clone for temporary storage
 		var widget = $.extend( true, {}, real_widget );
-		var dialog = _createPropertyDialog('OnOff Button Properties');
+		var dialog = DialogManager.createPropertyDialog('OnOff Button Properties');
 		
 		DialogManager.dlgAddDevices( dialog , widget.properties.deviceid, 
 			function() {
@@ -2366,8 +2435,9 @@ var UIManager  = ( function( window, undefined ) {
 		);
 		
 		// buttons
-		$('div#dialogModal button.btn-primary').off('click');
-		$('div#dialogModal button.btn-primary').on( 'click', function() {
+		$('div#dialogs')		
+			.off('submit',"div#dialogModal form")
+			.on( 'submit',"div#dialogModal form", function() {
 			// save for real this time
 			real_widget.properties.deviceid = $("#altui-select-device").val();
 			$('div#dialogModal button.btn-primary').off('click');
@@ -2379,7 +2449,7 @@ var UIManager  = ( function( window, undefined ) {
 	function _onPropertyGauge(real_widget) {		
 		// clone for temporary storage
 		var widget = $.extend( true, {}, real_widget );
-		var dialog = _createPropertyDialog('Gauge Properties');
+		var dialog = DialogManager.createPropertyDialog('Gauge Properties');
 		DialogManager.dlgAddDevices( dialog , widget.properties.deviceid, function() {
 			DialogManager.dlgAddVariables(dialog, widget, function() {
 				DialogManager.dlgAddLine(dialog,'Label', widget.properties.label);
@@ -2395,8 +2465,9 @@ var UIManager  = ( function( window, undefined ) {
 		});		
 		
 		// buttons
-		$('div#dialogs').off('click',"div#dialogModal button.btn-primary");
-		$('div#dialogs').on( 'click',"div#dialogModal button.btn-primary", function() {
+		$('div#dialogs')		
+			.off('submit',"div#dialogModal form")
+			.on( 'submit',"div#dialogModal form", function() {
 			// save for real this time
 			real_widget.properties.deviceid = widget.properties.deviceid;
 			var states = VeraBox.getStates( widget.properties.deviceid );
