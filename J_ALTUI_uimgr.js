@@ -713,10 +713,15 @@ var UIManager  = ( function( window, undefined ) {
 						
 						// mostlikely in UI5 icons are not located in devicestates folder, so let's fix it
 						var baseIconName = dt.ui_static_data.flashicon;
-						var dot = baseIconName.indexOf('.');
+						AltuiDebug.debug("UI5 style static baseIconName:"+baseIconName);
+						var dot = baseIconName.lastIndexOf('.');
 						if (dot >=0)
 							baseIconName=baseIconName.substr(0,dot);
-						baseIconName = "../../../"+baseIconName;
+						if (baseIconName.substring(0,4)!="http")
+						{
+							baseIconName = "../../../"+baseIconName;
+						}
+						AltuiDebug.debug("UI5 style static baseIconName modified :"+baseIconName);
 						var ds = dt.ui_static_data.DisplayStatus;
 						var variable = VeraBox.getStatus( device.id, ds.Service, ds.Variable );
 						if (variable==null) 
@@ -727,6 +732,7 @@ var UIManager  = ( function( window, undefined ) {
 					}
 					else
 						str = si[0];
+					AltuiDebug.debug("Icon for device id:"+id+"  str :"+str);
 			}
 			else {
 				// no state icons found
