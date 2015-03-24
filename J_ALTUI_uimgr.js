@@ -927,8 +927,8 @@ var UIManager  = ( function( window, undefined ) {
 				.css("max-width","100%")
 				.css("max-width","100%")
 				.css("width","100%")
-				.css("height","100%");
-				// .width(size.width);
+				.css("height","100%")
+				.height((size!=undefined) ? size.height : 300);
 		}
 		return obj.wrap( "<div></div>" ).parent().html();
 	};
