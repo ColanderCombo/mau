@@ -443,6 +443,7 @@ var DialogManager = ( function() {
 			deviceid = $(this).val();
 			args=[];
 			eventid=0;
+			selected_event = null;
 			var device = VeraBox.getDeviceByID( deviceid );
 			var events = VeraBox.getDeviceEvents(device);
 			$("select#"+htmlid).replaceWith( _getSelectForEvents( events ) );
@@ -452,6 +453,7 @@ var DialogManager = ( function() {
 		$('div#dialogModal').on("change","#"+htmlid,function() {
 			args=[];
 			eventid=$(this).val();
+			selected_event = null;
 			var device = VeraBox.getDeviceByID( deviceid );
 			var events = VeraBox.getDeviceEvents(device);
 			$.each(events, function(idx,event){
@@ -621,7 +623,17 @@ var SceneEditor = function (scene) {
 
 	function _editTrigger( triggeridx , jqButton) {
 		//Object {name: "blw 2", enabled: 1, template: 2, device: 5, arguments: Array[1]…}LastEval: 0arguments: Array[1]device: 5enabled: 1last_run: 1424626243lua: "return false"name: "blw 2"template: 2
-		var trigger = scene.triggers[ triggeridx ];
+		var trigger = (triggeridx!=-1) 
+		? scene.triggers[ triggeridx ] 
+		: {
+			name:'',
+			enabled:1,
+			template:'',
+			device:0,
+			arguments:[],
+			lua:''
+		};
+		
 		var dialog = DialogManager.createPropertyDialog('Trigger');
 		DialogManager.dlgAddLine( dialog , "TriggerName", trigger.name, "", {required:''} ); 
 		DialogManager.dlgAddDevices( dialog , trigger.device, function() {
@@ -640,11 +652,20 @@ var SceneEditor = function (scene) {
 				var id = $(elem).prop('id').substring("altui-event-param".length);
 				trigger.arguments.push( {id:id, value: $(elem).val() } );
 			});
-			$('div#dialogModal').modal('hide');
-			
-			// now update the UI
-			$("tr[data-trigger-idx="+triggeridx+"]").replaceWith( _displayTrigger(trigger,triggeridx) );
-			_showSaveNeeded();
+			if ((trigger.device>0) && (trigger.template>0))
+			{
+				$('div#dialogModal').modal('hide');
+				// now update the UI
+				if (triggeridx>=0) {
+					$("tr[data-trigger-idx="+triggeridx+"]").replaceWith( _displayTrigger(trigger,triggeridx) );
+				} else {
+					scene.triggers.push( trigger );
+					var parent = $(event.data.button).closest("tr");
+					parent.before(  _displayTrigger(trigger,scene.triggers.length-1) );
+					// $(jqButton).parent().before()
+				}
+				_showSaveNeeded();
+			}
 		});
 	};
 	
@@ -886,15 +907,16 @@ var SceneEditor = function (scene) {
 		html += "<h3>Trigger <span id='trigger' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+"</h3> ";	
 		html += _displayJson( 'trigger', scene.triggers);
 		try {
+			html +="<table class='table table-condensed'>";
+			html +="<tbody>";
 			if (scene.triggers) {
-				html +="<table class='table table-condensed'>";
-				html +="<tbody>";
 				$.each( scene.triggers, function(idx,trigger) {
 					html += _displayTrigger(trigger,idx);	// trigger do not have IDs so use array index
 				});
-				html +="</tbody>";
-				html +="</table>";
 			}
+			html +=("<tr><td colspan='7'>"+smallbuttonTemplate.format( -1, 'altui-addtrigger', plusGlyph)+"</td></tr>");
+			html +="</tbody>";
+			html +="</table>";
 		}
 		catch(err) {
 			html +="error happened during decoding";
@@ -1063,8 +1085,12 @@ var SceneEditor = function (scene) {
 		.on("click",".altui-edittrigger",function(){ 
 			var triggeridx = $(this).parents("tr[data-trigger-idx]").data("trigger-idx");
 			_editTrigger( triggeridx , $(this) );
+		})
+		.off("click",".altui-addtrigger")
+		.on("click",".altui-addtrigger",function(){ 
+			_editTrigger( -1 , $(this) );
 		});
-
+		
 		$("#altui-room-list").change( function() {
 			scene.room = $(this).val();
 			_showSaveNeeded();
