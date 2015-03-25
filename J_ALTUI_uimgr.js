@@ -1482,12 +1482,17 @@ var UIManager  = ( function( window, undefined ) {
 						}
 						AltuiDebug.debug("UI5 style static baseIconName modified :"+baseIconName);
 						var ds = dt.ui_static_data.DisplayStatus;
-						var variable = VeraBox.getStatus( device.id, ds.Service, ds.Variable );
-						if (variable==null) 
-							variable=0;
-						var status = variable / (ds.MaxValue - ds.MinValue);
-						var val = Math.ceil( status * 4 );
-						str = baseIconName + "_" + (isNaN( val * 25 ) ? 0 : (val * 25)) + ".png";
+						if ((ds.Service != undefined) && (ds.Variable != undefined))
+						{
+							var variable = VeraBox.getStatus( device.id, ds.Service, ds.Variable );
+							if (variable==null) 
+								variable=0;
+							var status = variable / (ds.MaxValue - ds.MinValue);
+							var val = Math.ceil( status * 4 );
+							str = baseIconName + "_" + (isNaN( val * 25 ) ? 0 : (val * 25)) + ".png";
+						}
+						else
+							str = baseIconName + ".png";
 					}
 					else
 						str = si[0];
