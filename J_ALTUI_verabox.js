@@ -1146,6 +1146,17 @@ var VeraBox = ( function( window, undefined ) {
 		}
 	};
 	
+	function _getDeviceEvents(device) {
+		if (device) {
+			var _devicetypesDB = UIManager.getDeviceTypesDB();
+			var dt = _devicetypesDB[device.device_type];
+			if  ((dt.ui_static_data == undefined) || (dt.ui_static_data.eventList2==undefined))
+				return [];
+			return dt.ui_static_data.eventList2;
+		}
+		return [];
+	};
+	
   // explicitly return public methods when this object is instantiated
   return {
 	//---------------------------------------------------------
@@ -1162,6 +1173,7 @@ var VeraBox = ( function( window, undefined ) {
 	getDeviceBatteryLevel : _deviceBatteryLevel,
 	getDeviceStaticUI : _getDeviceStaticUI,
 	getDeviceActions: _getDeviceActions,
+	getDeviceEvents : _getDeviceEvents,
 	getScenes		: _getScenes,
 	getSceneByID 	: _getSceneByID,
 	getPlugins		: _getPlugins,

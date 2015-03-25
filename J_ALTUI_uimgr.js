@@ -245,7 +245,7 @@ var DialogManager = ( function() {
 	function _getDeviceActionSelect(id, deviceid, actiondescriptor, cbfunc) {
 		var device = VeraBox.getDeviceByID(deviceid);
 		VeraBox.getDeviceActions(device,function( services ) {
-			var select = $("<select id='"+id+"' class='form-control'></select>");
+			var select = $("<select required id='"+id+"' class='form-control'></select>");
 			select.append("<option value='0' {0}>Select ...</option>".format( actiondescriptor.action==''? 'selected' : ''));
 			$.each(services, function(idx,service) {
 				var group = $("<optgroup label='"+service.ServiceId+"'></optgroup>");
@@ -389,6 +389,94 @@ var DialogManager = ( function() {
 		};
 	};
 	
+	function _dlgAddEvents(dialog, label, htmlid, deviceid, eventid, args)
+	{
+		var selected_event = null;
+
+		function _findArgumentValue(args,id,defaultValue) {
+			var value='';
+			$.each(args,function(idx,arg) {
+				if (arg.id==id) {
+					value = (arg.value!=undefined) ? arg.value : defaultValue; 
+					return false;
+				}
+			});
+			return value;
+		};
+		
+		function _getSelectForEvents( events ) {
+			var select = $("<select required id='"+htmlid+"' class='form-control'></select>");
+			select.append("<option value='0' {0}>Select ...</option>".format( eventid==0 ? 'selected' : ''));
+			selected_event = null;
+			$.each(events, function(idx,event){
+				var selected = '';
+				if (eventid==event.id) {
+					selected_event = event;
+					selected = 'selected';
+				}
+				select.append("<option value='{0}' {2}>{1}</option>".format(
+					event.id,
+					event.label.text,
+					selected));
+			});
+			return select.wrap( "<div></div>" ).parent().html();
+		};
+
+		function _getEventArguments( selected_event, args ) {
+			var propertyline="";
+			if ((selected_event!=null) && (selected_event.argumentList)) 
+			{
+				$.each(selected_event.argumentList, function(idx,eventarg) {
+					propertyline += "<div class='form-group'>";
+					propertyline += "	<label for='altui-event-param{0}'>{1} {2}</label>".format(idx,eventarg.name,eventarg.comparisson);
+					propertyline += "	<input required id='altui-event-param{0}' type='text' class='form-control' value='{1}' placeholder='default to {2}'></input>"
+						.format(eventarg.id, _findArgumentValue(args,eventarg.id,eventarg.defaultValue), eventarg.defaultValue );
+					propertyline += "</div>";
+					// (argument.value !=undefined) ? argument.value : eventarg.defaultValue );	
+				});
+			} 
+			return propertyline;
+		}
+		
+		//callback, if select device changes, we need to update actions
+		$("#altui-select-device").on("change",function() {
+			deviceid = $(this).val();
+			args=[];
+			eventid=0;
+			var device = VeraBox.getDeviceByID( deviceid );
+			var events = VeraBox.getDeviceEvents(device);
+			$("select#"+htmlid).replaceWith( _getSelectForEvents( events ) );
+			$(".altui-arguments").html( _getEventArguments(selected_event, args) );
+		});
+		
+		$('div#dialogModal').on("change","#"+htmlid,function() {
+			args=[];
+			eventid=$(this).val();
+			var device = VeraBox.getDeviceByID( deviceid );
+			var events = VeraBox.getDeviceEvents(device);
+			$.each(events, function(idx,event){
+				if (eventid==event.id) {
+					selected_event = event;
+				}
+			});
+			$(".altui-arguments").html( _getEventArguments(selected_event, args) );
+		});
+		
+		var device = VeraBox.getDeviceByID( deviceid );
+		var events = VeraBox.getDeviceEvents(device);
+		var propertyline = "";
+		propertyline += "<div class='form-group'>";
+		propertyline += "	<label for='"+htmlid+"'>"+label+"</label>";
+		propertyline +=     _getSelectForEvents(events);
+		propertyline += "</div>";
+		
+		propertyline += "<div class='altui-arguments'>";
+		propertyline += _getEventArguments( selected_event , args );
+		propertyline += "</div>";
+		
+		$(dialog).find(".row-fluid").append(propertyline);
+	};
+	
 	function _dlgAddActions(id, dialog,widget,actiondescriptor,label, cbfunc)
 	{
 		// callback when select of actions is changed
@@ -444,6 +532,7 @@ var DialogManager = ( function() {
 		dlgAddDevices:_dlgAddDevices,
 		dlgAddScenes:_dlgAddScenes,
 		dlgAddActions:_dlgAddActions,
+		dlgAddEvents:_dlgAddEvents,		
 		getDialogActionValue: _getDialogActionValue
 	};
 })();
@@ -451,10 +540,13 @@ var DialogManager = ( function() {
 //=====================================================================		
 // Scene Editor
 //=====================================================================		
-var SceneEditor = ( function (undefined) {
+
+var SceneEditor = function (scene) {
 
 	var _timerTypes = ['none','interval','day of week','day of month','absolute'];
-
+	var scene = scene;
+	var sceneid = scene.id;
+	
 	// trigger do not have IDs so use array index
 	function _displayTrigger(trigger,idx) {
 		function _findEventFromTriggerTemplate(device,template)
@@ -474,7 +566,7 @@ var SceneEditor = ( function (undefined) {
 		var deviceid = trigger.device;
 		var device = VeraBox.getDeviceByID(deviceid);
 		var event = _findEventFromTriggerTemplate( device, trigger.template );
-		html +="<tr>";
+		html +="<tr data-trigger-idx='"+idx+"'>";
 		html +="<td>";
 		html +="<input type='checkbox' {0} class='altui-enable-trigger' id='{1}'></input>".format( trigger.enabled==true ? 'checked' : '',idx);
 		html +="</td>";
@@ -521,11 +613,41 @@ var SceneEditor = ( function (undefined) {
 		
 		html +="<td>";
 		html += smallbuttonTemplate.format( idx, 'altui-deltrigger', deleteGlyph);
+		html += smallbuttonTemplate.format( idx, 'altui-edittrigger', editGlyph);
 		html +="</td>";
 		html +="</tr>";
 		return html;
 	};
 
+	function _editTrigger( triggeridx , jqButton) {
+		//Object {name: "blw 2", enabled: 1, template: 2, device: 5, arguments: Array[1]…}LastEval: 0arguments: Array[1]device: 5enabled: 1last_run: 1424626243lua: "return false"name: "blw 2"template: 2
+		var trigger = scene.triggers[ triggeridx ];
+		var dialog = DialogManager.createPropertyDialog('Trigger');
+		DialogManager.dlgAddLine( dialog , "TriggerName", trigger.name, "", {required:''} ); 
+		DialogManager.dlgAddDevices( dialog , trigger.device, function() {
+			DialogManager.dlgAddEvents( dialog, "Events", "altui-select-events", trigger.device, trigger.template, trigger.arguments );
+			$('div#dialogModal').modal();
+		});
+		
+		$('div#dialogs').off('submit',"div#dialogModal form").on( 'submit',"div#dialogModal form", { button: jqButton }, function( event ) {	
+			trigger.name = $("#altui-widget-TriggerName").val();
+			trigger.enabled = 1;
+			trigger.device = $("#altui-select-device").val();
+			trigger.template = $("#altui-select-events").val();
+			trigger.arguments = [];
+			$(".altui-arguments input").each( function(idx,elem)
+			{
+				var id = $(elem).prop('id').substring("altui-event-param".length);
+				trigger.arguments.push( {id:id, value: $(elem).val() } );
+			});
+			$('div#dialogModal').modal('hide');
+			
+			// now update the UI
+			$("tr[data-trigger-idx="+triggeridx+"]").replaceWith( _displayTrigger(trigger,triggeridx) );
+			_showSaveNeeded();
+		});
+	};
+	
 	function _displayJson(type,obj) {
 		return "<pre id='altui-json-"+type+"' class='altui-json-code'>"+JSON.stringify( obj )+"</pre>";
 	};
@@ -638,21 +760,24 @@ var SceneEditor = ( function (undefined) {
 						value: $(elem).val()
 					});
 				} );		
-				$('div#dialogModal').modal('hide');
-				
-				// now update UI
-				// var ids = $(event.data.button).prop("id").split(".");	// groupidx.actionidx
-				var parent = $(event.data.button).closest("tr");
-				if (ida>=0) {
-					//edit
-					parent.replaceWith( _displayAction(action,ida,idg) );
+				if ((action.device>0) && (action.action!=""))
+				{
+					$('div#dialogModal').modal('hide');
+					
+					// now update UI
+					// var ids = $(event.data.button).prop("id").split(".");	// groupidx.actionidx
+					var parent = $(event.data.button).closest("tr");
+					if (ida>=0) {
+						//edit
+						parent.replaceWith( _displayAction(action,ida,idg) );
+					}
+					else {
+						//add
+						scene.groups[ idg ].actions.push( action );
+						parent.before( _displayAction(action,scene.groups[ idg ].actions.length - 1 ,idg) );
+					}
+					_showSaveNeeded();
 				}
-				else {
-					//add
-					scene.groups[ idg ].actions.push( action );
-					parent.before( _displayAction(action,scene.groups[ idg ].actions.length - 1 ,idg) );
-				}
-				_showSaveNeeded();
 			}
 		);
 	};
@@ -685,9 +810,9 @@ var SceneEditor = ( function (undefined) {
 		return html;
 	};
 
-	function _editGroup( idx, scene, _group , _button ) {
+	function _editGroup( idx,  group , _button ) {
 			var dialog = DialogManager.createPropertyDialog('Scene Group');
-			DialogManager.dlgAddLine(dialog, "Delay", _group.delay ,"delay in seconds",{
+			DialogManager.dlgAddLine(dialog, "Delay", group.delay ,"delay in seconds",{
 				type:'number',
 				min:1,
 				required:''
@@ -695,7 +820,7 @@ var SceneEditor = ( function (undefined) {
 			$('div#dialogs')
 				.off('submit',"div#dialogModal form")
 				.on( 'submit',"div#dialogModal form", 
-					{ scene: scene, group:_group, button:_button },
+					{ scene: scene, group:group, button:_button },
 					function( event ) {
 						// save for real this time
 						var duration = $("#altui-widget-Delay").val();
@@ -742,7 +867,7 @@ var SceneEditor = ( function (undefined) {
 			$(".altui-scene-editbutton").removeClass("btn-default").addClass("btn-danger");
 	};
 
-	function _sceneEditDraw(id,scene) {
+	function _sceneEditDraw() {
 
 		var htmlSceneEditButton = "  <button type='submit' class='btn btn-default altui-scene-editbutton'>Submit</button>";
 		var htmlSceneAddButtonTmpl = "  <button type='submit' class='btn btn-default {0}'>"+plusGlyph+"</button>";
@@ -792,7 +917,7 @@ var SceneEditor = ( function (undefined) {
 			html +="error happened during decoding";
 		}
 
-		html += "<h3>Actions <span id='group' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+htmlSceneAddButtonTmpl.format("altui-add-group")+"</h3>";	
+		html += "<h3>Actions <span id='group' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+htmlSceneAddButtonTmpl.format("altui-addgroup")+"</h3>";	
 		html += _displayJson( 'group', scene.groups );
 		try {
 			if (scene.groups)
@@ -822,7 +947,7 @@ var SceneEditor = ( function (undefined) {
 		return html;
 	};
 	
-	function _runActions(sceneid, scene) {
+	function _runActions() {
 		//
 		// actions
 		//
@@ -926,13 +1051,18 @@ var SceneEditor = ( function (undefined) {
 		})
 		.off("click",".altui-editgroup")
 		.on("click",".altui-editgroup",function(){ 
-			var id = parseInt($(this).prop('id'));
-			_editGroup( id, scene, scene.groups[ id ] , $(this) );
+			var groupidx = parseInt($(this).prop('id'));
+			_editGroup( groupidx, scene.groups[ groupidx ] , $(this) );
 		})
-		.off("click",".altui-add-group")
-		.on("click",".altui-add-group",function(){ 
+		.off("click",".altui-addgroup")
+		.on("click",".altui-addgroup",function(){ 
 			var group = {"delay":'',"actions":[]};
-			_editGroup( -1 , scene, group , $(this) );
+			_editGroup( -1 , group , $(this) );
+		})
+		.off("click",".altui-edittrigger")
+		.on("click",".altui-edittrigger",function(){ 
+			var triggeridx = $(this).parents("tr[data-trigger-idx]").data("trigger-idx");
+			_editTrigger( triggeridx , $(this) );
 		});
 
 		$("#altui-room-list").change( function() {
@@ -964,7 +1094,7 @@ var SceneEditor = ( function (undefined) {
 		sceneEditDraw 	: _sceneEditDraw,
 		runActions 		: _runActions
 	}
-})();
+};
 
 var UIManager  = ( function( window, undefined ) {  
 	//---------------------------------------------------------
@@ -3438,17 +3568,17 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		// Deep copy so we can edit it
 		var orgscene = VeraBox.getSceneByID( sceneid );
 		var scene = jQuery.extend(true, {}, orgscene);
-			
+		var editor = SceneEditor( scene );
 		//
 		// get HTML for scene and draw it
 		//
 		var html = "<div class='col-xs-12'>" ;
 		html += UIManager.sceneDraw(sceneid, scene);
-		html += SceneEditor.sceneEditDraw(sceneid, scene);	
+		html += editor.sceneEditDraw();
 		html += "</div>";
 
 		$(".altui-mainpanel").append(  html );
-		SceneEditor.runActions(sceneid, scene);	
+		editor.runActions();
 	},
 
 	pagePlugins: function ()
