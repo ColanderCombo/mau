@@ -300,7 +300,7 @@ var DialogManager = ( function() {
 		$.each(_timerDOW, function(idx,element) {
 			// propertyline += "<div class='checkbox'>";
 			propertyline +="<label class='checkbox-inline'>";
-			propertyline +=( "<input type='checkbox' id='altui-widget-"+name+element.value+"' " + ( ($.inArray(element.value.toString(),selected_days)!=-1) ? 'checked' : '') +" value='"+element.value+"' >"+element.text);
+			propertyline +=( "<input type='checkbox' id='altui-widget-"+name+element.value+"' " + ( ($.inArray(element.value.toString(),selected_days)!=-1) ? 'checked' : '') +" value='"+element.value+"' />"+element.text);
 			propertyline +="</label>";
 		});
 		propertyline += "</div>";
@@ -351,6 +351,25 @@ var DialogManager = ( function() {
 		$(dialog).find(".row-fluid").append(propertyline);
 	};	
 
+	function _dlgAddTimeInterval(dialog, name, value, lines)
+	{
+		var unit = (value||' ').slice(-1);
+		var value = parseInt(value);
+		var propertyline = "";
+		propertyline += "<div class='form-group'>";
+		propertyline += "	<label for='altui-widget-"+name+"' title=''>"+name+"</label>";
+		propertyline += "	<div class='form-inline'>";
+		propertyline += "	<input id='altui-widget-"+name+"' class='form-control' type='number' value='"+value+"' placeholder='enter "+name+"' ></input>";
+		propertyline += "	<select id='altui-widget-"+name+"Unit' class='form-control' >";
+		$.each(lines, function(idx,line){
+			propertyline += "<option value='{0}' {2}>{1}</option>".format(line.value, line.text, (unit==line.value)?'selected':'');
+		})
+		propertyline += "</select>";
+		propertyline += "</div>";	// form inline
+		propertyline += "</div>";
+		$(dialog).find(".row-fluid").append(propertyline);
+	};
+	
 	function _dlgAddTime(dialog, name, value, _timerRelative)
 	{
 		function _decomposeTimer( value ) {
@@ -403,15 +422,15 @@ var DialogManager = ( function() {
 		propertyline += "<div class='form-group'>";
 		propertyline += "	<label for='altui-widget-"+name+"' title='[-]hh:mm:ss[R|S]'>"+name+"</label>";
 		propertyline += "	<span title='[-]hh:mm:ss[R|S]'>"+helpGlyph+"</span>";
-propertyline += "	<div class='form-inline'>";
+		propertyline += "	<div class='form-inline'>";
 		propertyline += "	<input id='altui-widget-"+name+"' class='form-control' value='"+res.value+"' placeholder='[-]hh:mm:ss[R|S]' ></input>";
 		propertyline += "	<select id='altui-widget-type-"+name+"' class='form-control' >";
 		$.each(_timerRelative, function(idx,line){
 			propertyline += "<option value='{0}' {2}>{1}</option>".format(line.value, line.text, (idx==res.iKind)?'selected':'');
 		})
 		propertyline += "</select>";
-propertyline += "</div>";
-		propertyline += "</div>";
+		propertyline += "</div>";	// form inline
+		propertyline += "</div>";	// form group
 		$(dialog).find(".row-fluid").append(propertyline);
 	};
 	
@@ -645,6 +664,7 @@ propertyline += "</div>";
 		dlgAddEvents:_dlgAddEvents,		
 		dlgAddDayOfWeek:_dlgAddDayOfWeek,
 		dlgAddTime: _dlgAddTime,
+		dlgAddTimeInterval: _dlgAddTimeInterval,
 		dlgAddDateTime:_dlgAddDateTime,
 		getDialogActionValue: _getDialogActionValue
 	};
@@ -891,20 +911,56 @@ var SceneEditor = function (scene) {
 			return template.format( $("#altui-widget-TimerTime").val() );
 		};
 		
+		function _showHideItems( timertype )
+		{
+			switch (parseInt(timertype)) {
+				case 1:	// interval
+					$("#altui-widget-TimerInterval,#altui-widget-TimerIntervalUnit")
+						.closest("div.form-group").show();
+					$("#altui-widget-TimerDayOfWeek, #altui-widget-TimerDayOfMonth, #altui-widget-TimerTime, #altui-widget-TimerDateTime")
+						.closest("div.form-group").hide();
+					break;
+				case 2: // day of week
+					$("#altui-widget-TimerDayOfWeek,#altui-widget-TimerTime")
+						.closest("div.form-group").show();
+					$("#altui-widget-TimerInterval,#altui-widget-TimerIntervalUnit, #altui-widget-TimerDayOfMonth, #altui-widget-TimerDateTime")
+						.closest("div.form-group").hide();
+					break;
+				case 3:	// day of month
+					$("#altui-widget-TimerDayOfMonth, #altui-widget-TimerTime")
+						.closest("div.form-group").show();
+					$("#altui-widget-TimerInterval,#altui-widget-TimerIntervalUnit, #altui-widget-TimerDayOfWeek, #altui-widget-TimerDateTime")
+						.closest("div.form-group").hide();
+					break;
+				case 4:
+					$("#altui-widget-TimerDateTime")
+						.closest("div.form-group").show();
+					$("#altui-widget-TimerInterval,#altui-widget-TimerIntervalUnit,#altui-widget-TimerDayOfWeek, #altui-widget-TimerDayOfMonth, #altui-widget-TimerTime")
+						.closest("div.form-group").hide();
+					break;
+				case 0:
+				default:
+			}
+		};
+		
 		//{"id":1,"name":"Interval","type":1,"enabled":1,"interval":"3h","last_run":1427346180,"next_run":1427363702}
 		var timer = _findTimerById( scene, timerid );
 		var dialog = DialogManager.createPropertyDialog('Timer');
 		DialogManager.dlgAddLine( dialog , "TimerName", timer.name, "", {required:''} ); 
 		DialogManager.dlgAddSelect(dialog, "TimerType", timer.type, _timerTypes, {required:''});
-		DialogManager.dlgAddLine( dialog, "TimerInterval", parseInt(timer.interval), "" , {type:'number'});
-		DialogManager.dlgAddSelect(dialog, "TimerIntervalUnit", (timer.interval ||" ").slice(-1), _timerUnits, {required:''});
+		DialogManager.dlgAddTimeInterval(dialog, "TimerInterval",timer.interval, _timerUnits);
 		DialogManager.dlgAddDayOfWeek(dialog, "TimerDayOfWeek", timer.days_of_week || '' , _timerDOW);
 		DialogManager.dlgAddLine(dialog, "TimerDayOfMonth", timer.days_of_month || '' );
 		DialogManager.dlgAddTime(dialog, "TimerTime", timer.time || '' ,_timerRelative);
 		DialogManager.dlgAddDateTime(dialog, "TimerDateTime", _formatRFC3339Date(timer.abstime || ''));
 		$('div#dialogModal').modal();
-
+		_showHideItems( timer.type );
+		
 		$('div#dialogs')
+			.off('change',"div#dialogModal form")
+			.on( 'change',"div#dialogModal #altui-widget-TimerType", function() {
+				_showHideItems( $(this).val() );
+			})
 			.off('submit',"div#dialogModal form")
 			.on( 'submit',"div#dialogModal form", 
 				{  button: jqButton },
