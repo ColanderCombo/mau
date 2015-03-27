@@ -770,8 +770,8 @@ var SceneEditor = function (scene) {
 		html +="</td>";
 		
 		html +="<td>";
-		html += smallbuttonTemplate.format( idx, 'altui-deltrigger', deleteGlyph);
-		html += smallbuttonTemplate.format( idx, 'altui-edittrigger', editGlyph);
+		html += smallbuttonTemplate.format( idx, 'altui-deltrigger', deleteGlyph,'Delete trigger');
+		html += smallbuttonTemplate.format( idx, 'altui-edittrigger', editGlyph, 'Edit trigger');
 		html +="</td>";
 		html +="</tr>";
 		return html;
@@ -862,8 +862,8 @@ var SceneEditor = function (scene) {
 		}
 		html +="</td>";
 		html +="<td>";
-		html += smallbuttonTemplate.format( timer.id, 'altui-deltimer', deleteGlyph);
-		html += smallbuttonTemplate.format( timer.id, 'altui-edittimer', editGlyph);
+		html += smallbuttonTemplate.format( timer.id, 'altui-deltimer', deleteGlyph,'Delete timer');
+		html += smallbuttonTemplate.format( timer.id, 'altui-edittimer', editGlyph,'Edit timer');
 		html +="</td>";
 		html +="</tr>";
 		//todo enabled , last_run , next_run
@@ -1031,7 +1031,7 @@ var SceneEditor = function (scene) {
 		$.each(arguments, function(idx,argument) {
 			html.push("{0}: {1}".format( argument.name, argument.value));
 		});
-		return html.join(',');
+		return "<small>"+html.join(',')+"</small>";
 	};
 	
 	function _displayAction(action,ida,idg) {
@@ -1042,8 +1042,8 @@ var SceneEditor = function (scene) {
 			action.action, 
 			_displayArguments(action.arguments));
 		html +="<td>";
-		html += smallbuttonTemplate.format( "{0}.{1}".format(idg,ida), 'altui-delaction', deleteGlyph);
-		html += smallbuttonTemplate.format( "{0}.{1}".format(idg,ida), 'altui-editaction', editGlyph);
+		html += smallbuttonTemplate.format( "{0}.{1}".format(idg,ida), 'altui-delaction', deleteGlyph, 'Delete Action');
+		html += smallbuttonTemplate.format( "{0}.{1}".format(idg,ida), 'altui-editaction', editGlyph, 'Edit Action');
 		html +="</td>";
 		html +="</tr>";
 		return html;
@@ -1116,12 +1116,12 @@ var SceneEditor = function (scene) {
 		html += "<tr data-group-idx='"+idx+"'>";
 		html += "<td>";
 		html +="<h4>{0} sec</h4>".format(group.delay);
-		html += "</td>";
-		html +="<td>";
+		// html += "</td>";
+		// html +="<td>";
 		if (idx>0) {
 			// Group IDX 0 : is the "Immediate" group, it cannot be deleted
-			html += smallbuttonTemplate.format( idx, 'altui-delgroup', deleteGlyph);
-			html += smallbuttonTemplate.format( idx, 'altui-editgroup', editGlyph);
+			html += smallbuttonTemplate.format( idx, 'altui-delgroup', deleteGlyph, 'Delete group');
+			html += smallbuttonTemplate.format( idx, 'altui-editgroup', editGlyph, 'Edit group');
 		}
 		html +="</td>";			
 		html += "<td>";
@@ -1130,7 +1130,7 @@ var SceneEditor = function (scene) {
 		$.each(group.actions, function(ida,action) {
 			html += _displayAction(action,ida,idx);
 		});
-		html +=("<tr><td colspan='3'>"+smallbuttonTemplate.format( idx, 'altui-addaction', plusGlyph)+"</td></tr>");
+		html +=("<tr><td colspan='3'>"+smallbuttonTemplate.format( idx, 'altui-addaction', plusGlyph,'Add action')+"</td></tr>");
 		html +="</tbody>";
 		html +="</table>";
 		html += "</td>";
@@ -1170,19 +1170,14 @@ var SceneEditor = function (scene) {
 						group.delay = duration;
 						
 						// now update UI
+						var parent = event.data.button.closest("tr");
 						if (idx>0) {
 							// Edit
-							var parent = event.data.button.parents("tr");
 							parent.replaceWith( _displayGroup(group,idx) );
 						} else {
 							// Add 
 							scene.groups.push( group );
-							var table = $(event.data.button).parent().nextAll("table");
-							var html="";
-							$.each(scene.groups, function(idx,group){
-								html += _displayGroup(group,idx);
-							});
-							table.find("tbody").first().html( html );
+							parent.before( _displayGroup(group,scene.groups.length-1) );
 						}
 						_showSaveNeeded();
 					});
@@ -1197,7 +1192,6 @@ var SceneEditor = function (scene) {
 	};
 
 	function _sceneEditDraw() {
-
 		var htmlSceneEditButton = "  <button type='submit' class='btn btn-default altui-scene-editbutton'>Submit</button>";
 		var htmlSceneAddButtonTmpl = "  <button type='submit' class='btn btn-default {0}'>"+plusGlyph+"</button>";
 		var rooms = VeraBox.getRoomsSync();
@@ -1210,8 +1204,8 @@ var SceneEditor = function (scene) {
 					htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format(room.name,room.id,selected ? 'selected' : '');
 				});
 		htmlRoomSelect 	  += "</select>";
-
-		var html = "<div class='form-inline'><h3>Room : "+htmlRoomSelect+"</h3></div>";
+		var htmlRoomName = "<input id='altui-scene-name-input' type='text' class='form-control' value='"+scene.name+"'></input>";
+		var html = "<div class='form-group'><h3>Room : "+htmlRoomSelect+"</h3><label for='altui-scene-name-input'>Name</Label>"+htmlRoomName+"</div>";
 		html += "<h3>Trigger <span id='trigger' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+"</h3> ";	
 		html += _displayJson( 'trigger', scene.triggers);
 		try {
@@ -1222,7 +1216,7 @@ var SceneEditor = function (scene) {
 					html += _displayTrigger(trigger,idx);	// trigger do not have IDs so use array index
 				});
 			}
-			html +=("<tr><td colspan='7'>"+smallbuttonTemplate.format( -1, 'altui-addtrigger', plusGlyph)+"</td></tr>");
+			html +=("<tr><td colspan='7'>"+smallbuttonTemplate.format( -1, 'altui-addtrigger', plusGlyph,'Add trigger')+"</td></tr>");
 			html +="</tbody>";
 			html +="</table>";
 		}
@@ -1233,34 +1227,35 @@ var SceneEditor = function (scene) {
 		html += "<h3>Timers <span id='timer' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+"</h3>";	
 		html += _displayJson( 'timer', scene.timers);
 		try {
+			html +="<table class='table table-condensed'>";
+			html +="<tbody>";
 			if (scene.timers) {
-				html +="<table class='table table-condensed'>";
-				html +="<tbody>";
 				$.each( scene.timers, function(idx,timer) {
 					html += _displayTimer(timer);
 				});
-				html +=("<tr><td colspan='4'>"+smallbuttonTemplate.format( -1 , 'altui-addtimer', plusGlyph)+"</td></tr>");
-				html +="</tbody>";
-				html +="</table>";
+				html +=("<tr><td colspan='4'>"+smallbuttonTemplate.format( -1 , 'altui-addtimer', plusGlyph,'Add timer')+"</td></tr>");
 			}
+			html +="</tbody>";
+			html +="</table>";
 		}
 		catch(err) {
 			html +="error happened during decoding";
 		}
 
-		html += "<h3>Actions <span id='group' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+htmlSceneAddButtonTmpl.format("altui-addgroup")+"</h3>";	
+		html += "<h3>Actions <span id='group' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+"</h3>";	
 		html += _displayJson( 'group', scene.groups );
 		try {
+			html +="<table class='table table-condensed'>";
+			html +="<tbody>";
 			if (scene.groups)
 			{
-				html +="<table class='table table-condensed'>";
-				html +="<tbody>";
 				$.each(scene.groups, function(idx,group){
 					html += _displayGroup(group,idx);
 				});
-				html +="</tbody>";
-				html +="</table>";
 			}
+			html +=("<tr><td colspan='3'>"+smallbuttonTemplate.format( -1 , 'altui-addgroup', plusGlyph,'Add group')+"</td></tr>");
+			html +="</tbody>";
+			html +="</table>";
 		}
 		catch(err) {
 			html +="error happened during decoding";
@@ -1303,6 +1298,7 @@ var SceneEditor = function (scene) {
 		.off("click",".altui-scene-editbutton")
 		.on("click",".altui-scene-editbutton",function(){ 
 			scene.lua = $("#altui-luascene").val();
+			scene.name = $("#altui-scene-name-input").val();
 			VeraBox.editScene(sceneid,scene);
 			_showSaveNeeded(true);
 		});
@@ -3874,11 +3870,19 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		function _drawScenes( filterfunc )
 		{
 			UIManager.clearPage();
-			$("#altui-pagetitle").text("Scenes");
+			var toolbatrHtml="";
+			toolbatrHtml+="  <button type='button' class='btn btn-default' id='altui-scene-create' >";
+			toolbatrHtml+=("    Create "+plusGlyph);
+			toolbatrHtml+="  </button>";			
+			$("#altui-pagetitle").text("Scenes").append(toolbatrHtml);
 
 			// on the left, get the rooms
 			UIManager.leftnavRooms( _onClickRoomButton );
 			VeraBox.getScenes( sceneDraw , filterfunc, afterSceneListDraw )
+			
+			$("#altui-scene-create").click( function() {
+				UIManager.pageSceneEdit(-1);
+			});
 		}
 		
 		function _onClickRoomButton() {
@@ -3903,7 +3907,15 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		$("div#dialogs").append(defaultDialogModalTemplate.format( 'vide', 'vide'));
 
 		// Deep copy so we can edit it
-		var orgscene = VeraBox.getSceneByID( sceneid );
+		var orgscene = (sceneid!=-1) ? VeraBox.getSceneByID( sceneid ) : { 
+				name:"New Scene",
+				id: 1,
+				triggers: [],
+				groups: [{"delay":0,"actions":[]}],
+				timers: [],
+				lua:"",
+				room:0
+		};
 		var scene = jQuery.extend(true, {}, orgscene);
 		var editor = SceneEditor( scene );
 		//
