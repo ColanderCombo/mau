@@ -420,10 +420,10 @@ var DialogManager = ( function() {
 		var res = _decomposeTimer((value==undefined) ? '' : value );
 		var propertyline = "";
 		propertyline += "<div class='form-group'>";
-		propertyline += "	<label for='altui-widget-"+name+"' title='[-]hh:mm:ss[R|S]'>"+name+"</label>";
-		propertyline += "	<span title='[-]hh:mm:ss[R|S]'>"+helpGlyph+"</span>";
+		propertyline += "	<label for='altui-widget-"+name+"' title='hh:mm:ss'>"+name+"</label>";
+		propertyline += "	<span title='hh:mm:ss'>"+helpGlyph+"</span>";
 		propertyline += "	<div class='form-inline'>";
-		propertyline += "	<input id='altui-widget-"+name+"' class='form-control' value='"+res.value+"' placeholder='[-]hh:mm:ss[R|S]' ></input>";
+		propertyline += "	<input id='altui-widget-"+name+"' class='form-control' value='"+res.value+"' placeholder='hh:mm:ss' ></input>";
 		propertyline += "	<select id='altui-widget-type-"+name+"' class='form-control' >";
 		$.each(_timerRelative, function(idx,line){
 			propertyline += "<option value='{0}' {2}>{1}</option>".format(line.value, line.text, (idx==res.iKind)?'selected':'');
@@ -897,15 +897,24 @@ var SceneEditor = function (scene) {
 		function _findTimerById( scene, timerid )
 		{
 			var timer = null;
-			$.each(scene.timers, function( idx,_timer) {	
-				if (_timer.id == timerid) {
-					timer = _timer;
-					return false;
-				}
-			});
+			if (scene.timers)
+				$.each(scene.timers, function( idx,_timer) {	
+					if (_timer.id == timerid) {
+						timer = _timer;
+						return false;
+					}
+				});
 			return timer;
 		};
-		
+		function _getNewTimerID()
+		{
+			var max = 0;
+			if (scene.timers)
+				$.each(scene.timers, function (idx,timer) {
+					max = Math.max(max, timer.id);
+				})
+			return ++max;
+		};
 		function _getTimerTime() {
 			var template = $("#altui-widget-type-TimerTime").val();
 			return template.format( $("#altui-widget-TimerTime").val() );
@@ -944,7 +953,13 @@ var SceneEditor = function (scene) {
 		};
 		
 		//{"id":1,"name":"Interval","type":1,"enabled":1,"interval":"3h","last_run":1427346180,"next_run":1427363702}
-		var timer = _findTimerById( scene, timerid );
+		var timer = (timerid!=-1) ? _findTimerById( scene, timerid ) : {
+			id: _getNewTimerID(),
+			enabled: 1,
+			name: 'new timer',
+			type: 1,
+			interval: '1h'
+		};
 		var dialog = DialogManager.createPropertyDialog('Timer');
 		DialogManager.dlgAddLine( dialog , "TimerName", timer.name, "", {required:''} ); 
 		DialogManager.dlgAddSelect(dialog, "TimerType", timer.type, _timerTypes, {required:''});
@@ -992,9 +1007,14 @@ var SceneEditor = function (scene) {
 							return;
 					}
 					$('div#dialogModal').modal('hide');
+					var parent = $(event.data.button).closest("tr");
 					if (timerid>=0) {
-						var parent = $(event.data.button).closest("tr");
+						// edit
 						parent.replaceWith( _displayTimer(timer) );
+					} else {
+						// addition
+						scene.timers.push( timer );
+						parent.before( _displayTimer(timer) );
 					}
 					_showSaveNeeded();
 				}
@@ -1219,6 +1239,7 @@ var SceneEditor = function (scene) {
 				$.each( scene.timers, function(idx,timer) {
 					html += _displayTimer(timer);
 				});
+				html +=("<tr><td colspan='4'>"+smallbuttonTemplate.format( -1 , 'altui-addtimer', plusGlyph)+"</td></tr>");
 				html +="</tbody>";
 				html +="</table>";
 			}
@@ -1298,30 +1319,32 @@ var SceneEditor = function (scene) {
 		$(".altui-mainpanel")
 			.off("click",".altui-deltimer")
 			.on("click",".altui-deltimer",function(){ 
-			var id = parseInt($(this).prop('id'));
-			$.each(scene.timers , function (idx,timer) {
-				if (timer.id ==id) {
-					scene.timers.splice( idx , 1 );
-					// now rename IDs !
-					var newid=1;
-					$.each(scene.timers, function( idx,timer) {
-						timer.id = newid++;
-					});
-					_showSaveNeeded();
-					return false; // we found it, stop the iteration
-				}
-			});
-			$(this).parents("tr").remove();
-			UIManager.pageMessage( "Timer deleted, remember to save your changes", "info");
-			// VeraBox.setScene(sceneid,scene);
+				var id = parseInt($(this).prop('id'));
+				$.each(scene.timers , function (idx,timer) {
+					if (timer.id ==id) {
+						scene.timers.splice( idx , 1 );
+						// now rename IDs !
+						var newid=1;
+						$.each(scene.timers, function( idx,timer) {
+							timer.id = newid++;
+						});
+						_showSaveNeeded();
+						return false; // we found it, stop the iteration
+					}
+				});
+				$(this).parents("tr").remove();
+				UIManager.pageMessage( "Timer deleted, remember to save your changes", "info");
+				// VeraBox.setScene(sceneid,scene);
 			})
 			.off("click",".altui-edittimer")
 			.on("click",".altui-edittimer",function(){ 
 				var id = parseInt($(this).prop('id'));
 				_editTimer( id , $(this) );
-			});
-		
-		$(".altui-mainpanel")
+			})
+			.off("click",".altui-addtimer")
+			.on("click",".altui-addtimer",function(){ 
+				_editTimer( -1 , $(this) );
+			})
 			.off("click",".altui-delaction")
 			.on("click",".altui-delaction",function(){ 
 				// groupid . actionid
@@ -1332,58 +1355,52 @@ var SceneEditor = function (scene) {
 				_showSaveNeeded();
 				UIManager.pageMessage( "Action deleted, remember to save your changes", "info");
 				// VeraBox.setScene(sceneid,scene);
+			})
+			.off("click",".altui-editaction")
+			.on("click",".altui-editaction",function(){ 
+				var ids = $(this).prop('id').split('.');
+				var group = scene.groups[ ids[0] ];
+				var action = group.actions[ ids[1] ];
+				_editAction(scene,action,ids[1],ids[0],$(this));
+			})
+			.off("click",".altui-addaction")
+			.on("click",".altui-addaction",function(){ 
+				var newaction = {
+					device:'',
+					service:'',
+					action:'',
+					arguments:[]
+				};
+				var idg = $(this).parents("table[data-group-idx]").data("group-idx");
+				_editAction(scene,newaction,-1,idg,$(this));
+			})
+			.off("click",".altui-delgroup")
+			.on("click",".altui-delgroup",function(){ 
+				var id = parseInt($(this).prop('id'));
+				$(this).parents("tr").remove();
+				scene.groups.splice( id , 1 );
+				_showSaveNeeded();
+				UIManager.pageMessage( "Group of actions deleted, remember to save your changes", "info");
+			})
+			.off("click",".altui-editgroup")
+			.on("click",".altui-editgroup",function(){ 
+				var groupidx = parseInt($(this).prop('id'));
+				_editGroup( groupidx, scene.groups[ groupidx ] , $(this) );
+			})
+			.off("click",".altui-addgroup")
+			.on("click",".altui-addgroup",function(){ 
+				var group = {"delay":'',"actions":[]};
+				_editGroup( -1 , group , $(this) );
+			})
+			.off("click",".altui-edittrigger")
+			.on("click",".altui-edittrigger",function(){ 
+				var triggeridx = $(this).parents("tr[data-trigger-idx]").data("trigger-idx");
+				_editTrigger( triggeridx , $(this) );
+			})
+			.off("click",".altui-addtrigger")
+			.on("click",".altui-addtrigger",function(){ 
+				_editTrigger( -1 , $(this) );
 			});
-
-		$(".altui-mainpanel")
-		.off("click",".altui-editaction")
-		.on("click",".altui-editaction",function(){ 
-			var ids = $(this).prop('id').split('.');
-			var group = scene.groups[ ids[0] ];
-			var action = group.actions[ ids[1] ];
-			_editAction(scene,action,ids[1],ids[0],$(this));
-		});
-
-		$(".altui-mainpanel")
-		.off("click",".altui-addaction")
-		.on("click",".altui-addaction",function(){ 
-			var newaction = {
-				device:'',
-				service:'',
-				action:'',
-				arguments:[]
-			};
-			var idg = $(this).parents("table[data-group-idx]").data("group-idx");
-			_editAction(scene,newaction,-1,idg,$(this));
-		});
-
-		$(".altui-mainpanel")
-		.off("click",".altui-delgroup")
-		.on("click",".altui-delgroup",function(){ 
-			var id = parseInt($(this).prop('id'));
-			$(this).parents("tr").remove();
-			scene.groups.splice( id , 1 );
-			_showSaveNeeded();
-			UIManager.pageMessage( "Group of actions deleted, remember to save your changes", "info");
-		})
-		.off("click",".altui-editgroup")
-		.on("click",".altui-editgroup",function(){ 
-			var groupidx = parseInt($(this).prop('id'));
-			_editGroup( groupidx, scene.groups[ groupidx ] , $(this) );
-		})
-		.off("click",".altui-addgroup")
-		.on("click",".altui-addgroup",function(){ 
-			var group = {"delay":'',"actions":[]};
-			_editGroup( -1 , group , $(this) );
-		})
-		.off("click",".altui-edittrigger")
-		.on("click",".altui-edittrigger",function(){ 
-			var triggeridx = $(this).parents("tr[data-trigger-idx]").data("trigger-idx");
-			_editTrigger( triggeridx , $(this) );
-		})
-		.off("click",".altui-addtrigger")
-		.on("click",".altui-addtrigger",function(){ 
-			_editTrigger( -1 , $(this) );
-		});
 		
 		$("#altui-room-list").change( function() {
 			scene.room = $(this).val();
