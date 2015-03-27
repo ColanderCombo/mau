@@ -300,7 +300,7 @@ var DialogManager = ( function() {
 		$.each(_timerDOW, function(idx,element) {
 			// propertyline += "<div class='checkbox'>";
 			propertyline +="<label class='checkbox-inline'>";
-			propertyline +=( "<input type='checkbox' id='altui-widget-"+name+idx+"' " + ( ($.inArray(idx.toString(),selected_days)!=-1) ? 'checked' : '') +" value='"+element.value+"' >"+element.text);
+			propertyline +=( "<input type='checkbox' id='altui-widget-"+name+element.value+"' " + ( ($.inArray(element.value.toString(),selected_days)!=-1) ? 'checked' : '') +" value='"+element.value+"' >"+element.text);
 			propertyline +="</label>";
 		});
 		propertyline += "</div>";
@@ -664,13 +664,13 @@ var SceneEditor = function (scene) {
 		{value:4,text:'absolute'}
 	];
 	var _timerDOW = [
-		{value:0,text:'Su'},
 		{value:1,text:'Mo'},
 		{value:2,text:'Tu'},
 		{value:3,text:'We'},
 		{value:4,text:'Th'},
 		{value:5,text:'Fr'},
-		{value:6,text:'Sa'}
+		{value:6,text:'Sa'},
+		{value:7,text:'Su'}
 	];
 	var _timerRelative = [
 		{value:"{0}",text:'At a certain time of day'},
