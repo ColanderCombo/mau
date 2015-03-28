@@ -4593,6 +4593,7 @@ $(document).ready(function() {
 	$(window).on('resize', function () {
 	  /*if (window.innerWidth > tabletSize) */
 	  $(".navbar-collapse").collapse('hide');
+	  UIManager.refreshUI( true ,false  );	// full but not first time
 	})
 
 	// $("#menu_room,#menu_device,#menu_scene,#menu_plugins,#menu_custom,#menu_plugins").toggle();-

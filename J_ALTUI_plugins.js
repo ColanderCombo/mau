@@ -29,7 +29,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-dimmable {font-size: 16px;}";
 		style += ".altui-motion {font-size: 22px;}";
 		style += ".altui-windowcover {}";
-		style += ".altui-dimmable-slider { width: 95px; margin-left: 50px;}";		
+		style += ".altui-dimmable-slider { margin-left: 50px;}";		
 		style += "div.altui-windowcover button.btn-sm { width: 4em; }";
 		return style;
 	};
@@ -184,6 +184,9 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	function _drawDimmable(devid, device) {
 
 		var html = "";
+		var onebody = $(".altui-device-body");
+		var sliderwidth = (onebody.length>=1) ? onebody.first().width()-50-70  : 95;
+		var bodywidth=$(".altui-device-body").first().width();
 		
 		// load level
 		var level = parseInt(VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:Dimming1', 'LoadLevelTarget' )); 
@@ -203,7 +206,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		html += _createOnOffButton( status,"altui-onoffbtn-"+devid , "OFF,ON" , "pull-right");
 		
 		// dimming
-		html+=("<div id='slider-{0}' class='altui-dimmable-slider'></div>".format(devid));
+		html+=("<div id='slider-{0}' class='altui-dimmable-slider' style='width: "+sliderwidth+"px;' ></div>").format(devid);
 		
 		// on off 
 		html += "<script type='text/javascript'>";
