@@ -3999,15 +3999,10 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	{
 		// clear page
 		UIManager.clearPage('Scene Edit');
-		$("#altui-pagetitle").text(sceneid!=undefined ? "Edit Scene #"+sceneid : "Create Scene");
-
-		// register dialog
-		$("div#dialogs").append(defaultDialogModalTemplate.format( 'vide', 'vide'));
-
 		// Deep copy so we can edit it
 		var orgscene = (sceneid!=-1) ? VeraBox.getSceneByID( sceneid ) : { 
 				name:"New Scene",
-				id: 1,
+				id: VeraBox.getNewSceneID(),
 				triggers: [],
 				groups: [{"delay":0,"actions":[]}],
 				timers: [],
@@ -4015,6 +4010,12 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 				room:0
 		};
 		var scene = jQuery.extend(true, {timers:[], triggers:[], groups:[] }, orgscene);
+
+		$("#altui-pagetitle").text(sceneid!=undefined ? "Edit Scene #"+scene.id : "Create Scene");
+
+		// register dialog
+		$("div#dialogs").append(defaultDialogModalTemplate.format( 'vide', 'vide'));
+
 		var editor = SceneEditor( scene );
 		//
 		// get HTML for scene and draw it

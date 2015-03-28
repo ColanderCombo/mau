@@ -592,6 +592,14 @@ var VeraBox = ( function( window, undefined ) {
 		return found;
 	};
 	
+	function _getNewSceneID() {
+		var max = 0;
+		$.each(_user_data.scenes, function( i,scene) {
+			max = Math.max( scene.id, max );
+		});
+		return max+1;
+	};
+	
 	function _getStates( deviceid  )
 	{
 		var arr = $.grep(_user_data.devices, function( device,idx) {
@@ -1176,6 +1184,7 @@ var VeraBox = ( function( window, undefined ) {
 	getDeviceEvents : _getDeviceEvents,
 	getScenes		: _getScenes,
 	getSceneByID 	: _getSceneByID,
+	getNewSceneID	: _getNewSceneID,
 	getPlugins		: _getPlugins,
 	getHouseMode	: _getHouseMode,
 	setHouseMode	: _setHouseMode,
