@@ -2647,7 +2647,7 @@ var UIManager  = ( function( window, undefined ) {
 	function _initEngine(styles, devicetypes) {
 		_initDB(devicetypes);
 		_initUIEngine(styles);
-		UIManager.drawHouseMode();
+		// UIManager.drawHouseMode();
 	};
 
 	function _initCustomPages( custompages ) {
@@ -3452,13 +3452,61 @@ var UIManager  = ( function( window, undefined ) {
 	updateDeviceTypeUPnpDB : _updateDeviceTypeUPnpDB,				// update devicetype UPNP information ( from D_xx S_xx files )
 	getDeviceTypesDB : function() {	return _devicetypesDB; },		// just a reader
 	
+	// breadcumb
+	breadCumb: function( title , param ) {
+		var tbl = [
+			{ id:0, title:'Home', onclick:'UIManager.pageHome()', 		parent:-1},
+			{ id:1, title:'Rooms', onclick:'UIManager.pageRooms()', 	parent:0 },
+			{ id:2, title:'Devices', onclick:'UIManager.pageDevices()', parent:0 },
+			{ id:5, title:'Control Panel', onclick:'UIManager.pagexxx()', parent:2 },
+			{ id:6, title:'Scenes', onclick:'UIManager.pageScenes()', 	parent:0 },
+			{ id:7, title:'Scene Edit', onclick:'UIManager.pageSceneEdit()', parent:6 },
+			{ id:8, title:'Plugins', onclick:'UIManager.pagePlugins()', parent:0 },
+			{ id:9, title:'Custom Pages', onclick:'UIManager.pageUsePages()', parent:0 },
+			{ id:10, title:'Edit Pages', onclick:'UIManager.pageEditPages()', parent:0 },
+			{ id:11, title:'Credits', onclick:'UIManager.pageCredits()', parent:0 },
+			{ id:12, title:'LuaTest', onclick:'UIManager.pageLuaTest()', parent:0 },
+			{ id:13, title:'LuaStart', onclick:'UIManager.pageLuaStart()', parent:0 },
+			{ id:14, title:'Optimize', onclick:'UIManager.pageOptimize()', parent:0 },
+		];
+		
+		function _parentsOf(child) {
+			var html = "";
+			$.each(tbl, function( idx,line) {
+				if (child.parent==line.id) {
+					var thisline = "<li><a href='javascript:void(0);' onclick='"+line.onclick+";return false;' >"+line.title+"</a></li>";
+					var parentlines = (line.parent==-1) ? '' :  _parentsOf(line);
+					html = parentlines + thisline;
+					return false;
+				}
+			});
+			return html;
+		};
+		
+		var html="";
+		html+="<ol class='breadcrumb altui-breadcrumb'>";
+		// html+="<li><a href='javascript:void(0);' onclick='UIManager.pageHome();return false;' >Home</a></li>";
+		// html+="<li><a href='javascript:void(0);' onclick='UIManager.pageDevices();return false;' >Device</a></li>";
+		// html+="<li class='active'>Data</li>";
+		$.each(tbl, function( idx,line) {
+			if (line.title==title) {
+				html += _parentsOf(line);
+				html += "<li class='active'>{0}</li>".format(line.title);
+			}
+		});
+		html+="</ol>";
+		return html;
+	},
+	
 	// pages
-	clearPage : function()
+	clearPage : function(title)
 	{
 		UIManager.stoprefreshModes();
 		$(".navbar-collapse").collapse('hide');
+		$(".altui-breadcrumb").remove();
 		$(".altui-pagefilter").remove();
 		$("#altui-device-name-filter").remove();
+		$("#altui-pagetitle").before ( UIManager.breadCumb( title ) );
 		$(".altui-mainpanel").empty();
 		$("#altui-pagemessage").empty();
 		$("#dialogs").empty();
@@ -3468,7 +3516,7 @@ var UIManager  = ( function( window, undefined ) {
 	//window.open("data_request?id=lr_ALTUI_Handler&command=home","_self");
 	pageHome : function()
 	{
-		UIManager.clearPage();
+		UIManager.clearPage('Home');
 		$("#altui-pagetitle").text("Welcome to VERA Alternate UI");
 		UIManager.drawHouseMode();
 
@@ -3504,7 +3552,7 @@ var UIManager  = ( function( window, undefined ) {
 	// ===========================
 	pageRooms : function ()
 	{
-		UIManager.clearPage();
+		UIManager.clearPage('Rooms');
 		var formHtml="";
 		formHtml+=" <div class='input-group col-sm-6'>";
 		formHtml+="       <input id='altui-create-room-name' type='text' class='form-control' placeholder='Room name...'>";
@@ -3549,7 +3597,7 @@ var UIManager  = ( function( window, undefined ) {
 /*
 ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"device_json: "D_BinaryLight1.json"device_type: "urn:schemas-upnp-org:device:BinaryLight:1"dirty: falsedisabled: 0embedded: "1"id: "106"id_parent: 4impl_file: ""invisible: "1"ip: ""local_udn: "uuid:4d494342-5342-5645-006a-000002b03150"mac: ""manufacturer: ""model: ""name: "1"room: 2states: Array[5]subcategory_num: 0time_created: "1409616976"
 */		
-		UIManager.clearPage();
+		UIManager.clearPage('Control Panel');
 
 		var rooms = VeraBox.getRoomsSync();
 		var device = VeraBox.getDeviceByID( devid );
@@ -3716,7 +3764,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 			toolbatrHtml+=("    Create "+plusGlyph);
 			toolbatrHtml+="  </button>";			
 
-			UIManager.clearPage();
+			UIManager.clearPage('Devices');
 			
 			// Dialogs
 			$(".altui-mainpanel").append(deviceModalTemplate.format( '', '', 0 ));
@@ -3919,7 +3967,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		
 		function _drawScenes( filterfunc )
 		{
-			UIManager.clearPage();
+			UIManager.clearPage('Scenes');
 			var toolbatrHtml="";
 			toolbatrHtml+="  <button type='button' class='btn btn-default' id='altui-scene-create' >";
 			toolbatrHtml+=("    Create "+plusGlyph);
@@ -3950,7 +3998,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	pageSceneEdit: function (sceneid)
 	{
 		// clear page
-		UIManager.clearPage();
+		UIManager.clearPage('Scene Edit');
 		$("#altui-pagetitle").text(sceneid!=undefined ? "Edit Scene #"+sceneid : "Create Scene");
 
 		// register dialog
@@ -3982,7 +4030,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 
 	pagePlugins: function ()
 	{
-		UIManager.clearPage();
+		UIManager.clearPage('Plugins');
 
 		function drawPlugin(idx, plugin) {
 			var iconTemplate = "<img class='altui-plugin-icon' src='https://apps.mios.com/{0}'></img>";
@@ -4031,7 +4079,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	{
 		// var pages = g_CustomPages;
 		// PageManager.init(g_CustomPages);
-		UIManager.clearPage();
+		UIManager.clearPage('Custom Pages');
 		$("#altui-pagetitle").text("Your Custom Pages");
 
 		var pageTabs = _createPageTabsHtml();
@@ -4227,7 +4275,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		};
 		
 		// draw page & toolbox
-		UIManager.clearPage();
+		UIManager.clearPage('Edit Pages');
 		
 		$("#altui-pagetitle").text("Custom Pages Editor");
 		UIManager.pageMessage("Drag and Drop to add/move/delete controls. use Ctrl+Click or lasso to select multiple controls","info");
@@ -4329,7 +4377,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	
 	pageWip: function ()
 	{
-		UIManager.clearPage();
+		UIManager.clearPage('Wip');
 		$("#altui-pagetitle").text("Work In Progress");
 		$(".altui-mainpanel").append("<h3>Sorry this is not yet implemented</h3>");
 	},
@@ -4348,7 +4396,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	
 	pageCredits: function ()
 	{
-		UIManager.clearPage();
+		UIManager.clearPage('Credits');
 		$("#altui-pagetitle").text("Credits");
 		
 		var tbl = [
@@ -4357,6 +4405,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 			["jQuery","http://jquery.com/","javascript framework and browser differences abstraction layer"],
 			["jQueryUI","http://jqueryui.com/","jQuery User Interface widgets ( like slider )"],
 			["Touch Punch","http://touchpunch.furf.com/","jQuery UI fix for touch screen devices"],
+			["Bootstrap Validator","https://github.com/1000hz/bootstrap-validator","Form validator in Bootstrap 3 style"],
 			["amg0","http://forum.micasaverde.com/","reachable as amg0 on this forum "]
 		];
 		var html = "<dl>";
@@ -4404,7 +4453,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	
 	pageLuaTest: function ()
 	{
-		UIManager.clearPage();
+		UIManager.clearPage('LuaTest');
 		$("#altui-pagetitle").text("LUA Code Test");
 		$(".altui-mainpanel").append("<p>This test code will succeed if it is syntactically correct and does not return false. an error in the code or a return false will trigger a failure</p>");
 		this.pageLuaForm("Lua Test Code","return true",function(lua) {
@@ -4419,7 +4468,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	
 	pageLuaStart: function ()
 	{
-		UIManager.clearPage();
+		UIManager.clearPage('LuaStart');
 		$("#altui-pagetitle").text("LUA Startup");
 		var lua = VeraBox.getLuaStartup();
 		this.pageLuaForm("Lua Startup Code",lua,function(newlua) {
@@ -4466,7 +4515,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	},
 	
 	pageOptimize: function() {
-		UIManager.clearPage();
+		UIManager.clearPage('Optimize');
 		$("#altui-pagetitle").text("Optimizations");
 
 		var color = IconDB.isDB() ? "text-success" : "text-danger";
@@ -4832,5 +4881,6 @@ $(document).ready(function() {
 		$("#debug").text(event.pageX + ", " + event.pageY);
 	});
 	*/
+	UIManager.pageHome();
 	AltuiDebug.debug("init done");
 });
