@@ -325,7 +325,7 @@ var DialogManager = ( function() {
 	{
 		var optstr = _optionsToString(options);
 		value = (value==undefined) ? '' : value ;
-		var placeholder = (options.placeholder==undefined) ? "placeholder:'enter "+name+"'" : "";
+		var placeholder = ((options !=undefined) && (options.placeholder==undefined)) ? "placeholder:'enter "+name+"'" : "";
 		var propertyline = "";
 		propertyline += "<div class='form-group'>";
 		propertyline += "	<label for='altui-widget-"+name+"' title='"+(help || '')+"'>"+name+"</label>";
