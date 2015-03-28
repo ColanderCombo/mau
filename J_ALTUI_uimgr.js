@@ -1249,8 +1249,8 @@ var SceneEditor = function (scene) {
 				$.each( scene.timers, function(idx,timer) {
 					html += _displayTimer(timer);
 				});
-				html +=("<tr><td colspan='4'>"+smallbuttonTemplate.format( -1 , 'altui-addtimer', plusGlyph,'Add timer')+"</td></tr>");
 			}
+			html +=("<tr><td colspan='4'>"+smallbuttonTemplate.format( -1 , 'altui-addtimer', plusGlyph,'Add timer')+"</td></tr>");
 			html +="</tbody>";
 			html +="</table>";
 		}
@@ -4014,7 +4014,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 				lua:"",
 				room:0
 		};
-		var scene = jQuery.extend(true, {}, orgscene);
+		var scene = jQuery.extend(true, {timers:[], triggers:[], groups:[] }, orgscene);
 		var editor = SceneEditor( scene );
 		//
 		// get HTML for scene and draw it
