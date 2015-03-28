@@ -2331,23 +2331,57 @@ var UIManager  = ( function( window, undefined ) {
 					break;
 				}
 				case "slider_vertical": {
+					function _onClickSlider(event) {
+						var uniqid = event.data.uniqid;
+						var control = event.data.control;
+						var htmlid = "altui-slider-vertical-value-"+uniqid;
+						var val = $(this).text();	// it is a div
+						var cls = $(this).attr('class');
+						var style = $(this).attr('style') + ' width:50px; ';
+						$(this).hide();
+						$("input#"+htmlid).val( val ).show().focus();
+					};
+					function _displaySliderValue(uniqid,control,val) {
+						var color = control.ControlCode == "heating_setpoint" ? "text-danger" : "text-primary";
+						var htmlid = "altui-slider-vertical-value-"+uniqid;
+						$("<div id='"+htmlid+"' class='"+color+"'>"+val+"</div>")
+							.appendTo( $(domparent) )
+							.css({
+								top: control.Display.Top, 
+								left: control.Display.Left, 
+								position:'absolute'})
+							// .width(control.Display.Width)
+							.height(20 /*control.Display.Height*/ )		// height given by class on UI5
+							.click( {uniqid:uniqid, control:control},_onClickSlider);
+						$("<input required id='"+htmlid+"' type='number' value='' />")
+							.appendTo( $(domparent) )
+							.css({
+								top: control.Display.Top, 
+								left: control.Display.Left, 
+								position:'absolute'})
+							// .width(control.Display.Width)
+							.height(25 /*control.Display.Height*/ )		// height given by class on UI5
+							.width(50)
+							.hide()
+							.blur( function() {
+								var val = $(this).val();
+								var htmlid = $(this).prop('id');
+								$("div#"+htmlid).text(val).show();
+								$("div#altui-slider-vertical-"+uniqid).slider("value", val );
+								$("input#"+htmlid).hide();	// toggle both DIV and INPUT
+							});
+					};
+					
 					// {"ControlGroup":"6","ControlType":"slider_vertical","top":"0","left":"3.5","ControlPair":"1","ID":"NewCurrentSetpointCool","Style":"numeric","Display":{"Service":"urn:upnp-org:serviceId:TemperatureSetpoint1_Cool","Variable":"CurrentSetpoint","Top":30,"Left":570,"Width":100,"Height":20},"Command":{"Service":"urn:upnp-org:serviceId:TemperatureSetpoint1_Cool","Action":"SetCurrentSetpoint","Parameters":[{"Name":"NewCurrentSetpoint","ID":"NewCurrentSetpointCool"}]},"ControlCode":"cooling_setpoint"}
 					var val = VeraBox.getStatus( devid, control.Display.Service, control.Display.Variable );
 					var uniqid = devid+"-"+idx;
-					var color = control.ControlCode == "heating_setpoint" ? "text-danger" : "text-primary";
-					$("<div id='altui-slider-vertical-value-"+uniqid+"' class='"+color+"'>"+val+"</div>")
-						.appendTo( $(domparent) )
-						.css({
-							top: control.Display.Top, 
-							left: control.Display.Left, 
-							position:'absolute'})
-						// .width(control.Display.Width)
-						.height(20 /*control.Display.Height*/ );		// height given by class on UI5
+					_displaySliderValue(uniqid,control,val)
 
+						
 					$("<div id='altui-slider-vertical-"+uniqid+"'></div>")
 						.appendTo( $(domparent) )
 						.css({
-							top: control.Display.Top+20, 
+							top: control.Display.Top+30, 
 							left: control.Display.Left, 
 							position:'absolute'})
 						// .width(control.Display.Width)
