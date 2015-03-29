@@ -2908,6 +2908,8 @@ var UIManager  = ( function( window, undefined ) {
 			.off('submit',"div#dialogModal form")
 			.on( 'submit',"div#dialogModal form", function() {
 			// save for real this time
+			if (widget.properties.deviceid==0)
+				return;	// mandatory data
 			real_widget.properties.deviceid = widget.properties.deviceid;
 			real_widget.properties.inverted = $("#altui-widget-Inverted").is(':checked');
 
@@ -2916,9 +2918,9 @@ var UIManager  = ( function( window, undefined ) {
 			real_widget.properties.variable = selected.variable;
 			real_widget.properties.service = selected.service;
 			
-			real_widget.properties.action_off = _getDialogActionValue("altui-widget-action-off");
+			real_widget.properties.action_off = DialogManager.getDialogActionValue("altui-widget-action-off");
 			real_widget.properties.labels[0] = $("#altui-widget-OffLabel").val();
-			real_widget.properties.action_on = _getDialogActionValue("altui-widget-action-on");
+			real_widget.properties.action_on = DialogManager.getDialogActionValue("altui-widget-action-on");
 			real_widget.properties.labels[1] = $("#altui-widget-OnLabel").val();
 			// read params
 			real_widget.properties.action_on.params={};
