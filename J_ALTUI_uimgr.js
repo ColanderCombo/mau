@@ -2493,27 +2493,59 @@ var UIManager  = ( function( window, undefined ) {
 	function _deviceDrawControlPanel(devid, device, container ) {
 
 		// Draw hidding attribute panel
-		var form = new HtmlBuilder.Form('','');
-		var panel = new HtmlBuilder.Panel('', 'altui-device-attrpanel panel-default', 'bg-info', {}, null, null, null/*"footer"*/, form);
-		var col = new HtmlBuilder.Col('altui-device-attributes-'+devid,'altui-device-attributes col-xs-12','', panel );
+		var html ="";
+		html+="<div class='row'>";
+		html += "<div id='altui-device-attributes-"+devid+"' class='col-xs-12 altui-device-attributes'>"
+		html += "<form class='form'>";
 		$.each( device, function(key,val) {
 			var typ = Object.prototype.toString.call(val);
 			if ((typ!="[object Object]") && (typ!="[object Array]")){
-				form.addChild( new HtmlBuilder.FormGroup('','form-group-sm',[
-					new HtmlBuilder.FormLabel('','col-xs-5 col-sm-2 col-lg-1','',key,null),
-					new HtmlBuilder.FormStatic('','input-sm col-xs-7 col-sm-4 col-lg-3','',val,null)
-				]));
+				html += "<div class='col-sm-6 col-md-4 col-lg-3'>";
+				html += "<div class='form-group'>";
+				html += "<label for='"+key+"'>"+key+"</label>";
+				html += "<input id='"+key+"' data-devid='"+devid+"' class='form-control' value='"+val+"'></input>";
+				html += "</div>"
+				html += "</div>"
 			}
 		});
-		$(container).append( col.getHtml() );
-		
-		//function( id, cls, bodycls, attrs, content, heading, footer, children) 
-		var panel = HtmlBuilder.Panel( '', '', 'bg-info', null, null, null, null, null);
-		var col = new HtmlBuilder.Col('altui-device-controlpanel-'+devid,'altui-device-controlpanel col-xs-12','', panel );
-		$(container).append( col.getHtml());	
+		html += "</form>";
+		html += "</div>";
+		html += "</div>";	// row
+
+		$(container).append( html );
+		$(".altui-device-attributes input").change( function() {
+			var deviceID = $(this).data('devid');
+			var attribute = $(this).prop('id');
+			var value = $(this).val();
+			if (confirm("Are you sure you want to modify this attribute")) {		
+				UPnPHelper.UPnPSetAttr(deviceID, attribute, value,function(result) {
+					if (result==null) {
+						UIManager.pageMessage( "Set Attribute action failed!", "warning" );				
+					}
+					else {
+						UIManager.pageMessage( "Set Attribute succeeded! a LUUP reload will happen now, be patient", "success" );			
+					}
+				});
+			}
+		});
+
+		html ="";
+		html+="<div class='row'>";
+		html +="<div id='altui-device-controlpanel-"+devid+"' class='col-xs-12 altui-device-controlpanel'>";
+		html +="	<div class='panel panel-default'>";
+		html +="		<div class='panel-heading'>";
+		html +="			<h1 class='panel-title'>{0} {1} {2} (#{3})</h1>";
+		html +="		</div>";
+		html +="		<div class='panel-body bg-info'>";
+		html +="		</div>";
+		html +="	</div>";
+		html +="</div>";
+		html += "</div>";	// row
+	
+		$(container).append( html.format(device.manufacturor || '', device.model || '', device.name || '', device.id) );	
 		
 		// Draw hidden debug panel
-		$(container).append( "<div class='altui-debug-div'></div>" );
+		$(container).append( "<div class='row'><div class='altui-debug-div'></div></div>" );
 
 		// draw custom or standard control panel
 		var domparent = $("#altui-device-controlpanel-"+devid+" .panel-body");		
@@ -3625,7 +3657,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		//
 		// Draw device control panel (attributes+panel+debug)
 		//
-		$(".altui-mainpanel").append( "<div id='altui-device-controlpanel-container-"+devid+"' class='altui-device-controlpanel-container'></div>" );
+		$(".altui-mainpanel").append( "<div id='altui-device-controlpanel-container-"+devid+"' class='col-xs-12 altui-device-controlpanel-container'></div>" );
 		var container = $("#altui-device-controlpanel-container-"+devid);
 		UIManager.deviceDrawControlPanel(devid, device, container ); 	//devid, device, domparent
 		

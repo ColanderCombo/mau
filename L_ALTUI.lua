@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.39"
+local version = "v0.40"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 -- local updateFrequencySec = 120	-- refreshes every x seconds
 -- local socket = require("socket")
@@ -727,6 +727,14 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				}
 				return json.encode(tbl)
 			end,
+		-- ["set_attribute"] = 
+			-- function(params)
+				-- local attr = lul_parameters["attr"]
+				-- local value = lul_parameters["value"]
+				-- local devid = lul_parameters["devid"]
+				-- luup.attr_set(attr , value, devid)
+				-- return "ok"
+			-- end,
 		["scenes"] = 
 			function(params)
 				return json.encode( luup.scenes )

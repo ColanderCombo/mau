@@ -31,6 +31,12 @@ var UPnPHelper = (function(window,undefined) {
 	function _getUrlHead() {
 		return window.location.pathname;
 	}
+	
+	function _buildAttributeSetUrl( deviceID, attribute, value) {
+		var urlHead ="data_request?id=lr_ALTUI_Handler&command=set_attribute&devid="+deviceID+"&attr="+encodeURIComponent(attribute)+"&value="+encodeURIComponent(value);
+		return urlHead;
+	}
+	
 	function _buildVariableSetUrl( deviceID, service, varName, varValue)
 	{
 		var urlHead = _getUrlHead()+'?id=variableset&DeviceNum='+deviceID+'&serviceId='+service+'&Variable='+varName+'&Value='+varValue;
@@ -101,6 +107,24 @@ var UPnPHelper = (function(window,undefined) {
 		});
 	};
 
+	function _UPnPSetAttr( deviceID, attribute, value, cbfunc)
+	{
+		// _exec( _buildAttributeSetUrl( deviceID, attribute, value) );
+		var target = {};
+		target.devices={};
+		target.devices["devices_"+deviceID]={};
+		target.devices["devices_"+deviceID][attribute]=value;
+		// var target = {
+			// "devices":{
+				// "devices_5": {
+					// "states": {},
+					// "model": "test"
+				// }
+			// }
+		// };
+		_ModifyUserData( target, cbfunc );
+	};
+	
 	function _UPnPSet( deviceID, service, varName, varValue )
 	{
 		_exec( _buildVariableSetUrl( deviceID, service, varName, varValue) );
@@ -222,6 +246,7 @@ var UPnPHelper = (function(window,undefined) {
 // </s:Envelope>	
 	function _ModifyUserData( user_data, cbfunc )
 	{
+		
 		var target = {
 			"devices":{},
 			"scenes":{},
@@ -329,6 +354,7 @@ var UPnPHelper = (function(window,undefined) {
 		//---------------------------------------------------------
 
 		reloadEngine	: _reloadEngine,
+		UPnPSetAttr		: _UPnPSetAttr,	// ( deviceID, attribute, value, cbfunc)
 		UPnPSet			: _UPnPSet,		// ( deviceID, service, varName, varValue )
 		UPnPAction		: _UPnPAction,	// ( deviceID, service, action, params, cbfunc )
 		UPnPGetFile		: _UPnPGetFile,
