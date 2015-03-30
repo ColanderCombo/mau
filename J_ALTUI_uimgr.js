@@ -2363,7 +2363,7 @@ var UIManager  = ( function( window, undefined ) {
 							.height(25 /*control.Display.Height*/ )		// height given by class on UI5
 							.width(50)
 							.hide()
-							.blur( function() {
+							.change( function() {
 								var val = $(this).val();
 								var htmlid = $(this).prop('id');
 								$("div#"+htmlid).text(val).show();
@@ -3475,6 +3475,7 @@ var UIManager  = ( function( window, undefined ) {
 	deviceDrawVariables : _deviceDrawVariables,			// draw the device variables
 	deviceDrawActions 	: _deviceDrawActions,			// draw the device Upnp Actions
 	deviceDrawControlPanel 	: _deviceDrawControlPanel,	// draw the full device control panel page; can be customized by a plugin ["ControlPanelFunc"]
+	defaultDeviceDrawControlPanel : _defaultDeviceDrawControlPanel,	// default device container panel
 	deviceCreate		: _deviceCreate,
 	cameraDraw			: _cameraDraw,
 	sceneDraw			: _sceneDraw,
