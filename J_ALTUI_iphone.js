@@ -15,6 +15,8 @@ var ALTUI_IPhoneLocator= ( function( window, undefined ) {
 		var style="";
 		style += ".altui-iphone 	{	font-size: 16px;	}";
 		style += ".altui-canalplus 	{	font-size: 12px;	}";
+		style += "#altui-cplus-keytbl td {text-align:center;     vertical-align:middle;}";
+		style += ".altui-cplus-button { width: 70px; font-size:12px;}";
 		return style;
 	};
 
@@ -67,6 +69,35 @@ var ALTUI_IPhoneLocator= ( function( window, undefined ) {
 		// $(domparent).append("Hello I am alive, and I am in a custom drawing function!");
 	// };
 
+	function _drawCanaplusControlPanel(devid, device, domparent) {
+		var html="";
+		html += "<table id='altui-cplus-keytbl'>";
+		html += "<tbody>";
+
+html+="<tr><td><button class='altui-cplus-button btn btn-default' id='1'>1</button></td><td><button class='altui-cplus-button btn btn-default' id='2'>2</button></td><td><button class='altui-cplus-button btn btn-default' id='3'>3</button></td></tr>";
+html+="<tr><td><button class='altui-cplus-button btn btn-default' id='4'>4</button></td><td><button class='altui-cplus-button btn btn-default' id='5'>5</button></td><td><button class='altui-cplus-button btn btn-default' id='6'>6</button></td></tr>";
+html+="<tr><td><button class='altui-cplus-button btn btn-default' id='7'>7</button></td><td><button class='altui-cplus-button btn btn-default' id='8'>8</button></td><td><button class='altui-cplus-button btn btn-default' id='9'>9</button></td></tr>";
+html+="<tr><td colspan='3'><button class='altui-cplus-button btn btn-default' id='0'>0</button></td></tr>";
+html+="<tr><td><button class='altui-cplus-button btn btn-default' id='Rewind'>Rewind</button></td><td><button class='altui-cplus-button btn btn-default' id='Play'>Play</button></td><td><button class='altui-cplus-button btn btn-default' id='Forward'>Forward</button></td></tr>";
+html+="<tr><td><button class='altui-cplus-button btn btn-default' id='Stop'>Stop</button></td><td><button class='altui-cplus-button btn btn-default' id='Pause'>Pause</button></td><td><button class='altui-cplus-button btn btn-default' id='Rec'>Rec</button></td></tr>";
+html+="<tr><td colspan='3'>-</td></tr>";
+html+="<tr><td><button class='altui-cplus-button btn btn-default' id='Menu'>Menu</button></td><td><button class='altui-cplus-button btn btn-default' id='Haut'>Haut</button></td><td><button class='altui-cplus-button btn btn-default' id='Guide'>Guide</button></td></tr>";
+html+="<tr><td><button class='altui-cplus-button btn btn-default' id='Gauche'>Gauche</button></td><td><button class='altui-cplus-button btn btn-default' id='Ok'>Ok</button></td><td><button class='altui-cplus-button btn btn-default' id='Droite'>Droite</button></td></tr>";
+html+="<tr><td><button class='altui-cplus-button btn btn-default' id='Retour'>Retour</button></td><td><button class='altui-cplus-button btn btn-default' id='Bas'>Bas</button></td><td><button class='altui-cplus-button btn btn-default' id='Sortie'>Sortie</button></td></tr>";
+html+="<tr><td colspan='3'>-</td></tr>";
+html+="<tr><td><button class='altui-cplus-button btn btn-default' id='Info'>Info</button></td><td><button class='altui-cplus-button btn btn-default' id='Info'>Info</button></td><td><button class='altui-cplus-button btn btn-default' id='Info'>Info</button></td></tr>";
+html+="<tr><td><button class='altui-cplus-button btn btn-default' id='VOL+'>VOL+</button></td><td><button class='altui-cplus-button btn btn-default' id='Mute'>Mute</button></td><td><button class='altui-cplus-button btn btn-default' id='P+'>P+</button></td></tr>";
+html+="<tr><td><button class='altui-cplus-button btn btn-default' id='VOL-'>VOL-</button></td><td>-</td><td><button class='altui-cplus-button btn btn-default' id='P-'>P-</button></td></tr>";
+
+		html += "</tbody>";
+		html += "</table>";
+		$(domparent).append(html);
+		$(".altui-cplus-button").click( function() {
+			var id = $(this).prop('id');
+			UPnPHelper.UPnPAction( devid, 'urn:upnp-org:serviceId:cplus1', 'SendKey', {keyStream:id} );
+		});
+	};	
+	
   // explicitly return public methods when this object is instantiated
   return {
 	//---------------------------------------------------------
@@ -76,6 +107,8 @@ var ALTUI_IPhoneLocator= ( function( window, undefined ) {
 	drawIPhone 	: _drawIPhone,
 	drawAltUI 	: _drawAltUI,
 	drawCanalplus : _drawCanalplus,
+	drawCanaplusControlPanel : _drawCanaplusControlPanel,
+	
 	// drawControlPanel : _drawControlPanel,
 	toggleDebug : function (devid,htmlid) {
 		ALTUI_PluginDisplays.toggleButton(devid, htmlid, 'urn:upnp-org:serviceId:altui1', 'Debug', function(id,newval) {

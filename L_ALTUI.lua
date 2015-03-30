@@ -806,6 +806,7 @@ local function getDefaultConfig()
 	tbl["urn:schemas-upnp-org:device:cplus:1"]= {
 		["ScriptFile"]="J_ALTUI_iphone.js",
 		["DeviceDrawFunc"]="ALTUI_IPhoneLocator.drawCanalplus",
+		["ControlPanelFunc"]="ALTUI_IPhoneLocator.drawCanaplusControlPanel"
 	}
 	tbl["urn:schemas-upnp-org:device:altui:1"]= {
 		["ScriptFile"]="J_ALTUI_iphone.js",

@@ -2542,7 +2542,7 @@ var UIManager  = ( function( window, undefined ) {
 		html +="</div>";
 		html += "</div>";	// row
 	
-		$(container).append( html.format(device.manufacturor || '', device.model || '', device.name || '', device.id) );	
+		$(container).append( html.format(device.manufacturer || '', device.model || '', device.name || '', device.id) );	
 		
 		// Draw hidden debug panel
 		$(container).append( "<div class='row'><div class='altui-debug-div'></div></div>" );
