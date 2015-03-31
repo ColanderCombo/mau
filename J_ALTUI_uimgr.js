@@ -2205,7 +2205,7 @@ var UIManager  = ( function( window, undefined ) {
 				};
 				case "variable": {
 					// Width is ignored on UI5
-					$( "<p>{0}</p>".format( VeraBox.getStatus( devid, control.Display.Service, control.Display.Variable ) ))
+					$( "<p>{0}</p>".format( VeraBox.getStatus( devid, control.Display.Service, control.Display.Variable ) || "" ))
 						.appendTo( $(domparent) )
 						.css({
 							top: paddingtop + (control.Display.Top || 0), 
