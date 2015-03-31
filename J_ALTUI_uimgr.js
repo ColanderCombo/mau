@@ -2490,8 +2490,7 @@ var UIManager  = ( function( window, undefined ) {
 
 	}
 
-	function _deviceDrawControlPanel(devid, device, container ) {
-
+	function _deviceDrawControlPanelAttributes(devid, device, container ) {
 		// Draw hidding attribute panel
 		var html ="";
 		html+="<div class='row'>";
@@ -2511,8 +2510,8 @@ var UIManager  = ( function( window, undefined ) {
 		html += "</form>";
 		html += "</div>";
 		html += "</div>";	// row
-
 		$(container).append( html );
+
 		$(".altui-device-attributes input").change( function() {
 			var deviceID = $(this).data('devid');
 			var attribute = $(this).prop('id');
@@ -2528,7 +2527,9 @@ var UIManager  = ( function( window, undefined ) {
 				});
 			}
 		});
+	};
 
+	function _deviceDrawControlPanelInternal(devid, device, container ) {
 		html ="";
 		html+="<div class='row'>";
 		html +="<div id='altui-device-controlpanel-"+devid+"' class='col-xs-12 altui-device-controlpanel'>";
@@ -2541,15 +2542,10 @@ var UIManager  = ( function( window, undefined ) {
 		html +="	</div>";
 		html +="</div>";
 		html += "</div>";	// row
-	
 		$(container).append( html.format(device.manufacturer || '', device.model || '', device.name || '', device.id) );	
-		
-		// Draw hidden debug panel
-		$(container).append( "<div class='row'><div class='altui-debug-div'></div></div>" );
 
 		// draw custom or standard control panel
 		var domparent = $("#altui-device-controlpanel-"+devid+" .panel-body");		
-
 		var dt = _devicetypesDB[device.device_type];
 		if (dt!=null && dt.ControlPanelFunc!=null) {
 			//execute the custom control panel function
@@ -2560,6 +2556,61 @@ var UIManager  = ( function( window, undefined ) {
 		}
 	};
 		
+	function _setActiveDeviceTabIdx( idx) {
+		$("#altui-devtab-tabs li").removeClass('active');
+		if (idx!=null)
+			$("li#altui-devtab-"+idx).find("a").tab('show');
+	};	
+	
+	function _getActiveDeviceTabIdx() {
+		var obj = $("#altui-devtab-tabs li.active");
+		if (obj.length ==0)
+			return null;
+		var pagename = obj.prop('id');
+		return pagename.substring( "altui-devtab-".length);
+	};	
+	
+	function _deviceDrawControlPanel(devid, device, container ) {
+		function _createDeviceTabs( device, tabs ) {
+			var lines= [];
+			$.each( tabs, function( idx,tab) {
+				if (/*tab.TabType=="javascript"*/1) {
+					lines.push( "<li id='altui-devtab-{1}' role='presentation' ><a href='#altui-devtab-content-{1}' aria-controls='{0}' role='tab' data-toggle='tab'>{0}</a></li>".format(tab.Label.text,idx) );
+				}
+			});
+			return "<ul class='nav nav-tabs' id='altui-devtab-tabs' role='tablist'>"+lines.join('')+"</ul>";
+		};
+		function _getDeviceTab(device,tab) {
+			return "<p>{0}-{1}</p>".format(device.id, tab.Label.text);
+		};
+		function _createDeviceTabContents(device, tabs) {
+			var html = "<div class='tab-content'>";
+			$.each( tabs, function( idx,tab) {
+				if (/*tab.TabType=="javascript"*/ 1) {
+					html += "<div id='altui-devtab-content-{0}' class='tab-pane'>".format(idx);
+					html += _getDeviceTab(device,tab);
+					html += "</div>";
+				}
+			});
+			html += "</div>";
+			return html;
+		};
+
+		// Draw hidden debug panel
+		$(container).append( "<div class='row'><div class='altui-debug-div'></div></div>" );
+		
+		_deviceDrawControlPanelAttributes(devid, device, container ) 	// row for attributes
+
+		$(container).append( "<div class='row'>" );
+			var dt = _devicetypesDB[ device.device_type ];
+			if ((dt != undefined) && (dt.ui_static_data!=undefined)) {
+				$(container).append( _createDeviceTabs( device, dt.ui_static_data.Tabs ) );
+				$(container).append( _createDeviceTabContents( device , dt.ui_static_data.Tabs ) );
+			}
+		$(container).append( "</div>" );	// End Row
+
+		_deviceDrawControlPanelInternal(devid, device, container );		// row for Flash Panel
+	};
 	
 	function _refreshFooter() {
 		// refresh footer
@@ -2599,6 +2650,8 @@ var UIManager  = ( function( window, undefined ) {
 
 		// refresh device panels
 		$(".altui-device-controlpanel-container").not(".altui-norefresh").each( function(index,element) {
+			var idx = _getActiveDeviceTabIdx();
+			
 			var htmlid = $(element).prop("id");
 			var devid = parseInt( htmlid.substring( "altui-device-controlpanel-container-".length ) );
 			var device = VeraBox.getDeviceByID( devid );
@@ -2608,8 +2661,10 @@ var UIManager  = ( function( window, undefined ) {
 			var debugvisible = $(".altui-debug-div").is(":visible"); 
 			$(element).html("");
 			UIManager.deviceDrawControlPanel(devid, device, $(element) );
-			$("#altui-device-attributes-"+devid).toggle(attrvisible);			// hide them by default;
+			$("#altui-device-attributes-"+devid).toggle(attrvisible);		// hide them by default;
 			$(".altui-debug-div").toggle(debugvisible);						// hide
+			
+			_setActiveDeviceTabIdx(idx);
 		});
 		
 		// refresh scenes
