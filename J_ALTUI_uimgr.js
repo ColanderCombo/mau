@@ -3534,14 +3534,19 @@ var UIManager  = ( function( window, undefined ) {
 	},
 	
 	// pages
-	clearPage : function(title)
+	clearPage : function(breadcumb,title)
 	{
 		UIManager.stoprefreshModes();
 		$(".navbar-collapse").collapse('hide');
 		$(".altui-breadcrumb").remove();
 		$(".altui-pagefilter").remove();
 		$("#altui-device-name-filter").remove();
-		$("#altui-pagetitle").before ( UIManager.breadCumb( title ) );
+		if (title) {
+			$("#altui-pagetitle").html( title );
+			$("#altui-pagetitle").before ( UIManager.breadCumb( breadcumb ) );
+		}
+		else
+			$("#altui-pagetitle").empty();
 		$(".altui-mainpanel").empty();
 		$("#altui-pagemessage").empty();
 		$("#dialogs").empty();
@@ -3551,8 +3556,7 @@ var UIManager  = ( function( window, undefined ) {
 	//window.open("data_request?id=lr_ALTUI_Handler&command=home","_self");
 	pageHome : function()
 	{
-		UIManager.clearPage('Home');
-		$("#altui-pagetitle").text("Welcome to VERA Alternate UI");
+		UIManager.clearPage('Home',"Welcome to VERA Alternate UI");
 		UIManager.drawHouseMode();
 
 	},
@@ -3587,7 +3591,7 @@ var UIManager  = ( function( window, undefined ) {
 	// ===========================
 	pageRooms : function ()
 	{
-		UIManager.clearPage('Rooms');
+		UIManager.clearPage('Rooms',"Rooms");
 		var formHtml="";
 		formHtml+=" <div class='input-group col-sm-6'>";
 		formHtml+="       <input id='altui-create-room-name' type='text' class='form-control' placeholder='Room name...'>";
@@ -3595,7 +3599,6 @@ var UIManager  = ( function( window, undefined ) {
 		formHtml+="         <button id='altui-create-room' class='btn btn-default' type='button'>Create "+plusGlyph+"</button>";
 		formHtml+="       </span>";
 		formHtml+="     </div><!-- /input-group -->";
-		$("#altui-pagetitle").text("Rooms");
 	
 		// on the left nav
 		// nothing
@@ -3632,13 +3635,12 @@ var UIManager  = ( function( window, undefined ) {
 /*
 ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"device_json: "D_BinaryLight1.json"device_type: "urn:schemas-upnp-org:device:BinaryLight:1"dirty: falsedisabled: 0embedded: "1"id: "106"id_parent: 4impl_file: ""invisible: "1"ip: ""local_udn: "uuid:4d494342-5342-5645-006a-000002b03150"mac: ""manufacturer: ""model: ""name: "1"room: 2states: Array[5]subcategory_num: 0time_created: "1409616976"
 */		
-		UIManager.clearPage('Control Panel');
 
 		var rooms = VeraBox.getRoomsSync();
 		var device = VeraBox.getDeviceByID( devid );
 		var category = VeraBox.getCategoryTitle( device.category_num );
 
-		$("#altui-pagetitle").html("{0} <small>{1} <small>#{2}</small></small>".format( device.name , category ,devid));
+		UIManager.clearPage('Control Panel',"{0} <small>{1} <small>#{2}</small></small>".format( device.name , category ,devid));
 
 		//
 		// Draw toolbar : room selection and attribute show toggle button
@@ -3799,7 +3801,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 			toolbatrHtml+=("    Create "+plusGlyph);
 			toolbatrHtml+="  </button>";			
 
-			UIManager.clearPage('Devices');
+			UIManager.clearPage('Devices',"Devices "+toolbatrHtml);
 			
 			// Dialogs
 			$(".altui-mainpanel").append(deviceModalTemplate.format( '', '', 0 ));
@@ -3808,7 +3810,6 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 			
 			// Title
 			$("#altui-pagetitle")
-				.html("Devices "+toolbatrHtml)
 				.after(filterHtml)
 				.css("display","inline");
 			$(".altui-pagefilter").css("display","inline");
@@ -4002,12 +4003,12 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		
 		function _drawScenes( filterfunc )
 		{
-			UIManager.clearPage('Scenes');
+			UIManager.clearPage('Scenes',"Scenes");
 			var toolbatrHtml="";
 			toolbatrHtml+="  <button type='button' class='btn btn-default' id='altui-scene-create' >";
 			toolbatrHtml+=("    Create "+plusGlyph);
 			toolbatrHtml+="  </button>";			
-			$("#altui-pagetitle").text("Scenes").append(toolbatrHtml);
+			$("#altui-pagetitle").append(toolbatrHtml);
 
 			// on the left, get the rooms
 			UIManager.leftnavRooms( _onClickRoomButton );
@@ -4032,8 +4033,6 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 
 	pageSceneEdit: function (sceneid)
 	{
-		// clear page
-		UIManager.clearPage('Scene Edit');
 		// Deep copy so we can edit it
 		var orgscene = (sceneid!=-1) ? VeraBox.getSceneByID( sceneid ) : { 
 				name:"New Scene",
@@ -4046,7 +4045,8 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		};
 		var scene = jQuery.extend(true, {timers:[], triggers:[], groups:[] }, orgscene);
 
-		$("#altui-pagetitle").text(sceneid!=undefined ? "Edit Scene #"+scene.id : "Create Scene");
+		// clear page
+		UIManager.clearPage('Scene Edit',sceneid!=undefined ? "Edit Scene #"+scene.id : "Create Scene");
 
 		// register dialog
 		$("div#dialogs").append(defaultDialogModalTemplate.format( 'vide', 'vide'));
@@ -4066,7 +4066,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 
 	pagePlugins: function ()
 	{
-		UIManager.clearPage('Plugins');
+		UIManager.clearPage('Plugins',"Plugins");
 
 		function drawPlugin(idx, plugin) {
 			var iconTemplate = "<img class='altui-plugin-icon' src='https://apps.mios.com/{0}'></img>";
@@ -4106,7 +4106,6 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 			});
 		};	
 		
-		$("#altui-pagetitle").text("Plugins");
 		$(".altui-mainpanel").append($("<table id='table' class='table table-condensed'><thead><tr><th></th><th>Name</th><th>Version</th><th>Actions</th><th>Update</th></tr></thead><tbody></tbody></table>"));
 		VeraBox.getPlugins( drawPlugin , endDrawPlugin);
 	},
@@ -4116,7 +4115,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		// var pages = g_CustomPages;
 		// PageManager.init(g_CustomPages);
 		UIManager.clearPage('Custom Pages');
-		$("#altui-pagetitle").text("Your Custom Pages");
+		// $("#altui-pagetitle").text("Your Custom Pages");
 
 		var pageTabs = _createPageTabsHtml();
 
@@ -4311,9 +4310,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		};
 		
 		// draw page & toolbox
-		UIManager.clearPage('Edit Pages');
-		
-		$("#altui-pagetitle").text("Custom Pages Editor");
+		UIManager.clearPage('Edit Pages',"Custom Pages Editor");
 		UIManager.pageMessage("Drag and Drop to add/move/delete controls. use Ctrl+Click or lasso to select multiple controls","info");
 
 		// register dialog
@@ -4413,8 +4410,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	
 	pageWip: function ()
 	{
-		UIManager.clearPage('Wip');
-		$("#altui-pagetitle").text("Work In Progress");
+		UIManager.clearPage('Wip',"Work In Progress");
 		$(".altui-mainpanel").append("<h3>Sorry this is not yet implemented</h3>");
 	},
 
@@ -4432,8 +4428,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	
 	pageCredits: function ()
 	{
-		UIManager.clearPage('Credits');
-		$("#altui-pagetitle").text("Credits");
+		UIManager.clearPage('Credits',"Credits");
 		
 		var tbl = [
 			["GetVera","http://getvera.com/","the zWave Getaway and backend platform"],
@@ -4489,8 +4484,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	
 	pageLuaTest: function ()
 	{
-		UIManager.clearPage('LuaTest');
-		$("#altui-pagetitle").text("LUA Code Test");
+		UIManager.clearPage('LuaTest',"LUA Code Test");
 		$(".altui-mainpanel").append("<p>This test code will succeed if it is syntactically correct and does not return false. an error in the code or a return false will trigger a failure</p>");
 		this.pageLuaForm("Lua Test Code","return true",function(lua) {
 			VeraBox.runLua(lua, function(result) {
@@ -4504,8 +4498,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	
 	pageLuaStart: function ()
 	{
-		UIManager.clearPage('LuaStart');
-		$("#altui-pagetitle").text("LUA Startup");
+		UIManager.clearPage('LuaStart',"LUA Startup");
 		var lua = VeraBox.getLuaStartup();
 		this.pageLuaForm("Lua Startup Code",lua,function(newlua) {
 			if (newlua!=lua) {
@@ -4551,8 +4544,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	},
 	
 	pageOptimize: function() {
-		UIManager.clearPage('Optimize');
-		$("#altui-pagetitle").text("Optimizations");
+		UIManager.clearPage('Optimize',"Optimizations");
 
 		var color = IconDB.isDB() ? "text-success" : "text-danger";
 		var okGlyph = glyphTemplate.format( "ok-sign", "OK" , color );
