@@ -2470,24 +2470,6 @@ var UIManager  = ( function( window, undefined ) {
 		} else {
 			$(domparent).append("<p>There is no default panel for this device</p>");
 		}
-		
-		// Because when you give absolute position to something, you take it out of the layout flow. 
-		// This means that its dimensions are no longer used to calculate its parent's height, among everything else
-		var parentHeight = $(domparent).height();
-		var maxHeight = 0;
-		$(domparent).children().each( function(idx) {
-			var p = $(this).position();
-			var h = $(this).outerHeight();
-			maxHeight = Math.max(maxHeight, p.top + h);
-		});
-		
-		// Reposition error msg at the bottom
-		$(domparent).find("pre").each( function(idx) {
-			$(this).css( {top: maxHeight, position:'absolute'} );
-			maxHeight += ($(this).outerHeight());	// this = PRE
-		});
-		$(domparent).height(maxHeight);
-
 	}
 
 	function _deviceDrawControlPanelAttributes(devid, device, container ) {
@@ -2529,23 +2511,9 @@ var UIManager  = ( function( window, undefined ) {
 		});
 	};
 
-	function _deviceDrawControlPanelInternal(devid, device, container ) {
-		html ="";
-		html+="<div class='row'>";
-		html +="<div id='altui-device-controlpanel-"+devid+"' class='col-xs-12 altui-device-controlpanel'>";
-		html +="	<div class='panel panel-default'>";
-		html +="		<div class='panel-heading'>";
-		html +="			<h1 class='panel-title'>{0} {1} {2} (#{3})</h1>";
-		html +="		</div>";
-		html +="		<div class='panel-body bg-info'>";
-		html +="		</div>";
-		html +="	</div>";
-		html +="</div>";
-		html += "</div>";	// row
-		$(container).append( html.format(device.manufacturer || '', device.model || '', device.name || '', device.id) );	
-
+	function _deviceDrawControlPanelInternal(devid, device, domparent ) {
 		// draw custom or standard control panel
-		var domparent = $("#altui-device-controlpanel-"+devid+" .panel-body");		
+		// var domparent = $("#altui-device-controlpanel-"+devid+" .panel-body");		
 		var dt = _devicetypesDB[device.device_type];
 		if (dt!=null && dt.ControlPanelFunc!=null) {
 			//execute the custom control panel function
@@ -2560,6 +2528,8 @@ var UIManager  = ( function( window, undefined ) {
 		$("#altui-devtab-tabs li").removeClass('active');
 		if (idx!=null)
 			$("li#altui-devtab-"+idx).find("a").tab('show');
+		else
+			$("li#altui-devtab-0").find("a").tab('show');
 	};	
 	
 	function _getActiveDeviceTabIdx() {
@@ -2573,43 +2543,88 @@ var UIManager  = ( function( window, undefined ) {
 	function _deviceDrawControlPanel(devid, device, container ) {
 		function _createDeviceTabs( device, tabs ) {
 			var lines= [];
+			lines.push("<ul class='nav nav-tabs' id='altui-devtab-tabs' role='tablist'>");
 			$.each( tabs, function( idx,tab) {
 				if (/*tab.TabType=="javascript"*/1) {
 					lines.push( "<li id='altui-devtab-{1}' role='presentation' ><a href='#altui-devtab-content-{1}' aria-controls='{0}' role='tab' data-toggle='tab'>{0}</a></li>".format(tab.Label.text,idx) );
 				}
 			});
-			return "<ul class='nav nav-tabs' id='altui-devtab-tabs' role='tablist'>"+lines.join('')+"</ul>";
-		};
-		function _getDeviceTab(device,tab) {
-			return "<p>{0}-{1}</p>".format(device.id, tab.Label.text);
-		};
-		function _createDeviceTabContents(device, tabs) {
+			lines.push("</ul>");
 			var html = "<div class='tab-content'>";
 			$.each( tabs, function( idx,tab) {
 				if (/*tab.TabType=="javascript"*/ 1) {
-					html += "<div id='altui-devtab-content-{0}' class='tab-pane'>".format(idx);
-					html += _getDeviceTab(device,tab);
+					html += "<div id='altui-devtab-content-{0}' class='tab-pane bg-info'>".format(idx);
 					html += "</div>";
 				}
 			});
 			html += "</div>";
-			return html;
+			return lines.join('')+html;
+		};
+		
+		function _getDeviceTab(device,tab) {
+			return "<p>{0}-{1}</p>".format(device.id, tab.Label.text);
+		};
+		
+		function _fixHeight( domparent )
+		{
+			// Because when you give absolute position to something, you take it out of the layout flow. 
+			// This means that its dimensions are no longer used to calculate its parent's height, among everything else
+			var parentHeight = $(domparent).height();
+			var maxHeight = 0;
+			$(domparent).children().each( function(idx,elem) {
+				// var p = $(elem).position();
+				var height = $(elem).outerHeight();
+				var top = parseInt($(elem).css('top'));
+				if ($.isNumeric(top)==false)
+					top=0;
+				maxHeight = Math.max(maxHeight, top + height);
+			});
+			
+			// Reposition error msg at the bottom
+			$(domparent).find("pre").each( function(idx) {
+				$(this).css( {top: maxHeight, position:'absolute'} );
+				maxHeight += ($(this).outerHeight());	// this = PRE
+			});
+			$(domparent).height(maxHeight);
+		};
+		
+		function _deviceDrawWireFrame(devid,device,container) {
+			html ="";
+			html+="<div class='row'>";
+				html +="<div id='altui-device-controlpanel-"+devid+"' class='col-xs-12 altui-device-controlpanel'>";
+				html +="	<div class='panel panel-default'>";
+				html +="		<div class='panel-heading'>";
+				html +="			<h1 class='panel-title'>{0} {1} {2} (#{3})</h1>";
+				html +="		</div>";
+				html +="		<div class='panel-body'>";
+				html +="		</div>";
+				html +="	</div>";
+				html +="</div>";
+			html += "</div>";	// row
+			$(container).append( html.format(device.manufacturer || '', device.model || '', device.name || '', device.id) );	
 		};
 
-		// Draw hidden debug panel
-		$(container).append( "<div class='row'><div class='altui-debug-div'></div></div>" );
+		function _deviceDrawControlPanelTabContents(devid, device, container, tabs ) {
+			$.each( tabs, function( idx,tab) {
+				if ( tab.TabType=="flash") {
+					parent  =  $('div#altui-devtab-content-'+idx);
+					_deviceDrawControlPanelInternal(devid, device, parent );		// row for Flash Panel
+					_fixHeight( parent );
+				}
+			});
+		};
 		
-		_deviceDrawControlPanelAttributes(devid, device, container ) 	// row for attributes
-
-		$(container).append( "<div class='row'>" );
-			var dt = _devicetypesDB[ device.device_type ];
-			if ((dt != undefined) && (dt.ui_static_data!=undefined)) {
-				$(container).append( _createDeviceTabs( device, dt.ui_static_data.Tabs ) );
-				$(container).append( _createDeviceTabContents( device , dt.ui_static_data.Tabs ) );
-			}
-		$(container).append( "</div>" );	// End Row
-
-		_deviceDrawControlPanelInternal(devid, device, container );		// row for Flash Panel
+		$(container).append( "<div class='row'><div class='altui-debug-div'></div></div>" );	// Draw hidden debug panel
+		_deviceDrawControlPanelAttributes(devid, device, container ) 							// row for attributes
+		_deviceDrawWireFrame(devid,device,container);
+		var dt = _devicetypesDB[ device.device_type ];
+		if ((dt != undefined) && (dt.ui_static_data!=undefined)) {
+			container = container.find(".panel-body");
+			$(container).append( "<div class='row'>" + _createDeviceTabs( device, dt.ui_static_data.Tabs ) + "</div>" );
+			$("li#altui-devtab-0").find("a").tab('show');
+			_deviceDrawControlPanelTabContents(devid, device, container, dt.ui_static_data.Tabs );		// row for Flash Panel
+		}
+		
 	};
 	
 	function _refreshFooter() {
@@ -4738,11 +4753,9 @@ $(document).ready(function() {
 		position: relative;		\
 		height:500px;			\
 	}							\
-	.altui-device-attrpanel .panel-body {	\
+	.altui-device-controlpanel .panel-body {	\
 		padding-top: 0px;\
-		padding-right: 0px;\
-		padding-left: 0px;\
-		padding-bottom: 5px;\
+		padding-bottom: 0px;\
 	}	\
 	.altui-device-heading,.altui-scene-heading {	\
 		height:30px;\
