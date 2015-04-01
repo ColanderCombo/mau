@@ -2176,7 +2176,30 @@ var UIManager  = ( function( window, undefined ) {
 		return obj.wrap( "<div></div>" ).parent().html();
 	};
 
-	function  _defaultDeviceDrawControlPanel(devid, device, domparent ) {
+	function _fixHeight( domparent ) {
+		// Because when you give absolute position to something, you take it out of the layout flow. 
+		// This means that its dimensions are no longer used to calculate its parent's height, among everything else
+		var parentHeight = $(domparent).height();
+		var maxHeight = 0;
+		$(domparent).children().each( function(idx,elem) {
+			// var p = $(elem).position();
+			var height = $(elem).outerHeight();
+			var top = parseInt($(elem).css('top'));
+			if ($.isNumeric(top)==false)
+				top=0;
+			maxHeight = Math.max(maxHeight, top + height);
+		});
+		maxHeight+=15;	// bottom padding
+		
+		// Reposition error msg at the bottom
+		$(domparent).find("pre").each( function(idx) {
+			$(this).css( {top: maxHeight, position:'absolute'} );
+			maxHeight += ($(this).outerHeight());	// this = PRE
+		});
+		$(domparent).height(maxHeight);
+	};
+			
+	function  _deviceDrawControlPanelTab(devid, device, tab, domparent ) {
 		function _displayControl( domparent, device, control, idx) {
 			var paddingleft = parseInt($("#altui-device-controlpanel-"+devid).css("padding-left"));
 			var paddingtop = parseInt($("#altui-device-controlpanel-"+devid+" .panel-body ").css("padding-top"));
@@ -2214,8 +2237,7 @@ var UIManager  = ( function( window, undefined ) {
 						// .width(control.Display.Width)
 						.height(control.Display.Height);
 					break;
-				}	
-
+				};	
 				case "multi_state_button": {
 					var value1 = VeraBox.getStatus( devid, control.states[0].Display.Service, control.states[0].Display.Variable );
 					var value2 = VeraBox.getStatus( devid, control.states[1].Display.Service, control.states[1].Display.Variable );
@@ -2252,7 +2274,7 @@ var UIManager  = ( function( window, undefined ) {
 					});
 					
 					break;
-				}
+				};
 				case "button": {
 					if (control.Display) 
 					{
@@ -2290,7 +2312,7 @@ var UIManager  = ( function( window, undefined ) {
 						//UI5 does not display button
 					}
 					break;
-				}
+				};
 				case "slider": {
 					var val = VeraBox.getStatus( devid, control.Display.Service, control.Display.Variable ) || 0;
 					var uniqid = devid+"-"+idx;
@@ -2329,7 +2351,7 @@ var UIManager  = ( function( window, undefined ) {
 						  } 
 						});
 					break;
-				}
+				};
 				case "slider_vertical": {
 					function _onClickSlider(event) {
 						var uniqid = event.data.uniqid;
@@ -2403,7 +2425,7 @@ var UIManager  = ( function( window, undefined ) {
 						  } 
 						});
 					break;
-				}
+				};
 				case "image": {
 					//{"ControlGroup":"3","ControlType":"image","top":"0","left":"0","Display":{"url":"?id=request_image&cam=","Top":0,"Left":0,"Width":320,"Height":240}}
 					var container = $(domparent).parents(".altui-device-controlpanel-container").addClass("altui-norefresh");
@@ -2445,32 +2467,26 @@ var UIManager  = ( function( window, undefined ) {
 							// .width(control.Display.Width);
 					}
 					break;
-				}
+				};
 				default: {
 					//$(domparent).append("<pre>"+JSON.stringify(control)+"</pre>");
 					if (AltuiDebug.IsDebug())
 						$(domparent).append("<pre>Unknown control type:"+control.ControlType+". See Debug</pre>");
-				}
-			}
+				};
+			};
 			$(".altui-debug-div").append("<pre>"+JSON.stringify(control)+"</pre>");
 		};
 
-		var static_root = VeraBox.getDeviceStaticUI(device);
 		$(domparent).css({position: 'relative'});
-		if (static_root) {
-			// search tabs for a control tab in flash
-			$.each(static_root.Tabs, function(idx,tab) {
-				if (tab.TabType=="flash") {
-					$.each( tab.Control, function (idx,control) {
-						_displayControl( domparent, device, control, idx );
-					});
-					return false;	// found
-				}
-			});			
-		} else {
-			$(domparent).append("<p>There is no default panel for this device</p>");
+		if (tab.TabType=="flash") {
+			$.each( tab.Control, function (idx,control) {
+				_displayControl( domparent, device, control, idx );
+			});
 		}
-	}
+
+		// fix height becasue absolute positioning removes element from the DOM calculations
+		_fixHeight( domparent );
+	};
 
 	function _deviceDrawControlPanelAttributes(devid, device, container ) {
 		// Draw hidding attribute panel
@@ -2510,19 +2526,6 @@ var UIManager  = ( function( window, undefined ) {
 			}
 		});
 	};
-
-	function _deviceDrawControlPanelInternal(devid, device, domparent ) {
-		// draw custom or standard control panel
-		// var domparent = $("#altui-device-controlpanel-"+devid+" .panel-body");		
-		var dt = _devicetypesDB[device.device_type];
-		if (dt!=null && dt.ControlPanelFunc!=null) {
-			//execute the custom control panel function
-			_executeFunctionByName(dt.ControlPanelFunc, window, devid, device, domparent);
-		}
-		else {
-			_defaultDeviceDrawControlPanel(devid, device, domparent);
-		}
-	};
 		
 	function _setActiveDeviceTabIdx( idx) {
 		$("#altui-devtab-tabs li").removeClass('active');
@@ -2541,51 +2544,33 @@ var UIManager  = ( function( window, undefined ) {
 	};	
 	
 	function _deviceDrawControlPanel(devid, device, container ) {
-		function _createDeviceTabs( device, tabs ) {
+		function _createDeviceTabs( device, bExtraTab, tabs ) {
+			var iExtraTab = 0;
 			var lines= [];
 			lines.push("<ul class='nav nav-tabs' id='altui-devtab-tabs' role='tablist'>");
+			if(bExtraTab) {
+				lines.push( "<li id='altui-devtab-{1}' role='presentation' ><a href='#altui-devtab-content-{1}' aria-controls='{0}' role='tab' data-toggle='tab'>{0}</a></li>".format("AltUI",0) );
+				iExtraTab = 1;
+			}
 			$.each( tabs, function( idx,tab) {
 				if (/*tab.TabType=="javascript"*/1) {
-					lines.push( "<li id='altui-devtab-{1}' role='presentation' ><a href='#altui-devtab-content-{1}' aria-controls='{0}' role='tab' data-toggle='tab'>{0}</a></li>".format(tab.Label.text,idx) );
+					lines.push( "<li id='altui-devtab-{1}' role='presentation' ><a href='#altui-devtab-content-{1}' aria-controls='{0}' role='tab' data-toggle='tab'>{0}</a></li>".format(tab.Label.text,idx+iExtraTab) );
 				}
 			});
 			lines.push("</ul>");
 			var html = "<div class='tab-content'>";
+			if (bExtraTab) {
+				html += "<div id='altui-devtab-content-{0}' class='tab-pane bg-info'>".format(0);
+				html += "</div>";
+			}
 			$.each( tabs, function( idx,tab) {
 				if (/*tab.TabType=="javascript"*/ 1) {
-					html += "<div id='altui-devtab-content-{0}' class='tab-pane bg-info'>".format(idx);
+					html += "<div id='altui-devtab-content-{0}' class='tab-pane bg-info'>".format(idx+iExtraTab);
 					html += "</div>";
 				}
 			});
 			html += "</div>";
 			return lines.join('')+html;
-		};
-		
-		function _getDeviceTab(device,tab) {
-			return "<p>{0}-{1}</p>".format(device.id, tab.Label.text);
-		};
-		
-		function _fixHeight( domparent )
-		{
-			// Because when you give absolute position to something, you take it out of the layout flow. 
-			// This means that its dimensions are no longer used to calculate its parent's height, among everything else
-			var parentHeight = $(domparent).height();
-			var maxHeight = 0;
-			$(domparent).children().each( function(idx,elem) {
-				// var p = $(elem).position();
-				var height = $(elem).outerHeight();
-				var top = parseInt($(elem).css('top'));
-				if ($.isNumeric(top)==false)
-					top=0;
-				maxHeight = Math.max(maxHeight, top + height);
-			});
-			
-			// Reposition error msg at the bottom
-			$(domparent).find("pre").each( function(idx) {
-				$(this).css( {top: maxHeight, position:'absolute'} );
-				maxHeight += ($(this).outerHeight());	// this = PRE
-			});
-			$(domparent).height(maxHeight);
 		};
 		
 		function _deviceDrawWireFrame(devid,device,container) {
@@ -2604,27 +2589,40 @@ var UIManager  = ( function( window, undefined ) {
 			$(container).append( html.format(device.manufacturer || '', device.model || '', device.name || '', device.id) );	
 		};
 
-		function _deviceDrawControlPanelTabContents(devid, device, container, tabs ) {
+		function _deviceDrawControlPanelTabContents(devid, device, container, bExtraTab, tabs ) {
+			var iExtraTab=0;
+			if (bExtraTab) {
+				iExtraTab=1;
+				var dt = _devicetypesDB[device.device_type];
+				if (dt!=null && dt.ControlPanelFunc!=null) {
+					var parent  =  $('div#altui-devtab-content-0');
+					// execute the custom control panel function
+					_executeFunctionByName(dt.ControlPanelFunc, window, devid, device, parent);
+					_fixHeight( parent );
+				}
+			}
 			$.each( tabs, function( idx,tab) {
 				if ( tab.TabType=="flash") {
-					parent  =  $('div#altui-devtab-content-'+idx);
-					_deviceDrawControlPanelInternal(devid, device, parent );		// row for Flash Panel
-					_fixHeight( parent );
+					var htmlid = idx+iExtraTab;
+					var parent  =  $('div#altui-devtab-content-'+htmlid);
+					_deviceDrawControlPanelTab(devid, device, tab, parent );		// row for Flash Panel
 				}
 			});
 		};
 		
 		$(container).append( "<div class='row'><div class='altui-debug-div'></div></div>" );	// Draw hidden debug panel
 		_deviceDrawControlPanelAttributes(devid, device, container ) 							// row for attributes
+
 		_deviceDrawWireFrame(devid,device,container);
+
 		var dt = _devicetypesDB[ device.device_type ];
 		if ((dt != undefined) && (dt.ui_static_data!=undefined)) {
 			container = container.find(".panel-body");
-			$(container).append( "<div class='row'>" + _createDeviceTabs( device, dt.ui_static_data.Tabs ) + "</div>" );
+			var bExtraTab = (dt.ControlPanelFunc!=null);
+			$(container).append( "<div class='row'>" + _createDeviceTabs( device, bExtraTab, dt.ui_static_data.Tabs ) + "</div>" );
 			$("li#altui-devtab-0").find("a").tab('show');
-			_deviceDrawControlPanelTabContents(devid, device, container, dt.ui_static_data.Tabs );		// row for Flash Panel
+			_deviceDrawControlPanelTabContents(devid, device, container, bExtraTab, dt.ui_static_data.Tabs );		// row for Flash Panel
 		}
-		
 	};
 	
 	function _refreshFooter() {
@@ -3545,7 +3543,6 @@ var UIManager  = ( function( window, undefined ) {
 	deviceDrawVariables : _deviceDrawVariables,			// draw the device variables
 	deviceDrawActions 	: _deviceDrawActions,			// draw the device Upnp Actions
 	deviceDrawControlPanel 	: _deviceDrawControlPanel,	// draw the full device control panel page; can be customized by a plugin ["ControlPanelFunc"]
-	defaultDeviceDrawControlPanel : _defaultDeviceDrawControlPanel,	// default device container panel
 	deviceCreate		: _deviceCreate,
 	cameraDraw			: _cameraDraw,
 	sceneDraw			: _sceneDraw,
@@ -4683,7 +4680,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		});
 	}
 	
-  };
+    };
 })( window );100
 
 // UIManager.loadScript('https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["corechart","table","gauge"]}]}');

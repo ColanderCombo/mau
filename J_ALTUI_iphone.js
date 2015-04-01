@@ -71,7 +71,7 @@ var ALTUI_IPhoneLocator= ( function( window, undefined ) {
 
 	function _drawCanaplusControlPanel(devid, device, domparent) {
 		var html="";
-		html +="<div class='pull-left'>";
+		html +="<div class=''>";
 		html += "<table id='altui-cplus-keytbl'>";
 		html += "<tbody>";
 html+="<tr><td><button class='altui-cplus-button btn btn-default' id='1'>1</button></td><td><button class='altui-cplus-button btn btn-default' id='2'>2</button></td><td><button class='altui-cplus-button btn btn-default' id='3'>3</button></td></tr>";
@@ -90,12 +90,12 @@ html+="<tr><td><button class='altui-cplus-button btn btn-default' id='VOL-'>VOL-
 		html += "</tbody>";
 		html += "</table>";
 		html +="</div>";
-		html +="<div id='altui-cplus-divcontainer' class='pull-left'>";
-		html +="</div>";
+		// html +="<div id='altui-cplus-divcontainer' class='pull-left'>";
+		// html +="</div>";
 		$(domparent).append(html);
 		
 		// also display the default
-		UIManager.defaultDeviceDrawControlPanel(devid, device, domparent.find("div#altui-cplus-divcontainer").width(400));
+		// UIManager.defaultDeviceDrawControlPanel(devid, device, domparent.find("div#altui-cplus-divcontainer").width(400));
 		
 		$(".altui-cplus-button").click( function() {
 			var id = $(this).prop('id');

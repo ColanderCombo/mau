@@ -768,8 +768,17 @@ var VeraBox = ( function( window, undefined ) {
 			// update the static ui information for the future displays
 			$.each(_user_data.static_data || [], function(idx,ui_static_data) {
 				var dt = ui_static_data.device_type == undefined ? ui_static_data.DeviceType : ui_static_data.device_type;
-				if (dt!=undefined)
-					UIManager.updateDeviceTypeUIDB( dt, ui_static_data);
+				if (dt!=undefined) {
+					UIManager.updateDeviceTypeUIDB( dt, ui_static_data);				
+					var nflash=0; njs=0;
+					$.each(ui_static_data.Tabs, function(idx,tab) {
+						if (tab.TabType=="flash")
+							nflash++;
+						else
+							njs++;
+					});
+					console.log("device {0} nflash:{1} njs:{2}".format(dt,nflash,njs));
+				}
 			});
 			
 			// update upnp information
