@@ -1583,23 +1583,22 @@ var UIManager  = ( function( window, undefined ) {
 		head.appendChild(style);
 	};
 
-	function _loadScript(scriptLocationAndName) {
+	function _createScript(scriptName ) {
+		var body = document.getElementsByTagName('body')[0];
+		var script = document.createElement('script');
+		script.type = 'text/javascript';
+		script.setAttribute("data-src", scriptName);
+		body.appendChild(script);
+	};
+	
+	function _loadScript(scriptLocationAndName, cbfunc) {
 		var head = document.getElementsByTagName('head')[0];
 		var script = document.createElement('script');
 		script.type = 'text/javascript';
 		script.src = scriptLocationAndName;
 
 		// once script is loaded, we can call style function in it
-		$(script).load( function() {
-			// script has been loaded , check if style needs to be loaded and if so, load them
-			$.each(_devicetypesDB,function(idx,dt) {
-				if ( (dt.ScriptFile == scriptLocationAndName) && (dt.StyleFunc != undefined) ) {
-					_loadStyle(dt.StyleFunc);
-					return false;	// exit the loop
-				}
-			});				
-		});
-
+		$(script).load( cbfunc );
 		head.appendChild(script);
 	};
 
@@ -1640,7 +1639,15 @@ var UIManager  = ( function( window, undefined ) {
 					var len = $('script[src="'+obj.ScriptFile+'"]').length;
 					if (len==0) {
 						// not loaded yet
-						_loadScript(obj.ScriptFile);	// load script & styles once script is loaded
+						_loadScript(obj.ScriptFile, function() {
+							// script has been loaded , check if style needs to be loaded and if so, load them
+							$.each(_devicetypesDB,function(idx,dt) {
+								if ( (dt.ScriptFile == scriptLocationAndName) && (dt.StyleFunc != undefined) ) {
+									_loadStyle(dt.StyleFunc);
+									return false;	// exit the loop
+								}
+							});				
+						});	// load script & styles once script is loaded
 					} 
 					else
 					{
@@ -2199,6 +2206,27 @@ var UIManager  = ( function( window, undefined ) {
 		$(domparent).height(maxHeight);
 	};
 			
+	function _codifyName(name)
+	{
+		return name.replace(/:/g,"_").replace(/-/g,"_");
+	}
+	
+	function  _deviceDrawControlPanelJSTab(devid, device, tab, domparent ) {
+		$(".altui-debug-div").append("<pre>"+JSON.stringify(tab)+"</pre>");
+		var script = tab.ScriptName;
+		if (script =="shared.js")
+			return;	// do not want UI5 tool pages !
+		var func = tab.Function;
+		var rootvarname = "Plugin_"+_codifyName(device.device_type);
+		//global variable in javascript are in window object
+		if (window[rootvarname]!=undefined) {
+			set_set_panel_html_callback(function(html) {
+				$(domparent).append(html);
+			});
+			var result = eval( rootvarname+".g_"+func+"("+devid+")" );
+		}
+	};
+	
 	function  _deviceDrawControlPanelTab(devid, device, tab, domparent ) {
 		function _displayControl( domparent, device, control, idx) {
 			var paddingleft = parseInt($("#altui-device-controlpanel-"+devid).css("padding-left"));
@@ -2602,10 +2630,13 @@ var UIManager  = ( function( window, undefined ) {
 				}
 			}
 			$.each( tabs, function( idx,tab) {
+				var htmlid = idx+iExtraTab;
+				var parent  =  $('div#altui-devtab-content-'+htmlid);
 				if ( tab.TabType=="flash") {
-					var htmlid = idx+iExtraTab;
-					var parent  =  $('div#altui-devtab-content-'+htmlid);
 					_deviceDrawControlPanelTab(devid, device, tab, parent );		// row for Flash Panel
+				} else {
+					//tab.TabType=="javascript"
+					_deviceDrawControlPanelJSTab(devid, device, tab, parent );
 				}
 			});
 		};
@@ -2617,6 +2648,36 @@ var UIManager  = ( function( window, undefined ) {
 
 		var dt = _devicetypesDB[ device.device_type ];
 		if ((dt != undefined) && (dt.ui_static_data!=undefined)) {
+			
+			// load scripts
+			var scripts = {};
+			$.each( dt.ui_static_data.Tabs, function( idx,tab) {
+				if (tab.TabType=="javascript" && tab.ScriptName!="shared.js")
+				{
+					var script = tab.ScriptName;
+					var func = tab.Function;
+					if (scripts[script] == undefined)
+						scripts[script]=[];
+					scripts[script].push( func );
+				}
+			});
+			$.each( scripts , function (scriptname,functions){
+				var len = $('script[data-src="'+scriptname+'"]').length;
+				if (len==0) {				// not loaded yet
+					_createScript( scriptname );
+					var publicfunctions = $.map( functions, function( func,idx) {
+						return "g_"+func+":"+func
+					});
+					FileDB.getFileContent( scriptname, function(data) {
+						var rootvarname = "Plugin_"+_codifyName(device.device_type);
+						// cannot use format() because of instances of {0} in code
+						var code = "var "+rootvarname+" = ( function (undefined) { "+data+"; return {"+publicfunctions.join(',')+"} })();";
+						$('script[data-src="'+scriptname+'"]').text(code);
+					})
+				}
+			});
+			
+			// display panels
 			container = container.find(".panel-body");
 			var bExtraTab = (dt.ControlPanelFunc!=null);
 			$(container).append( "<div class='row'>" + _createDeviceTabs( device, bExtraTab, dt.ui_static_data.Tabs ) + "</div>" );

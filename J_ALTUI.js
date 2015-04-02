@@ -17,16 +17,21 @@ var ip_address = data_request_url;
 //-------------------------------------------------------------
 // Utilities Javascript
 //-------------------------------------------------------------
-String.prototype.format = function()
-{
-   var content = this;
-   for (var i=0; i < arguments.length; i++)
-   {
-        var replacement = '{' + i + '}';
-        content = content.replace(replacement, arguments[i]);  
-   }
-   return content;
+if (typeof String.prototype.format == 'undefined') {
+	String.prototype.format = function()
+	{
+	   var content = this;
+	   for (var i=0; i < arguments.length; i++)
+	   {
+			var replacement = new RegExp('\\{' + i + '\\}', 'g');	// regex requires \ and assignment into string requires \\,
+			// if ($.type(arguments[i]) === "string")
+				// arguments[i] = arguments[i].replace(/\$/g,'$');
+			content = content.replace(replacement, arguments[i]);  
+	   }
+	   return content;
+	};
 };
+
 
 String.prototype.htmlEncode = function()
 {

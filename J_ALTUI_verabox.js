@@ -9,6 +9,12 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 
+// Global for UI5 UI7 javascript compatibility
+var jsonp={};
+jsonp.ud={};
+jsonp.ud.devices=[];
+jsonp.ud.scenes=[];
+
 
 var UPnPHelper = (function(window,undefined) {
 	//---------------------------------------------------------
@@ -354,6 +360,7 @@ var UPnPHelper = (function(window,undefined) {
 		//---------------------------------------------------------
 
 		reloadEngine	: _reloadEngine,
+		getUrlHead		: _getUrlHead,
 		UPnPSetAttr		: _UPnPSetAttr,	// ( deviceID, attribute, value, cbfunc)
 		UPnPSet			: _UPnPSet,		// ( deviceID, service, varName, varValue )
 		UPnPAction		: _UPnPAction,	// ( deviceID, service, action, params, cbfunc )
@@ -398,16 +405,7 @@ var VeraBox = ( function( window, undefined ) {
 	function _setRooms(arr) 		{	_rooms = arr;		};
 	function _setScenes(arr) 		{	_scenes = arr;		};
 	function _setCategories(arr)	{	_categories = arr;	};
-	function _setDevices(arr) 		{
-		_devices = arr;
-		// $.each( arr , function( idx, obj ) {
-			// if ( (obj!=null) && (obj.DeviceType !=null) )  {
-				// UIManager.addDeviceType( obj.DeviceType  , {
-					// category_num: obj.category_num
-				// });
-			// }
-		// });
-	};
+	function _setDevices(arr) 		{	_devices = arr;		};
 	
 	function _reloadEngine()
 	{
@@ -765,19 +763,23 @@ var VeraBox = ( function( window, undefined ) {
 			_scenes = data.scenes;
 			_devices = data.devices;
 			
+			// UI5 compatibility
+			jsonp.ud.devices = data.devices;
+			jsonp.ud.scenes = data.scenes;
+			
 			// update the static ui information for the future displays
 			$.each(_user_data.static_data || [], function(idx,ui_static_data) {
 				var dt = ui_static_data.device_type == undefined ? ui_static_data.DeviceType : ui_static_data.device_type;
 				if (dt!=undefined) {
 					UIManager.updateDeviceTypeUIDB( dt, ui_static_data);				
-					var nflash=0; njs=0;
-					$.each(ui_static_data.Tabs, function(idx,tab) {
-						if (tab.TabType=="flash")
-							nflash++;
-						else
-							njs++;
-					});
-					console.log("device {0} nflash:{1} njs:{2}".format(dt,nflash,njs));
+					// var nflash=0; njs=0;
+					// $.each(ui_static_data.Tabs, function(idx,tab) {
+						// if (tab.TabType=="flash")
+							// nflash++;
+						// else
+							// njs++;
+					// });
+					// console.log("device {0} nflash:{1} njs:{2}".format(dt,nflash,njs));
 				}
 			});
 			
@@ -1248,10 +1250,10 @@ var VeraBox = ( function( window, undefined ) {
 	loadEngine 		: _loadEngine, 
 	isEngineCached	: _isEngineCached,
 	initEngine		: function() 	{
-							_loadEngine();
-							_initDataEngine();				// init the data collection engine
-							UIManager.refreshUI( true , true );	// full & first time full display
-						},		
+						_loadEngine();
+						_initDataEngine();				// init the data collection engine
+						UIManager.refreshUI( true , true );	// full & first time full display
+					},		
   };
 } )( window );
 
@@ -1489,5 +1491,27 @@ var FileDB = ( function (window, undefined) {
 		resetDB			: function(db) 	{	MyLocalStorage.clear("FileDB"); _dbFile = {}; }
 	}
 } )( window );
+
+// Global for UI5 UI7 javascript compatibility
+var data_request_url = UPnPHelper.getUrlHead()+'?';
+function get_device_state(deviceId, serviceId, variable, dynamic) {
+	return VeraBox.getStatus( deviceId, serviceId, variable );
+};
+
+function set_device_state (deviceId, serviceId, variable, value, dynamic) {
+	VeraBox.setStatus( deviceId, serviceId, variable, value );
+	return true;
+};
+
+var set_panel_html_cb = null;
+function set_set_panel_html_callback(cb) {
+	if ($.isFunction(cb))
+		set_panel_html_cb =cb;
+};
+
+function set_panel_html(html) {
+	if ($.isFunction(set_panel_html_cb))
+		(set_panel_html_cb)(html);
+};
 
 
