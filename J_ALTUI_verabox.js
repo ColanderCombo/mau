@@ -14,6 +14,7 @@ var jsonp={};
 jsonp.ud={};
 jsonp.ud.devices=[];
 jsonp.ud.scenes=[];
+jsonp.ud.rooms=[];
 
 
 var UPnPHelper = (function(window,undefined) {
@@ -766,6 +767,7 @@ var VeraBox = ( function( window, undefined ) {
 			// UI5 compatibility
 			jsonp.ud.devices = data.devices;
 			jsonp.ud.scenes = data.scenes;
+			jsonp.ud.rooms = data.rooms;
 			
 			// update the static ui information for the future displays
 			$.each(_user_data.static_data || [], function(idx,ui_static_data) {
