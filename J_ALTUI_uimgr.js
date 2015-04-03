@@ -2697,7 +2697,7 @@ var UIManager  = ( function( window, undefined ) {
 				
 				var bExtraTab = (dt.ControlPanelFunc!=null);
 				$(container).append( "<div class='row'>" + _createDeviceTabs( device, bExtraTab, dt.ui_static_data.Tabs ) + "</div>" );
-				$("li#altui-devtab-0").find("a").tab('show');
+				$(container).find("li a").first().tab('show');	// activate first tab
 				
 				_deviceDrawControlPanelTabContents(devid, device,dt.ui_static_data.Tabs );		// row for Flash Panel
 				if (bAsync) {
