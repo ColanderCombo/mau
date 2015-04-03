@@ -1584,11 +1584,11 @@ var UIManager  = ( function( window, undefined ) {
 	};
 
 	function _createScript(scriptName ) {
-		var body = document.getElementsByTagName('body')[0];
+		var container = $(".altui-scripts")[0];			// js object
 		var script = document.createElement('script');
 		script.type = 'text/javascript';
 		script.setAttribute("data-src", scriptName);
-		body.appendChild(script);
+		container.appendChild(script);
 	};
 	
 	function _loadScript(scriptLocationAndName, cbfunc) {
@@ -2219,6 +2219,7 @@ var UIManager  = ( function( window, undefined ) {
 		if (script =="shared.js")
 			return;	// do not want UI5 tool pages !
 		var func = tab.Function;
+		/*
 		var rootvarname = "Plugin_"+_codifyName(device.device_type);
 		//global variable in javascript are in window object
 		if (window[rootvarname]!=undefined) {
@@ -2232,6 +2233,16 @@ var UIManager  = ( function( window, undefined ) {
 				set_panel_html("an error occurred while displaying the javascript tab. devid: "+devid+" err:"+err.message+" <pre>stack:"+err.stack+"</pre>");
 			}
 		}
+		*/
+		set_set_panel_html_callback(function(html) {
+			$(domparent).append(html);
+		});
+		try {
+			var result = eval( func+"("+devid+")" );
+		}
+		catch(err) {
+			set_panel_html("an error occurred while displaying the javascript tab. devid: "+devid+" err:"+err.message+" <pre>stack:"+err.stack+"</pre>");
+		}		
 	};
 	
 	function  _deviceDrawControlPanelTab(devid, device, tab, domparent ) {
@@ -2613,20 +2624,24 @@ var UIManager  = ( function( window, undefined ) {
 					scripts[script].push( func );
 				}
 			});
-
-			$.each( scripts , function (scriptname,functions){
+		
+			if (scripts.length==0)
+				_defereddisplay(true);
+			else
+				$.each( scripts , function (scriptname,functions){
 				var len = $('script[data-src="'+scriptname+'"]').length;
 				if (len==0) {				// not loaded yet
 					_createScript( scriptname );
-					var publicfunctions = $.map( functions, function( func,idx) {
-						return "g_"+func+":"+func
-					});
+					// var publicfunctions = $.map( functions, function( func,idx) {
+						// return "g_"+func+":"+func
+					// });
 					_toLoad ++;
 					FileDB.getFileContent( scriptname, function(data) {
 						_toLoad --;
-						var rootvarname = "Plugin_"+_codifyName(device.device_type);
+						// var rootvarname = "Plugin_"+_codifyName(device.device_type);
 						// cannot use format() because of instances of {0} in code
-						var code = "var "+rootvarname+" = ( function (undefined) { "+data+"; return {"+publicfunctions.join(',')+"} })();";
+						// var code = "var "+rootvarname+" = ( function (undefined) { "+data+"; return {"+publicfunctions.join(',')+"} })();";
+						var code = "//@ sourceURL="+scriptname+"\n"+data;
 						$('script[data-src="'+scriptname+'"]').text(code);
 						_defereddisplay(true);
 					})
@@ -2707,7 +2722,7 @@ var UIManager  = ( function( window, undefined ) {
 			}
 		};
 		
-		_defereddisplay(false);	// wait until scripts are loaded
+		// _defereddisplay(false);	// wait until scripts are loaded
 	};
 	
 	function _refreshFooter() {
@@ -2842,6 +2857,9 @@ var UIManager  = ( function( window, undefined ) {
 		PageManager.init(custompages);
 	};
 
+	function _clearScripts() {
+	};
+	
 	//------------------------------------------------------------	
 	//  CUSTOM PAGE MENU
 	//------------------------------------------------------------	
@@ -3612,7 +3630,8 @@ var UIManager  = ( function( window, undefined ) {
 	//---------------------------------------------------------
 	initEngine 		: _initEngine, 
 	initCustomPages : _initCustomPages,
-	loadScript : _loadScript,	//(scriptLocationAndName) 
+	loadScript 		: _loadScript,	//(scriptLocationAndName) 
+	clearScripts	: _clearScripts,
 	
 	// UI helpers
 	UI7Check			: function() { return _ui7Check; },
@@ -3706,6 +3725,8 @@ var UIManager  = ( function( window, undefined ) {
 		$("#altui-pagemessage").empty();
 		$("#dialogs").empty();
 		$(".altui-leftnav").empty();
+		$(".altui-scripts").remove();
+		$("body").append("<div class='altui-scripts'></div>");
 	},
 	
 	//window.open("data_request?id=lr_ALTUI_Handler&command=home","_self");
