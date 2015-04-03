@@ -1494,8 +1494,10 @@ var FileDB = ( function (window, undefined) {
 	}
 } )( window );
 
+
 // Global for UI5 UI7 javascript compatibility
 var data_request_url = UPnPHelper.getUrlHead()+'?';
+var command_url = UPnPHelper.getUrlHead().replace('/data_request','');
 function get_device_state(deviceId, serviceId, variable, dynamic) {
 	return VeraBox.getStatus( deviceId, serviceId, variable );
 };
@@ -1516,4 +1518,40 @@ function set_panel_html(html) {
 		(set_panel_html_cb)(html);
 };
 
+var Ajax = (function(window,undefined) {
+	return {
+		Request: function (url,opts) {
+			
+			var options = $.extend({
+				method:"GET",
+				parameters: {},
+				onSuccess : null,
+				onFailure : null,
+				onComplete : null,
+			}, opts);
+			
+			var jqxhr = $.ajax( {
+				url: url,
+				type: options.method,
+				data: options.parameters,
+				dataType: "text"
+			})
+			.done(function(data, textStatus, jqXHR) {
+				if ($.isFunction( options.onSuccess )) {
+					(options.onSuccess)(data);
+				}
+			})
+			.fail(function(jqXHR, textStatus, errorThrown) {
+				if ($.isFunction( options.onFailure )) {
+					(options.onFailure)(textStatus);
+				}
+			})
+			.always(function() {
+				if ($.isFunction( options.onComplete )) {
+					(options.onComplete)("");
+				}
+			});
+		}
+	};
+})();
 
