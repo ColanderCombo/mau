@@ -2625,7 +2625,7 @@ var UIManager  = ( function( window, undefined ) {
 				}
 			});
 		
-			if (scripts.length==0)
+			if (Object.keys(scripts).length==0)
 				_defereddisplay(true);
 			else
 				$.each( scripts , function (scriptname,functions){
