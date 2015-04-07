@@ -2034,7 +2034,7 @@ var UIManager  = ( function( window, undefined ) {
 		}
 		else
 			iconDataSrc = iconPath;
-		return "<img class='altui-device-icon pull-left img-rounded' data-org-src='"+iconPath+"' src='"+iconDataSrc+"' alt='_todo_'></img>";
+		return "<img class='altui-device-icon pull-left img-rounded' data-org-src='"+iconPath+"' src='"+iconDataSrc+"' alt='_todo_' onerror='UIManager.onDeviceIconError("+device.id+")' ></img>";
 	}
 	
 	function _deviceDraw(id, device) {
@@ -3858,6 +3858,10 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		});
 	},
 	
+	onDeviceIconError : function( deviceid ) {
+		$("div.altui-device#"+deviceid+" img").attr('src',defaultIconSrc);
+	},
+	
 	pageDevices : function ()
 	{
 		var _deviceDisplayFilter = {
@@ -3990,7 +3994,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 				.after(filterHtml)
 				.css("display","inline");
 			$(".altui-pagefilter").css("display","inline");
-
+			
 			// Category & Form filter
 			var devnames = [];
 			VeraBox.getDevices( 
@@ -4074,7 +4078,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 			$("#altui-device-create").click( function() {
 				UIManager.deviceCreate( );
 			});
-			
+
 			// on the left, get the rooms
 			UIManager.leftnavRooms( _onClickRoomButton );
 			VeraBox.getDevices( drawDeviceContainer , filterfunc, endDrawDevice);
