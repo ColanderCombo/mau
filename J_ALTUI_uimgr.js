@@ -3750,7 +3750,8 @@ var UIManager  = ( function( window, undefined ) {
 	leftnavRooms : function ( clickFunction )
 	{
 		$("body").off("click",".altui-leftbutton");
-		$(".altui-leftnav").append( leftNavButtonTemplate.format( 0, "All") );
+		$(".altui-leftnav").append( leftNavButtonTemplate.format( -1, "All") );
+		$(".altui-leftnav").append( leftNavButtonTemplate.format( 0, "No Room") );
 		// install a click handler on button
 		if ($.isFunction( clickFunction ))  {
 			$("body").off("click",".altui-leftbutton");
@@ -3861,7 +3862,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	{
 		var _deviceDisplayFilter = {
 			filterformvisible 	: false,
-			room			: 0,
+			room			: -1,
 			invisible 		: (MyLocalStorage.getSettings("ShowInvisibleDevice")==true),
 			batterydevice	: false,
 			category		: 0,
@@ -3872,7 +3873,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		function deviceFilter(device) {
 			var batteryLevel = VeraBox.getDeviceBatteryLevel(device);
 			var regexp = new RegExp(RegExp.escape(_deviceDisplayFilter.filtername),"i")
-			return ( (_deviceDisplayFilter.room == 0) || (device!=null && device.room == _deviceDisplayFilter.room) ) 
+			return ( (_deviceDisplayFilter.room == -1) || (device!=null && device.room == _deviceDisplayFilter.room) ) 
 				&& ( (_deviceDisplayFilter.invisible == true) || (device.invisible != "1") )	
 				&& ( (_deviceDisplayFilter.category == 0) || (device.category_num == _deviceDisplayFilter.category) ) 
 				&& ( (_deviceDisplayFilter.filtername.length==0) || (device.name.search( regexp )!=-1) ) 
@@ -4199,7 +4200,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 			var roomid = $(this).prop('id');
 			// filter function
 			function _sceneInThisRoom(scene) {
-				return (roomid==0) || (scene!=null && scene.room==roomid);
+				return (roomid==-1) || (scene!=null && scene.room==roomid);
 			}
 			_drawScenes( _sceneInThisRoom );
 		};
