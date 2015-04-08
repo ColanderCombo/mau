@@ -4806,6 +4806,13 @@ $(document).ready(function() {
 	})
 
 	// $("#menu_room,#menu_device,#menu_scene,#menu_plugins,#menu_custom,#menu_plugins").toggle();-
+	// @font-face {	\
+	  // font-family: OpenSansLight;		\
+	  // src: url('//"+window.location.hostname+"/cmh/skins/default/fonts/OpenSans-Light-webfont.woff') format('woff');		\
+	  // font-weight: normal;		\
+	  // font-style: normal;		\
+	// }							
+	
 	var styles ="					\
 	.solid-border {	\
 		border:1px solid;: 0px;\
@@ -4868,6 +4875,10 @@ $(document).ready(function() {
 		padding-top: 0px;\
 		padding-bottom: 0px;\
 	}	\
+	.altui-devtab-content {				\
+		font-size:12px;					\
+		font-family:Arial;				\
+	}									\
 	.altui-device-heading,.altui-scene-heading {	\
 		height:30px;\
 		padding-top: 5px;\
