@@ -1232,7 +1232,9 @@ var SceneEditor = function (scene) {
 		var htmlRoomName = "<input id='altui-scene-name-input' type='text' class='form-control' value='"+scene.name+"'></input>";
 		//scene options room, name, modes
 		var html = "<div class='form-group'><h3>Room : "+htmlRoomSelect+"</h3><label for='altui-scene-name-input'>Name :</Label>"+htmlRoomName;
-		if (scene.modeStatus != undefined) {
+		if (UIManager.UI7Check()==true) {
+			if (scene.modeStatus==undefined)
+				scene.modeStatus="";
 			var modes = scene.modeStatus.split(',');
 			html += "<label for='altui-scene-mode-input'>Runs in mode :</Label>";
 			html += "<div class='btn-group'>";
@@ -1337,6 +1339,12 @@ var SceneEditor = function (scene) {
 		.on("click",".altui-scene-editbutton",function(){ 
 			scene.lua = $("#altui-luascene").val();
 			scene.name = $("#altui-scene-name-input").val();
+			if (UIManager.UI7Check()==true) {
+				var selectedmode = $(".altui-housemode div.preset_selected");
+				scene.modeStatus = $.map( selectedmode, function(elem,idx) {
+					return $(elem).prop('id').substring("altui-mode".length);
+				} ).join(",");
+			}
 			VeraBox.editScene(sceneid,scene);
 			_showSaveNeeded(true);
 		});
@@ -1351,6 +1359,15 @@ var SceneEditor = function (scene) {
 		});
 		
 		$(".altui-mainpanel")
+			.off("click",".altui-housemode")
+			.on("click",".altui-housemode",function(){ 
+				var div = $(this).find("div.housemode");
+				if (div.hasClass("preset_selected"))
+					div.removeClass("preset_selected").addClass("preset_unselected");
+				else
+					div.removeClass("preset_unselected").addClass("preset_selected");
+				_showSaveNeeded(true);
+			})
 			.off("click",".altui-deltimer")
 			.on("click",".altui-deltimer",function(){ 
 				var id = parseInt($(this).prop('id'));
@@ -4255,16 +4272,13 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		$("div#dialogs").append(defaultDialogModalTemplate.format( 'vide', 'vide'));
 
 		var editor = SceneEditor( scene );
-		//
-		// get HTML for scene and draw it
-		//
 		var html = "<div class='col-xs-12'>" ;
-		html += UIManager.sceneDraw(sceneid, scene);
-		html += editor.sceneEditDraw();
+		html += UIManager.sceneDraw(sceneid, scene);	// draw scene
+		html += editor.sceneEditDraw();					// draw editor
 		html += "</div>";
-
 		$(".altui-mainpanel").append(  html );
-		editor.runActions();
+		
+		editor.runActions();							// interactivity
 	},
 
 	pagePlugins: function ()
