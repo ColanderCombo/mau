@@ -9,6 +9,8 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
 
+// 0:modeid 1:modetext 2:modeclss for bitmap 3:preset_unselected or preset_selected
+var houseModeButtonTemplate = "  <button type='button' class='btn btn-default altui-housemode'><div>{1}</div><div id='altui-mode{0}' class='col-xs-3 {2} {3} housemode'></div></button>";							
 var leftNavButtonTemplate = "<button id='{0}' type='button' class='altui-leftbutton btn btn-default'>{1}</button>";
 var deleteGlyph = "<span class='glyphicon glyphicon-trash text-danger' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Delete'></span>";
 var glyphTemplate = "<span class='glyphicon glyphicon-{0} {2}' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='{1}' ></span>";
@@ -36,6 +38,13 @@ var buttonTemplate 		= "<button id='{0}' type='button' class='{1} btn btn-{3}' a
 var buttonDebugHtml = "<button type='button' class='btn btn-default' id='altui-debug-btn' >Debug<span class='caret'></span></button>";
 var cameraURI="data:image/png;base64,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";
 var defaultIconSrc="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAASJSURBVHja7Jp7aI5RHMff123CMOYyMmFY5LZYI5umFmHhD2pyyYzYkju5hCWX0jZKM9rEkCy5tJostxWRIteZe5FLyW2Y68z35Pfq9Os8z573eT3vu9fOr76d5zzn8jyf59x+57yvu6amxlWfrIGrnpkG1sAaWANrYA2sgTWwBnbKGnmT2e12/7MHb8vOaYhgEJQA9YN6Qj2g5lCoSFu4eNF1K3V5sx9o5M+vC0jxvCRoKjQOalmnW9gH0BYI5kKLoE5B06Vttug8KBMKqyX7S+g+9Ab6SGHwAAN2MIICqL9BlifQMegcdAHj9X1QtjBAxcy2BNoENWbJ1VARtAO6BMiaoO7SgG2C4AA0SZF8CFoDyMf/xRgGbCsExVA8S3oEzQJomUG5AQgSoSFQNNSZlqZ4q8uS34Hx0s0MYA+KSQsv/pHlD0eQQctTVFC1MDkQRQrYtQDdoOgFa6F0qGmwdun10Fh2Lx2wOxnseAS7ofZGDhP0DHoAVUJvnQB2e+OWcdcSEKMRnGTZlgN2K+sBWdACRZXfoBPQYeg8ytmC9IrBLjB5T+VQFynLXrz0TDZrC5gJrKrv0HYoG/lf+dpq/vKlMxnsbRqbcsuqYC9B0wH6MGi2h4CJRDCfjT+x9HyR7mUpYIXDkRAoWF9aeBXzovIAcUX6IBMVYzYTedZb+JghCCIo+gFl3gV00sILtcalGHchdPsr1B0v9lJaeiqgjlLRXKRnmED2QpAGjYH6iEdJyeJZp6FCEarcUW8Y7HTpKRKssD0eWLLVDPYqbQtVoGFQAX2gZVBfBuuiuoSDUgpdRv4Yf4/haSxewDyodLZZSMUH+a6AFXDCdUxVQBpZrJj0UHamX4DxoDb0UI/dAsw1KZ5KfrDH9iP9pqKe3mLdhSJtvLNY6vbYhfa2hRNZmRKWPoPFtxhMSkehcJb0ArpRi2THJA91DXR6lo5j8dMSSFeacDx2Ea17T1HHQpbPRSccscj/3KR3tUVwl7V0LjTMyRaOZnG5O49gacUGrbtUUe8KM1iyHKgduzcUdSY62cK9pOvXzPftx/JeUJRPUnRl8dEO03L3t8VRd7X0oUYpJkuPpdAxkSPAHaTrpyytG4uXK8onKO7FsAM74YWJQ4EqyWffZfJO8U526VA27mRrK13/NPCQult4xmyUrZLiG6GuJvmjnOzS8oa+QnG6USZ5XyprVkv9wiM7L3XlOOaz+8zgVWYzXxhp+Raq+GSSJjb/K9kEl2/BKfkRkEM8i3bfJC0NH61SioufYdawPJsVK0V5XQY+S742t32ALWU95jWC4+yIKFpRtszx/bAPVqaY3V+RM2Lm0rYkJ0NlhX4707J5eDCHLTPF1PJmNhJKVtwvQU8YW2d/LiXLJydiOMWTDWBqs0oLM3jAu7QYm78QTHb9+UXCromZOcXOzzYB+csDHRiMoMMBb004NMmoo8RfBwD/Cvo57XTWQZ8tFjsi3E6UPeW3My0njDYOU+hMS/jWEZL7egc6Q4cJqu2mcwfx/4Pp/2lpYA2sgTWwBtbAGlgDO2W/BRgADRV6RjlErQoAAAAASUVORK5CYII="
+
+var _HouseModes = [
+	{id:1, text:"Home", cls:"preset_home"},
+	{id:2, text:"Away", cls:"preset_away"},
+	{id:3, text:"Night", cls:"preset_night"},
+	{id:4, text:"Vacation", cls:"preset_vacation"}
+];
 
 // 0: variable , 1: value , 2: service
 var deviceVariableLineTemplate = "  <tr>";
@@ -679,7 +688,7 @@ var DialogManager = ( function() {
 var SceneEditor = function (scene) {
 
 	var _timerTypes = [
-		// {value:0,text:'none'},
+		{value:0,text:'**Illegal**'},
 		{value:1,text:'interval'},
 		{value:2,text:'day of week'},
 		{value:3,text:'day of month'},
@@ -1221,7 +1230,20 @@ var SceneEditor = function (scene) {
 				});
 		htmlRoomSelect 	  += "</select>";
 		var htmlRoomName = "<input id='altui-scene-name-input' type='text' class='form-control' value='"+scene.name+"'></input>";
-		var html = "<div class='form-group'><h3>Room : "+htmlRoomSelect+"</h3><label for='altui-scene-name-input'>Name</Label>"+htmlRoomName+"</div>";
+		//scene options room, name, modes
+		var html = "<div class='form-group'><h3>Room : "+htmlRoomSelect+"</h3><label for='altui-scene-name-input'>Name :</Label>"+htmlRoomName;
+		if (scene.modeStatus != undefined) {
+			var modes = scene.modeStatus.split(',');
+			html += "<label for='altui-scene-mode-input'>Runs in mode :</Label>";
+			html += "<div class='btn-group'>";
+			$.each(_HouseModes, function(idx,mode) {
+				var select = ($.inArray( mode.id.toString(), modes) == -1) ? "preset_unselected" : "preset_selected";
+				html += (houseModeButtonTemplate.format(mode.id, mode.text, mode.cls, select));
+			});
+			html+="</div>";
+		}
+		html+="</div>";
+		
 		html += "<h3>Trigger <span id='trigger' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+"</h3> ";	
 		html += _displayJson( 'trigger', scene.triggers);
 		try {
@@ -4699,13 +4721,15 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		html +="	<p>This is a project under work, more to come.</p>";
 		html +="	<div class='altui-housemode row'>";
 
-							
 		if (_ui7Check==true) {
 			html += "<div class='btn-group' role='group' aria-label='...'>";
-			html += "  <button type='button' class='btn btn-default altui-housemode'><div>Home</div><div id='altui-mode1' class='col-xs-3 preset_home preset_unselected housemode'></div></button>";
-			html += "  <button type='button' class='btn btn-default altui-housemode'><div>Away</div><div id='altui-mode2' class='col-xs-3 preset_away preset_unselected housemode'></div></button>";
-			html += "  <button type='button' class='btn btn-default altui-housemode'><div>Night</div><div id='altui-mode3' class='col-xs-3 preset_night preset_unselected housemode'></div></button>";
-			html += "  <button type='button' class='btn btn-default altui-housemode'><div>Vacation</div><div id='altui-mode4' class='col-xs-3 preset_vacation preset_unselected housemode'></div></button>";
+			$.each(_HouseModes, function(idx,mode) {
+				html += (houseModeButtonTemplate.format(mode.id, mode.text, mode.cls , "preset_unselected"));
+			});
+			// html += "  <button type='button' class='btn btn-default altui-housemode'><div>Home</div><div id='altui-mode1' class='col-xs-3 preset_home preset_unselected housemode'></div></button>";
+			// html += "  <button type='button' class='btn btn-default altui-housemode'><div>Away</div><div id='altui-mode2' class='col-xs-3 preset_away preset_unselected housemode'></div></button>";
+			// html += "  <button type='button' class='btn btn-default altui-housemode'><div>Night</div><div id='altui-mode3' class='col-xs-3 preset_night preset_unselected housemode'></div></button>";
+			// html += "  <button type='button' class='btn btn-default altui-housemode'><div>Vacation</div><div id='altui-mode4' class='col-xs-3 preset_vacation preset_unselected housemode'></div></button>";
 			html += "</div>";
 		} else {
 			html += "<p>No Housemode feature on UI5</p>";
@@ -4963,19 +4987,15 @@ $(document).ready(function() {
 	}		\
 	.preset_home {		\
 	  margin: auto;		\
-	  margin-top: 20px;		\
 	}		\
 	.preset_away {		\
 	  margin: auto;		\
-	  margin-top: 20px;		\
 	}		\
 	.preset_night {		\
 	  margin: auto;		\
-	  margin-top: 20px;		\
 	}		\
 	.preset_vacation {		\
 	  margin: auto;		\
-	  margin-top: 20px;		\
 	}		\
 	.imgLogo {		\
 		display: block;		\
