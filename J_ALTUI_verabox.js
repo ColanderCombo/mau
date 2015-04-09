@@ -662,30 +662,37 @@ var VeraBox = ( function( window, undefined ) {
 		var bResult = false;
 		var expressions=[];
 		$.each(conditions, function(i,condition){
-			var str = "";
-			if (isInteger( condition.value )) {
-				var val = VeraBox.getStatus( deviceid, condition.service, condition.variable );
-				if (val=="")
-					AltuiDebug.debug( "devid:{0} service:{1} variable:{2} value:'{3}' should not be null".format( 
-						deviceid,
-						condition.service, 
-						condition.variable,
-						val));
-				val = val || 0;
-				str = "({0} {1} {2})".format(
-					val,
-					condition.operator, 
-					condition.value 
-				);
+			// strange device JSON sometime ... ex zWave repeater, condition is not defined
+			if ( (condition.service!=undefined) && (condition.variable!=undefined))
+			{
+				var str = "";
+				if (isInteger( condition.value )) {
+					var val = VeraBox.getStatus( deviceid, condition.service, condition.variable );
+					if (val=="")
+						AltuiDebug.debug( "devid:{0} service:{1} variable:{2} value:'{3}' should not be null".format( 
+							deviceid,
+							condition.service, 
+							condition.variable,
+							val));
+					val = val || 0;
+					str = "({0} {1} {2})".format(
+						val,
+						condition.operator, 
+						condition.value 
+					);
+				}
+				else {
+					str = "('{0}' {1} '{2}')".format(
+						VeraBox.getStatus( deviceid, condition.service, condition.variable ),
+						condition.operator, 
+						condition.value 
+					);
+				}
+				expressions.push(str);
 			}
 			else {
-				str = "('{0}' {1} '{2}')".format(
-					VeraBox.getStatus( deviceid, condition.service, condition.variable ),
-					condition.operator, 
-					condition.value 
-				);
+				AltuiDebug.debug("Invalid State Icon condition definition for deviceid:"+deviceid);
 			}
-			expressions.push(str);
 		});
 		var str = expressions.join(" && ");
 		var bResult = eval(str);
