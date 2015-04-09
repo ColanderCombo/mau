@@ -1366,7 +1366,7 @@ var SceneEditor = function (scene) {
 					div.removeClass("preset_selected").addClass("preset_unselected");
 				else
 					div.removeClass("preset_unselected").addClass("preset_selected");
-				_showSaveNeeded(true);
+				_showSaveNeeded();
 			})
 			.off("click",".altui-deltimer")
 			.on("click",".altui-deltimer",function(){ 
