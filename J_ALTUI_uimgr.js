@@ -2251,7 +2251,7 @@ var UIManager  = ( function( window, undefined ) {
 	}
 	
 	function  _deviceDrawControlPanelJSTab(devid, device, tab, domparent, bActiveTab ) {
-		$(".altui-debug-div").append("<pre>"+JSON.stringify(tab)+"</pre>");
+
 		$(domparent).addClass("altui-norefresh");	// javascript tabs are not refreshed
 		
 		var script = tab.ScriptName;
@@ -2546,7 +2546,6 @@ var UIManager  = ( function( window, undefined ) {
 						$(domparent).append("<pre>Unknown control type:"+control.ControlType+". See Debug</pre>");
 				};
 			};
-			$(".altui-debug-div").append("<pre>"+JSON.stringify(control)+"</pre>");
 		};
 
 		$(domparent).css({position: 'relative'});
@@ -2691,15 +2690,16 @@ var UIManager  = ( function( window, undefined ) {
 				$.each( tabs, function( idx,tab) {
 					parent  =  $('div#altui-devtab-content-'+tabidx);
 					_deviceDrawControlPanelOneTabContent(devid, device, parent, tabidx, (activeTabIdx==tabidx)  );
+					$(".altui-debug-div").append("<pre>"+JSON.stringify(tab)+"</pre>");
 					tabidx++;
 				});
 			};
 			if (_toLoad==0) {
-				$(container).append( "<div class='row'><div class='altui-debug-div'></div></div>" );	// Draw hidden debug panel
 				_deviceDrawControlPanelAttributes(devid, device, container ) 							// row for attributes
 				_deviceDrawWireFrame(devid,device,container);
-				container = container.find(".panel-body");
-				
+				$(container).append( "<div class='row'><div class='altui-debug-div'></div></div>" );	// Draw hidden debug panel
+
+				container = container.find(".panel-body");				
 				var bExtraTab = (dt.ControlPanelFunc!=null);
 				$(container).append( "<div class='row'>" + _createDeviceTabs( device, bExtraTab, dt.ui_static_data.Tabs ) + "</div>" );
 				$(container).find("li a").first().tab('show');	// activate first tab
@@ -2709,14 +2709,6 @@ var UIManager  = ( function( window, undefined ) {
 					$("#altui-device-attributes-"+devid).toggle(false);		// hide them by default;
 					$(".altui-debug-div").toggle(false);					// hide
 				}
-				
-				// register a handler on tab changes to update height of domparent ( usefulk when child are in absolute positioning )
-				$(container).off('shown.bs.tab', 'a[data-toggle="tab"]');
-				$(container).on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
-					var activeTabIdx = _getActiveDeviceTabIdx();
-					var parent  =  $('div#altui-devtab-content-'+activeTabIdx);
-					_fixHeight(parent);
-				});
 			}
 		};
 
@@ -3886,6 +3878,15 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 			$("#altui-device-attributes-"+devid).toggle();		// toogle attribute box
 			$("#altui-toggle-attributes span.caret").toggleClass( "caret-reversed" );
 		});
+		
+		// register a handler on tab changes to update height of domparent ( usefulk when child are in absolute positioning )
+		$(container).off('shown.bs.tab', 'a[data-toggle="tab"]');
+		$(container).on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
+			var activeTabIdx = _getActiveDeviceTabIdx();
+			var parent  =  $('div#altui-devtab-content-'+activeTabIdx);
+			_fixHeight(parent);
+		});
+
 	},
 	
 	onDeviceIconError : function( deviceid ) {
