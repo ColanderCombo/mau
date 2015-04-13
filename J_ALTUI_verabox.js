@@ -695,6 +695,7 @@ var VeraBox = ( function( window, undefined ) {
 			}
 		});
 		var str = expressions.join(" && ");
+		AltuiDebug.debug("_evaluateConditions(deviceid:{0} str:{1} conditions:{2})".format(deviceid,str,JSON.stringify(conditions)));
 		var bResult = eval(str);
 		return bResult;
 	};
@@ -1137,8 +1138,7 @@ var VeraBox = ( function( window, undefined ) {
 
 	// load actions from S files
 	function _loadDeviceActions(dt,cbfunc) {
-		function __findAction(actions,name)
-		{
+		function __findAction(actions,name) {
 			var bfound = null;
 			$.each(actions,function(i,o) {
 				if (o.name==name) {
@@ -1148,45 +1148,50 @@ var VeraBox = ( function( window, undefined ) {
 			});
 			return bfound;
 		}
-		var todo = dt.Services.length;
-		$.each(dt.Services, function (idx,service) {
-			// warning, async call, so result comes later. we need to wait until completion
-			var that = service.Actions;
-			// if (that.length==0) 	// if actions are not already loaded
-			// {
-				FileDB.getFileContent(service.SFilename , function( xmlstr ) {
-					var xml = $( $.parseXML( xmlstr ) );
-					$.each(xml.find("action"), function( idx,action) {
-						var name = $(action).find("name").first().text();	// action name is the first one
-						if (__findAction(that,name)==null)
-						{
-							var input=[];
-							var output=[];
-							$.each( $(action).find("argument"), function( idx,argument) {
-								var direction = $(argument).find("direction").text();
-								var name = $(argument).find("name").text();
-								if (direction == "in")
-									input.push( name );
-								else
-									output.push( name );
-							});
-							that.push( {
-								name : name,
-								input : input,
-								output : output
-							} );
-						}
+		if (dt.Services) {
+			var todo = dt.Services.length;
+			$.each(dt.Services, function (idx,service) {
+				// warning, async call, so result comes later. we need to wait until completion
+				var that = service.Actions;
+				// if (that.length==0) 	// if actions are not already loaded
+				// {
+					FileDB.getFileContent(service.SFilename , function( xmlstr ) {
+						var xml = $( $.parseXML( xmlstr ) );
+						$.each(xml.find("action"), function( idx,action) {
+							var name = $(action).find("name").first().text();	// action name is the first one
+							if (__findAction(that,name)==null)
+							{
+								var input=[];
+								var output=[];
+								$.each( $(action).find("argument"), function( idx,argument) {
+									var direction = $(argument).find("direction").text();
+									var name = $(argument).find("name").text();
+									if (direction == "in")
+										input.push( name );
+									else
+										output.push( name );
+								});
+								that.push( {
+									name : name,
+									input : input,
+									output : output
+								} );
+							}
+						});
+						todo--;
+						if (todo==0)
+							cbfunc(dt.Services);
 					});
-					todo--;
-					if (todo==0)
-						cbfunc(dt.Services);
-				});
-			// } 
-			// else		// actions were already loaded
-			// {
-				// cbfunc(dt.Services);
-			// }
-		});
+				// } 
+				// else		// actions were already loaded
+				// {
+					// cbfunc(dt.Services);
+				// }
+			});
+			return;
+		}
+		AltuiDebug.debug("_loadDeviceActions() : no services");	
+		return;
 	};
 		
 	function _getDeviceActions(device,cbfunc) {
@@ -1196,6 +1201,7 @@ var VeraBox = ( function( window, undefined ) {
 			_loadDeviceActions(dt,cbfunc);
 		}
 		else {
+			AltuiDebug.debug("_getDeviceActions(null) : null device");
 			cbfunc([]);
 		}
 	};
@@ -1468,6 +1474,7 @@ var FileDB = ( function (window, undefined) {
 	var _dbFile = null;
 	
 	function _getFileContent( name, cbfunc ) {
+		AltuiDebug.debug("_getFileContent( {0} )".format(name));
 		if (_dbFile == null) {
 			_dbFile = MyLocalStorage.get("FileDB");
 			if (_dbFile==null)
@@ -1479,13 +1486,20 @@ var FileDB = ( function (window, undefined) {
 		
 		if (_dbFile[name]!=undefined)
 			if (_dbFile[name]=="pending")
+			{
+				AltuiDebug.debug("_getFileContent( {0} ) ==> not yet here, defered in 200ms".format(name));
 				setTimeout( FileDB.getFileContent, 200, name,cbfunc );
-			else
+			}
+			else {
+				AltuiDebug.debug("_getFileContent( {0} ) ==> returning content from cache".format(name));
 				cbfunc(_dbFile[name]); 
+			}
 		else {
 			_dbFile[name]="pending";
 			//console.log("getting file "+name);
+			AltuiDebug.debug("_getFileContent( {0} ) ==> asking content to Vera".format(name));
 			UPnPHelper.UPnPGetFile( name, function(data) {
+				AltuiDebug.debug("_getFileContent( {0} ) ==> returning async content from Vera".format(name));
 				_dbFile[name] = data;
 				cbfunc(data);
 			});

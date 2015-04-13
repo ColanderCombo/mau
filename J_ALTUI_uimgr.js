@@ -1844,6 +1844,7 @@ var UIManager  = ( function( window, undefined ) {
 		var device = VeraBox.getDeviceByID( devid );
 
 		VeraBox.getDeviceActions(device, function( services ) {
+			AltuiDebug.debug("VeraBox.getDeviceActions => returns services:{0}".format( JSON.stringify(services)));
 			var lines = [];
 			$.each( services, function( idx,service) {
 				$.each( service.Actions, function (key1,action) {
@@ -4160,20 +4161,20 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		});
 		
 		// delegated event for device drop down menu-right
-		$(".altui-mainpanel").off("click touchend",".altui-device-variables");
-		$(".altui-mainpanel").on("click touchend",".altui-device-variables",function(){ 
+		$(".altui-mainpanel").off("click",".altui-device-variables");
+		$(".altui-mainpanel").on("click",".altui-device-variables",function(){ 
 			var id = $(this).prop('id');
 			UIManager.deviceDrawVariables(id);
 		});
 
-		$(".altui-mainpanel").off("click touchend",".altui-device-actions");
-		$(".altui-mainpanel").on("click touchend",".altui-device-actions",function(){ 
+		$(".altui-mainpanel").off("click",".altui-device-actions");
+		$(".altui-mainpanel").on("click",".altui-device-actions",function(){ 
 			var id = $(this).prop('id');
 			UIManager.deviceDrawActions(id);
 		});
 
-		$(".altui-mainpanel").off("click touchend",".altui-device-controlpanelitem");
-		$(".altui-mainpanel").on("click touchend",".altui-device-controlpanelitem",function(){ 
+		$(".altui-mainpanel").off("click",".altui-device-controlpanelitem");
+		$(".altui-mainpanel").on("click",".altui-device-controlpanelitem",function(){ 
 			var id = $(this).prop('id');
 			$(".altui-mainpanel").off("click touchend");
 			UIManager.pageControlPanel(id);
