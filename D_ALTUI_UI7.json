@@ -22,7 +22,8 @@
 			"lang_tag": "tabname_control",
 			"text": "Control"
 		},
-		"Position": "0",
+		"Position": "1",
+		"TopNavigationTab": "1",
 		"TabType": "flash",
 		"SceneGroup": [
 			{
@@ -161,7 +162,8 @@
 			"lang_tag": "settings",
 			"text": "Settings"
 		},
-		"Position": "0",
+		"Position": "2",
+		"TopNavigationTab": "1",
 		"TabType": "javascript",
 		"ScriptName": "J_ALTUI.js",
 		"Function": "altui_Settings"
@@ -171,7 +173,7 @@
         "lang_tag": "advanced",
         "text": "Advanced"
       },
-      "Position": "1",
+      "Position": "3",
       "TabType": "javascript",
       "ScriptName": "shared.js",
       "Function": "advanced_device"
@@ -181,7 +183,7 @@
         "lang_tag": "logs",
         "text": "Logs"
       },
-      "Position": "2",
+      "Position": "4",
       "TabType": "javascript",
       "ScriptName": "shared.js",
       "Function": "device_logs"
@@ -191,7 +193,7 @@
         "lang_tag": "notifications",
         "text": "Notifications"
       },
-      "Position": "3",
+      "Position": "5",
       "TabType": "javascript",
       "ScriptName": "shared.js",
       "Function": "device_notifications"
@@ -201,7 +203,7 @@
 			"lang_tag": "ui7_device_scenes",
 			"text": "Scenes"
 		},
-		"Position": "4",
+		"Position": "6",
 		"TabType": "javascript",
 		"ScriptName": "shared.js",
 		"Function": "device_scenes"
@@ -211,7 +213,8 @@
 			"lang_tag": "donate",
 			"text": "Donate"
 		},
-		"Position": "5",
+		"TopNavigationTab": "1",
+		"Position": "7",
 		"TabType": "javascript",
 		"ScriptName": "J_ALTUI.js",
 		"Function": "altui_Donate"

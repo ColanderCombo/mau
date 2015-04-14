@@ -1726,19 +1726,26 @@ var UIManager  = ( function( window, undefined ) {
 			
 			// get it into the cache ( or get it from the cache )
 			FileDB.getFileContent(Dfilename , function( xmlstr ) {
-				var xml = $( $.parseXML( xmlstr ) );
-				_devicetypesDB[devtype].Ifilename= xml.find("implementationFile").text();
-				_devicetypesDB[devtype].Services = [];
-				var serviceIDs = xml.find("serviceId");
-				var Sfilenames = xml.find("SCPDURL");
-				xml.find("serviceId").each( function (index,value) {
-					// get all services files name, but do not get content, will be fetched on demand
-					_devicetypesDB[devtype].Services.push({
-						ServiceId : $(value).text(),
-						SFilename : $(Sfilenames[index]).text(),
-						Actions : []
+				try {
+					var doc = $.parseXML( xmlstr );
+					var xml = $( doc );
+					_devicetypesDB[devtype].Ifilename= xml.find("implementationFile").text();
+					_devicetypesDB[devtype].Services = [];
+					var serviceIDs = xml.find("serviceId");
+					var Sfilenames = xml.find("SCPDURL");
+					xml.find("serviceId").each( function (index,value) {
+						// get all services files name, but do not get content, will be fetched on demand
+						_devicetypesDB[devtype].Services.push({
+							ServiceId : $(value).text(),
+							SFilename : $(Sfilenames[index]).text(),
+							Actions : []
+						});
 					});
-				});
+				}
+				catch(e) {
+					console.log("error in xml parsing, Dfile:"+Dfilename);
+					console.log("xmlstr"+xmlstr);
+				}
 			});
 		}
 	};
