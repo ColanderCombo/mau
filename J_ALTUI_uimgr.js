@@ -4283,22 +4283,51 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 
 	pagePlugins: function ()
 	{
+			
+		function _sortBySourceName(a,b)
+		{
+			if (a.SourceName < b.SourceName)
+				return -1;
+			if (a.SourceName > b.SourceName)
+				return 1;
+			return 0;
+		};
+		
 		UIManager.clearPage('Plugins',"Plugins");
 
+		function _getFileButton(plugin) {
+			var html = "";
+			html +="<div class='btn-group'>";
+			html +="  <button id='{0}' type='button' class='btn btn-default dropdown-toggle altui-plugin-files' data-toggle='dropdown' aria-expanded='false'>".format(plugin.id);
+			html +="    Files <span class='caret'></span>";
+			html +="  </button>";
+			html +="  <ul class='dropdown-menu' role='menu'>";
+			if (plugin.Files)
+				$.each(plugin.Files.sort(_sortBySourceName), function(idx,file) {
+					html +="    <li><a class='altui-plugin-file' href='#' data-plugin='{1}'>{0}</a></li>".format(file.SourceName,plugin.id);
+				});
+			html +="  </ul>";
+			html +="</div>";
+			// var filebutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-files',  glyphTemplate.format("file","Files",""));
+			return html;
+		};
+		
 		function drawPlugin(idx, plugin) {
 			var iconTemplate = "<img class='altui-plugin-icon' src='https://apps.mios.com/{0}'></img>";
+			var filebutton = _getFileButton(plugin);
 			var helpbutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-question-sign',  glyphTemplate.format("question-sign","Help",""));
 			var infobutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-info-sign',  glyphTemplate.format("info-sign","Information",""));
 			var updatebutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-retweet',  glyphTemplate.format("retweet","Update Now",""));
 
-			var pluginTemplate = "<tr><td>{6}</td><td>{0}</td><td>{1}.{2}</td><td>{3} {4}</td><td>{5}</td></tr>";
+			var pluginTemplate = "<tr><td>{6}</td><td>{0}</td><td>{1}.{2}</td><td>{7}</td><td>{3} {4}</td><td>{5}</td></tr>";
 			var pluginTxt = pluginTemplate.format(
 				plugin.Title,
 				plugin.VersionMajor,plugin.VersionMinor,
 				helpbutton,
 				infobutton,
 				updatebutton,
-				iconTemplate.format(plugin.Icon)
+				iconTemplate.format(plugin.Icon),
+				filebutton
 				);
 			$(".altui-mainpanel tbody").append(pluginTxt);
 			$("button.altui-plugin-question-sign#"+plugin.id).data("url",plugin.Instructions);
@@ -4312,6 +4341,12 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 			$(".altui-plugin-info-sign").click(function() {
 				window.open("http://apps.mios.com/plugin.php?id="+$(this).prop("id"), '_blank');
 			});
+			$(".altui-plugin-file").click(function() {
+				var id = $(this).data("plugin");
+				var name = $(this).text();
+				var url = UPnPHelper.buildUPnPGetFileUrl( name );
+				window.open(url, '_blank');
+			});
 			$(".altui-plugin-retweet").click(function() {
 				var id = $(this).prop("id");
 				if (id!=undefined && confirm("are you sure you want to update plugin "+id))
@@ -4323,7 +4358,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 			});
 		};	
 		
-		$(".altui-mainpanel").append($("<table id='table' class='table table-condensed'><thead><tr><th></th><th>Name</th><th>Version</th><th>Actions</th><th>Update</th></tr></thead><tbody></tbody></table>"));
+		$(".altui-mainpanel").append($("<table id='table' class='table table-condensed'><thead><tr><th></th><th>Name</th><th>Version</th><th>Files</th><th>Actions</th><th>Update</th></tr></thead><tbody></tbody></table>"));
 		VeraBox.getPlugins( drawPlugin , endDrawPlugin);
 	},
 
@@ -4961,7 +4996,7 @@ $(document).ready(function() {
 		margin-right:5px;			\
 	}\
 	.altui-plugin-icon { 			\
-		font-size: 2em;				\
+		font-size: 1.5em;				\
 		height: 40px;				\
 	}								\
 	textarea#altui-luastartup ,textarea#altui-luascene{		\

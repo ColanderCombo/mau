@@ -362,6 +362,7 @@ var UPnPHelper = (function(window,undefined) {
 
 		reloadEngine	: _reloadEngine,
 		getUrlHead		: _getUrlHead,
+		buildUPnPGetFileUrl : _buildUPnPGetFileUrl,
 		UPnPSetAttr		: _UPnPSetAttr,	// ( deviceID, attribute, value, cbfunc)
 		UPnPSet			: _UPnPSet,		// ( deviceID, service, varName, varValue )
 		UPnPAction		: _UPnPAction,	// ( deviceID, service, action, params, cbfunc )
@@ -479,8 +480,8 @@ var VeraBox = ( function( window, undefined ) {
 		if (a.name > b.name)
 			return 1;
 		return 0;
-	}
-	
+	};
+
 	// Get Rooms  , call a callback function asynchronously, or return array of rooms
 	function _getScenes( func , filterfunc, endfunc ) {
 		if (_scenes)
@@ -493,7 +494,18 @@ var VeraBox = ( function( window, undefined ) {
 			_asyncResponse( _user_data.InstalledPlugins2, func , null, endfunc);
 		return _user_data.InstalledPlugins2;
 	};
-		
+	
+	function _getPluginByID	(id) {
+		var plugin = null;
+		$.each(_user_data.InstalledPlugins2,function(idx,p) {
+			if (p.id==id) {
+				plugin = p;
+				return false;
+			}
+		});
+		return plugin;
+	};
+	
 	function _getDevices( func , filterfunc, endfunc ) {
 		//no data yet, fetch it, otherwise just process the async response
 		// if (_devices==null) {
@@ -1238,6 +1250,7 @@ var VeraBox = ( function( window, undefined ) {
 	getSceneByID 	: _getSceneByID,
 	getNewSceneID	: _getNewSceneID,
 	getPlugins		: _getPlugins,
+	getPluginByID 	: _getPluginByID, 
 	getHouseMode	: _getHouseMode,
 	setHouseMode	: _setHouseMode,
 	setStatus		: _setStatus,
