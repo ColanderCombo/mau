@@ -4345,12 +4345,21 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 				var id = $(this).data("plugin");
 				var name = $(this).text();
 				FileDB.getFileContent(name , function( txt ) {
-					UIManager.pageEditor(name,txt,function(txt) {
-						alert('saved');
+					var url = UPnPHelper.buildUPnPGetFileUrl(name);
+					UIManager.pageEditor(name,txt,"Download",function(txt) {
+					$(".altui-mainpanel a[download]")[0].click();
+						//http://192.168.1.16/cgi-bin/cmh/upload_upnp_file.sh
+						//POST 
+						//Content-Type: multipart/form-data; boundary=----WebKitFormBoundary2WJHndGdc2ARFMXa
 					});
+					$(".altui-mainpanel").prepend("Download: <a href='"+url+"' download>"+name+"</a>");
 				});
 				// var url = UPnPHelper.buildUPnPGetFileUrl( name );
 				// window.open(url, '_blank');
+				//upnp_file_1
+				//Content-Disposition: form-data; name="upnp_file_1"; filename="J_ALTUI_uimgr.js"
+				//Content-Disposition: form-data; name=""
+				//Content-Disposition: form-data; name="restart_lua"
 			});
 			$(".altui-plugin-retweet").click(function() {
 				var id = $(this).prop("id");
@@ -4723,14 +4732,14 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	},
 	
 
-	pageEditorForm: function (title,txt,onClickCB) {
+	pageEditorForm: function (title,txt,button,onClickCB) {
 		var html = "";
 		html +="<form class='col-sm-11' role='form' action='javascript:void(0);'>";
 		html +="  <div class='form-group'>";
 		html +="    <label for='altui-editor-text'>"+title+":</label>";
 		html +="    <textarea id='altui-editor-text' rows='20' class='form-control' placeholder='xxx'>"+txt+"</textarea>";
 		html +="  </div>";
-		html +="  <button id='altui-luaform-button' type='submit' class='btn btn-default'>Submit</button>";
+		html +="  <button id='altui-luaform-button' type='submit' class='btn btn-default'>"+button+"</button>";
 		html +="</form>";
 		$(".altui-mainpanel").append(html);
 		$("#altui-luaform-button").click( function() {
@@ -4739,11 +4748,11 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		});
 	},
 	
-	pageEditor: function (filename,txt,cbfunc)
+	pageEditor: function (filename,txt,button,cbfunc)
 	{
 		UIManager.clearPage(filename,"Editor");
 		$(".altui-mainpanel").append("<p> </p>");
-		this.pageEditorForm(filename,txt,function(newtxt) {
+		this.pageEditorForm(filename,txt,button,function(newtxt) {
 			if ($.isFunction(cbfunc)) 
 				cbfunc(newtxt);
 		});
@@ -4753,7 +4762,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	{
 		UIManager.clearPage('LuaTest',"LUA Code Test");
 		$(".altui-mainpanel").append("<p>This test code will succeed if it is syntactically correct and does not return false. an error in the code or a return false will trigger a failure</p>");
-		this.pageEditorForm("Lua Test Code","return true",function(lua) {
+		this.pageEditorForm("Lua Test Code","return true","Submit",function(lua) {
 			VeraBox.runLua(lua, function(result) {
 				if ( result == "Passed")
 					UIManager.pageMessage( "Test code succeeded", "success");
@@ -4767,7 +4776,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	{
 		UIManager.clearPage('LuaStart',"LUA Startup");
 		var lua = VeraBox.getLuaStartup();
-		this.pageEditorForm("Lua Startup Code",lua,function(newlua) {
+		this.pageEditorForm("Lua Startup Code",lua,"Submit",function(newlua) {
 			if (newlua!=lua) {
 				if (confirm("do you want to change lua startup code ? if yes, it will generate a LUA reload, be patient..."))
 					VeraBox.setStartupCode(newlua);
