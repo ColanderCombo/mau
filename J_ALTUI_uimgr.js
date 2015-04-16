@@ -3707,6 +3707,7 @@ var UIManager  = ( function( window, undefined ) {
 			{ id:12, title:'LuaTest', onclick:'UIManager.pageLuaTest()', parent:0 },
 			{ id:13, title:'LuaStart', onclick:'UIManager.pageLuaStart()', parent:0 },
 			{ id:14, title:'Optimize', onclick:'UIManager.pageOptimize()', parent:0 },
+			{ id:15, title:'Editor', onclick:'UIManager.pageEditor()', parent:8 },
 		];
 		
 		function _parentsOf(child) {
@@ -4352,7 +4353,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 						//POST 
 						//Content-Type: multipart/form-data; boundary=----WebKitFormBoundary2WJHndGdc2ARFMXa
 					});
-					$(".altui-mainpanel").prepend("Download: <a href='"+url+"' download>"+name+"</a>");
+					$(".altui-mainpanel").prepend("<div class='hidden' >Download: <a href='"+url+"' download>"+name+"</a></div>");
 				});
 				// var url = UPnPHelper.buildUPnPGetFileUrl( name );
 				// window.open(url, '_blank');
@@ -4750,7 +4751,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 	
 	pageEditor: function (filename,txt,button,cbfunc)
 	{
-		UIManager.clearPage(filename,"Editor");
+		UIManager.clearPage('Editor', filename);
 		$(".altui-mainpanel").append("<p> </p>");
 		this.pageEditorForm(filename,txt,button,function(newtxt) {
 			if ($.isFunction(cbfunc)) 
