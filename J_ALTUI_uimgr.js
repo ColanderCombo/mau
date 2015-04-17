@@ -1776,8 +1776,10 @@ var UIManager  = ( function( window, undefined ) {
 				_format(date.getSeconds())
 			);
 			return iso;
+		} else if ( (value.indexOf("http") === 0) || (value.indexOf("https") === 0) || (value.indexOf("ftp") === 0) ) {
+			return "<a href='{0}'>{0}</a>".format(value);
 		}
-		return value;
+		return value.toString().htmlEncode();
 	};
 	
 	function _deviceDrawVariables(devid) {
@@ -1793,7 +1795,7 @@ var UIManager  = ( function( window, undefined ) {
 				var val = $(this).val();
 				VeraBox.setStatus( devid, tbl[0],tbl[1], val );
 				$(this).parent().click(_clickOnValue);
-				$(this).replaceWith(_enhanceValue(val).toString().htmlEncode());					
+				$(this).replaceWith(_enhanceValue(val));					
 			});
 		};
 			
@@ -1804,7 +1806,7 @@ var UIManager  = ( function( window, undefined ) {
 			$.each(device.states.sort(_sortByVariableName), function(idx,state) {
 				var str = deviceVariableLineTemplate.format(
 					state.variable, 
-					_enhanceValue(state.value).toString().htmlEncode(), 
+					_enhanceValue(state.value), 
 					state.service,
 					idx //btoa(state.service+"."+state.variable)
 					);
