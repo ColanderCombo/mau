@@ -4738,7 +4738,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		html +="<form class='col-sm-11' role='form' action='javascript:void(0);'>";
 		html +="  <div class='form-group'>";
 		html +="    <label for='altui-editor-text'>"+title+":</label>";
-		html +="    <textarea id='altui-editor-text' rows='20' class='form-control' placeholder='xxx'>"+txt+"</textarea>";
+		html +="    <textarea id='altui-editor-text' rows='20' class='form-control' placeholder='xxx'>"+txt.htmlEncode()+"</textarea>";
 		html +="  </div>";
 		html +="  <button id='altui-luaform-button' type='submit' class='btn btn-default'>"+button+"</button>";
 		html +="</form>";
