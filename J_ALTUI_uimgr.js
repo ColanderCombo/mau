@@ -1758,41 +1758,68 @@ var UIManager  = ( function( window, undefined ) {
 		_devicetypesDB[devtype].ui_static_data = ui_definitions;
 	};
 
+	function _format(d) {
+		return ("0"+d).substr(-2);
+	};	
+
 	function _enhanceValue(value) 
 	{
-		function _format(d) {
-			return ("0"+d).substr(-2);
-		};
+
 		
 		//try to guess what is the value
 		if ($.isNumeric(value) && value>=1035615941 && value <= 4035615941) {
 			var date = new Date(value*1000);
-			var iso = "{0}/{1}/{2} {3}:{4}:{5}".format(
-				date.getFullYear(),
-				_format(date.getMonth()+1),
-				_format(date.getDate()),
-				_format(date.getHours()),
-				_format(date.getMinutes()),
-				_format(date.getSeconds())
-			);
-			return iso;
+			return date.toLocaleString();
+			// var iso = "{0}/{1}/{2} {3}:{4}:{5}".format(
+				// date.getFullYear(),
+				// _format(date.getMonth()+1),
+				// _format(date.getDate()),
+				// _format(date.getHours()),
+				// _format(date.getMinutes()),
+				// _format(date.getSeconds())
+			// );
 		} else if ( (value.indexOf("http") === 0) || (value.indexOf("https") === 0) || (value.indexOf("ftp") === 0) ) {
 			return "<a href='{0}'>{0}</a>".format(value);
 		}
 		return value.toString().htmlEncode();
 	};
 	
+	function _enhanceEditorValue(id,value)
+	{
+		if ($.isNumeric(value) && value>=1035615941 && value <= 4035615941) {
+			var field = "<input type='datetime-local' id='inp{0}' name='inp{0}' value='{1}'>";
+			var date = new Date(value*1000);
+			// var offset = date.getTimezoneOffset();
+			// offset = ((offset<0? '+':'-')+ _format(parseInt(Math.abs(offset/60)))+ ":"+_format(Math.abs(offset%60)));
+			var iso = "{0}-{1}-{2}T{3}:{4}:{5}".format(
+				date.getFullYear(),
+				_format(date.getMonth()+1),
+				_format(date.getDate()),
+				_format(date.getHours()),
+				_format(date.getMinutes()),
+				_format(date.getSeconds()) );
+				// offset );
+			return field.format(id,iso);
+		}
+		return "<input id='inp"+id+"' class='form-control' type='text' value='"+value+"'></input>" 
+	}
+	
 	function _deviceDrawVariables(devid) {
 		function _clickOnValue() {
 			var id = $(this).prop('id');	// base64
 			var tbl = [device.states[id].service , device.states[id].variable]//atob(id).split('.');
-			var val = VeraBox.getStatus(devid,tbl[0],tbl[1]);
+			var value = VeraBox.getStatus(devid,tbl[0],tbl[1]);
 			$(this).off( "click");
-			$(this).html( "<input id='inp"+id+"' class='form-control' type='text' value='"+val+"'></input>" );
-			$("input#inp"+id).change( function() {
+			$(this).html( _enhanceEditorValue(id,value) );
+			$("input#inp"+id).focusout( function() {
 				var id = $(this).prop('id').substr(3);	// remove inp
 				var tbl = [device.states[id].service , device.states[id].variable]//atob(id).split('.');
-				var val = $(this).val();
+				var val = $(this).val();	// but this is in UTC so we need to convert back to locale timezone
+				if ($(this).attr('type')=='datetime-local') {
+					var d = new Date(val);	// input returns in UTC but we want in locale
+					var locale = d.getTime() + (d.getTimezoneOffset()*60000);	// add offset so that it is locale
+					val = locale/1000;
+				}
 				VeraBox.setStatus( devid, tbl[0],tbl[1], val );
 				$(this).parent().click(_clickOnValue);
 				$(this).replaceWith(_enhanceValue(val));					
