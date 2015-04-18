@@ -29,7 +29,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-dimmable {font-size: 16px;}";
 		style += ".altui-motion {font-size: 22px;}";
 		style += ".altui-windowcover {}";
-		style += ".altui-dimmable-slider { margin-left: 50px;}";		
+		style += ".altui-dimmable-slider { margin-left: 50px; }";	
+		style += ".altui-infoviewer-log { margin-top: 10px; }";	
 		style += "div.altui-windowcover button.btn-sm { width: 4em; }";
 		return style;
 	};
