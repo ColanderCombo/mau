@@ -143,10 +143,17 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	function _drawHumidity(devid, device) {
 		var html = "";
 		var status = parseInt(VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:HumiditySensor1', 'CurrentLevel' )); 
-		html += ("<span class='altui-humidity' >"+status+"% </span>");
+		html += ("<span class='altui-humidity' >"+status+" % </span>");
 		return html;
 	};
 	
+	function _drawLight(devid, device) {
+		var html = "";
+		var status = parseInt(VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:LightSensor1', 'CurrentLevel' )); 
+		html += ("<span class='altui-humidity' >"+status+" % </span>");
+		return html;
+	};
+
 	function _onClickWindowCoverButton(e)
 	{
 		// http://192.168.1.16/port_3480/data_request?id=action&DeviceNum=26&serviceId=urn:upnp-org:serviceId:WindowCovering1&action=Up
@@ -303,6 +310,15 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		return html;
 	};
 	
+	function _drawVacation(devid, device) {
+		var html ="";
+		var status = parseInt( VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status') );
+		var expiryDate =  VeraBox.getStatus( devid, 'urn:futzle-com:serviceId:HolidayVirtualSwitch1', 'OverrideExpiryDate');
+		html+= "<div class='altui-watts '>{0}</div>".format( (status==1) ? "Holiday" : "Working" );
+		html+= "<div class=''>{0}</div>".format( expiryDate );
+		return html;
+	};
+	
 	function _drawBinLightControlPanel(devid, device, domparent) {
 
 		var html = "Any thing can go here<hr>";
@@ -333,8 +349,10 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawDimmable   : _drawDimmable,
 	drawMotion 	   : _drawMotion,
 	drawHumidity   : _drawHumidity,
+	drawLight   	: _drawLight,
 	drawWindowCover : _drawWindowCover,
 	drawPowerMeter : _drawPowerMeter,
+	drawVacation     : _drawVacation,
 	toggleButton   : _toggleButton,
 	toggleOnOffButton : function (devid,htmlid) {
 		_toggleButton(devid, htmlid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status', function(id,newval) {

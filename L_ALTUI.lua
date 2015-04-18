@@ -780,6 +780,10 @@ local function getDefaultConfig()
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawHumidity",
 	}
+	tbl["urn:schemas-micasaverde-com:device:LightSensor:1"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawLight",
+	}
 	tbl["urn:schemas-upnp-org:device:DimmableLight:1"]= {
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawDimmable",
@@ -812,6 +816,10 @@ local function getDefaultConfig()
 	tbl["urn:schemas-upnp-org:device:altui:1"]= {
 		["ScriptFile"]="J_ALTUI_iphone.js",
 		["DeviceDrawFunc"]="ALTUI_IPhoneLocator.drawAltUI",
+	}
+	tbl["urn:schemas-futzle-com:device:holidayvirtualswitch:1"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawVacation",
 	}
 	tbl["urn:schemas-upnp-org:device:IPhoneLocator:1"]= {
 		["ScriptFile"]="J_ALTUI_iphone.js",
