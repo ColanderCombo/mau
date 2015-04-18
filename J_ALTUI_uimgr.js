@@ -1762,10 +1762,19 @@ var UIManager  = ( function( window, undefined ) {
 		return ("0"+d).substr(-2);
 	};	
 
+	function _toIso(date) {
+		var iso = "{0}-{1}-{2}T{3}:{4}:{5}".format(
+			date.getFullYear(),
+			_format(date.getMonth()+1),
+			_format(date.getDate()),
+			_format(date.getHours()),
+			_format(date.getMinutes()),
+			_format(date.getSeconds()) );
+		return iso;
+	};
+	
 	function _enhanceValue(value) 
 	{
-
-		
 		//try to guess what is the value
 		if ($.isNumeric(value) && value>=1035615941 && value <= 4035615941) {
 			var date = new Date(value*1000);
@@ -1791,15 +1800,7 @@ var UIManager  = ( function( window, undefined ) {
 			var date = new Date(value*1000);
 			// var offset = date.getTimezoneOffset();
 			// offset = ((offset<0? '+':'-')+ _format(parseInt(Math.abs(offset/60)))+ ":"+_format(Math.abs(offset%60)));
-			var iso = "{0}-{1}-{2}T{3}:{4}:{5}".format(
-				date.getFullYear(),
-				_format(date.getMonth()+1),
-				_format(date.getDate()),
-				_format(date.getHours()),
-				_format(date.getMinutes()),
-				_format(date.getSeconds()) );
-				// offset );
-			return field.format(id,iso);
+			return field.format(id, _toIso(date));
 		}
 		return "<input id='inp"+id+"' class='form-control' type='text' value='"+value+"'></input>" 
 	}
@@ -2197,9 +2198,9 @@ var UIManager  = ( function( window, undefined ) {
 		var delButtonHtml = buttonTemplate.format( scene.id, 'btn-xs altui-delscene pull-right', deleteGlyph,'default');
 		var label = ((scene.hidden==true) ? hiddenGlyph+' ' : '') + scene.name;
 
-		var lastrun = (scene.last_run != undefined) ? okGlyph+" "+_enhanceValue(scene.last_run) : '';
+		var lastrun = (scene.last_run != undefined) ? okGlyph+" "+_toIso(new Date(scene.last_run*1000)) : '';
 		var nextrun = _findSceneNextRun(scene);
-		nextrun = (nextrun==0) ? '' : timeGlyph+" "+_enhanceValue(nextrun);
+		nextrun = (nextrun==0) ? '' : timeGlyph+" "+_toIso(new Date(nextrun*1000));
 		
 		var idDisplay = "<div class='pull-right text-muted'><small>#"+scene.id+" </small></div>";
 				
