@@ -147,10 +147,52 @@ var UPnPHelper = (function(window,undefined) {
 		_exec( _buildUPnPGetFileUrl( devicefile), cbfunc );
 	};
 	
+	function _UPnPDeletePlugin( pluginid, cbfunc )
+	{
+		AltuiDebug.debug("_UPnPDeletePlugin( {0} )".format( pluginid));
+		
+		var xml = "";
+		xml +="<s:Envelope xmlns:s='http://schemas.xmlsoap.org/soap/envelope/' s:encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'>";
+		xml +="   <s:Body>";
+			xml +="<u:DeletePlugin xmlns:u='urn:schemas-micasaverde-org:service:HomeAutomationGateway:1'>";
+				xml +="<PluginNum>{0}</PluginNum>";
+			xml +="</u:DeletePlugin>";
+		xml +="   </s:Body>";
+		xml +="</s:Envelope>";
+
+		var url = _buildHAGSoapUrl();
+		$.ajax({
+			url: url,
+			type: "POST",
+			dataType: "text",
+			contentType: "text/xml;charset=UTF-8",
+			processData: false,
+			data:  xml.format( pluginid  ),
+			headers: {
+				"SOAPACTION":'"urn:schemas-micasaverde-org:service:HomeAutomationGateway:1#DeletePlugin"'
+			},
+		})
+		.done(function(data, textStatus, jqXHR) {
+			if ($.isFunction( cbfunc ))
+			{
+				var re = /<OK>(.+)<\/OK>/; 
+				var result = data.match(re);
+				cbfunc( ( result != null) && (result.length>=2) ? result[1] : null );		// device ID in call back
+			}
+		})
+		.fail(function(jqXHR, textStatus, errorThrown) {
+			if ($.isFunction( cbfunc ))
+				cbfunc(null);
+		})
+		.always(function() {
+		});
+	};
+
 	function _UPnPUpdatePlugin( pluginid, cbfunc )
 	{
 		_exec( _buildUPnPUpdatePlugin( pluginid), cbfunc );
 	};
+
 	function _UPnPRunLua( code, cbfunc )
 	{
 		_exec( _buildUPnPRunLua( code), cbfunc );
@@ -368,6 +410,7 @@ var UPnPHelper = (function(window,undefined) {
 		UPnPAction		: _UPnPAction,	// ( deviceID, service, action, params, cbfunc )
 		UPnPGetFile		: _UPnPGetFile,
 		UPnPUpdatePlugin: _UPnPUpdatePlugin,
+		UPnPDeletePlugin: _UPnPDeletePlugin,
 		UPnPRunLua 		: _UPnPRunLua,
 		ModifyUserData	: _ModifyUserData,
 		renameDevice 	: _renameDevice,

@@ -4345,19 +4345,22 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		function drawPlugin(idx, plugin) {
 			var iconTemplate = "<img class='altui-plugin-icon' src='https://apps.mios.com/{0}'></img>";
 			var filebutton = _getFileButton(plugin);
-			var helpbutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-question-sign',  glyphTemplate.format("question-sign","Help",""));
-			var infobutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-info-sign',  glyphTemplate.format("info-sign","Information",""));
-			var updatebutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-retweet',  glyphTemplate.format("retweet","Update Now",""));
+			var helpbutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-question-sign',  glyphTemplate.format("question-sign","Help",""), "Help");
+			var infobutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-info-sign',  glyphTemplate.format("info-sign","Information",""), "Info");
+			var updatebutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-update',  glyphTemplate.format("retweet","Update Now",""), "Update");
+			var deletebutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-uninstall',  glyphTemplate.format("remove","Uninstall",""), "Uninstall");
 
-			var pluginTemplate = "<tr><td>{6}</td><td>{0}</td><td>{1}.{2}</td><td>{7}</td><td>{3} {4}</td><td>{5}</td></tr>";
+			var pluginTemplate = "<tr><td>{6}</td><td>{0}</td><td>{1}.{2}</td><td>{7}</td><td>{3} {4}</td><td>{5}</td><td>{8}</td></tr>";
 			var pluginTxt = pluginTemplate.format(
 				plugin.Title,
-				plugin.VersionMajor,plugin.VersionMinor,
+				plugin.VersionMajor,
+				plugin.VersionMinor,
 				helpbutton,
 				infobutton,
 				updatebutton,
 				iconTemplate.format(plugin.Icon),
-				filebutton
+				filebutton,
+				deletebutton
 				);
 			$(".altui-mainpanel tbody").append(pluginTxt);
 			$("button.altui-plugin-question-sign#"+plugin.id).data("url",plugin.Instructions);
@@ -4378,20 +4381,11 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 					var url = UPnPHelper.buildUPnPGetFileUrl(name);
 					UIManager.pageEditor(name,txt,"Download",function(txt) {
 					$(".altui-mainpanel a[download]")[0].click();
-						//http://192.168.1.16/cgi-bin/cmh/upload_upnp_file.sh
-						//POST 
-						//Content-Type: multipart/form-data; boundary=----WebKitFormBoundary2WJHndGdc2ARFMXa
 					});
 					$(".altui-mainpanel").prepend("<div class='hidden' >Download: <a href='"+url+"' download>"+name+"</a></div>");
 				});
-				// var url = UPnPHelper.buildUPnPGetFileUrl( name );
-				// window.open(url, '_blank');
-				//upnp_file_1
-				//Content-Disposition: form-data; name="upnp_file_1"; filename="J_ALTUI_uimgr.js"
-				//Content-Disposition: form-data; name=""
-				//Content-Disposition: form-data; name="restart_lua"
 			});
-			$(".altui-plugin-retweet").click(function() {
+			$(".altui-plugin-update").click(function() {
 				var id = $(this).prop("id");
 				if (id!=undefined && confirm("are you sure you want to update plugin "+id))
 				{
@@ -4400,9 +4394,18 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 					});
 				}
 			});
+			$(".altui-plugin-uninstall").click(function() {
+				var id = $(this).prop("id");
+				if (id!=undefined && confirm("are you sure you want to uninstall this plugin "+id+" and all its created devices"))
+				{
+					UPnPHelper.UPnPDeletePlugin(id,function(result) {
+						alert(result);
+					});
+				}
+			});
 		};	
 		
-		$(".altui-mainpanel").append($("<table id='table' class='table table-condensed'><thead><tr><th></th><th>Name</th><th>Version</th><th>Files</th><th>Actions</th><th>Update</th></tr></thead><tbody></tbody></table>"));
+		$(".altui-mainpanel").append($("<table id='table' class='table table-condensed'><thead><tr><th></th><th>Name</th><th>Version</th><th>Files</th><th>Actions</th><th>Update</th><th>Uninstall</th></tr></thead><tbody></tbody></table>"));
 		VeraBox.getPlugins( drawPlugin , endDrawPlugin);
 	},
 
