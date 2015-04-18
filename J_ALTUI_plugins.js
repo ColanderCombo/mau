@@ -318,6 +318,27 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		html+= "<div class=''>{0}</div>".format( expiryDate );
 		return html;
 	};
+
+	function _drawWeather(devid, device) {
+		var html ="";
+		var condition = VeraBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'Condition');
+		var wind = VeraBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'WindCondition');
+		html+= "<div class=''>Condition: {0}</div>".format( condition );
+		html+= "<div class=''>Wind: {0}</div>".format( wind );
+		return html;
+	};
+	
+	function _drawInfoViewer(devid, device) {
+		var html ="";
+		var pattern = VeraBox.getStatus( devid, 'urn:a-lurker-com:serviceId:InfoViewer1', 'LuaPattern');
+		if (pattern!="")
+			html+= "<span class=''>Pattern: {0}</span>".format( pattern.htmlEncode() );
+		html+="<button type='button' class='pull-right altui-infoviewer-log btn btn-default btn-sm '>Open</button>" ;
+		html += "<script type='text/javascript'>";
+		html += " $('div.altui-device#{0} button.altui-infoviewer-log').on('click', function() { window.open('data_request?id=lr_al_info','_blank'); } );".format(devid);
+		html += "</script>";
+		return html;
+	};	
 	
 	function _drawBinLightControlPanel(devid, device, domparent) {
 
@@ -353,6 +374,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawWindowCover : _drawWindowCover,
 	drawPowerMeter : _drawPowerMeter,
 	drawVacation     : _drawVacation,
+	drawWeather     : _drawWeather,
+	drawInfoViewer     : _drawInfoViewer,
 	toggleButton   : _toggleButton,
 	toggleOnOffButton : function (devid,htmlid) {
 		_toggleButton(devid, htmlid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status', function(id,newval) {

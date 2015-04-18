@@ -784,6 +784,14 @@ local function getDefaultConfig()
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawLight",
 	}
+	tbl["urn:schemas-a-lurker-com:device:InfoViewer:1"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawInfoViewer",
+	}
+	tbl["urn:demo-micasaverde-com:device:weather:1"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawWeather",
+	}
 	tbl["urn:schemas-upnp-org:device:DimmableLight:1"]= {
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawDimmable",
