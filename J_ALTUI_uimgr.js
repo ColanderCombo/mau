@@ -2276,7 +2276,7 @@ var UIManager  = ( function( window, undefined ) {
 		return name.replace(/:/g,"_").replace(/-/g,"_");
 	}
 	
-	function  _deviceDrawControlPanelJSTab(devid, device, tab, domparent, bActiveTab ) {
+	function  _deviceDrawControlPanelJSTab(devid, device, tab, domparent ) {
 
 		$(domparent).addClass("altui-norefresh");	// javascript tabs are not refreshed
 		
@@ -2293,11 +2293,10 @@ var UIManager  = ( function( window, undefined ) {
 		catch(err) {
 			set_panel_html("an error occurred while displaying the javascript tab. devid: "+devid+" err:"+err.message+" <pre>stack:"+err.stack+"</pre>");
 		}		
-		if (bActiveTab==true)
-			_fixHeight(domparent);
+		_fixHeight(domparent);
 	};
 	
-	function  _deviceDrawControlPanelTab(devid, device, tab, domparent, bActiveTab ) {
+	function  _deviceDrawControlPanelTab(devid, device, tab, domparent ) {
 		function _displayControl( domparent, device, control, idx) {
 			var paddingleft = parseInt($("#altui-device-controlpanel-"+devid).css("padding-left"));
 			var paddingtop = parseInt($("#altui-device-controlpanel-"+devid+" .panel-body ").css("padding-top"));
@@ -2582,29 +2581,28 @@ var UIManager  = ( function( window, undefined ) {
 		}
 
 		// fix height because absolute positioning removes element from the DOM calculations
-		if (bActiveTab==true)
-			_fixHeight( domparent );
+		_fixHeight( domparent );
 	};
 	
-	function _deviceDrawControlPanelOneTabContent(devid, device, parent, tabidx, bActiveTab ) {
+	function _deviceDrawControlPanelOneTabContent(devid, device, parent, tabidx ) {
 		var dt = _devicetypesDB[device.device_type];
 		if (dt!=null && dt.ControlPanelFunc!=null && (tabidx==0)) {
 			_executeFunctionByName(dt.ControlPanelFunc, window, devid, device, parent);
-			if (bActiveTab==true)
-					_fixHeight( parent );
+			_fixHeight( parent );
 		}
 		else if (tabidx>0) {
 			var tab = dt.ui_static_data.Tabs[tabidx-1];
 			if ((tab.TabType!="javascript") || (tab.ScriptName!="shared.js")) {
 				if ( tab.TabType=="flash") {
-					_deviceDrawControlPanelTab(devid, device, tab, parent, bActiveTab );		// row for Flash Panel
+					_deviceDrawControlPanelTab(devid, device, tab, parent );		// row for Flash Panel
 				} else {
-					_deviceDrawControlPanelJSTab(devid, device, tab, parent, bActiveTab );
+					_deviceDrawControlPanelJSTab(devid, device, tab, parent );
 				}
 			}
 		}
 	};
-		
+
+
 	function _deviceDrawControlPanelAttributes(devid, device, container ) {
 		// Draw hidding attribute panel
 		var html ="";
@@ -2659,7 +2657,14 @@ var UIManager  = ( function( window, undefined ) {
 		var pagename = obj.prop('id');
 		return pagename.substring( "altui-devtab-".length);
 	};	
-	
+			
+	function _displayActiveDeviceTab(activeTabIdx, device, domparent) {
+		if ($(domparent).hasClass("altui-norefresh")==false) {
+			$(domparent).html("");
+			_deviceDrawControlPanelOneTabContent(device.id, device, domparent, activeTabIdx );
+		}
+	};
+
 	function _deviceDrawControlPanel(devid, device, container ) {
 		
 		function _defereddisplay(bAsync) {
@@ -2675,7 +2680,7 @@ var UIManager  = ( function( window, undefined ) {
 					}
 				});
 				lines.push("</ul>");
-				var html = "<div class='tab-content'>";
+				var html = "<div class='tab-content {0}'>".format( (UIManager.UI7Check()==true) ? '' : 'altui-tabcontent-fix');
 				if (bExtraTab) {
 					html += "<div id='altui-devtab-content-0' class='tab-pane bg-info altui-devtab-content'>";
 					html += "</div>";
@@ -2704,37 +2709,30 @@ var UIManager  = ( function( window, undefined ) {
 				html += "</div>";	// row
 				$(container).append( html.format(device.manufacturer || '', device.model || '', device.name || '', device.id) );	
 			};
-			function _deviceDrawControlPanelTabContents(devid, device, tabs ) {
-				// tab0 is the custom altui tab, it does not exist in VERA tabs table
-				var tabidx = 0;
-				var activeTabIdx = _getActiveDeviceTabIdx();
-				var parent  =  $('div#altui-devtab-content-'+tabidx);
-				_deviceDrawControlPanelOneTabContent(devid, device, parent, tabidx, (activeTabIdx==tabidx)  );
-				tabidx++;
-				
-				// VERA tabs table ,we start with a tabidx == 1
-				$.each( tabs, function( idx,tab) {
-					parent  =  $('div#altui-devtab-content-'+tabidx);
-					_deviceDrawControlPanelOneTabContent(devid, device, parent, tabidx, (activeTabIdx==tabidx)  );
-					$(".altui-debug-div").append("<pre>"+JSON.stringify(tab)+"</pre>");
-					tabidx++;
-				});
-			};
 			if (_toLoad==0) {
 				_deviceDrawControlPanelAttributes(devid, device, container ) 							// row for attributes
 				_deviceDrawWireFrame(devid,device,container);
 				$(container).append( "<div class='row'><div class='altui-debug-div'></div></div>" );	// Draw hidden debug panel
 
 				container = container.find(".panel-body");				
+				var dt = _devicetypesDB[device.device_type];
 				var bExtraTab = (dt.ControlPanelFunc!=null);
 				$(container).append( "<div class='row'>" + _createDeviceTabs( device, bExtraTab, dt.ui_static_data.Tabs ) + "</div>" );
+
 				$(container).find("li a").first().tab('show');	// activate first tab
-				
-				_deviceDrawControlPanelTabContents(devid, device,dt.ui_static_data.Tabs );		// row for Flash Panel
+				var activeTabIdx = _getActiveDeviceTabIdx();
+				var domparent  =  $('div#altui-devtab-content-'+activeTabIdx);
+				_displayActiveDeviceTab(activeTabIdx, device, domparent);
+
 				if (bAsync) {
 					$("#altui-device-attributes-"+devid).toggle(false);		// hide them by default;
 					$(".altui-debug-div").toggle(false);					// hide
 				}
+
+				if (AltuiDebug.IsDebug()) {
+					$("div.altui-debug-div").append( "<pre>"+JSON.stringify(dt.ui_static_data.Tabs)+"</pre>" );				
+				}
+				
 			}
 		};
 
@@ -2810,24 +2808,10 @@ var UIManager  = ( function( window, undefined ) {
 		});
 
 		// refresh device panels
-		$(".altui-device-controlpanel").not(".altui-norefresh").each( function(index,element) {
-			// check state of toggle-able elements
+		$(".altui-device-controlpanel").not(".altui-norefresh").each( function(index,element) {			
+			// force a refresh/drawing if needed.
+			// the event handler for the tab SHOW event will take care of the display of the tab
 			var activeTabIdx = _getActiveDeviceTabIdx();
-			var attrvisible = $("#altui-device-attributes-"+devid).is(":visible"); 
-			var debugvisible = $(".altui-debug-div").is(":visible"); 
-			var devid = parseInt($(element).data("devid"));
-			var device = VeraBox.getDeviceByID( devid );
-
-			var collection = $(element).find(".altui-devtab-content").not(".altui-norefresh");
-			
-			$.each(collection, function( idx,tab ) {
-				$(tab).html("");
-				var tabidx = parseInt($(tab).prop('id').substring("altui-devtab-content-".length));
-				_deviceDrawControlPanelOneTabContent(devid, device, tab, tabidx, (activeTabIdx==tabidx));
-			});
-			
-			$("#altui-device-attributes-"+devid).toggle(attrvisible);		// hide them by default;
-			$(".altui-debug-div").toggle(debugvisible);						// hide	
 			_setActiveDeviceTabIdx(activeTabIdx);
 		});
 		
@@ -3858,19 +3842,13 @@ var UIManager  = ( function( window, undefined ) {
 
 	pageControlPanel: function( devid ) 
 	{
-/*
-ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"device_json: "D_BinaryLight1.json"device_type: "urn:schemas-upnp-org:device:BinaryLight:1"dirty: falsedisabled: 0embedded: "1"id: "106"id_parent: 4impl_file: ""invisible: "1"ip: ""local_udn: "uuid:4d494342-5342-5645-006a-000002b03150"mac: ""manufacturer: ""model: ""name: "1"room: 2states: Array[5]subcategory_num: 0time_created: "1409616976"
-*/		
-
 		var rooms = VeraBox.getRoomsSync();
 		var device = VeraBox.getDeviceByID( devid );
 		var category = VeraBox.getCategoryTitle( device.category_num );
 
 		UIManager.clearPage('Control Panel',"{0} <small>{1} <small>#{2}</small></small>".format( device.name , category ,devid));
 
-		//
 		// Draw toolbar : room selection and attribute show toggle button
-		//
 		var htmlRoomSelect = "<select id='altui-room-list' class='form-control '>";
 		if (rooms)
 				htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format("No Room",0,'');
@@ -3879,10 +3857,11 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 					htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format(room.name,room.id,selected ? 'selected' : '');
 				});
 		htmlRoomSelect 	  += "</select>";
-		var html = "<div class='form-inline'><h3>Room : "+htmlRoomSelect
-			+ "<button type='button' class='btn btn-default' id='altui-toggle-attributes' >Attributes<span class='caret'></span></button>"
-			+ buttonDebugHtml
-			+"</h3></div>";
+		var html = "<div class='form-inline'><h3>Room : "+htmlRoomSelect;
+		html += "<button type='button' class='btn btn-default' id='altui-toggle-attributes' >Attributes<span class='caret'></span></button>";
+		if (AltuiDebug.IsDebug())
+			html +=  buttonDebugHtml;
+		html += "</h3></div>";
 		$(".altui-mainpanel").append( html );
 
 		//
@@ -3909,9 +3888,12 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		// register a handler on tab changes to update height of domparent ( usefulk when child are in absolute positioning )
 		$(container).off('shown.bs.tab', 'a[data-toggle="tab"]');
 		$(container).on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
+			var controlpanel = $(e.target).closest(".altui-device-controlpanel");
+			var devid = parseInt($(controlpanel).data("devid"));
+			var device = VeraBox.getDeviceByID( devid );
 			var activeTabIdx = _getActiveDeviceTabIdx();
-			var parent  =  $('div#altui-devtab-content-'+activeTabIdx);
-			_fixHeight(parent);
+			var domparent  =  $('div#altui-devtab-content-'+activeTabIdx);
+			_displayActiveDeviceTab(activeTabIdx, device, domparent);
 		});
 
 	},
@@ -5000,6 +4982,12 @@ $(document).ready(function() {
 		position: relative;		\
 		height:500px;			\
 	}							\
+	.altui-tabcontent-fix	{	\
+	  padding-top: 15px; \
+	  padding-left: 15px; \
+	  padding-bottom: 15px; \
+	  padding-right: 15px; \
+	}	\
 	.altui-device-controlpanel .panel-body {	\
 		padding-top: 0px;\
 		padding-bottom: 0px;\
