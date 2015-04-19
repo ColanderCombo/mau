@@ -22,15 +22,12 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	// return styles needed by this plugin module
 	function _getStyle() {
 		var style="";
-		style += ".altui-watts {font-size: 16px;}";
-		style += ".altui-volts {font-size: 16px;}";
-		style += ".altui-temperature {font-size: 18px;}";
-		style += ".altui-humidity {font-size: 18px;}";
-		style += ".altui-dimmable {font-size: 16px;}";
+		style += ".altui-watts, .altui-volts, .altui-dimmable  {font-size: 16px;}";
+		style += ".altui-temperature, .altui-humidity  {font-size: 18px;}";
 		style += ".altui-motion {font-size: 22px;}";
 		style += ".altui-windowcover {}";
 		style += ".altui-dimmable-slider { margin-left: 50px; }";	
-		style += ".altui-infoviewer-log { margin-top: 10px; }";	
+		style += ".altui-infoviewer-log,.altui-window-btn { margin-top: 10px; }";	
 		style += "div.altui-windowcover button.btn-sm { width: 4em; }";
 		return style;
 	};
@@ -170,9 +167,9 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 
 		var html = "";
 		html += "<div class='pull-right'><div id='altui-wc-"+device.id+"' class='btn-group altui-windowcover' role='group' aria-label='...'>";
-		html += "  <button id ='altui-window-Up' type='button' class='btn btn-default btn-sm {0}'>Up</button>".format( (status==100) ? 'active' : '' );
-		html += "  <button id ='altui-window-Stop' type='button' class='btn btn-default btn-sm'>Stop</button>";
-		html += "  <button id ='altui-window-Down' type='button' class='btn btn-default btn-sm {0}'>Down</button>".format( (status==0) ? 'active' : '' );
+		html += "  <button id ='altui-window-Up' type='button' class='altui-window-btn btn btn-default btn-sm {0}'>Up</button>".format( (status==100) ? 'active' : '' );
+		html += "  <button id ='altui-window-Stop' type='button' class='altui-window-btn btn btn-default btn-sm'>Stop</button>";
+		html += "  <button id ='altui-window-Down' type='button' class='altui-window-btn btn btn-default btn-sm {0}'>Down</button>".format( (status==0) ? 'active' : '' );
 		html += "</div>";
 		html += "</div>";
 		
