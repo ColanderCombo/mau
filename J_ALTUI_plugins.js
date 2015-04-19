@@ -25,6 +25,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-watts, .altui-volts, .altui-dimmable  {font-size: 16px;}";
 		style += ".altui-temperature, .altui-humidity  {font-size: 18px;}";
 		style += ".altui-motion {font-size: 22px;}";
+		style += ".altui-weather-text {font-size: 13px;}";
 		style += ".altui-windowcover {}";
 		style += ".altui-dimmable-slider { margin-left: 50px; }";	
 		style += ".altui-infoviewer-log,.altui-window-btn { margin-top: 10px; }";	
@@ -320,9 +321,15 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	function _drawWeather(devid, device) {
 		var html ="";
 		var condition = VeraBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'Condition');
+		var conditionGroup = VeraBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'ConditionGroup');
 		var wind = VeraBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'WindCondition');
-		html+= "<div class=''>Condition: {0}</div>".format( condition );
-		html+= "<div class=''>Wind: {0}</div>".format( wind );
+		html+= "<div class='altui-weather-text'>{0}</div>".format( condition );
+		html+= "<div class='altui-weather-text'>Wind: {0}</div>".format( wind );
+		var newsrc = "http://icons.wxug.com/i/c/i/"+conditionGroup+".gif";
+		setTimeout( function() {
+			var icon = $("#"+devid+".altui-device img");
+			$(icon).attr('src',newsrc);
+		}, 100 );
 		return html;
 	};
 	
