@@ -1651,58 +1651,36 @@ var UIManager  = ( function( window, undefined ) {
 	};
 
 	function _initDB(devicetypes) {
-		// url = "data_request?id=lr_ALTUI_Handler&command=devicetypes";
-		// var jqxhr = $.ajax( {
-			// url: url,
-			// type: "GET",
-			// dataType: "text",
-			// cache: false
-		// })
-		// .done(function(data) {
-			// var arr = JSON.parse(data);
-			$.extend(true,_devicetypesDB,devicetypes);
-			// foreach load the module if needed
-			AltuiDebug.SetDebug( _devicetypesDB["info"].debug ) ;
-			_ui7Check = (_devicetypesDB["info"].ui7Check == "true" );
-			_version = _devicetypesDB["info"].PluginVersion;
-			_remoteAccessUrl =_devicetypesDB["info"].RemoteAccess;
-			
-			// do some fixes for UI5
-			// if (_ui7Check == false ) {
-				// var src="//{0}/cmh/skins/default/images/logo_top.png";
-				// $("img.imgLogo").attr("src",src.format(window.location.hostname));
-			// }		
+		$.extend(true,_devicetypesDB,devicetypes);
+		// foreach load the module if needed
+		AltuiDebug.SetDebug( _devicetypesDB["info"].debug ) ;
+		_ui7Check = (_devicetypesDB["info"].ui7Check == "true" );
+		_version = _devicetypesDB["info"].PluginVersion;
+		_remoteAccessUrl =_devicetypesDB["info"].RemoteAccess;
 
-			$.each(_devicetypesDB, function(devtype,obj) {
-				if (obj!=null && obj.ScriptFile!=null) {
-					var len = $('script[src="'+obj.ScriptFile+'"]').length;
-					if (len==0) {
-						// not loaded yet
-						_loadScript(obj.ScriptFile, function() {
-							// script has been loaded , check if style needs to be loaded and if so, load them
-							$.each(_devicetypesDB,function(idx,dt) {
-								if ( (dt.ScriptFile == scriptLocationAndName) && (dt.StyleFunc != undefined) ) {
-									_loadStyle(dt.StyleFunc);
-									return false;	// exit the loop
-								}
-							});				
-						});	// load script & styles once script is loaded
-					} 
-					else
-					{
-						// loaded
-						if (obj.StyleFunc!= undefined)
-							_loadStyle(obj.StyleFunc);	// just load styles
-					}
+		$.each(_devicetypesDB, function(devtype,obj) {
+			if (obj!=null && obj.ScriptFile!=null) {
+				var len = $('script[src="'+obj.ScriptFile+'"]').length;
+				if (len==0) {
+					// not loaded yet
+					_loadScript(obj.ScriptFile, function() {
+						// script has been loaded , check if style needs to be loaded and if so, load them
+						$.each(_devicetypesDB,function(idx,dt) {
+							if ( (dt.ScriptFile == scriptLocationAndName) && (dt.StyleFunc != undefined) ) {
+								_loadStyle(dt.StyleFunc);
+								return false;	// exit the loop
+							}
+						});				
+					});	// load script & styles once script is loaded
+				} 
+				else
+				{
+					// loaded
+					if (obj.StyleFunc!= undefined)
+						_loadStyle(obj.StyleFunc);	// just load styles
 				}
-			});
-
-		// })
-		// .fail(function(jqXHR, textStatus) {
-			// UIManager.pageMessage( "VERA did not respond: " + textStatus , "danger");
-		// })
-		// .always(function() {
-		// });
+			}
+		});
 	};
 	
 	function _addDeviceType(devtype, obj) {
@@ -2102,6 +2080,13 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		if (device==null)
 			device = VeraBox.getDeviceByID(deviceid);
+
+		// if there is a custom function, use it
+		if (_devicetypesDB[ device.device_type ]!=null && _devicetypesDB[ device.device_type ].DeviceIconFunc!=null) {
+			return  _executeFunctionByName(_devicetypesDB[ device.device_type ].DeviceIconFunc, window, device.id, device);
+		}
+		
+		//otherwise
 		var iconPath = _getDeviceIconPath( device.id,device );
 		var iconDataSrc = "";
 		if (VeraBox.isRemoteAccess()) {
@@ -2152,7 +2137,10 @@ var UIManager  = ( function( window, undefined ) {
 
 		var devicecontainerTemplate	= "<div class='panel panel-{4} altui-device ' id='{0}'>"
 		devicecontainerTemplate	+=		"<div class='panel-heading altui-device-heading'>"+dropdownTemplate+batteryHtml+"<span class='panel-title altui-device-title' data-toggle='tooltip' data-placement='left' title='{2}'><small>{1}</small></span></div>";
-		devicecontainerTemplate	+=  	"<div class='panel-body altui-device-body'>"+iconHtml+"{3}</div>";
+		devicecontainerTemplate	+=  	"<div class='panel-body altui-device-body'>";
+		devicecontainerTemplate	+= 	  	iconHtml;
+		devicecontainerTemplate	+= 	  	"{3}";
+		devicecontainerTemplate	+= 	  "</div>";
 		devicecontainerTemplate	+= 	  "</div>";
 		
 		var deviceHtml ="";

@@ -321,16 +321,17 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	function _drawWeather(devid, device) {
 		var html ="";
 		var condition = VeraBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'Condition');
-		var conditionGroup = VeraBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'ConditionGroup');
 		var wind = VeraBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'WindCondition');
 		html+= "<div class='altui-weather-text'>{0}</div>".format( condition );
 		html+= "<div class='altui-weather-text'>Wind: {0}</div>".format( wind );
-		var newsrc = "http://icons.wxug.com/i/c/i/"+conditionGroup+".gif";
-		setTimeout( function() {
-			var icon = $("#"+devid+".altui-device img");
-			$(icon).attr('src',newsrc);
-		}, 50 );
 		return html;
+	};
+	
+	function _drawWeatherIcon(devid, device) {
+		var html ="";
+		var conditionGroup = VeraBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'ConditionGroup');
+		var newsrc = "http://icons.wxug.com/i/c/i/"+conditionGroup+".gif";
+		return "<img class='altui-device-icon pull-left img-rounded' src='"+newsrc+"' alt='"+conditionGroup+"' onerror='UIManager.onDeviceIconError("+device.id+")' ></img>";
 	};
 	
 	function _drawInfoViewer(devid, device) {
@@ -377,11 +378,12 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawHumidity   : _drawHumidity,
 	drawLight   	: _drawLight,
 	drawWindowCover : _drawWindowCover,
-	drawPowerMeter : _drawPowerMeter,
-	drawVacation     : _drawVacation,
+	drawPowerMeter  : _drawPowerMeter,
+	drawVacation    : _drawVacation,
 	drawWeather     : _drawWeather,
-	drawInfoViewer     : _drawInfoViewer,
-	toggleButton   : _toggleButton,
+	drawWeatherIcon : _drawWeatherIcon,
+	drawInfoViewer  : _drawInfoViewer,
+	toggleButton    : _toggleButton,
 	toggleOnOffButton : function (devid,htmlid) {
 		_toggleButton(devid, htmlid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status', function(id,newval) {
 			UPnPHelper.setOnOff( devid, newval);

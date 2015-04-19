@@ -791,6 +791,7 @@ local function getDefaultConfig()
 	tbl["urn:demo-micasaverde-com:device:weather:1"]= {
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawWeather",
+		["DeviceIconFunc"]="ALTUI_PluginDisplays.drawWeatherIcon",
 	}
 	tbl["urn:schemas-upnp-org:device:DimmableLight:1"]= {
 		["ScriptFile"]="J_ALTUI_plugins.js",
