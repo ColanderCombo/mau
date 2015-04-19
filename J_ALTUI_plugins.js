@@ -329,7 +329,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		setTimeout( function() {
 			var icon = $("#"+devid+".altui-device img");
 			$(icon).attr('src',newsrc);
-		}, 100 );
+		}, 50 );
 		return html;
 	};
 	
