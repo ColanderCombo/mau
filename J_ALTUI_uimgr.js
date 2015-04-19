@@ -4369,7 +4369,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		
 		function endDrawPlugin() {
 			$(".altui-plugin-question-sign").click(function() {
-				var url = $(this).data("url");
+				var url = $(this).data("url"); 
 				window.open( url, '_blank');
 			});
 			$(".altui-plugin-info-sign").click(function() {
