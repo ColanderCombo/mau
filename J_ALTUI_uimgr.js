@@ -4364,7 +4364,7 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 				deletebutton
 				);
 			$(".altui-mainpanel tbody").append(pluginTxt);
-			$("button.altui-plugin-question-sign#"+plugin.id).data("url",plugin.Instructions);
+			$("button#"+plugin.id+".altui-plugin-question-sign").data("url",plugin.Instructions);
 		};
 		
 		function endDrawPlugin() {
