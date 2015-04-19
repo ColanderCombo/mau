@@ -4657,8 +4657,18 @@ ControlURLs: Objectaltid: "e1"category_num: 3device_file: "D_BinaryLight1.xml"de
 		$(".altui-edittools").click( function () {
 			var id = $(this).prop('id');
 			$.each(edittools, function(idx,tool){
-				if (tool.glyph == id)
-					(tool.onclick)( $(".altui-custompage-canvas").children(".ui-selected") );
+				if (tool.glyph == id) {
+					// update on HTML page
+					var page = PageManager.getPageFromName( _getActivePageName() );
+					var selected = $(".altui-custompage-canvas").children(".ui-selected");
+					(tool.onclick)( selected );
+					
+					// update the children position for each selected children
+					$.each(selected, function (idx,elem) {
+						widgetid = $(elem).prop('id');
+						PageManager.updateChildrenInPage( page, widgetid, $(elem).position() , $(elem).size() );
+					});
+				}
 			})
 		});
 			
