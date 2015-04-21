@@ -1522,6 +1522,7 @@ var UIManager  = ( function( window, undefined ) {
 		// if same message already exists, simply increase the badge count
 		//
 		var found = null;
+		txt = txt.htmlEncode();
 		
 		$("div.altui-pagemessage").each( function(idx,obj) {
 			found = $(obj).find("span.altui-pagemessage-txt");
