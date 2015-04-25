@@ -1545,6 +1545,8 @@ var PageMessage = (function(window, undefined ) {
 				n = 1+parseInt(badge.html());
 			}
 			$(tr).replaceWith( _messageRow(idx, n, now.toLocaleString(),txt,level,dataset) );
+			if (level== "success")
+				setTimeout( function () { $("div#altui-pagemessage  tr[data-idx='" + idx + "']").remove(); }, 5000 );
 		}
 		else {
 			var htmlmsg = _messageRow(_pageMessageIdx, 1, now.toLocaleString(),txt,level,dataset);
@@ -1573,6 +1575,8 @@ var PageMessage = (function(window, undefined ) {
 					jobid : job.id	 	//message for this job, will replace old one
 				}) 
 			);
+			if (job.status==4)
+				setTimeout( function () { $("div#altui-pagemessage  tr[data-jobid='" + job.id + "']").remove(); }, 5000 );
 		}
 		else
 		{
