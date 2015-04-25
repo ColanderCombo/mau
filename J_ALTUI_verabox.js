@@ -108,7 +108,7 @@ var UPnPHelper = (function(window,undefined) {
 				cbfunc(null);
 			}
 			else
-				UIManager.pageMessage( formatAjaxErrorMessage(jqXHR, textStatus), "warning" );				
+				PageMessage.message( formatAjaxErrorMessage(jqXHR, textStatus), "warning" );				
 		})
 		.always(function() {
 		});
@@ -212,9 +212,9 @@ var UPnPHelper = (function(window,undefined) {
 				url = url+"&room="+roomid;
 			_exec( url, function(result) {	
 				if (result!="OK") 
-					UIManager.pageMessage( "Device modify failed!", "warning" );
+					PageMessage.message( "Device modify failed!", "warning" );
 				else
-					UIManager.pageMessage( "Device modified!", "success" );
+					PageMessage.message( "Device modified!", "success" );
 			} );
 		}
 	};
@@ -362,9 +362,9 @@ var UPnPHelper = (function(window,undefined) {
 			})
 			.done(function(data, textStatus, jqXHR) {
 				if (data=="ERROR")
-					UIManager.pageMessage( "Scene action failed!", "warning" );
+					PageMessage.message( "Scene action failed!", "warning" );
 				else {	
-					UIManager.pageMessage( "Scene action succeeded! a LUUP reload will happen now, be patient", "success" );
+					PageMessage.message( "Scene action succeeded! a LUUP reload will happen now, be patient", "success" );
 					_reloadEngine();
 				}
 			})
@@ -388,10 +388,10 @@ var UPnPHelper = (function(window,undefined) {
 			// console.log( JSON.stringify(target));
 			_ModifyUserData( target, function(result) {
 				if (result==null) {
-					UIManager.pageMessage( "Scene action failed!", "warning" );				
+					PageMessage.message( "Scene action failed!", "warning" );				
 				}
 				else {
-					UIManager.pageMessage( "Scene action succeeded! a LUUP reload will happen now, be patient", "success" );			
+					PageMessage.message( "Scene action succeeded! a LUUP reload will happen now, be patient", "success" );			
 				}
 			});
 		}
@@ -454,7 +454,6 @@ var VeraBox = ( function( window, undefined ) {
 	
 	function _reloadEngine()
 	{
-		$("#altui-pagemessage").empty();
 		UPnPHelper.reloadEngine( function(data) {
 			if (data!=null) {
 				// reload worked,  reset all cache
@@ -497,7 +496,7 @@ var VeraBox = ( function( window, undefined ) {
 			// }
 		// })
 		// .fail(function(jqXHR, textStatus) {
-			// UIManager.pageMessage( "VERA did not respond: " + textStatus , "danger");
+			// PageMessage.message( "VERA did not respond: " + textStatus , "danger");
 		// })
 		// .always(function() {
 		// });
@@ -582,7 +581,7 @@ var VeraBox = ( function( window, undefined ) {
 			})
 			.fail(function(jqXHR, textStatus) {
 				_categories = null;
-				UIManager.pageMessage( "VERA did not respond: " + textStatus , "danger");
+				PageMessage.message( "VERA did not respond: " + textStatus , "danger");
 			})
 			.always(function() {
 			});
@@ -629,7 +628,7 @@ var VeraBox = ( function( window, undefined ) {
 			}
 		})
 		.fail(function(jqXHR, textStatus) {
-			UIManager.pageMessage( "VERA did not respond: " + textStatus , "danger");
+			PageMessage.message( "VERA did not respond: " + textStatus , "danger");
 		})
 		.always(function() {
 		});
@@ -808,7 +807,7 @@ var VeraBox = ( function( window, undefined ) {
 		})
 		.fail(function(jqXHR, textStatus) {
 			setTimeout( _refreshEngine, 1000 );
-			UIManager.pageMessage( "VERA did not respond: " + textStatus , "danger");
+			PageMessage.message( "VERA did not respond: " + textStatus , "danger");
 		})
 		.always(function() {
 		});
@@ -903,7 +902,7 @@ var VeraBox = ( function( window, undefined ) {
 		})
 		.fail(function(jqXHR, textStatus) {
 			_dataEngine = setTimeout( _initDataEngine, 1000 );
-			UIManager.pageMessage( "VERA did not respond: " + textStatus , "danger");
+			PageMessage.message( "VERA did not respond: " + textStatus , "danger");
 		})
 		.always(function() {
 			AltuiDebug.debug("_initDataEngine() (user_data) returned.");
@@ -939,14 +938,14 @@ var VeraBox = ( function( window, undefined ) {
 		})
 		  .done(function(data) {
 			if (data!="ERROR") {
-				UIManager.pageMessage("Create Room succeeded for "+name, "success", true);
+				PageMessage.message("Create Room succeeded for "+name, "success", true);
 			}
 			else {
-				UIManager.pageMessage("Could not create Room "+name, "warning");
+				PageMessage.message("Could not create Room "+name, "warning");
 			}
 		  })
 		  .fail(function(jqXHR, textStatus) {
-			UIManager.pageMessage( "Create Room failed: " + textStatus , "danger");
+			PageMessage.message( "Create Room failed: " + textStatus , "danger");
 		  })
 		  .always(function() {
 		  });
@@ -963,14 +962,14 @@ var VeraBox = ( function( window, undefined ) {
 			})
 			  .done(function(data) {
 				if (data!="ERROR") {
-					UIManager.pageMessage("Deleted Room "+id, "success", true);
+					PageMessage.message("Deleted Room "+id, "success", true);
 				}
 				else {
-					UIManager.pageMessage("Could not delete Room "+id, "warning");
+					PageMessage.message("Could not delete Room "+id, "warning");
 				}
 			  })
 			  .fail(function(jqXHR, textStatus) {
-				UIManager.pageMessage( "Delete Room failed: " + textStatus , "danger");
+				PageMessage.message( "Delete Room failed: " + textStatus , "danger");
 			  })
 			  .always(function() {
 			  });
@@ -981,17 +980,16 @@ var VeraBox = ( function( window, undefined ) {
 	{
 		if (id>0) {
 			var url = "data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="+id;
-			$("#altui-pagemessage").empty();
 			var jqxhr = $.ajax( {
 				url: url,
 				type: "GET",
 				dataType: "text"
 			})
 			.done(function() {
-				UIManager.pageMessage("Ran Scene "+id+" successfully", "success");
+				PageMessage.message("Ran Scene "+id+" successfully", "success");
 			})
 			.fail(function(jqXHR, textStatus) {
-				UIManager.pageMessage( "VERA did not respond: " + textStatus , "danger");
+				PageMessage.message( "VERA did not respond: " + textStatus , "danger");
 			})
 			.always(function() {
 			});
@@ -1019,14 +1017,14 @@ var VeraBox = ( function( window, undefined ) {
 			})
 			.done(function(data) {
 				if (data!="ERROR") {
-					UIManager.pageMessage("Deleted Scene "+id+" successfully, please ", "success", true);
+					PageMessage.message("Deleted Scene "+id+" successfully, please ", "success", true);
 				}
 				else {
-					UIManager.pageMessage("Could not delete Scene "+id, "warning");
+					PageMessage.message("Could not delete Scene "+id, "warning");
 				}
 			})
 			.fail(function(jqXHR, textStatus) {
-				UIManager.pageMessage( "Delete Scene failed: " + textStatus , "danger");
+				PageMessage.message( "Delete Scene failed: " + textStatus , "danger");
 			})
 			.always(function() {
 			});
@@ -1359,17 +1357,17 @@ var PageManager = (function() {
 		var names = $.map( _pages, function(page,idx) {	return page.name;	} );
 		VeraBox.saveData( "CustomPages", JSON.stringify(names), function(data) {
 			if (data!="")
-				UIManager.pageMessage("Save Pages success", "success");
+				PageMessage.message("Save Pages success", "success");
 			else
-				UIManager.pageMessage("Save Pages failure", "danger");
+				PageMessage.message("Save Pages failure", "danger");
 		});
 		
 		$.each(_pages, function(idx,page) {
 			VeraBox.saveData( page.name, JSON.stringify(page), function(data) {
 			if (data!="")
-				UIManager.pageMessage("Save for "+page.name+" succeeded.", "success");
+				PageMessage.message("Save for "+page.name+" succeeded.", "success");
 			else
-				UIManager.pageMessage( "Save for "+page.name+" did not succeed." , "danger");
+				PageMessage.message( "Save for "+page.name+" did not succeed." , "danger");
 			});
 		});
 	};
@@ -1400,12 +1398,13 @@ var PageManager = (function() {
 		
 	function _getPageFromName( name ) {
 		var result = null;
-		$.each( _pages, function( idx,page) {
-			if ( page.name==name) {
-				result = page;
-				return false;
-			}
-		});
+		if (name)
+			$.each( _pages, function( idx,page) {
+				if ( page.name==name) {
+					result = page;
+					return false;
+				}
+			});
 		return result;
 	};
 	

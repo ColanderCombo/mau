@@ -502,7 +502,6 @@ local htmlLayout = [[
 		<div class="row">
 			<div class="col-sm-10 col-sm-push-2">
 				<h1 id="altui-pagetitle" >Welcome to VERA Alternate UI</h1>
-				<p id="altui-pagemessage"></p>
 				<div id="dialogs"></div>
 				<div class="altui-mainpanel row">
 				</div>

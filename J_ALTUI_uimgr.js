@@ -188,9 +188,9 @@ var LuaEditor = (function () {
 				VeraBox.runLua(lua, function(result) {
 					alert(result);
 					// if ( result == "Passed")
-						// UIManager.pageMessage( "Test code succeeded", "success");
+						// PageMessage.message( "Test code succeeded", "success");
 					// else
-						// UIManager.pageMessage( "Test code failed", "danger");
+						// PageMessage.message( "Test code failed", "danger");
 				});
 			});
 			
@@ -1324,7 +1324,7 @@ var SceneEditor = function (scene) {
 			LuaEditor.openDialog( scene.triggers[id].lua !=undefined ? scene.triggers[id].lua : "" , function(code){
 				scene.triggers[id].lua = code;
 				_showSaveNeeded();
-				UIManager.pageMessage( "Event Lua code edited, remember to save your changes", "info");
+				PageMessage.message( "Event Lua code edited, remember to save your changes", "info");
 			});
 		});
 		
@@ -1354,7 +1354,7 @@ var SceneEditor = function (scene) {
 			scene.triggers.splice( $(this).prop('id') , 1 );
 			$(this).parents("tr").remove();
 			_showSaveNeeded();
-			UIManager.pageMessage( "Trigger deleted, remember to save your changes", "info");
+			PageMessage.message( "Trigger deleted, remember to save your changes", "info");
 			// VeraBox.setScene(sceneid,scene);
 		});
 		
@@ -1384,7 +1384,7 @@ var SceneEditor = function (scene) {
 					}
 				});
 				$(this).parents("tr").remove();
-				UIManager.pageMessage( "Timer deleted, remember to save your changes", "info");
+				PageMessage.message( "Timer deleted, remember to save your changes", "info");
 				// VeraBox.setScene(sceneid,scene);
 			})
 			.off("click",".altui-edittimer")
@@ -1404,7 +1404,7 @@ var SceneEditor = function (scene) {
 				group.actions.splice( ids[1], 1 );
 				$(this).parents("tr").first().remove();
 				_showSaveNeeded();
-				UIManager.pageMessage( "Action deleted, remember to save your changes", "info");
+				PageMessage.message( "Action deleted, remember to save your changes", "info");
 				// VeraBox.setScene(sceneid,scene);
 			})
 			.off("click",".altui-editaction")
@@ -1431,7 +1431,7 @@ var SceneEditor = function (scene) {
 				$(this).parents("tr").remove();
 				scene.groups.splice( id , 1 );
 				_showSaveNeeded();
-				UIManager.pageMessage( "Group of actions deleted, remember to save your changes", "info");
+				PageMessage.message( "Group of actions deleted, remember to save your changes", "info");
 			})
 			.off("click",".altui-editgroup")
 			.on("click",".altui-editgroup",function(){ 
@@ -1484,6 +1484,154 @@ var SceneEditor = function (scene) {
 	}
 };
 
+// ===========================
+//  Page UI pieces helpers
+// ===========================
+var PageMessage = (function(window, undefined ) {
+	var _badgeTemplate = '<span class="badge">{0}</span>&nbsp;';
+	var _msgTemplate = '<span class="altui-pagemessage-txt" >{0}</span>';
+	var _pageMessageIdx = 0;
+
+	
+	function _toDataset(dataset) {
+		if (dataset == undefined)
+			return '';
+		var lines=[];
+		$.each( dataset, function(key,val) {
+			lines.push( "data-{0}='{1}'".format(key,val));
+		});
+		return lines.join(' ');
+	};			
+	// dataset enables to mark messages and find them back later, it is a {} object translated into data-* attributes
+	function _messageRow(_pageMessageIdx, badge, now,txt,level,dataset)
+	{
+		var close = "<button class='close altui-pagemessage-close' type='button' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
+		var badgehtml = (badge>1) ? _badgeTemplate.format(badge) : "";
+		var htmlmsg = ("<tr data-idx='{0}' {4} class='{3}'><td>"+close+"</td><td>"+badgehtml+"</td><td>{1}</td><td class='altui-pagemessage-txt'>{2}</td></tr>").format( 
+			_pageMessageIdx,
+			now.toLocaleString(),
+			txt.htmlEncode(),
+			level,
+			_toDataset(dataset));
+		return htmlmsg;
+	};	
+
+	function _message(txt,level,bReload,dataset)		
+	{
+		// level =success, info, warning, danger
+		if ((level!="success") &&  (level!="info" ) &&  (level!="warning") &&  (level!="danger"))	{
+			level = "info";
+		}
+
+		//
+		// if same message already exists, simply increase the badge count
+		//
+		var now = new Date();
+		var found = null;				
+		$("div#altui-pagemessage td.altui-pagemessage-txt").each( function(idx,obj) {
+			if (txt == $(obj).html()) {
+				found = $(obj);
+				return false;
+			}
+		});
+		if (found != null)
+		{
+			var tr = $(found).parent();
+			var idx = $(tr).data('idx');
+			var badge = $(tr).find("span.badge");
+			var n = 2;
+			if (badge.length>0)
+			{
+				n = 1+parseInt(badge.html());
+			}
+			$(tr).replaceWith( _messageRow(idx, n, now.toLocaleString(),txt,level,dataset) );
+		}
+		else {
+			var htmlmsg = _messageRow(_pageMessageIdx, 1, now.toLocaleString(),txt,level,dataset);
+			$("div#altui-pagemessage tbody").prepend( htmlmsg );
+			$("div#altui-pagemessage  tr[data-idx='" + _pageMessageIdx + "']").each( function(idx,elem) {
+				var that = $(elem);
+				setTimeout( function() { 
+					$(that).remove(); 
+					} , 5000 );
+			});
+			_pageMessageIdx++;
+		}
+	};
+	
+	function _jobMessage(device,job)
+	{
+		var now = new Date();
+		var txt = "#{0}:{1}:{2}".format(job.id,device.name,job.comments);
+		var tr = $("div#altui-pagemessage tr[data-jobid='"+job.id+"']");
+		if (tr.length>0) {
+			var idx = $(tr).data('idx');
+			var badge = $(tr).find("span.badge");
+			$(tr).replaceWith( 
+				_messageRow(idx, 1, now.toLocaleString(),txt, UIManager.jobStatusToColor( job.status ), {
+					devid : device.id,	//device concerned
+					jobid : job.id	 	//message for this job, will replace old one
+				}) 
+			);
+		}
+		else
+		{
+			// new message
+			_message(
+				txt,
+				UIManager.jobStatusToColor( job.status ),
+				false, 
+				{
+					devid : device.id,	//device concerned
+					jobid : job.id	 	//message for this job, will replace old one
+				}
+			);
+		}
+	};
+	
+	function _clearJobMessage(device)
+	{
+		var devicemessages = $(".altui-pagemessage[data-devid='"+device.id+"']");
+		setTimeout( function() {
+			$(devicemessages).remove();			
+		}, 5000 );
+	};
+
+	function _init() {
+		var Html="";
+		Html+="<div class='' id='altui-pagemessage'>";
+		Html+="	<button id='altui-toggle-messages' class='btn btn-default' type='button' data-toggle='collapse' data-target='#altui-pagemessage-panel' >";
+		Html+="	  Messages&nbsp;<span class='caret'></span>";
+		Html+="	</button>";
+		Html+="	<div class='panel panel-default collapse' id='altui-pagemessage-panel' >";
+		Html+="		<div class='panel-body'>";
+		Html+="			<table class='table table-condensed table-responsive'>";
+		Html+="				<tbody>";
+		Html+="				</tbody>";
+		Html+="			</table>";
+		Html+="		</div>";
+		Html+="	</div>";
+		Html+="</div>";
+		$("#altui-pagetitle").before( Html );
+		// close button for pageMessages
+		$( document ).on( "click", ".altui-pagemessage-close", function() {
+			$(this).closest("tr").remove();
+		});
+	};
+	
+	function _clear() {
+		$("#altui-pagemessage tbody").empty();
+	};
+	
+	return {
+		init			: _init,
+		clear			: _clear,
+		message			: _message, // (txt,level,bReload,dataset)	
+		jobMessage		: _jobMessage,
+		clearJobMessage	: _clearJobMessage,
+	};
+})();
+
 var UIManager  = ( function( window, undefined ) {  
 	//---------------------------------------------------------
 	// private functions
@@ -1494,123 +1642,6 @@ var UIManager  = ( function( window, undefined ) {
 	var _version = "";
 	var _remoteAccessUrl = "";
 
-	// ===========================
-	//  Page UI pieces helpers
-	// ===========================
-	var _badgeTemplate = '<span class="badge">{0}</span>&nbsp;';
-	var _msgTemplate = '<span class="altui-pagemessage-txt" >{0}</span>';
-	var _pageMessageIdx = 0;
-	// dataset enables to mark messages and find them back later, it is a {} object translated into data-* attributes
-	function _pageMessage(txt,level,bReload,dataset)		
-	{
-		function _toDataset(dataset) {
-			if (dataset == undefined)
-				return '';
-			var lines=[];
-			$.each( dataset, function(key,val) {
-				lines.push( "data-{0}='{1}'".format(key,val));
-			});
-			return lines.join(' ');
-		};
-		
-		// level =success, info, warning, danger
-		if ((level!="success") &&  (level!="info" ) &&  (level!="warning") &&  (level!="danger"))	{
-			level = "info";
-		}
-		
-		//
-		// if same message already exists, simply increase the badge count
-		//
-		var found = null;
-		txt = txt.htmlEncode();
-		
-		$("div.altui-pagemessage").each( function(idx,obj) {
-			found = $(obj).find("span.altui-pagemessage-txt");
-			if (txt == found.html())
-				return false;
-			found = null;
-		});
-		if (found != null)
-		{
-			var badge = $(found).parent().find("span.badge");
-			if (badge.length>0)
-			{
-				var n = parseInt(badge.html());
-				badge.html( n+1 );
-			}
-			else
-			{
-				$(found).parent().html( _badgeTemplate.format(2)+_msgTemplate.format(txt) );
-			}
-		}
-		else {
-			var htmlmsg = '<div data-idx="{1}" {2} class="altui-pagemessage alert alert-{0} alert-dismissible" role="alert" >'.format(level,_pageMessageIdx,_toDataset( dataset));
-			htmlmsg += '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
-			htmlmsg += ('<span><span class="altui-pagemessage-txt">{0}</span></span>').format( txt );
-			if (bReload==true) 
-				htmlmsg += smallbuttonTemplate.format('altui-reload','altui-reload','Reload Engine');
-			htmlmsg += "</div>";
-			$("#altui-pagemessage").prepend( htmlmsg);	// most recent message first
-			
-			// add a timer to auto delete
-			$(".altui-pagemessage.alert-success[data-idx='" + _pageMessageIdx + "']").each( function(idx,elem) {
-				var that = $(elem);
-				setTimeout( function() { 
-					$(that).remove(); 
-					} , 5000 );
-			});
-			_pageMessageIdx++;
-		}
-		
-		// remove all success messages older than 1
-		$(".altui-pagemessage.alert-success").each( function(i,o) {
-			if ( $(o).data("idx") <= _pageMessageIdx-3) {
-				$(o).remove();
-			}
-		});
-		
-	};
-	
-	function _jobMessage(device,job)
-	{
-		var message = "#{0}:{1}:{2}".format(job.id,device.name,job.comments);
-		var samejobmessages = $(".altui-pagemessage[data-jobid='"+job.id+"']");
-		if (samejobmessages.length>0) {
-			//reuse message
-			$(samejobmessages).find(".altui-pagemessage-txt").html(message);
-			//update status color
-			$(samejobmessages)
-				.removeClass("alert-info alert-active alert-danger alert-success alert-default")
-				.addClass("alert-"+_jobStatusToColor( job.status ));
-		}
-		else
-		{
-			// new message
-			_pageMessage(
-				message,
-				_jobStatusToColor( job.status ),false, 
-				{
-					devid : device.id,	//device concerned
-					jobid : job.id	 	//message for this job, will replace old one
-				}
-			);
-		}
-		
-		//remove old messages for this device
-		$(".altui-pagemessage[data-devid='"+device.id+"']").each( function(i,o) {
-			if ( $(o).data("jobid") != job.id) {
-				$(o).remove();
-			}
-		});
-	};
-	
-	function _clearJobMessage(device)
-	{
-		var devicemessages = $(".altui-pagemessage[data-devid='"+device.id+"']");
-		setTimeout( function() {
-			$(devicemessages).remove();			
-		}, 5000 );
-	};
 	
 	//var devicecontainerTemplate = "<div class=' col-xs-12 col-sm-6 col-md-4 col-lg-3 '><p data-toggle='tooltip' data-placement='left' title='{2}'>{0} [{1}]</p></div>"
 	
@@ -1843,9 +1874,9 @@ var UIManager  = ( function( window, undefined ) {
 						function ( newid ) {
 							$('#deviceCreateModal').modal('hide');
 							if (newid)
-								UIManager.pageMessage( "Device "+newid+" created successfully", "success");
+								PageMessage.message( "Device "+newid+" created successfully", "success");
 							else
-								UIManager.pageMessage( "Device creation failed", "danger");
+								PageMessage.message( "Device creation failed", "danger");
 						}
 					);
 				}
@@ -2168,7 +2199,7 @@ var UIManager  = ( function( window, undefined ) {
 				devicebodyHtml+= _defaultDeviceDraw(id, device);
 			}
 			// $("div.altui-device#"+id+" div.panel-body" ).append(deviceHtml);
-			deviceHtml = devicecontainerTemplate.format(id,_enhanceDeviceTitle(device,device.name),tooltip,devicebodyHtml,_jobStatusToColor(device.status));
+			deviceHtml = devicecontainerTemplate.format(id,_enhanceDeviceTitle(device,device.name),tooltip,devicebodyHtml,UIManager.jobStatusToColor(device.status));
 			device.dirty=false;
 		}
 		return deviceHtml;
@@ -2633,10 +2664,10 @@ var UIManager  = ( function( window, undefined ) {
 			if (confirm("Are you sure you want to modify this attribute")) {		
 				UPnPHelper.UPnPSetAttr(deviceID, attribute, value,function(result) {
 					if (result==null) {
-						UIManager.pageMessage( "Set Attribute action failed!", "warning" );				
+						PageMessage.message( "Set Attribute action failed!", "warning" );				
 					}
 					else {
-						UIManager.pageMessage( "Set Attribute succeeded! a LUUP reload will happen now, be patient", "success" );			
+						PageMessage.message( "Set Attribute succeeded! a LUUP reload will happen now, be patient", "success" );			
 					}
 				});
 			}
@@ -2798,12 +2829,12 @@ var UIManager  = ( function( window, undefined ) {
 				// draw job information.
 				if (device.Jobs != undefined) {
 					$.each( device.Jobs, function( idx, job ) {
-						UIManager.jobMessage( device,job );
+						PageMessage.jobMessage( device,job );
 					});
 				}
 				else
 				{
-					UIManager.clearJobMessage( device );
+					PageMessage.clearJobMessage( device );
 				}
 			}
 		});
@@ -3579,7 +3610,7 @@ var UIManager  = ( function( window, undefined ) {
 
 	function _getActivePageName() {
 		var pagename = $("#altui-page-tabs li.active").prop('id');
-		return pagename.substring( "altui-page-".length);
+		return pagename != undefined ? pagename.substring( "altui-page-".length) : '';
 	};
 
 	function _createPageTabsHtml( bEditMode ) {
@@ -3669,9 +3700,6 @@ var UIManager  = ( function( window, undefined ) {
 	// UI helpers
 	UI7Check			: function() { return _ui7Check; },
 	RemoteAccessUrl		: function() { return _remoteAccessUrl; },
-	pageMessage			: _pageMessage,
-	jobMessage			: _jobMessage,
-	clearJobMessage		: _clearJobMessage,
 	stoprefreshModes	: _stoprefreshModes,
 	refreshModes		: _refreshModes,
 	
@@ -3679,6 +3707,7 @@ var UIManager  = ( function( window, undefined ) {
 	onoffOnClick 		: _onoffOnClick,
 	
 	//drawing functions
+	jobStatusToColor	: _jobStatusToColor,
 	deviceDraw 			: _deviceDraw,					// draw the mini device on device page; can be customized by a plugin by ["DeviceDrawFunc"]
 	deviceDrawVariables : _deviceDrawVariables,			// draw the device variables
 	deviceDrawActions 	: _deviceDrawActions,			// draw the device Upnp Actions
@@ -3745,6 +3774,7 @@ var UIManager  = ( function( window, undefined ) {
 	clearPage : function(breadcumb,title)
 	{
 		UIManager.stoprefreshModes();
+		PageMessage.clear();
 		$(".navbar-collapse").collapse('hide');
 		$(".altui-breadcrumb").remove();
 		$(".altui-pagefilter").remove();
@@ -3756,7 +3786,6 @@ var UIManager  = ( function( window, undefined ) {
 		else
 			$("#altui-pagetitle").empty();
 		$(".altui-mainpanel").empty();
-		$("#altui-pagemessage").empty();
 		$("#dialogs").empty();
 		$(".altui-leftnav").empty();
 		$(".altui-scripts").remove();
@@ -4112,7 +4141,6 @@ var UIManager  = ( function( window, undefined ) {
 				_drawDevices(deviceFilter);
 			});
 
-			$("#altui-pagemessage").empty();
 			$(".altui-leftnav").empty();
 
 			// create button
@@ -4582,7 +4610,7 @@ var UIManager  = ( function( window, undefined ) {
 		
 		// draw page & toolbox
 		UIManager.clearPage('Edit Pages',"Custom Pages Editor");
-		UIManager.pageMessage("Drag and Drop to add/move/delete controls. use Ctrl+Click or lasso to select multiple controls","info");
+		PageMessage.message("Drag and Drop to add/move/delete controls. use Ctrl+Click or lasso to select multiple controls","info");
 
 		// register dialog
 		$("div#dialogs").append(defaultDialogModalTemplate.format( 'vide', 'vide'));
@@ -4780,9 +4808,9 @@ var UIManager  = ( function( window, undefined ) {
 		this.pageEditorForm("Lua Test Code","return true","Submit",function(lua) {
 			VeraBox.runLua(lua, function(result) {
 				if ( result == "Passed")
-					UIManager.pageMessage( "Test code succeeded", "success");
+					PageMessage.message( "Test code succeeded", "success");
 				else
-					UIManager.pageMessage( "Test code failed", "danger");
+					PageMessage.message( "Test code failed", "danger");
 			});
 		});
 	},
@@ -4915,15 +4943,7 @@ $(document).ready(function() {
 	  /*if (window.innerWidth > tabletSize) */
 	  $(".navbar-collapse").collapse('hide');
 	  UIManager.refreshUI( true ,false  );	// full but not first time
-	})
-
-	// $("#menu_room,#menu_device,#menu_scene,#menu_plugins,#menu_custom,#menu_plugins").toggle();-
-	// @font-face {	\
-	  // font-family: OpenSansLight;		\
-	  // src: url('//"+window.location.hostname+"/cmh/skins/default/fonts/OpenSans-Light-webfont.woff') format('woff');		\
-	  // font-weight: normal;		\
-	  // font-style: normal;		\
-	// }							
+	});			
 	
 	var styles ="					\
 	.solid-border {	\
@@ -4934,6 +4954,15 @@ $(document).ready(function() {
 		max-height:100%;\
 		height:100%;\
 	}					\
+	#altui-toggle-messages { \
+		margin-bottom: 5px;				\
+	} \
+	div#altui-pagemessage-panel {	\
+		max-height:100px;	\
+		height:100px;		\
+		background-color: #f5f5f5;	\
+		overflow-y: auto; 			\
+	}						\
 	.altui-leftnav .altui-edittoolbox { \
 		border:1px solid;: 0px;\
 		margin-top: -1px;		\
@@ -5152,17 +5181,17 @@ $(document).ready(function() {
 	AltuiDebug.debug("starting engines");
 	AltuiDebug.debug("Configuration: "+JSON.stringify(g_DeviceTypes));
 	AltuiDebug.debug("Custom Pages: "+JSON.stringify(g_CustomPages));
+	PageMessage.init();
 	VeraBox.initEngine(  );
 	UIManager.initEngine(styles.format(window.location.hostname), g_DeviceTypes);
 	UIManager.initCustomPages(g_CustomPages);
-	
 	$( window ).unload(function() {
 		// save state to accelerate the launch next time
 		// UIManager.saveEngine();	
 		VeraBox.saveEngine();
 		AltuiDebug.debug("exiting");
 	});
-
+	
 	// collapse on click on small screens
 	$(".navbar-nav a").on("click",function() {
 		//	$(".navbar-toggle").click();
