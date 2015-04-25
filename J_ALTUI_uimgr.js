@@ -1551,7 +1551,7 @@ var PageMessage = (function(window, undefined ) {
 		else {
 			var htmlmsg = _messageRow(_pageMessageIdx, 1, now.toLocaleString(),txt,level,dataset);
 			$("div#altui-pagemessage tbody").prepend( htmlmsg );
-			$("div#altui-pagemessage  tr[data-idx='" + _pageMessageIdx + "']").each( function(idx,elem) {
+			$("div#altui-pagemessage  tr.success[data-idx='" + _pageMessageIdx + "']").each( function(idx,elem) {
 				var that = $(elem);
 				setTimeout( function() { 
 					$(that).remove(); 
@@ -1618,9 +1618,14 @@ var PageMessage = (function(window, undefined ) {
 		Html+="</div>";
 		$("#altui-pagetitle").before( Html );
 		// close button for pageMessages
-		$( document ).on( "click", ".altui-pagemessage-close", function() {
-			$(this).closest("tr").remove();
-		});
+		$( document )
+			.on( "click", ".altui-pagemessage-close", function() {
+				$(this).closest("tr").remove();
+			})
+			.on( "click", "#altui-toggle-messages", function() {
+				$(this).find("span").toggleClass( "caret-reversed" );
+			})
+			
 	};
 	
 	function _clear() {
