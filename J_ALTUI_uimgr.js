@@ -2,7 +2,7 @@
 // http://192.168.1.16:3480/data_request?id=lr_ALTUI_Handler&command=home
 // This program is free software: you can redistribute it and/or modify
 // it under the condition that it is for private or home useage and 
-// this whole comment is reproduced in the source code file.
+// this whole comment is reproduced in the source code file
 // Commercial utilisation is not authorized without the appropriate
 // written agreement from amg0 / alexis . mermet @ gmail . com
 // This program is distributed in the hope that it will be useful,
@@ -1533,7 +1533,7 @@ var PageMessage = (function(window, undefined ) {
 				found = $(obj);
 				return false;
 			}
-		});
+		}); 
 		if (found != null)
 		{
 			var tr = $(found).parent();
