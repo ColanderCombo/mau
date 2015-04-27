@@ -168,9 +168,9 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 
 		var html = "";
 		html += "<div class='pull-right'><div id='altui-wc-"+device.id+"' class='btn-group altui-windowcover' role='group' aria-label='...'>";
-		html += "  <button id ='altui-window-Up' type='button' class='altui-window-btn btn btn-default btn-sm {0}'>Up</button>".format( (status==100) ? 'active' : '' );
-		html += "  <button id ='altui-window-Stop' type='button' class='altui-window-btn btn btn-default btn-sm'>Stop</button>";
-		html += "  <button id ='altui-window-Down' type='button' class='altui-window-btn btn btn-default btn-sm {0}'>Down</button>".format( (status==0) ? 'active' : '' );
+		html += ("  <button id ='altui-window-Up' type='button' class='altui-window-btn btn btn-default btn-sm {0}'>"+_T("Up")+"</button>").format( (status==100) ? 'active' : '' );
+		html += ("  <button id ='altui-window-Stop' type='button' class='altui-window-btn btn btn-default btn-sm'>"+_T("Stop")+"</button>");
+		html += ("  <button id ='altui-window-Down' type='button' class='altui-window-btn btn btn-default btn-sm {0}'>"+_T("Down")+"</button>").format( (status==0) ? 'active' : '' );
 		html += "</div>";
 		html += "</div>";
 		
@@ -209,7 +209,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		if (_isBusyStatus(device))  {  
 			status = -1;
 		}
-		html += _createOnOffButton( status,"altui-onoffbtn-"+devid , "OFF,ON" , "pull-right");
+		html += _createOnOffButton( status,"altui-onoffbtn-"+devid , _T("OFF,ON") , "pull-right");
 		
 		// dimming
 		html+=("<div id='slider-{0}' class='altui-dimmable-slider' style='width: "+sliderwidth+"px;' ></div>").format(devid);
@@ -235,7 +235,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	function _drawDoorLock(devid, device) {
 		var status = VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:DoorLock1', 'Status' );
 		var html ="";
-		html += ALTUI_PluginDisplays.createOnOffButton( status,"altui-onoffbtn-"+devid, "Unlock,Lock" , "pull-right");
+		html += ALTUI_PluginDisplays.createOnOffButton( status,"altui-onoffbtn-"+devid, _T("Unlock,Lock") , "pull-right");
 
 		html += "<script type='text/javascript'>";
 		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleDoorLock({0},'div#altui-onoffbtn-{0}'); } );".format(devid);
@@ -262,7 +262,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			// status = -1;
 		// }
 		var armed = parseInt(VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Armed' )); 
-		html += _createOnOffButton( armed,"altui-onoffbtn-"+devid, "Bypass,Arm", "pull-right" );
+		html += _createOnOffButton( armed,"altui-onoffbtn-"+devid, _T("Bypass,Arm"), "pull-right" );
 		
 		// armed
 		html += "<script type='text/javascript'>";
@@ -288,7 +288,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		if ( _isBusyStatus(device) )  {  
 			status = -1;
 		}
-		html += _createOnOffButton( status,"altui-onoffbtn-"+devid, "OFF,ON" , "pull-right");
+		html += _createOnOffButton( status,"altui-onoffbtn-"+devid, _T("OFF,ON") , "pull-right");
 		
 		html += "<script type='text/javascript'>";
 		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleOnOffButton({0},'div#altui-onoffbtn-{0}'); } );".format(devid);
@@ -313,7 +313,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var html ="";
 		var status = parseInt( VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status') );
 		var expiryDate =  VeraBox.getStatus( devid, 'urn:futzle-com:serviceId:HolidayVirtualSwitch1', 'OverrideExpiryDate');
-		html+= "<div class='altui-watts '>{0}</div>".format( (status==1) ? "Holiday" : "Working" );
+		html+= "<div class='altui-watts '>{0}</div>".format( (status==1) ? _T("Holiday") : _T("Working") );
 		html+= "<div class=''>{0}</div>".format( expiryDate );
 		return html;
 	};
@@ -323,7 +323,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var condition = VeraBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'Condition');
 		var wind = VeraBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'WindCondition');
 		html+= "<div class='altui-weather-text'>{0}</div>".format( condition );
-		html+= "<div class='altui-weather-text'>Wind: {0}</div>".format( wind );
+		html+= ("<div class='altui-weather-text'>"+_T("Wind")+": {0}</div>").format( wind );
 		return html;
 	};
 	
@@ -339,7 +339,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var pattern = VeraBox.getStatus( devid, 'urn:a-lurker-com:serviceId:InfoViewer1', 'LuaPattern');
 		if (pattern!="")
 			html+= "<span class=''>Pattern: {0}</span>".format( pattern.htmlEncode() );
-		html+="<button type='button' class='pull-right altui-infoviewer-log btn btn-default btn-sm '>Open</button>" ;
+		html+="<button type='button' class='pull-right altui-infoviewer-log btn btn-default btn-sm '>"+_T("Open")+"</button>" ;
 		html += "<script type='text/javascript'>";
 		html += " $('div.altui-device#{0} button.altui-infoviewer-log').on('click', function() { window.open('data_request?id=lr_al_info','_blank'); } );".format(devid);
 		html += "</script>";

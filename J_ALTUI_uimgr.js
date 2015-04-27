@@ -1236,7 +1236,7 @@ var SceneEditor = function (scene) {
 			if (scene.modeStatus==undefined)
 				scene.modeStatus="";
 			var modes = scene.modeStatus.split(',');
-			html += "<label for='altui-scene-mode-input'>Runs in mode :</Label>";
+			html += "<label for='altui-scene-mode-input'>"+_T("Runs in mode")+" :</Label>";
 			html += "<div class='btn-group'>";
 			$.each(_HouseModes, function(idx,mode) {
 				var select = ($.inArray( mode.id.toString(), modes) == -1) ? "preset_unselected" : "preset_selected";
@@ -2234,7 +2234,7 @@ var UIManager  = ( function( window, undefined ) {
 		scenecontainerTemplate	+=  "<div class='panel-body altui-scene-body'>{3} <small class='text-muted pull-right'>{4}</small><small style='clear: right;' class='text-info pull-right'>{5}</small></div>";
 		scenecontainerTemplate	+=  "</div>";
 
-		var runButtonHtml = buttonTemplate.format( scene.id, 'altui-runscene pull-left', "Run "+runGlyph,'primary');
+		var runButtonHtml = buttonTemplate.format( scene.id, 'altui-runscene pull-left', _T("Run")+"&nbsp;"+runGlyph,'primary');
 		var editButtonHtml = buttonTemplate.format( scene.id, 'altui-editscene pull-left', wrenchGlyph,'default');
 		return scenecontainerTemplate.format(scene.id, label, 'tooltip', runButtonHtml + editButtonHtml , lastrun, nextrun);
 	};
@@ -3844,7 +3844,7 @@ var UIManager  = ( function( window, undefined ) {
 		formHtml+=" <div class='input-group col-sm-6'>";
 		formHtml+="       <input id='altui-create-room-name' type='text' class='form-control' placeholder='Room name...'>";
 		formHtml+="       <span class='input-group-btn'>";
-		formHtml+="         <button id='altui-create-room' class='btn btn-default' type='button'>Create "+plusGlyph+"</button>";
+		formHtml+="         <button id='altui-create-room' class='btn btn-default' type='button'>"+_T("Create")+plusGlyph+"</button>";
 		formHtml+="       </span>";
 		formHtml+="     </div><!-- /input-group -->";
 	
@@ -4057,7 +4057,7 @@ var UIManager  = ( function( window, undefined ) {
 			toolbatrHtml+="    Filter <span class='caret'></span>";
 			toolbatrHtml+="  </button>";			
 			toolbatrHtml+="  <button type='button' class='btn btn-default' id='altui-device-create' >";
-			toolbatrHtml+=("    Create "+plusGlyph);
+			toolbatrHtml+=(_T("Create")+"&nbsp;"+plusGlyph);
 			toolbatrHtml+="  </button>";			
 
 			UIManager.clearPage(_T('Devices'),"Devices "+toolbatrHtml);
@@ -4264,7 +4264,7 @@ var UIManager  = ( function( window, undefined ) {
 			UIManager.clearPage(_T('Scenes'),_T("Scenes"));
 			var toolbatrHtml="";
 			toolbatrHtml+="  <button type='button' class='btn btn-default' id='altui-scene-create' >";
-			toolbatrHtml+=("    Create "+plusGlyph);
+			toolbatrHtml+=(_T("Create")+"&nbsp;"+plusGlyph);
 			toolbatrHtml+="  </button>";			
 			$("#altui-pagetitle").append(toolbatrHtml);
 
@@ -4973,33 +4973,33 @@ body+="	</div>";
 body+="	<div id='navbar' class='navbar-collapse collapse'>";
 body+="	  <ul class='nav navbar-nav'>";
 body+="		<li class='active'><div class='imgLogo'></div></li>";
-body+="		<li><a id='menu_room' href='#'  >Rooms</a></li>";
-body+="		<li><a id='menu_device' href='#'  >Devices</a></li>";
-body+="		<li><a id='menu_scene' href='#'  >Scenes</a></li>";
-body+="		<li><a id='menu_plugins' href='#'  >Plugins</a></li>";
+body+="		<li><a id='menu_room' href='#'  >"+_T("Rooms")+"</a></li>";
+body+="		<li><a id='menu_device' href='#'  >"+_T("Devices")+"</a></li>";
+body+="		<li><a id='menu_scene' href='#'  >"+_T("Scenes")+"</a></li>";
+body+="		<li><a id='menu_plugins' href='#'  >"+_T("Plugins")+"</a></li>";
 body+="		<li class='dropdown'>";
-body+="			<a href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-expanded='false'>Custom Pages <span class='caret'></span></a>";
+body+="			<a href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-expanded='false'>"+_T("Custom Pages")+" <span class='caret'></span></a>";
 body+="			<ul class='dropdown-menu' role='menu'>";
-body+="				<li><a id='altui-pages-see' href='#' >Use Custom Pages</a></li>";
-body+="				<li><a id='altui-pages-edit' href='#' >Edit Custom Pages</a></li>";
+body+="				<li><a id='altui-pages-see' href='#' >"+_T("Use Custom Pages")+"</a></li>";
+body+="				<li><a id='altui-pages-edit' href='#' >"+_T("Edit Custom Pages")+"</a></li>";
 body+="			</ul>";
 body+="		</li>";
 body+="		<li class='dropdown'>";
-body+="		  <a href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-expanded='false'>More... <span class='caret'></span></a>";
+body+="		  <a href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-expanded='false'>"+_T("More")+"... <span class='caret'></span></a>";
 body+="		  <ul class='dropdown-menu' role='menu'>";
-body+="			<li><a id='altui-remoteaccess' href='#' >Remote Access Login</a></li>";
-body+="			<li><a id='altui-reload' href='#' >Reload Luup Engine</a></li>";
+body+="			<li><a id='altui-remoteaccess' href='#' >"+_T("Remote Access Login")+"</a></li>";
+body+="			<li><a id='altui-reload' href='#' >"+_T("Reload Luup Engine")+"</a></li>";
 body+="			<li class='divider'></li>";
 body+="			<li class='dropdown-header'>Lua</li>";
-body+="			<li><a id='altui-luastart' href='#' >Lua Startup Code</a></li>";
-body+="			<li><a id='altui-luatest' href='#' >Lua Test Code</a></li>";
+body+="			<li><a id='altui-luastart' href='#' >"+_T("Lua Startup Code")+"</a></li>";
+body+="			<li><a id='altui-luatest' href='#' >"+_T("Lua Test Code")+"</a></li>";
 body+="			<li class='divider'></li>";
 body+="			<li class='dropdown-header'>Admin</li>";
-body+="			<li><a id='altui-optimize' href='#'>Optimizations</a></li>";
-body+="			<li><a id='altui-localize' href='#'>Localization</a></li>";
+body+="			<li><a id='altui-optimize' href='#'>"+_T("Optimizations")+"</a></li>";
+body+="			<li><a id='altui-localize' href='#'>"+_T("Localization")+"</a></li>";
 body+="			<li class='divider'></li>";
-body+="			<li class='dropdown-header'>Misc</li>";
-body+="			<li><a id='altui-credits' href='#'>Credits</a></li>";
+body+="			<li class='dropdown-header'>"+_T("Misc")+"</li>";
+body+="			<li><a id='altui-credits' href='#'>"+_T("Credits")+"</a></li>";
 body+="		  </ul>";
 body+="		</li>";
 body+="	  </ul>";
@@ -5009,7 +5009,7 @@ body+="</nav>";
 body+="<div class='container-fluid theme-showcase' role='main'>";
 body+="	<div class='row'>";
 body+="		<div class='col-sm-10 col-sm-push-2'>";
-body+="			<h1 id='altui-pagetitle' >Welcome to VERA Alternate UI</h1>";
+body+="			<h1 id='altui-pagetitle' >"+_T("Welcome to VERA Alternate UI")+"</h1>";
 body+="			<div id='dialogs'></div>";
 body+="			<div class='altui-mainpanel row'>";
 body+="			</div>";
