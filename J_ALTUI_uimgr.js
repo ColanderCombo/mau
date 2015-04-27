@@ -1795,17 +1795,12 @@ var UIManager  = ( function( window, undefined ) {
 	function _enhanceValue(value) 
 	{
 		//try to guess what is the value
-		if ($.isNumeric(value) && value>=1035615941 && value <= 4035615941) {
-			var date = new Date(value*1000);
-			return date.toLocaleString();
-			// var iso = "{0}/{1}/{2} {3}:{4}:{5}".format(
-				// date.getFullYear(),
-				// _format(date.getMonth()+1),
-				// _format(date.getDate()),
-				// _format(date.getHours()),
-				// _format(date.getMinutes()),
-				// _format(date.getSeconds())
-			// );
+		if ($.isNumeric(value)) {
+			if ( value>=1035615941 && value <= 4035615941) {
+				var date = new Date(value*1000);
+				return date.toLocaleString();
+			}
+			return value;
 		} else if ( (value.indexOf("http") === 0) || (value.indexOf("https") === 0) || (value.indexOf("ftp") === 0) ) {
 			return "<a href='{0}'>{0}</a>".format(value);
 		}
@@ -3739,20 +3734,20 @@ var UIManager  = ( function( window, undefined ) {
 	// breadcumb
 	breadCumb: function( title , param ) {
 		var tbl = [
-			{ id:0, title:'Home', onclick:'UIManager.pageHome()', 		parent:-1},
-			{ id:1, title:'Rooms', onclick:'UIManager.pageRooms()', 	parent:0 },
-			{ id:2, title:'Devices', onclick:'UIManager.pageDevices()', parent:0 },
-			{ id:5, title:'Control Panel', onclick:'UIManager.pagexxx()', parent:2 },
-			{ id:6, title:'Scenes', onclick:'UIManager.pageScenes()', 	parent:0 },
-			{ id:7, title:'Scene Edit', onclick:'UIManager.pageSceneEdit()', parent:6 },
-			{ id:8, title:'Plugins', onclick:'UIManager.pagePlugins()', parent:0 },
-			{ id:9, title:'Custom Pages', onclick:'UIManager.pageUsePages()', parent:0 },
-			{ id:10, title:'Edit Pages', onclick:'UIManager.pageEditPages()', parent:0 },
-			{ id:11, title:'Credits', onclick:'UIManager.pageCredits()', parent:0 },
-			{ id:12, title:'LuaTest', onclick:'UIManager.pageLuaTest()', parent:0 },
-			{ id:13, title:'LuaStart', onclick:'UIManager.pageLuaStart()', parent:0 },
-			{ id:14, title:'Optimize', onclick:'UIManager.pageOptimize()', parent:0 },
-			{ id:15, title:'Editor', onclick:'UIManager.pageEditor()', parent:8 },
+			{ id:0, title:_T('Home'), onclick:'UIManager.pageHome()', 		parent:-1},
+			{ id:1, title:_T('Rooms'), onclick:'UIManager.pageRooms()', 	parent:0 },
+			{ id:2, title:_T('Devices'), onclick:'UIManager.pageDevices()', parent:0 },
+			{ id:5, title:_T('Control Panel'), onclick:'UIManager.pagexxx()', parent:2 },
+			{ id:6, title:_T('Scenes'), onclick:'UIManager.pageScenes()', 	parent:0 },
+			{ id:7, title:_T('Scene Edit'), onclick:'UIManager.pageSceneEdit()', parent:6 },
+			{ id:8, title:_T('Plugins'), onclick:'UIManager.pagePlugins()', parent:0 },
+			{ id:9, title:_T('Custom Pages'), onclick:'UIManager.pageUsePages()', parent:0 },
+			{ id:10, title:_T('Edit Pages'), onclick:'UIManager.pageEditPages()', parent:0 },
+			{ id:11, title:_T('Credits'), onclick:'UIManager.pageCredits()', parent:0 },
+			{ id:12, title:_T('LuaTest'), onclick:'UIManager.pageLuaTest()', parent:0 },
+			{ id:13, title:_T('LuaStart'), onclick:'UIManager.pageLuaStart()', parent:0 },
+			{ id:14, title:_T('Optimize'), onclick:'UIManager.pageOptimize()', parent:0 },
+			{ id:15, title:_T('Editor'), onclick:'UIManager.pageEditor()', parent:8 },
 		];
 		
 		function _parentsOf(child) {
@@ -3808,7 +3803,7 @@ var UIManager  = ( function( window, undefined ) {
 	//window.open("data_request?id=lr_ALTUI_Handler&command=home","_self");
 	pageHome : function()
 	{
-		UIManager.clearPage('Home',"Welcome to VERA Alternate UI");
+		UIManager.clearPage(_T('Home'),_T("Welcome to VERA Alternate UI"));
 		UIManager.drawHouseMode();
 
 	},
@@ -3844,7 +3839,7 @@ var UIManager  = ( function( window, undefined ) {
 	// ===========================
 	pageRooms : function ()
 	{
-		UIManager.clearPage('Rooms',"Rooms");
+		UIManager.clearPage(_T('Rooms'),_T("Rooms"));
 		var formHtml="";
 		formHtml+=" <div class='input-group col-sm-6'>";
 		formHtml+="       <input id='altui-create-room-name' type='text' class='form-control' placeholder='Room name...'>";
@@ -3889,7 +3884,7 @@ var UIManager  = ( function( window, undefined ) {
 		var device = VeraBox.getDeviceByID( devid );
 		var category = VeraBox.getCategoryTitle( device.category_num );
 
-		UIManager.clearPage('Control Panel',"{0} <small>{1} <small>#{2}</small></small>".format( device.name , category ,devid));
+		UIManager.clearPage(_T('Control Panel'),"{0} <small>{1} <small>#{2}</small></small>".format( device.name , category ,devid));
 
 		// Draw toolbar : room selection and attribute show toggle button
 		var htmlRoomSelect = "<select id='altui-room-list' class='form-control '>";
@@ -4065,7 +4060,7 @@ var UIManager  = ( function( window, undefined ) {
 			toolbatrHtml+=("    Create "+plusGlyph);
 			toolbatrHtml+="  </button>";			
 
-			UIManager.clearPage('Devices',"Devices "+toolbatrHtml);
+			UIManager.clearPage(_T('Devices'),"Devices "+toolbatrHtml);
 			
 			// Dialogs
 			$(".altui-mainpanel").append(deviceModalTemplate.format( '', '', 0 ));
@@ -4266,7 +4261,7 @@ var UIManager  = ( function( window, undefined ) {
 		
 		function _drawScenes( filterfunc )
 		{
-			UIManager.clearPage('Scenes',"Scenes");
+			UIManager.clearPage(_T('Scenes'),_T("Scenes"));
 			var toolbatrHtml="";
 			toolbatrHtml+="  <button type='button' class='btn btn-default' id='altui-scene-create' >";
 			toolbatrHtml+=("    Create "+plusGlyph);
@@ -4309,7 +4304,7 @@ var UIManager  = ( function( window, undefined ) {
 		var scene = jQuery.extend(true, {timers:[], triggers:[], groups:[] }, orgscene);
 
 		// clear page
-		UIManager.clearPage('Scene Edit',sceneid!=undefined ? "Edit Scene #"+scene.id : "Create Scene");
+		UIManager.clearPage(_T('Scene Edit'),sceneid!=undefined ? "Edit Scene #"+scene.id : "Create Scene");
 
 		// register dialog
 		$("div#dialogs").append(defaultDialogModalTemplate.format( 'vide', 'vide'));
@@ -4336,7 +4331,7 @@ var UIManager  = ( function( window, undefined ) {
 			return 0;
 		};
 		
-		UIManager.clearPage('Plugins',"Plugins");
+		UIManager.clearPage(_T('Plugins'),_T("Plugins"));
 
 		function _getFileButton(plugin) {
 			var html = "";
@@ -4426,7 +4421,7 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		// var pages = g_CustomPages;
 		// PageManager.init(g_CustomPages);
-		UIManager.clearPage('Custom Pages');
+		UIManager.clearPage(_T('Custom Pages'));
 		// $("#altui-pagetitle").text("Your Custom Pages");
 
 		var pageTabs = _createPageTabsHtml();
@@ -4622,7 +4617,7 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		
 		// draw page & toolbox
-		UIManager.clearPage('Edit Pages',"Custom Pages Editor");
+		UIManager.clearPage(_T('Edit Pages'),_T("Custom Pages Editor"));
 		PageMessage.message("Drag and Drop to add/move/delete controls. use Ctrl+Click or lasso to select multiple controls","info");
 
 		// register dialog
@@ -4732,7 +4727,7 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pageWip: function ()
 	{
-		UIManager.clearPage('Wip',"Work In Progress");
+		UIManager.clearPage(_T('Wip'),_T("Work In Progress"));
 		$(".altui-mainpanel").append("<h3>Sorry this is not yet implemented</h3>");
 	},
 
@@ -4750,7 +4745,7 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pageCredits: function ()
 	{
-		UIManager.clearPage('Credits',"Credits");
+		UIManager.clearPage(_T('Credits'),_T("Credits"));
 		
 		var tbl = [
 			["GetVera","http://getvera.com/","the zWave Getaway and backend platform"],
@@ -4806,7 +4801,7 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pageEditor: function (filename,txt,button,cbfunc)
 	{
-		UIManager.clearPage('Editor', filename);
+		UIManager.clearPage(_T('Editor'), filename);
 		$(".altui-mainpanel").append("<p> </p>");
 		this.pageEditorForm(filename,txt,button,function(newtxt) {
 			if ($.isFunction(cbfunc)) 
@@ -4816,7 +4811,7 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pageLuaTest: function ()
 	{
-		UIManager.clearPage('LuaTest',"LUA Code Test");
+		UIManager.clearPage(_T('LuaTest'),_T("LUA Code Test"));
 		$(".altui-mainpanel").append("<p>This test code will succeed if it is syntactically correct and does not return false. an error in the code or a return false will trigger a failure</p>");
 		this.pageEditorForm("Lua Test Code","return true","Submit",function(lua) {
 			VeraBox.runLua(lua, function(result) {
@@ -4830,7 +4825,7 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pageLuaStart: function ()
 	{
-		UIManager.clearPage('LuaStart',"LUA Startup");
+		UIManager.clearPage(_T('LuaStart'),_T("LUA Startup"));
 		var lua = VeraBox.getLuaStartup();
 		this.pageEditorForm("Lua Startup Code",lua,"Submit",function(newlua) {
 			if (newlua!=lua) {
@@ -4878,7 +4873,7 @@ var UIManager  = ( function( window, undefined ) {
 	},
 	
 	pageOptimize: function() {
-		UIManager.clearPage('Optimize',"Optimizations");
+		UIManager.clearPage(_T('Optimize'),_T("Optimizations"));
 
 		var color = IconDB.isDB() ? "text-success" : "text-danger";
 		var okGlyph = glyphTemplate.format( "ok-sign", "OK" , color );
@@ -4951,6 +4946,10 @@ var UIManager  = ( function( window, undefined ) {
 })( window );
 
 // UIManager.loadScript('https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["corechart","table","gauge"]}]}');
+var language = window.navigator.userLanguage || window.navigator.language;
+if (language != 'en')
+	UIManager.loadScript('J_ALTUI_loc_'+ language + '.js' );
+
 $(document).ready(function() {
 	$(window).on('resize', function () {
 	  /*if (window.innerWidth > tabletSize) */
@@ -4997,6 +4996,7 @@ body+="			<li><a id='altui-luatest' href='#' >Lua Test Code</a></li>";
 body+="			<li class='divider'></li>";
 body+="			<li class='dropdown-header'>Admin</li>";
 body+="			<li><a id='altui-optimize' href='#'>Optimizations</a></li>";
+body+="			<li><a id='altui-localize' href='#'>Localization</a></li>";
 body+="			<li class='divider'></li>";
 body+="			<li class='dropdown-header'>Misc</li>";
 body+="			<li><a id='altui-credits' href='#'>Credits</a></li>";
@@ -5311,34 +5311,34 @@ $("body").prepend(body);
 	});
 
 	$(".altui-debug-div").toggle(false);
-	$( document ).on( "click", "#altui-debug-btn", function() {
-		$(".altui-debug-div").toggle();
-		$("#altui-debug-btn span.caret").toggleClass( "caret-reversed" );
-	});
 	
-	$( document ).on( "click", "#altui-reload", function() {
-		VeraBox.reloadEngine();
-	});
-	$( document ).on( "click", "#altui-remoteaccess", function() {
-		UIManager.pageRemoteAccess();
-	});
-	$( document ).on( "click", "#altui-credits", function() {
-		UIManager.pageCredits();
-	});
-	$( document ).on( "click", "#altui-luastart", function() {
-		UIManager.pageLuaStart();
-	});
-	$( document ).on( "click", "#altui-luatest", function() {
-		UIManager.pageLuaTest();
-	});
-	$( document ).on( "click", "#altui-optimize", function() {
-		UIManager.pageOptimize();
-	});
-	/*
-	$(document).mousemove(function(event){
-		$("#debug").text(event.pageX + ", " + event.pageY);
-	});
-	*/
+	$( document )
+		.on( "click", "#altui-debug-btn", function() {
+			$(".altui-debug-div").toggle();
+			$("#altui-debug-btn span.caret").toggleClass( "caret-reversed" );
+		})
+		.on( "click", "#altui-reload", function() {
+			VeraBox.reloadEngine();
+		})
+		.on( "click", "#altui-remoteaccess", function() {
+			UIManager.pageRemoteAccess();
+		})
+		.on( "click", "#altui-credits", function() {
+			UIManager.pageCredits();
+		})
+		.on( "click", "#altui-luastart", function() {
+			UIManager.pageLuaStart();
+		})
+		.on( "click", "#altui-luatest", function() {
+			UIManager.pageLuaTest();
+		})
+		.on( "click", "#altui-optimize", function() {
+			UIManager.pageOptimize();
+		})
+		.on( "click", "#altui-localize", function() {
+			Localization.dump();
+		});
+
 	UIManager.pageHome();
 	AltuiDebug.debug("init done");
 });

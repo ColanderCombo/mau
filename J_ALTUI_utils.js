@@ -9,6 +9,42 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 
+var Localization = ( function (undefined) {
+	var _unknown_terms = {};
+	var _terms = {};
+	
+	__T =  function(t) {
+		var v =_terms[t]
+		if (v)
+			return v;
+		_unknown_terms[t] = t;
+		return t;
+	};
+	
+	_initTerms = function(terms) {
+		_terms = $.extend({},terms);
+		_unknown_terms = {};
+	};
+	
+	_dumpTerms = function() {
+		if (AltuiDebug.IsDebug()) {
+			console.log( JSON.stringify(_unknown_terms) );
+			console.log( JSON.stringify(_terms) );
+		}
+		UIManager.pageEditorForm("Localization unknown terms",JSON.stringify(_unknown_terms),"Close",function() {
+			UIManager.pageHome();
+		});
+	};
+	
+	return {
+		_T : __T,
+		init : _initTerms,
+		dump : _dumpTerms
+	}
+})();
+
+_T = Localization._T;
+
 if (typeof RegExp.escape == 'undefined') {
 	RegExp.escape = function(string) {
 	  return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')

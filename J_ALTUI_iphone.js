@@ -25,7 +25,7 @@ var ALTUI_IPhoneLocator= ( function( window, undefined ) {
 		var debug = VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:altui1', 'Debug' ); 
 		
 		var html ="";
-		html += ALTUI_PluginDisplays.createOnOffButton( debug,"altui-onoffbtn-"+devid, "Normal,Debug" , "pull-right");
+		html += ALTUI_PluginDisplays.createOnOffButton( debug,"altui-onoffbtn-"+devid, _T("Normal,Debug") , "pull-right");
 		html += "<script type='text/javascript'>";
 		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_IPhoneLocator.toggleDebug({0},'div#altui-onoffbtn-{0}'); } );".format(devid);
 		html += "</script>";
@@ -43,7 +43,7 @@ var ALTUI_IPhoneLocator= ( function( window, undefined ) {
 		html+=("<span class='altui-iphone' > "+dist+" </span>");
 		html+=("<small > "+unit+" </small>");
 
-		html += ALTUI_PluginDisplays.createOnOffButton( mute,"altui-onoffbtn-"+devid, "Unmuted,Muted" , "pull-right");
+		html += ALTUI_PluginDisplays.createOnOffButton( mute,"altui-onoffbtn-"+devid, _T("Unmuted,Muted") , "pull-right");
 		html += "<script type='text/javascript'>";
 		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_IPhoneLocator.toggleMute({0},'div#altui-onoffbtn-{0}'); } );".format(devid);
 		html += "</script>";
@@ -55,7 +55,7 @@ var ALTUI_IPhoneLocator= ( function( window, undefined ) {
 		var channel = VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:cplus1', 'CurrentChannel' ).split(','); 
 		var present = VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:cplus1', 'Present' );
 		var html ="";
-		html += ALTUI_PluginDisplays.createOnOffButton( present,"altui-onoffbtn-"+devid, "OFF,ON", "pull-right" );
+		html += ALTUI_PluginDisplays.createOnOffButton( present,"altui-onoffbtn-"+devid, _T("OFF,ON"), "pull-right" );
 		if (channel.length>=2)
 			html+=("<div class='altui-canalplus' >{0}</div><span><small>{1}</small></span>".format(channel[1],channel[0]));
 
