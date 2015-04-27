@@ -2924,7 +2924,7 @@ var UIManager  = ( function( window, undefined ) {
 		_initDB(devicetypes);
 		_initUIEngine(styles);
 		if (themecss && (themecss.trim()!="") )
-			$("body").append("<link rel='stylesheet' href='"+themecss+"'>");
+			$("title").after("<link rel='stylesheet' href='"+themecss+"'>");
 		// $("body").append("<link rel='stylesheet' href='//docs.google.com/uc?authuser=0&id=0B6TVdm2A9rnNNS1mSUZ5TmhPczA&export=download'>");
 		// $("body").append("<link rel='stylesheet' href='//docs.google.com/uc?authuser=0&id=0B6TVdm2A9rnNLWlIeEZDN1ZGU0k&export=download'>");
 		// UIManager.drawHouseMode();

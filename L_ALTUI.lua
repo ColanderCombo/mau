@@ -443,8 +443,8 @@ local htmlLayout = [[
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css">
 	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-    <title>VERA AltUI</title>
 	@style@
+    <title>VERA AltUI</title>
 </head>
 
 <body role="document">
