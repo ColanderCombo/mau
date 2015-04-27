@@ -48,5 +48,9 @@ Localization.init( {
   "Misc":"Divers",
   "Create":"Créer",
   "Runs in mode": "Exécute seulement en mode",
-  "Run" : "Exécute"
+  "Run" : "Exécute",
+  "OFF,ON":"OFF,ON",
+  "Working":"Travail",
+  "Holiday":"Vacances",
+  "Wind":"Vent"
 });
