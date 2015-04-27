@@ -2920,9 +2920,13 @@ var UIManager  = ( function( window, undefined ) {
 		head.appendChild(style);	
 	};
 	
-	function _initEngine(styles, devicetypes) {
+	function _initEngine(styles, devicetypes, themecss) {
 		_initDB(devicetypes);
 		_initUIEngine(styles);
+		if (themecss && (themecss.trim()!="") )
+			$("body").append("<link rel='stylesheet' href='"+themecss+"'>");
+		// $("body").append("<link rel='stylesheet' href='//docs.google.com/uc?authuser=0&id=0B6TVdm2A9rnNNS1mSUZ5TmhPczA&export=download'>");
+		// $("body").append("<link rel='stylesheet' href='//docs.google.com/uc?authuser=0&id=0B6TVdm2A9rnNLWlIeEZDN1ZGU0k&export=download'>");
 		// UIManager.drawHouseMode();
 	};
 
@@ -4953,6 +4957,76 @@ $(document).ready(function() {
 	  $(".navbar-collapse").collapse('hide');
 	  UIManager.refreshUI( true ,false  );	// full but not first time
 	});			
+
+var body = "";
+body+="<!-- Fixed navbar -->";
+body+="<nav class='navbar navbar-default navbar-fixed-top'>";
+body+="  <div class='container'>";
+body+="	<div class='navbar-header'>";
+body+="	  <button type='button' class='navbar-toggle collapsed' data-toggle='collapse' data-target='#navbar' aria-expanded='false' aria-controls='navbar'>";
+body+="		<span class='sr-only'>Toggle navigation</span>";
+body+="		<span class='icon-bar'></span>";
+body+="		<span class='icon-bar'></span>";
+body+="		<span class='icon-bar'></span>";
+body+="	  </button>		  ";
+body+="	  <a class='navbar-brand' href='#'></a>";
+body+="	</div>";
+body+="	<div id='navbar' class='navbar-collapse collapse'>";
+body+="	  <ul class='nav navbar-nav'>";
+body+="		<li class='active'><div class='imgLogo'></div></li>";
+body+="		<li><a id='menu_room' href='#'  >Rooms</a></li>";
+body+="		<li><a id='menu_device' href='#'  >Devices</a></li>";
+body+="		<li><a id='menu_scene' href='#'  >Scenes</a></li>";
+body+="		<li><a id='menu_plugins' href='#'  >Plugins</a></li>";
+body+="		<li class='dropdown'>";
+body+="			<a href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-expanded='false'>Custom Pages <span class='caret'></span></a>";
+body+="			<ul class='dropdown-menu' role='menu'>";
+body+="				<li><a id='altui-pages-see' href='#' >Use Custom Pages</a></li>";
+body+="				<li><a id='altui-pages-edit' href='#' >Edit Custom Pages</a></li>";
+body+="			</ul>";
+body+="		</li>";
+body+="		<li class='dropdown'>";
+body+="		  <a href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-expanded='false'>More... <span class='caret'></span></a>";
+body+="		  <ul class='dropdown-menu' role='menu'>";
+body+="			<li><a id='altui-remoteaccess' href='#' >Remote Access Login</a></li>";
+body+="			<li><a id='altui-reload' href='#' >Reload Luup Engine</a></li>";
+body+="			<li class='divider'></li>";
+body+="			<li class='dropdown-header'>Lua</li>";
+body+="			<li><a id='altui-luastart' href='#' >Lua Startup Code</a></li>";
+body+="			<li><a id='altui-luatest' href='#' >Lua Test Code</a></li>";
+body+="			<li class='divider'></li>";
+body+="			<li class='dropdown-header'>Admin</li>";
+body+="			<li><a id='altui-optimize' href='#'>Optimizations</a></li>";
+body+="			<li class='divider'></li>";
+body+="			<li class='dropdown-header'>Misc</li>";
+body+="			<li><a id='altui-credits' href='#'>Credits</a></li>";
+body+="		  </ul>";
+body+="		</li>";
+body+="	  </ul>";
+body+="	</div><!--/.nav-collapse -->";
+body+="  </div>";
+body+="</nav>";
+body+="<div class='container-fluid theme-showcase' role='main'>";
+body+="	<div class='row'>";
+body+="		<div class='col-sm-10 col-sm-push-2'>";
+body+="			<h1 id='altui-pagetitle' >Welcome to VERA Alternate UI</h1>";
+body+="			<div id='dialogs'></div>";
+body+="			<div class='altui-mainpanel row'>";
+body+="			</div>";
+body+="		</div>";
+body+="		<div class='col-sm-2 col-sm-pull-10'>";
+body+="			<div class='altui-leftnav btn-group-vertical' role='group' aria-label='...'>";
+body+="				<!--";
+body+="				<button type='button' class='btn btn-default'>One</button>";
+body+="				<button type='button' class='btn btn-default'>Deux</button>";
+body+="				<button type='button' class='btn btn-default'>Trois</button>";
+body+="				-->";
+body+="			</div>";
+body+="		</div>";
+body+="	</div>";
+body+="</div> <!-- /container -->";
+
+$("body").prepend(body);
 	
 	var styles ="					\
 	.solid-border {	\
@@ -5192,7 +5266,7 @@ $(document).ready(function() {
 	AltuiDebug.debug("Custom Pages: "+JSON.stringify(g_CustomPages));
 	PageMessage.init();
 	VeraBox.initEngine(  );
-	UIManager.initEngine(styles.format(window.location.hostname), g_DeviceTypes);
+	UIManager.initEngine(styles.format(window.location.hostname), g_DeviceTypes, g_CustomTheme);
 	UIManager.initCustomPages(g_CustomPages);
 	$( window ).unload(function() {
 		// save state to accelerate the launch next time

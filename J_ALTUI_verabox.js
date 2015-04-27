@@ -46,7 +46,7 @@ var UPnPHelper = (function(window,undefined) {
 	
 	function _buildVariableSetUrl( deviceID, service, varName, varValue)
 	{
-		var urlHead = _getUrlHead()+'?id=variableset&DeviceNum='+deviceID+'&serviceId='+service+'&Variable='+varName+'&Value='+varValue;
+		var urlHead = _getUrlHead()+'?id=variableset&DeviceNum='+deviceID+'&serviceId='+service+'&Variable='+varName+'&Value='+encodeURIComponent(varValue);
 		return urlHead;
 	}
 	function _buildVariableGetUrl( deviceID, service, varName)

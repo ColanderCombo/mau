@@ -106,6 +106,7 @@ function altui_Settings(deviceID) {
     var present  = get_device_state(deviceID,  altui_Svs, 'Present',1);
 	var ipaddr = findDeviceIP(deviceID);
 	var config = get_device_state(deviceID,  altui_Svs, 'PluginConfig',1);
+	var themecss = get_device_state(deviceID,  altui_Svs, 'ThemeCSS',1);
 	var style='	<style>\
 	  table.altui_table td:first-child{\
 		background-color: #E0E0E0;\
@@ -123,6 +124,7 @@ function altui_Settings(deviceID) {
 
 	var htmltest = '<button id="altui-open">Open Window</button>';
 	var htmlConfig = '<textarea id="altui-config" rows="6" cols="50"></textarea>';
+	var htmlTheme = '<textarea id="altui-theme" rows="3" cols="50"></textarea>';
 	var htmlSetConfig= '<button id="altui-setconfig">Set Configuration</button>';
 	var htmlResetConfig= '<button id="altui-resetconfig">Default Configuration</button>';
 	var htmlViewJson = '<button id="altui-viewconfig">View Configuration</button>';
@@ -132,6 +134,7 @@ function altui_Settings(deviceID) {
 		'<table class="altui_table" id="altui_table">'+
 		'<tr><td>Run</td><td> '+htmltest+' </td></tr>' +
 		'<tr><td>Config</td><td> '+htmlConfig+' </td></tr>' +
+		'<tr><td>Theme</td><td> '+htmlTheme+' </td></tr>' +
 		'<tr><td>Actions</td><td> '+htmlViewJson+htmlSetConfig+htmlResetConfig+' </td></tr>' +
 		'</table>'+
 		'</div>' ;
@@ -143,6 +146,10 @@ function altui_Settings(deviceID) {
 	// test isregistered
 	//
 	jQuery( "#altui-config" ).text( config );
+	jQuery( "#altui-theme" ).text( themecss ).change( function() {
+		var themecss = jQuery(this).val()+' ';
+		saveVar(deviceID,  altui_Svs, "ThemeCSS", themecss, true);
+	});
 	jQuery( "#altui-open" ).click(function() {
 		var url =  ip_address +'id=lr_ALTUI_Handler&command=home'; //buildUPnPActionUrl(deviceID,altui_Svs,"Refresh");
 		window.open( url, '_blank');

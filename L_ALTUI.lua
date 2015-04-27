@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.45"
+local version = "v0.45b"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 -- local updateFrequencySec = 120	-- refreshes every x seconds
 -- local socket = require("socket")
@@ -20,7 +20,6 @@ local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 -- local xpath = require("xpath")
 local json = require("L_ALTUIjson")
 local mime = require("mime")
-
 
 hostname = ""
 
@@ -449,74 +448,7 @@ local htmlLayout = [[
 </head>
 
 <body role="document">
-    <!-- Fixed navbar -->
-    <nav class="navbar navbar-default navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>		  
-          <a class="navbar-brand" href="#"></a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-            <li class="active"><div class="imgLogo"></div></li>
-            <li><a id="menu_room" href="#"  >Rooms</a></li>
-            <li><a id="menu_device" href="#"  >Devices</a></li>
-            <li><a id="menu_scene" href="#"  >Scenes</a></li>
-            <li><a id="menu_plugins" href="#"  >Plugins</a></li>
-            <li class="dropdown">
-				<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Custom Pages <span class="caret"></span></a>
-				<ul class="dropdown-menu" role="menu">
-					<li><a id='altui-pages-see' href="#" >Use Custom Pages</a></li>
-					<li><a id='altui-pages-edit' href="#" >Edit Custom Pages</a></li>
-				</ul>
-			</li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">More... <span class="caret"></span></a>
-              <ul class="dropdown-menu" role="menu">
-                <li><a id='altui-remoteaccess' href="#" >Remote Access Login</a></li>
-                <li><a id='altui-reload' href="#" >Reload Luup Engine</a></li>
-                <li class="divider"></li>
-                <li class="dropdown-header">Lua</li>
-                <li><a id='altui-luastart' href="#" >Lua Startup Code</a></li>
-                <li><a id='altui-luatest' href="#" >Lua Test Code</a></li>
-                <li class="divider"></li>
-                <li class="dropdown-header">Admin</li>
-                <li><a id='altui-optimize' href="#">Optimizations</a></li>
-                <li class="divider"></li>
-                <li class="dropdown-header">Misc</li>
-                <li><a id='altui-credits' href="#">Credits</a></li>
-              </ul>
-            </li>
-          </ul>
-        </div><!--/.nav-collapse -->
-      </div>
-    </nav>
 
-
-    <div class="container-fluid theme-showcase" role="main">
-		<div class="row">
-			<div class="col-sm-10 col-sm-push-2">
-				<h1 id="altui-pagetitle" >Welcome to VERA Alternate UI</h1>
-				<div id="dialogs"></div>
-				<div class="altui-mainpanel row">
-				</div>
-			</div>
-			<div class="col-sm-2 col-sm-pull-10">
-				<div class="altui-leftnav btn-group-vertical" role="group" aria-label="...">
-					<!--
-					<button type="button" class="btn btn-default">One</button>
-					<button type="button" class="btn btn-default">Deux</button>
-					<button type="button" class="btn btn-default">Trois</button>
-					-->
-				</div>
-			</div>
-		</div>
-    </div> <!-- /container -->
 	
     <!-- Bootstrap core JavaScript    ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
@@ -542,6 +474,7 @@ local htmlLayout = [[
 		};
 		var g_DeviceTypes =  JSON.parse('@devicetypes@');
 		var g_CustomPages = @custompages@;
+		var g_CustomTheme = '@ThemeCSS@';
 	</script>
 	<hr>
 	<footer><p class="text-center"><small id="altui-footer">AltUI, amg0, <span class="bg-danger">Waiting Initial Data</span></small></p><span id="debug"></span></footer>
@@ -632,6 +565,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				variables["style"] = htmlStyle:template(variables)
 				variables["devicetypes"] = json.encode(tbl)
 				variables["custompages"] = "["..table.concat(result_tbl, ",").."]"
+				variables["ThemeCSS"] = luup.variable_get(service, "ThemeCSS", deviceID) or ""
 				-- " becomes \x22
 				variables["optional_scripts"] = optional_scripts
 				return htmlLayout:template(variables)
@@ -861,6 +795,7 @@ function startupDeferred(lul_device)
 	local oldversion = getSetVariable(service, "Version", lul_device, version)
 	local present = getSetVariable(service,"Present", lul_device, 0)
 	local remoteurl =getSetVariable(service,"RemoteAccess", lul_device, "https://vera-ui.strongcubedfitness.com/Veralogin.php")
+	local css = getSetVariable(service,"ThemeCSS", lul_device, "")
 	
 	if (debugmode=="1") then
 		DEBUG_MODE = true
