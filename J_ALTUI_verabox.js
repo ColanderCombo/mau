@@ -108,7 +108,7 @@ var UPnPHelper = (function(window,undefined) {
 				cbfunc(null);
 			}
 			else
-				PageMessage.message( formatAjaxErrorMessage(jqXHR, textStatus), "warning" );				
+				PageMessage.message( formatAjaxErrorMessage(jqXHR, textStatus), "warning" ) ;				
 		})
 		.always(function() {
 		});
@@ -206,15 +206,15 @@ var UPnPHelper = (function(window,undefined) {
 	
 	function _renameDevice( devid, newname, roomid )
 	{
-		if (confirm("Are you sure you want to modify this device to:"+newname)) {
+		if (confirm(_T("Are you sure you want to modify this device to:")+newname)) {
 			var url = _getUrlHead()+"?id=device&action=rename&device="+devid+"&name="+newname;
 			if (roomid !=undefined)
 				url = url+"&room="+roomid;
 			_exec( url, function(result) {	
 				if (result!="OK") 
-					PageMessage.message( "Device modify failed!", "warning" );
+					PageMessage.message( _T("Device modify failed!"), "warning" );
 				else
-					PageMessage.message( "Device modified!", "success" );
+					PageMessage.message( _T("Device modified!"), "success" );
 			} );
 		}
 	};
@@ -581,7 +581,7 @@ var VeraBox = ( function( window, undefined ) {
 			})
 			.fail(function(jqXHR, textStatus) {
 				_categories = null;
-				PageMessage.message( "VERA did not respond: " + textStatus , "danger");
+				PageMessage.message( _T("VERA did not respond")+": " + textStatus , "danger");
 			})
 			.always(function() {
 			});
@@ -628,7 +628,7 @@ var VeraBox = ( function( window, undefined ) {
 			}
 		})
 		.fail(function(jqXHR, textStatus) {
-			PageMessage.message( "VERA did not respond: " + textStatus , "danger");
+			PageMessage.message( _T("VERA did not respond")+": " + textStatus , "danger");
 		})
 		.always(function() {
 		});
@@ -807,7 +807,7 @@ var VeraBox = ( function( window, undefined ) {
 		})
 		.fail(function(jqXHR, textStatus) {
 			setTimeout( _refreshEngine, 1000 );
-			PageMessage.message( "VERA did not respond: " + textStatus , "danger");
+			PageMessage.message( _T("VERA did not respond")+": " + textStatus , "danger");
 		})
 		.always(function() {
 		});
@@ -902,7 +902,7 @@ var VeraBox = ( function( window, undefined ) {
 		})
 		.fail(function(jqXHR, textStatus) {
 			_dataEngine = setTimeout( _initDataEngine, 1000 );
-			PageMessage.message( "VERA did not respond: " + textStatus , "danger");
+			PageMessage.message( _T("VERA did not respond") + ": " + textStatus , "danger");
 		})
 		.always(function() {
 			AltuiDebug.debug("_initDataEngine() (user_data) returned.");
@@ -938,14 +938,14 @@ var VeraBox = ( function( window, undefined ) {
 		})
 		  .done(function(data) {
 			if (data!="ERROR") {
-				PageMessage.message("Create Room succeeded for "+name, "success", true);
+				PageMessage.message(_T("Create Room succeeded for")+": "+name, "success", true);
 			}
 			else {
-				PageMessage.message("Could not create Room "+name, "warning");
+				PageMessage.message(_T("Could not create Room")+": "+name, "warning");
 			}
 		  })
 		  .fail(function(jqXHR, textStatus) {
-			PageMessage.message( "Create Room failed: " + textStatus , "danger");
+			PageMessage.message( _T("Create Room failed")+": " + textStatus , "danger");
 		  })
 		  .always(function() {
 		  });
@@ -953,7 +953,7 @@ var VeraBox = ( function( window, undefined ) {
 
 	function _deleteRoom(id)
 	{	
-		if (confirm("Are you sure you want to delete room ("+id+")")) {
+		if (confirm(_T("Are you sure you want to delete room")+" ("+id+")")) {
 			var url = "data_request?id=room&action=delete&room="+id;
 			var jqxhr = $.ajax( {
 				url: url,
@@ -962,14 +962,14 @@ var VeraBox = ( function( window, undefined ) {
 			})
 			  .done(function(data) {
 				if (data!="ERROR") {
-					PageMessage.message("Deleted Room "+id, "success", true);
+					PageMessage.message(_T("Deleted Room")+" "+id, "success", true);
 				}
 				else {
-					PageMessage.message("Could not delete Room "+id, "warning");
+					PageMessage.message(_T("Could not delete Room")+" "+id, "warning");
 				}
 			  })
 			  .fail(function(jqXHR, textStatus) {
-				PageMessage.message( "Delete Room failed: " + textStatus , "danger");
+				PageMessage.message( _T("Delete Room failed")+ ": " + textStatus , "danger");
 			  })
 			  .always(function() {
 			  });
@@ -986,10 +986,10 @@ var VeraBox = ( function( window, undefined ) {
 				dataType: "text"
 			})
 			.done(function() {
-				PageMessage.message("Ran Scene "+id+" successfully", "success");
+				PageMessage.message(_T("Ran Scene #{0} successfully").format(id), "success");
 			})
 			.fail(function(jqXHR, textStatus) {
-				PageMessage.message( "VERA did not respond: " + textStatus , "danger");
+				PageMessage.message( _T("VERA did not respond")+": " + textStatus , "danger");
 			})
 			.always(function() {
 			});
@@ -1008,7 +1008,7 @@ var VeraBox = ( function( window, undefined ) {
 
 	function _deleteScene(id)
 	{
-		if (confirm("Are you sure you want to delete scene ("+id+")")) {
+		if (confirm(_T("Are you sure you want to delete scene ({0})").format(id))) {
 			var url = "data_request?id=scene&action=delete&scene="+id;
 			var jqxhr = $.ajax( {
 				url: url,
@@ -1017,14 +1017,14 @@ var VeraBox = ( function( window, undefined ) {
 			})
 			.done(function(data) {
 				if (data!="ERROR") {
-					PageMessage.message("Deleted Scene "+id+" successfully, please ", "success", true);
+					PageMessage.message(_T("Deleted Scene {0} successfully ").format(id), "success", true);
 				}
 				else {
-					PageMessage.message("Could not delete Scene "+id, "warning");
+					PageMessage.message(_T("Could not delete Scene {0}").format(id), "warning");
 				}
 			})
 			.fail(function(jqXHR, textStatus) {
-				PageMessage.message( "Delete Scene failed: " + textStatus , "danger");
+				PageMessage.message( _T("Delete Scene failed")+": " + textStatus , "danger");
 			})
 			.always(function() {
 			});

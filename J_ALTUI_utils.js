@@ -36,7 +36,7 @@ var Localization = ( function (undefined) {
 			window.navigator.language || "",
 			JSON.stringify(_unknown_terms)
 		);
-		UIManager.pageEditorForm("Localization information",text,"Close",function() {
+		UIManager.pageEditorForm("Localization information",text,_T("Close"),function() {
 			UIManager.pageHome();
 		});
 	};

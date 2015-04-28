@@ -9,6 +9,120 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
 
+// UIManager.loadScript('https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["corechart","table","gauge"]}]}');
+var _HouseModes = [
+	{id:1, text:_T("Home"), cls:"preset_home"},
+	{id:2, text:_T("Away"), cls:"preset_away"},
+	{id:3, text:_T("Night"), cls:"preset_night"},
+	{id:4, text:_T("Vacation"), cls:"preset_vacation"}
+];
+var deviceModalTemplate = "";
+var deviceActionModalTemplate = "";
+var defaultDialogModalTemplate = "";
+
+var language = window.navigator.userLanguage || window.navigator.language;
+if (language != 'en') {
+	var scriptLocationAndName = 'J_ALTUI_loc_'+ language.substring(0, 2) + '.js' ;
+	var head = document.getElementsByTagName('head')[0];
+	var script = document.createElement('script');
+	script.type = 'text/javascript';
+	script.src = scriptLocationAndName;
+
+	// once script is loaded, we can call style function in it
+	$(script).load(  function() {
+		_HouseModes = [
+			{id:1, text:_T("Home"), cls:"preset_home"},
+			{id:2, text:_T("Away"), cls:"preset_away"},
+			{id:3, text:_T("Night"), cls:"preset_night"},
+			{id:4, text:_T("Vacation"), cls:"preset_vacation"}
+		];
+		// 0: table  1: devicename 2: id
+		deviceModalTemplate = "<div id='deviceModal' class='modal fade'>";
+		deviceModalTemplate += "  <div class='modal-dialog modal-lg'>";
+		deviceModalTemplate += "    <div class='modal-content'>";
+		deviceModalTemplate += "      <div class='modal-header'>";
+		deviceModalTemplate += "        <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
+		deviceModalTemplate += "        <h4 class='modal-title'>{1} <small>#{2}</small> - Variables</h4>";
+		deviceModalTemplate += "      </div>";
+		deviceModalTemplate += "      <div class='modal-body'>";
+		deviceModalTemplate += "      <div class='row-fluid'>";
+		deviceModalTemplate += " <table class='table table-condensed'>";
+		deviceModalTemplate += "       <thead>";
+		deviceModalTemplate += "         <tr>";
+		// deviceModalTemplate += "           <th>#</th>";
+		deviceModalTemplate += "           <th>"+_T("Variable")+"</th>";
+		deviceModalTemplate += "           <th>"+_T("Value")+"</th>";
+		deviceModalTemplate += "         </tr>";
+		deviceModalTemplate += "       </thead>";
+		deviceModalTemplate += "       <tbody>";
+		deviceModalTemplate += "       {0}";					// lines goes here
+		deviceModalTemplate += "       </tbody>";
+		deviceModalTemplate += "     </table>";
+		deviceModalTemplate += "      </div>";
+		deviceModalTemplate += "      </div>";
+		deviceModalTemplate += "      <div class='modal-footer'>";
+		deviceModalTemplate += "        <button type='button' class='btn btn-primary' data-dismiss='modal'>"+_T("Close")+"</button>";
+		// deviceModalTemplate += "        <button type='button' class='btn btn-primary'>Save changes</button>";
+		deviceModalTemplate += "      </div>";
+		deviceModalTemplate += "    </div><!-- /.modal-content -->";
+		deviceModalTemplate += "  </div><!-- /.modal-dialog -->";
+		deviceModalTemplate += "</div><!-- /.modal -->";
+
+		// 0: table  1: devicename 2: id
+		deviceActionModalTemplate = "<div id='deviceActionModal' class='modal fade'>";
+		deviceActionModalTemplate += "  <div class='modal-dialog'>";
+		deviceActionModalTemplate += "    <div class='modal-content'>";
+		deviceActionModalTemplate += "      <div class='modal-header'>";
+		deviceActionModalTemplate += "        <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
+		deviceActionModalTemplate += "        <h4 class='modal-title'>{1} <small>#{2}</small> - Actions</h4>";
+		deviceActionModalTemplate += "      </div>";
+		deviceActionModalTemplate += "      <div class='modal-body'>";
+		deviceActionModalTemplate += " 	<table class='table table-condensed' >";
+		deviceActionModalTemplate += "       <thead>";
+		deviceActionModalTemplate += "         <tr>";
+		deviceActionModalTemplate += "           <th>"+_T("Action")+"</th>";
+		deviceActionModalTemplate += "           <th>"+_T("Parameters")+"</th>";
+		deviceActionModalTemplate += "         </tr>";
+		deviceActionModalTemplate += "       </thead>";
+		deviceActionModalTemplate += "       <tbody>";
+		deviceActionModalTemplate += "       {0}";					// lines goes here
+		deviceActionModalTemplate += "       </tbody>";
+		deviceActionModalTemplate += "     </table>";
+		deviceActionModalTemplate += "      </div>";
+		deviceActionModalTemplate += "      <div class='modal-footer'>";
+		deviceActionModalTemplate += "        <button type='button' class='btn btn-primary' data-dismiss='modal'>"+_T("Close")+"</button>";
+		deviceActionModalTemplate += "      </div>";
+		deviceActionModalTemplate += "    </div><!-- /.modal-content -->";
+		deviceActionModalTemplate += "  </div><!-- /.modal-dialog -->";
+		deviceActionModalTemplate += "</div><!-- /.modal -->";
+
+		// 0: title, 1: body
+		defaultDialogModalTemplate = "<div id='dialogModal' class='modal fade'>";
+		defaultDialogModalTemplate += "  <div class='modal-dialog modal-lg'>";
+		defaultDialogModalTemplate += "    <form class='form' data-toggle='validator' onsubmit='return false;'>";
+		defaultDialogModalTemplate += "    <div class='modal-content'>";
+		defaultDialogModalTemplate += "      <div class='modal-header'>";
+		defaultDialogModalTemplate += "        <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
+		defaultDialogModalTemplate += "        <h4 class='modal-title'>{0} </h4>";
+		defaultDialogModalTemplate += "      </div>";
+		defaultDialogModalTemplate += "      <div class='modal-body'>";
+		defaultDialogModalTemplate += "      <div class='row-fluid'>";
+		defaultDialogModalTemplate += "      {1}";
+		defaultDialogModalTemplate += "      </div>";
+		defaultDialogModalTemplate += "      </div>";
+		defaultDialogModalTemplate += "      <div class='modal-footer'>";
+		defaultDialogModalTemplate += "        <button type='button' class='btn btn-default' data-dismiss='modal'>"+_T("Close")+"</button>";
+		defaultDialogModalTemplate += "        <button type='submit' class='btn btn-primary'>"+_T("Save Changes")+"</button>";
+		defaultDialogModalTemplate += "      </div>";
+		defaultDialogModalTemplate += "    </div><!-- /.modal-content -->";
+		defaultDialogModalTemplate += "    </form>";
+		defaultDialogModalTemplate += "  </div><!-- /.modal-dialog -->";
+		defaultDialogModalTemplate += "</div><!-- /.modal -->";
+
+	});
+	head.appendChild(script);
+}
+
 // 0:modeid 1:modetext 2:modeclss for bitmap 3:preset_unselected or preset_selected
 var houseModeButtonTemplate = "  <button type='button' class='btn btn-default altui-housemode'><div>{1}</div><div id='altui-mode{0}' class='col-xs-3 {2} {3} housemode'></div></button>";							
 var leftNavButtonTemplate = "<button id='{0}' type='button' class='altui-leftbutton btn btn-default'>{1}</button>";
@@ -24,14 +138,14 @@ var searchGlyph="<span class='glyphicon glyphicon-search' aria-hidden='true' dat
 var plusGlyph="<span class='glyphicon glyphicon-plus' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Add'></span>";
 var saveGlyph="<span class='glyphicon glyphicon-save' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Save'></span>";
 var labelGlyph="<span class='glyphicon glyphicon-font' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Label'></span>";
-var loadGlyph = glyphTemplate.format( "open", "Load" , "");
-var infoGlyph = glyphTemplate.format( "info-sign", "Info" , "");
-var picGlyph = glyphTemplate.format( "picture", "Image" , "");
-var runGlyph = glyphTemplate.format( "play", "Run Scene" , "");
-var editGlyph = glyphTemplate.format( "pencil", "Edit" , "");
-var cameraGlyph = glyphTemplate.format( "facetime-video", "Camera" , "");
-var onoffGlyph = glyphTemplate.format( "off", "On Off" , "");
-var scaleGlyph = glyphTemplate.format( "scale", "Gauge" , "");
+var loadGlyph = glyphTemplate.format( "open", _T("Load") , "");
+var infoGlyph = glyphTemplate.format( "info-sign", _T("Info") , "");
+var picGlyph = glyphTemplate.format( "picture", _T("Image") , "");
+var runGlyph = glyphTemplate.format( "play", _T("Run Scene") , "");
+var editGlyph = glyphTemplate.format( "pencil", _T("Edit") , "");
+var cameraGlyph = glyphTemplate.format( "facetime-video", _T("Camera") , "");
+var onoffGlyph = glyphTemplate.format( "off", _T("On Off") , "");
+var scaleGlyph = glyphTemplate.format( "scale", _T("Gauge") , "");
 var helpGlyph = glyphTemplate.format( "question-sign", "" , "");
 var smallbuttonTemplate = "<button id='{0}' type='button' class='{1} btn btn-default btn-sm' aria-label='tbd' title='{3}'>{2}</button>";
 var buttonTemplate 		= "<button id='{0}' type='button' class='{1} btn btn-{3}' aria-label='tbd'>{2}</button>";
@@ -39,51 +153,12 @@ var buttonDebugHtml = "<button type='button' class='btn btn-default' id='altui-d
 var cameraURI="data:image/png;base64,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";
 var defaultIconSrc="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAASJSURBVHja7Jp7aI5RHMff123CMOYyMmFY5LZYI5umFmHhD2pyyYzYkju5hCWX0jZKM9rEkCy5tJostxWRIteZe5FLyW2Y68z35Pfq9Os8z573eT3vu9fOr76d5zzn8jyf59x+57yvu6amxlWfrIGrnpkG1sAaWANrYA2sgTWwBnbKGnmT2e12/7MHb8vOaYhgEJQA9YN6Qj2g5lCoSFu4eNF1K3V5sx9o5M+vC0jxvCRoKjQOalmnW9gH0BYI5kKLoE5B06Vttug8KBMKqyX7S+g+9Ab6SGHwAAN2MIICqL9BlifQMegcdAHj9X1QtjBAxcy2BNoENWbJ1VARtAO6BMiaoO7SgG2C4AA0SZF8CFoDyMf/xRgGbCsExVA8S3oEzQJomUG5AQgSoSFQNNSZlqZ4q8uS34Hx0s0MYA+KSQsv/pHlD0eQQctTVFC1MDkQRQrYtQDdoOgFa6F0qGmwdun10Fh2Lx2wOxnseAS7ofZGDhP0DHoAVUJvnQB2e+OWcdcSEKMRnGTZlgN2K+sBWdACRZXfoBPQYeg8ytmC9IrBLjB5T+VQFynLXrz0TDZrC5gJrKrv0HYoG/lf+dpq/vKlMxnsbRqbcsuqYC9B0wH6MGi2h4CJRDCfjT+x9HyR7mUpYIXDkRAoWF9aeBXzovIAcUX6IBMVYzYTedZb+JghCCIo+gFl3gV00sILtcalGHchdPsr1B0v9lJaeiqgjlLRXKRnmED2QpAGjYH6iEdJyeJZp6FCEarcUW8Y7HTpKRKssD0eWLLVDPYqbQtVoGFQAX2gZVBfBuuiuoSDUgpdRv4Yf4/haSxewDyodLZZSMUH+a6AFXDCdUxVQBpZrJj0UHamX4DxoDb0UI/dAsw1KZ5KfrDH9iP9pqKe3mLdhSJtvLNY6vbYhfa2hRNZmRKWPoPFtxhMSkehcJb0ArpRi2THJA91DXR6lo5j8dMSSFeacDx2Ea17T1HHQpbPRSccscj/3KR3tUVwl7V0LjTMyRaOZnG5O49gacUGrbtUUe8KM1iyHKgduzcUdSY62cK9pOvXzPftx/JeUJRPUnRl8dEO03L3t8VRd7X0oUYpJkuPpdAxkSPAHaTrpyytG4uXK8onKO7FsAM74YWJQ4EqyWffZfJO8U526VA27mRrK13/NPCQult4xmyUrZLiG6GuJvmjnOzS8oa+QnG6USZ5XyprVkv9wiM7L3XlOOaz+8zgVWYzXxhp+Raq+GSSJjb/K9kEl2/BKfkRkEM8i3bfJC0NH61SioufYdawPJsVK0V5XQY+S742t32ALWU95jWC4+yIKFpRtszx/bAPVqaY3V+RM2Lm0rYkJ0NlhX4707J5eDCHLTPF1PJmNhJKVtwvQU8YW2d/LiXLJydiOMWTDWBqs0oLM3jAu7QYm78QTHb9+UXCromZOcXOzzYB+csDHRiMoMMBb004NMmoo8RfBwD/Cvo57XTWQZ8tFjsi3E6UPeW3My0njDYOU+hMS/jWEZL7egc6Q4cJqu2mcwfx/4Pp/2lpYA2sgTWwBtbAGlgDO2W/BRgADRV6RjlErQoAAAAASUVORK5CYII="
 
-var _HouseModes = [
-	{id:1, text:"Home", cls:"preset_home"},
-	{id:2, text:"Away", cls:"preset_away"},
-	{id:3, text:"Night", cls:"preset_night"},
-	{id:4, text:"Vacation", cls:"preset_vacation"}
-];
-
 // 0: variable , 1: value , 2: service
 var deviceVariableLineTemplate = "  <tr>";
 // deviceVariableLineTemplate += "         <th scope='row'>1</th>";
 deviceVariableLineTemplate += "         <td><span title='{2}'>{0}</span></td>";
 deviceVariableLineTemplate += "         <td id='{3}' class='altui-variable-value' >{1}</td>";
 deviceVariableLineTemplate += "     </tr>";
-
-// 0: table  1: devicename 2: id
-var deviceModalTemplate = "<div id='deviceModal' class='modal fade'>";
-deviceModalTemplate += "  <div class='modal-dialog modal-lg'>";
-deviceModalTemplate += "    <div class='modal-content'>";
-deviceModalTemplate += "      <div class='modal-header'>";
-deviceModalTemplate += "        <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
-deviceModalTemplate += "        <h4 class='modal-title'>{1} <small>#{2}</small> - Variables</h4>";
-deviceModalTemplate += "      </div>";
-deviceModalTemplate += "      <div class='modal-body'>";
-deviceModalTemplate += "      <div class='row-fluid'>";
-deviceModalTemplate += " <table class='table table-condensed'>";
-deviceModalTemplate += "       <thead>";
-deviceModalTemplate += "         <tr>";
-// deviceModalTemplate += "           <th>#</th>";
-deviceModalTemplate += "           <th>Variable</th>";
-deviceModalTemplate += "           <th>Value</th>";
-deviceModalTemplate += "         </tr>";
-deviceModalTemplate += "       </thead>";
-deviceModalTemplate += "       <tbody>";
-deviceModalTemplate += "       {0}";					// lines goes here
-deviceModalTemplate += "       </tbody>";
-deviceModalTemplate += "     </table>";
-deviceModalTemplate += "      </div>";
-deviceModalTemplate += "      </div>";
-deviceModalTemplate += "      <div class='modal-footer'>";
-deviceModalTemplate += "        <button type='button' class='btn btn-primary' data-dismiss='modal'>Close</button>";
-// deviceModalTemplate += "        <button type='button' class='btn btn-primary'>Save changes</button>";
-deviceModalTemplate += "      </div>";
-deviceModalTemplate += "    </div><!-- /.modal-content -->";
-deviceModalTemplate += "  </div><!-- /.modal-dialog -->";
-deviceModalTemplate += "</div><!-- /.modal -->";
 
 // 0:name 1:name
 var deviceActionParamTemplate = "<div class='input-group input-group-sm'>";
@@ -97,56 +172,6 @@ deviceActionLineTemplate += "         <td><span title='{2}'><button class='btn b
 deviceActionLineTemplate += "         <td>{1}</td>";
 deviceActionLineTemplate += "     </tr>";
 
-// 0: table  1: devicename 2: id
-var deviceActionModalTemplate = "<div id='deviceActionModal' class='modal fade'>";
-deviceActionModalTemplate += "  <div class='modal-dialog'>";
-deviceActionModalTemplate += "    <div class='modal-content'>";
-deviceActionModalTemplate += "      <div class='modal-header'>";
-deviceActionModalTemplate += "        <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
-deviceActionModalTemplate += "        <h4 class='modal-title'>{1} <small>#{2}</small> - Actions</h4>";
-deviceActionModalTemplate += "      </div>";
-deviceActionModalTemplate += "      <div class='modal-body'>";
-deviceActionModalTemplate += " 	<table class='table table-condensed' >";
-deviceActionModalTemplate += "       <thead>";
-deviceActionModalTemplate += "         <tr>";
-deviceActionModalTemplate += "           <th>Action</th>";
-deviceActionModalTemplate += "           <th>Parameters</th>";
-deviceActionModalTemplate += "         </tr>";
-deviceActionModalTemplate += "       </thead>";
-deviceActionModalTemplate += "       <tbody>";
-deviceActionModalTemplate += "       {0}";					// lines goes here
-deviceActionModalTemplate += "       </tbody>";
-deviceActionModalTemplate += "     </table>";
-deviceActionModalTemplate += "      </div>";
-deviceActionModalTemplate += "      <div class='modal-footer'>";
-deviceActionModalTemplate += "        <button type='button' class='btn btn-primary' data-dismiss='modal'>Close</button>";
-deviceActionModalTemplate += "      </div>";
-deviceActionModalTemplate += "    </div><!-- /.modal-content -->";
-deviceActionModalTemplate += "  </div><!-- /.modal-dialog -->";
-deviceActionModalTemplate += "</div><!-- /.modal -->";
-
-// 0: title, 1: body
-var defaultDialogModalTemplate = "<div id='dialogModal' class='modal fade'>";
-defaultDialogModalTemplate += "  <div class='modal-dialog modal-lg'>";
-defaultDialogModalTemplate += "    <form class='form' data-toggle='validator' onsubmit='return false;'>";
-defaultDialogModalTemplate += "    <div class='modal-content'>";
-defaultDialogModalTemplate += "      <div class='modal-header'>";
-defaultDialogModalTemplate += "        <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
-defaultDialogModalTemplate += "        <h4 class='modal-title'>{0} </h4>";
-defaultDialogModalTemplate += "      </div>";
-defaultDialogModalTemplate += "      <div class='modal-body'>";
-defaultDialogModalTemplate += "      <div class='row-fluid'>";
-defaultDialogModalTemplate += "      {1}";
-defaultDialogModalTemplate += "      </div>";
-defaultDialogModalTemplate += "      </div>";
-defaultDialogModalTemplate += "      <div class='modal-footer'>";
-defaultDialogModalTemplate += "        <button type='button' class='btn btn-default' data-dismiss='modal'>Close</button>";
-defaultDialogModalTemplate += "        <button type='submit' class='btn btn-primary'>Save changes</button>";
-defaultDialogModalTemplate += "      </div>";
-defaultDialogModalTemplate += "    </div><!-- /.modal-content -->";
-defaultDialogModalTemplate += "    </form>";
-defaultDialogModalTemplate += "  </div><!-- /.modal-dialog -->";
-defaultDialogModalTemplate += "</div><!-- /.modal -->";
 
 var LuaEditor = (function () {
 	// 0: Lua code to edit
@@ -164,9 +189,9 @@ var LuaEditor = (function () {
 	luaEditorModalTemplate += "      	</div>";
 	luaEditorModalTemplate += "      </div>";
 	luaEditorModalTemplate += "      <div class='modal-footer'>";
-	luaEditorModalTemplate += "        <button type='button' class='btn btn-default' data-dismiss='modal'>Close</button>";
-	luaEditorModalTemplate += "        <button type='button' class='btn btn-default altui-luacode-test' >Test Code</button>";
-	luaEditorModalTemplate += "        <button type='button' class='btn btn-primary altui-luacode-save' data-dismiss='modal'>Save changes</button>";
+	luaEditorModalTemplate += "        <button type='button' class='btn btn-default' data-dismiss='modal'>"+_T("Close")+"</button>";
+	luaEditorModalTemplate += "        <button type='button' class='btn btn-default altui-luacode-test' >"+_T("Test Code")+"</button>";
+	luaEditorModalTemplate += "        <button type='button' class='btn btn-primary altui-luacode-save' data-dismiss='modal'>"+_T("Save Changes")+"</button>";
 	luaEditorModalTemplate += "      </div>";
 	luaEditorModalTemplate += "    </div><!-- /.modal-content -->";
 	luaEditorModalTemplate += "  </div><!-- /.modal-dialog -->";
@@ -299,13 +324,13 @@ var DialogManager = ( function() {
 		$(dialog).find(".row-fluid").append(propertyline);
 	};
 
-	function _dlgAddDayOfWeek(dialog,name, value, _timerDOW)
+	function _dlgAddDayOfWeek(dialog,name, label, value, _timerDOW)
 	{
 		//0:sunday
 		var selected_days = value.split(',');
 		var propertyline = "";
 		propertyline += "<div class='form-group' id='altui-widget-"+name+"'>";
-		propertyline += "	<label  title='"+name+"'>"+name+": </label>";
+		propertyline += "	<label  title='"+name+"'>"+label+": </label>";
 		$.each(_timerDOW, function(idx,element) {
 			// propertyline += "<div class='checkbox'>";
 			propertyline +="<label class='checkbox-inline'>";
@@ -330,14 +355,14 @@ var DialogManager = ( function() {
 		return tbl.join(' ');
 	};
 	
-	function _dlgAddLine(dialog, name, value,help, options)
+	function _dlgAddLine(dialog, name, label, value,help, options)
 	{
 		var optstr = _optionsToString(options);
 		value = (value==undefined) ? '' : value ;
 		var placeholder = ((options !=undefined) && (options.placeholder==undefined)) ? "placeholder:'enter "+name+"'" : "";
 		var propertyline = "";
 		propertyline += "<div class='form-group'>";
-		propertyline += "	<label for='altui-widget-"+name+"' title='"+(help || '')+"'>"+name+"</label>";
+		propertyline += "	<label for='altui-widget-"+name+"' title='"+(help || '')+"'>"+label+"</label>";
 		if (help)
 			propertyline += "	<span title='"+(help || '')+"'>"+helpGlyph+"</span>";
 		propertyline += "	<input id='altui-widget-"+name+"' class='form-control' "+optstr+" value='"+value+"' "+placeholder+" ></input>";
@@ -345,13 +370,13 @@ var DialogManager = ( function() {
 		$(dialog).find(".row-fluid").append(propertyline);
 	};
 	
-	function _dlgAddSelect(dialog, name, value, lines, htmloptions)
+	function _dlgAddSelect(dialog, name, label, value, lines, htmloptions)
 	{
 		var optstr = _optionsToString(htmloptions);
 		value = (value==undefined) ? '' : value ;
 		var propertyline = "";
 		propertyline += "<div class='form-group'>";
-		propertyline += "	<label for='altui-widget-"+name+"' title='"+name+"'>"+name+"</label>";
+		propertyline += "	<label for='altui-widget-"+name+"' title='"+name+"'>"+label+"</label>";
 		propertyline += "	<select id='altui-widget-"+name+"' class='form-control' "+optstr+">";
 		$.each(lines, function(idx,line){
 			propertyline += "<option value='{0}' {2}>{1}</option>".format(line.value, line.text, (value==line.value)?'selected':'');
@@ -361,13 +386,13 @@ var DialogManager = ( function() {
 		$(dialog).find(".row-fluid").append(propertyline);
 	};	
 
-	function _dlgAddTimeInterval(dialog, name, value, lines)
+	function _dlgAddTimeInterval(dialog, name, label, value, lines)
 	{
 		var unit = (value||' ').slice(-1);
 		var value = parseInt(value);
 		var propertyline = "";
 		propertyline += "<div class='form-group'>";
-		propertyline += "	<label for='altui-widget-"+name+"' title=''>"+name+"</label>";
+		propertyline += "	<label for='altui-widget-"+name+"' title=''>"+label+"</label>";
 		propertyline += "	<div class='form-inline'>";
 		propertyline += "	<input id='altui-widget-"+name+"' class='form-control' type='number' value='"+value+"' placeholder='enter "+name+"' ></input>";
 		propertyline += "	<select id='altui-widget-"+name+"Unit' class='form-control' >";
@@ -486,7 +511,7 @@ var DialogManager = ( function() {
 				// all devices are enumarated
 				var propertyline = "";
 				propertyline += "<div class='form-group'>";
-				propertyline += "	<label for='altui-widget-device'>Device</label>";
+				propertyline += "	<label for='altui-widget-device'>"+_T("Device")+"</label>";
 				propertyline +=     select.wrap( "<div></div>" ).parent().html();
 				propertyline += "</div>";
 				
@@ -801,8 +826,8 @@ var SceneEditor = function (scene) {
 			lua:''
 		};
 		
-		var dialog = DialogManager.createPropertyDialog('Trigger');
-		DialogManager.dlgAddLine( dialog , "TriggerName", trigger.name, "", {required:''} ); 
+		var dialog = DialogManager.createPropertyDialog(_T('Trigger'));
+		DialogManager.dlgAddLine( dialog , "TriggerName", _T("TriggerName"), trigger.name, "", {required:''} ); 
 		DialogManager.dlgAddDevices( dialog , trigger.device, function() {
 			DialogManager.dlgAddEvents( dialog, "Events", "altui-select-events", trigger.device, trigger.template, trigger.arguments );
 			$('div#dialogModal').modal();
@@ -978,12 +1003,12 @@ var SceneEditor = function (scene) {
 			type: 1,
 			interval: '1h'
 		};
-		var dialog = DialogManager.createPropertyDialog('Timer');
-		DialogManager.dlgAddLine( dialog , "TimerName", timer.name, "", {required:''} ); 
-		DialogManager.dlgAddSelect(dialog, "TimerType", timer.type, _timerTypes, {required:''});
-		DialogManager.dlgAddTimeInterval(dialog, "TimerInterval",timer.interval, _timerUnits);
-		DialogManager.dlgAddDayOfWeek(dialog, "TimerDayOfWeek", timer.days_of_week || '' , _timerDOW);
-		DialogManager.dlgAddLine(dialog, "TimerDayOfMonth", timer.days_of_month || '' ,"nn,nn,nn", {
+		var dialog = DialogManager.createPropertyDialog(_T('Timer'));
+		DialogManager.dlgAddLine( dialog , "TimerName", _T("TimerName"), timer.name, "", {required:''} ); 
+		DialogManager.dlgAddSelect(dialog, "TimerType", _T("TimerType"), timer.type, _timerTypes, {required:''});
+		DialogManager.dlgAddTimeInterval(dialog, "TimerInterval",_T("TimerInterval"),timer.interval, _timerUnits);
+		DialogManager.dlgAddDayOfWeek(dialog, "TimerDayOfWeek", _T("TimerDayOfWeek"), timer.days_of_week || '' , _timerDOW);
+		DialogManager.dlgAddLine(dialog, "TimerDayOfMonth", _T("TimerDayOfMonth"), timer.days_of_month || '' ,"nn,nn,nn", {
 			pattern:'^[0-9]+(,[0-9]+)*$',
 			placeholder:'Enter comma separated numbers: nn,nn,nn'
 		});
@@ -1081,7 +1106,7 @@ var SceneEditor = function (scene) {
 			return res;
 		};
 		
-		var dialog = DialogManager.createPropertyDialog('Group Action');
+		var dialog = DialogManager.createPropertyDialog(_T('Group Action'));
 		DialogManager.dlgAddDevices( dialog , action.device, function() {
 			var widget = {
 				properties: {
@@ -1093,7 +1118,7 @@ var SceneEditor = function (scene) {
 					}
 				}
 			};
-			DialogManager.dlgAddActions("altui-select-action",dialog, widget, widget.properties.action, 'Action', function() {
+			DialogManager.dlgAddActions("altui-select-action",dialog, widget, widget.properties.action, _T('Action'), function() {
 				$('div#dialogModal').modal();
 			});
 		});
@@ -1165,8 +1190,8 @@ var SceneEditor = function (scene) {
 	};
 
 	function _editGroup( idx,  group , _button ) {
-			var dialog = DialogManager.createPropertyDialog('Scene Group');
-			DialogManager.dlgAddLine(dialog, "Delay", group.delay ,"delay in seconds",{
+			var dialog = DialogManager.createPropertyDialog(_T('Scene Group'));
+			DialogManager.dlgAddLine(dialog, "Delay", _T("Delay"),group.delay ,"delay in seconds",{
 				type:'number',
 				min:1,
 				required:''
@@ -1217,7 +1242,7 @@ var SceneEditor = function (scene) {
 	};
 
 	function _sceneEditDraw() {
-		var htmlSceneEditButton = "  <button type='submit' class='btn btn-default altui-scene-editbutton'>Submit</button>";
+		var htmlSceneEditButton = "  <button type='submit' class='btn btn-default altui-scene-editbutton'>"+_T("Submit")+"</button>";
 		var htmlSceneAddButtonTmpl = "  <button type='submit' class='btn btn-default {0}'>"+plusGlyph+"</button>";
 		var rooms = VeraBox.getRoomsSync();
 		
@@ -1246,7 +1271,7 @@ var SceneEditor = function (scene) {
 		}
 		html+="</div>";
 		
-		html += "<h3>Trigger <span id='trigger' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+"</h3> ";	
+		html += ("<h3>"+_T("Triggers")+" <span id='trigger' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+"</h3> ");	
 		html += _displayJson( 'trigger', scene.triggers);
 		try {
 			html +="<table class='table table-condensed'>";
@@ -1264,7 +1289,7 @@ var SceneEditor = function (scene) {
 			html +="error happened during decoding";
 		}
 		
-		html += "<h3>Timers <span id='timer' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+"</h3>";	
+		html += "<h3>"+_T("Timers")+" <span id='timer' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+"</h3>";	
 		html += _displayJson( 'timer', scene.timers);
 		try {
 			html +="<table class='table table-condensed'>";
@@ -1282,7 +1307,7 @@ var SceneEditor = function (scene) {
 			html +="error happened during decoding";
 		}
 
-		html += "<h3>Actions <span id='group' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+"</h3>";	
+		html += "<h3>"+_T("Actions")+" <span id='group' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+"</h3>";	
 		html += _displayJson( 'group', scene.groups );
 		try {
 			html +="<table class='table table-condensed'>";
@@ -1302,7 +1327,7 @@ var SceneEditor = function (scene) {
 		}
 
 		var lua = (scene.lua!=undefined) ? scene.lua : "";
-		html +=  "<h3>Lua</h3> ";	
+		html +=  "<h3>"+_T("Lua")+"</h3> ";	
 		// html +="<form class='col-sm-11' role='form' action='javascript:void(0);'>";
 		html +="  <div class='form-group'>";
 		html += ("    <label for='altui-luascene'>Lua scene code:</label>"+htmlSceneEditButton);
@@ -1645,15 +1670,14 @@ var UIManager  = ( function( window, undefined ) {
 	//---------------------------------------------------------
 	// private functions
 	//---------------------------------------------------------
+
 	// var _uiengine = null;		// setTimeout timer object for ui refresh
 	var _devicetypesDB = {};
 	var _ui7Check = true;
 	var _version = "";
 	var _remoteAccessUrl = "";
 
-	
 	//var devicecontainerTemplate = "<div class=' col-xs-12 col-sm-6 col-md-4 col-lg-3 '><p data-toggle='tooltip' data-placement='left' title='{2}'>{0} [{1}]</p></div>"
-	
 	function _loadStyle(styleFunctionName) {
 		var head = document.getElementsByTagName('head')[0];
 		var style = document.createElement('style');
@@ -3025,7 +3049,7 @@ var UIManager  = ( function( window, undefined ) {
 		
 		// clone for temporary storage
 		var widget = $.extend( true, {}, real_widget );
-		var dialog = DialogManager.createPropertyDialog('Device Variable Properties');
+		var dialog = DialogManager.createPropertyDialog(_T('Device Variable Properties'));
 		DialogManager.dlgAddDevices( dialog , widget.properties.deviceid, function() {
 			DialogManager.dlgAddVariables(dialog, widget, function() {
 				// run the show
@@ -3101,7 +3125,7 @@ var UIManager  = ( function( window, undefined ) {
 		var widget = $.extend( true, {}, real_widget );
 		var dialog = DialogManager.createPropertyDialog('UPnP Action Properties');
 		DialogManager.dlgAddDevices( dialog , widget.properties.deviceid, function() {
-			DialogManager.dlgAddActions("altui-widget-action",dialog, widget, widget.properties, 'Action', function() {
+			DialogManager.dlgAddActions("altui-widget-action",dialog, widget, widget.properties, _T('Action'), function() {
 				// run the show
 				$('div#dialogModal').modal();
 			});
@@ -3138,10 +3162,10 @@ var UIManager  = ( function( window, undefined ) {
 		DialogManager.dlgAddDevices( dialog , widget.properties.deviceid, function() {
 			DialogManager.dlgAddVariables(dialog, widget, function() {
 				DialogManager.dlgAddCheck(dialog,'Inverted',widget.properties.inverted);
-				DialogManager.dlgAddLine(dialog,'OffLabel', widget.properties.labels[0]);
-				DialogManager.dlgAddActions("altui-widget-action-off",dialog, widget, widget.properties.action_off, 'Action to switch OFF', function() {
-					DialogManager.dlgAddLine(dialog,'OnLabel', widget.properties.labels[1]);
-					DialogManager.dlgAddActions("altui-widget-action-on",dialog, widget, widget.properties.action_on, 'Action to switch ON', function() {
+				DialogManager.dlgAddLine(dialog,'OffLabel', _T('OffLabel'),widget.properties.labels[0]);
+				DialogManager.dlgAddActions("altui-widget-action-off",dialog, widget, widget.properties.action_off, _T('Action to switch OFF'), function() {
+					DialogManager.dlgAddLine(dialog,'OnLabel', _T('OnLabel'), widget.properties.labels[1]);
+					DialogManager.dlgAddActions("altui-widget-action-on",dialog, widget, widget.properties.action_on, _T('Action to switch ON'), function() {
 						// run the show
 						$('div#dialogModal').modal();
 					});
@@ -3250,13 +3274,13 @@ var UIManager  = ( function( window, undefined ) {
 		var dialog = DialogManager.createPropertyDialog('Gauge Properties');
 		DialogManager.dlgAddDevices( dialog , widget.properties.deviceid, function() {
 			DialogManager.dlgAddVariables(dialog, widget, function() {
-				DialogManager.dlgAddLine(dialog,'Label', widget.properties.label);
-				DialogManager.dlgAddLine(dialog,'Min', widget.properties.min);
-				DialogManager.dlgAddLine(dialog,'Green', widget.properties.greenfrom);
-				DialogManager.dlgAddLine(dialog,'Orange', widget.properties.orangefrom);
-				DialogManager.dlgAddLine(dialog,'Red', widget.properties.redfrom);
-				DialogManager.dlgAddLine(dialog,'Max', widget.properties.max);
-				DialogManager.dlgAddLine(dialog,'Ticks', widget.properties.majorTicks.join(','),'nn,nn,nn');
+				DialogManager.dlgAddLine(dialog,'Label', _T('Label'), widget.properties.label);
+				DialogManager.dlgAddLine(dialog,'Min', _T('Min'), widget.properties.min);
+				DialogManager.dlgAddLine(dialog,'Green', _T('Green'), widget.properties.greenfrom);
+				DialogManager.dlgAddLine(dialog,'Orange', _T('Orange'), widget.properties.orangefrom);
+				DialogManager.dlgAddLine(dialog,'Red', _T('Red'), widget.properties.redfrom);
+				DialogManager.dlgAddLine(dialog,'Max', _T('Max'), widget.properties.max);
+				DialogManager.dlgAddLine(dialog,'Ticks', _T('Ticks'), widget.properties.majorTicks.join(','),'nn,nn,nn');
 				// run the show
 				$('div#dialogModal').modal();
 			});
@@ -3896,7 +3920,7 @@ var UIManager  = ( function( window, undefined ) {
 				});
 		htmlRoomSelect 	  += "</select>";
 		var html = "<div class='form-inline'><h3>Room : "+htmlRoomSelect;
-		html += "<button type='button' class='btn btn-default' id='altui-toggle-attributes' >Attributes<span class='caret'></span></button>";
+		html += "<button type='button' class='btn btn-default' id='altui-toggle-attributes' >"+_T("Attributes")+"<span class='caret'></span></button>";
 		if (AltuiDebug.IsDebug())
 			html +=  buttonDebugHtml;
 		html += "</h3></div>";
@@ -3991,8 +4015,8 @@ var UIManager  = ( function( window, undefined ) {
 				deviceCreateModalTemplate += "      </div>";
 			deviceCreateModalTemplate += "      </div>";
 			deviceCreateModalTemplate += "      <div class='modal-footer'>";
-			deviceCreateModalTemplate += "        <button type='button' class='btn btn-default' data-dismiss='modal'>Close</button>";
-			deviceCreateModalTemplate += "        <button type='button' class='btn btn-primary'>Save changes</button>";
+			deviceCreateModalTemplate += "        <button type='button' class='btn btn-default' data-dismiss='modal'>"+_T("Close")+"</button>";
+			deviceCreateModalTemplate += "        <button type='button' class='btn btn-primary'>"+_T("Save Changes")+"</button>";
 			deviceCreateModalTemplate += "      </div>";
 			deviceCreateModalTemplate += "    </div><!-- /.modal-content -->";
 			deviceCreateModalTemplate += "  </div><!-- /.modal-dialog -->";
@@ -4813,7 +4837,7 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		UIManager.clearPage(_T('LuaTest'),_T("LUA Code Test"));
 		$(".altui-mainpanel").append("<p>This test code will succeed if it is syntactically correct and does not return false. an error in the code or a return false will trigger a failure</p>");
-		this.pageEditorForm("Lua Test Code","return true","Submit",function(lua) {
+		this.pageEditorForm("Lua Test Code","return true",_T("Submit"),function(lua) {
 			VeraBox.runLua(lua, function(result) {
 				if ( result == "Passed")
 					PageMessage.message( "Test code succeeded", "success");
@@ -4945,10 +4969,6 @@ var UIManager  = ( function( window, undefined ) {
     };
 })( window );
 
-// UIManager.loadScript('https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["corechart","table","gauge"]}]}');
-var language = window.navigator.userLanguage || window.navigator.language;
-if (language != 'en')
-	UIManager.loadScript('J_ALTUI_loc_'+ language.substring(0, 2) + '.js' );
 
 $(document).ready(function() {
 	$(window).on('resize', function () {
