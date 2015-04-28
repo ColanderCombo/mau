@@ -11,7 +11,7 @@
 
 Localization.init( {
   "Home": "Maison",
-  "Welcome to VERA Alternate UI": "Bienvenu dans AltUI pour VERA",
+  "Welcome to VERA Alternate UI": "Bienvenue dans AltUI pour VERA",
   "Rooms": "Pieces",
   "Devices": "Périphériques",
   "Control Panel": "Controle",

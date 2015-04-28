@@ -31,7 +31,12 @@ var Localization = ( function (undefined) {
 			console.log( JSON.stringify(_unknown_terms) );
 			console.log( JSON.stringify(_terms) );
 		}
-		UIManager.pageEditorForm("Localization unknown terms",JSON.stringify(_unknown_terms),"Close",function() {
+		var text = "browser userlanguage:{0} language:{1}\n Unknown terms:{2}".format(
+			window.navigator.userLanguage || "",
+			window.navigator.language || "",
+			JSON.stringify(_unknown_terms)
+		);
+		UIManager.pageEditorForm("Localization information",text,"Close",function() {
 			UIManager.pageHome();
 		});
 	};

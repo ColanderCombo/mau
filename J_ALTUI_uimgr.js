@@ -4948,7 +4948,7 @@ var UIManager  = ( function( window, undefined ) {
 // UIManager.loadScript('https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["corechart","table","gauge"]}]}');
 var language = window.navigator.userLanguage || window.navigator.language;
 if (language != 'en')
-	UIManager.loadScript('J_ALTUI_loc_'+ language + '.js' );
+	UIManager.loadScript('J_ALTUI_loc_'+ language.substring(0, 2) + '.js' );
 
 $(document).ready(function() {
 	$(window).on('resize', function () {
