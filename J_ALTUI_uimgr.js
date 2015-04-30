@@ -1800,7 +1800,7 @@ var UIManager  = ( function( window, undefined ) {
 	function _initDB(devicetypes) {
 		$.extend(true,_devicetypesDB,devicetypes);
 		// foreach load the module if needed
-		AltuiDebug.SetDebug( _devicetypesDB["info"].debug ) ;
+		// AltuiDebug.SetDebug( _devicetypesDB["info"].debug ) ;
 		_ui7Check = (_devicetypesDB["info"].ui7Check == "true" );
 		_version = _devicetypesDB["info"].PluginVersion;
 		_remoteAccessUrl =_devicetypesDB["info"].RemoteAccess;
@@ -2222,7 +2222,9 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		if (device==null)
 			device = VeraBox.getDeviceByID(deviceid);
-
+		if (device==null)
+			return "<img class='altui-device-icon pull-left img-rounded' data-org-src='/err' src='"+defaultIconSrc+"' alt='_todo_' onerror='UIManager.onDeviceIconError("+deviceid+")' ></img>";
+		
 		// if there is a custom function, use it
 		if (_devicetypesDB[ device.device_type ]!=null && _devicetypesDB[ device.device_type ].DeviceIconFunc!=null) {
 			return  _executeFunctionByName(_devicetypesDB[ device.device_type ].DeviceIconFunc, window, device.id, device);
@@ -3008,12 +3010,7 @@ var UIManager  = ( function( window, undefined ) {
 
 	
 	function _initUIEngine(css) {
-		// _uiengine = setTimeout(_refreshUI,10,true);
-		
-		//fix css for remote access
-		// var reg = /background: url\(([^)]*)\)/g
-		// var myArray = css.match(reg); 
-		
+
 		var head = document.getElementsByTagName('head')[0];
 		var style = document.createElement('style');
 		style.type = 'text/css';
@@ -4717,7 +4714,7 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		UIManager.clearPage(_T('Editor'), filename);
 		$(".altui-mainpanel").append("<p> </p>");
-		this.pageEditorForm(filename,txt,button,function(newtxt) {
+		UIManager.pageEditorForm(filename,txt,button,function(newtxt) {
 			if ($.isFunction(cbfunc)) 
 				cbfunc(newtxt);
 		});
@@ -4727,7 +4724,7 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		UIManager.clearPage(_T('LuaTest'),_T("LUA Code Test"));
 		$(".altui-mainpanel").append("<p>This test code will succeed if it is syntactically correct and does not return false. an error in the code or a return false will trigger a failure</p>");
-		this.pageEditorForm("Lua Test Code","return true",_T("Submit"),function(lua) {
+		UIManager.pageEditorForm("Lua Test Code","return true",_T("Submit"),function(lua) {
 			VeraBox.runLua(lua, function(result) {
 				if ( result == "Passed")
 					PageMessage.message( "Test code succeeded", "success");
@@ -4741,7 +4738,7 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		UIManager.clearPage(_T('LuaStart'),_T("LUA Startup"));
 		var lua = VeraBox.getLuaStartup();
-		this.pageEditorForm("Lua Startup Code",lua,"Submit",function(newlua) {
+		UIManager.pageEditorForm("Lua Startup Code",lua,"Submit",function(newlua) {
 			if (newlua!=lua) {
 				if (confirm("do you want to change lua startup code ? if yes, it will generate a LUA reload, be patient..."))
 					VeraBox.setStartupCode(newlua);
@@ -4861,83 +4858,205 @@ var UIManager  = ( function( window, undefined ) {
 
 
 $(document).ready(function() {
-	$(window).on('resize', function () {
-	  /*if (window.innerWidth > tabletSize) */
-	  $(".navbar-collapse").collapse('hide');
-	  UIManager.refreshUI( true ,false  );	// full but not first time
-	});			
+	function _initLocalizedGlobals() {
+		console.log("_initLocalizedGlobals()");
+		_HouseModes = [
+			{id:1, text:_T("Home"), cls:"preset_home"},
+			{id:2, text:_T("Away"), cls:"preset_away"},
+			{id:3, text:_T("Night"), cls:"preset_night"},
+			{id:4, text:_T("Vacation"), cls:"preset_vacation"}
+		];
+		// 0: table  1: devicename 2: id
+		deviceModalTemplate = "<div id='deviceModal' class='modal fade'>";
+		deviceModalTemplate += "  <div class='modal-dialog modal-lg'>";
+		deviceModalTemplate += "    <div class='modal-content'>";
+		deviceModalTemplate += "      <div class='modal-header'>";
+		deviceModalTemplate += "        <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
+		deviceModalTemplate += "        <h4 class='modal-title'>{1} <small>#{2}</small> - Variables</h4>";
+		deviceModalTemplate += "      </div>";
+		deviceModalTemplate += "      <div class='modal-body'>";
+		deviceModalTemplate += "      <div class='row-fluid'>";
+		deviceModalTemplate += " <table class='table table-condensed'>";
+		deviceModalTemplate += "       <thead>";
+		deviceModalTemplate += "         <tr>";
+		// deviceModalTemplate += "           <th>#</th>";
+		deviceModalTemplate += "           <th>"+_T("Variable")+"</th>";
+		deviceModalTemplate += "           <th>"+_T("Value")+"</th>";
+		deviceModalTemplate += "         </tr>";
+		deviceModalTemplate += "       </thead>";
+		deviceModalTemplate += "       <tbody>";
+		deviceModalTemplate += "       {0}";					// lines goes here
+		deviceModalTemplate += "       </tbody>";
+		deviceModalTemplate += "     </table>";
+		deviceModalTemplate += "      </div>";
+		deviceModalTemplate += "      </div>";
+		deviceModalTemplate += "      <div class='modal-footer'>";
+		deviceModalTemplate += "        <button type='button' class='btn btn-primary' data-dismiss='modal'>"+_T("Close")+"</button>";
+		// deviceModalTemplate += "        <button type='button' class='btn btn-primary'>Save changes</button>";
+		deviceModalTemplate += "      </div>";
+		deviceModalTemplate += "    </div><!-- /.modal-content -->";
+		deviceModalTemplate += "  </div><!-- /.modal-dialog -->";
+		deviceModalTemplate += "</div><!-- /.modal -->";
 
-var body = "";
-body+="<!-- Fixed navbar -->";
-body+="<nav class='navbar navbar-default navbar-fixed-top'>";
-body+="  <div class='container'>";
-body+="	<div class='navbar-header'>";
-body+="	  <button type='button' class='navbar-toggle collapsed' data-toggle='collapse' data-target='#navbar' aria-expanded='false' aria-controls='navbar'>";
-body+="		<span class='sr-only'>Toggle navigation</span>";
-body+="		<span class='icon-bar'></span>";
-body+="		<span class='icon-bar'></span>";
-body+="		<span class='icon-bar'></span>";
-body+="	  </button>		  ";
-body+="	  <a class='navbar-brand' href='#'></a>";
-body+="	</div>";
-body+="	<div id='navbar' class='navbar-collapse collapse'>";
-body+="	  <ul class='nav navbar-nav'>";
-body+="		<li class='active'><div class='imgLogo'></div></li>";
-body+="		<li><a id='menu_room' href='#'  >"+_T("Rooms")+"</a></li>";
-body+="		<li><a id='menu_device' href='#'  >"+_T("Devices")+"</a></li>";
-body+="		<li><a id='menu_scene' href='#'  >"+_T("Scenes")+"</a></li>";
-body+="		<li><a id='menu_plugins' href='#'  >"+_T("Plugins")+"</a></li>";
-body+="		<li class='dropdown'>";
-body+="			<a href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-expanded='false'>"+_T("Custom Pages")+" <span class='caret'></span></a>";
-body+="			<ul class='dropdown-menu' role='menu'>";
-body+="				<li><a id='altui-pages-see' href='#' >"+_T("Use Custom Pages")+"</a></li>";
-body+="				<li><a id='altui-pages-edit' href='#' >"+_T("Edit Custom Pages")+"</a></li>";
-body+="			</ul>";
-body+="		</li>";
-body+="		<li class='dropdown'>";
-body+="		  <a href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-expanded='false'>"+_T("More")+"... <span class='caret'></span></a>";
-body+="		  <ul class='dropdown-menu' role='menu'>";
-body+="			<li><a id='altui-remoteaccess' href='#' >"+_T("Remote Access Login")+"</a></li>";
-body+="			<li><a id='altui-reload' href='#' >"+_T("Reload Luup Engine")+"</a></li>";
-body+="			<li class='divider'></li>";
-body+="			<li class='dropdown-header'>Lua</li>";
-body+="			<li><a id='altui-luastart' href='#' >"+_T("Lua Startup Code")+"</a></li>";
-body+="			<li><a id='altui-luatest' href='#' >"+_T("Lua Test Code")+"</a></li>";
-body+="			<li class='divider'></li>";
-body+="			<li class='dropdown-header'>Admin</li>";
-body+="			<li><a id='altui-optimize' href='#'>"+_T("Optimizations")+"</a></li>";
-body+="			<li><a id='altui-localize' href='#'>"+_T("Localization")+"</a></li>";
-body+="			<li class='divider'></li>";
-body+="			<li class='dropdown-header'>"+_T("Misc")+"</li>";
-body+="			<li><a id='altui-credits' href='#'>"+_T("Credits")+"</a></li>";
-body+="		  </ul>";
-body+="		</li>";
-body+="	  </ul>";
-body+="	</div><!--/.nav-collapse -->";
-body+="  </div>";
-body+="</nav>";
-body+="<div class='container-fluid theme-showcase' role='main'>";
-body+="	<div class='row'>";
-body+="		<div class='col-sm-10 col-sm-push-2'>";
-body+="			<h1 id='altui-pagetitle' >"+_T("Welcome to VERA Alternate UI")+"</h1>";
-body+="			<div id='dialogs'></div>";
-body+="			<div class='altui-mainpanel row'>";
-body+="			</div>";
-body+="		</div>";
-body+="		<div class='col-sm-2 col-sm-pull-10'>";
-body+="			<div class='altui-leftnav btn-group-vertical' role='group' aria-label='...'>";
-body+="				<!--";
-body+="				<button type='button' class='btn btn-default'>One</button>";
-body+="				<button type='button' class='btn btn-default'>Deux</button>";
-body+="				<button type='button' class='btn btn-default'>Trois</button>";
-body+="				-->";
-body+="			</div>";
-body+="		</div>";
-body+="	</div>";
-body+="</div> <!-- /container -->";
+		// 0: table  1: devicename 2: id
+		deviceActionModalTemplate = "<div id='deviceActionModal' class='modal fade'>";
+		deviceActionModalTemplate += "  <div class='modal-dialog'>";
+		deviceActionModalTemplate += "    <div class='modal-content'>";
+		deviceActionModalTemplate += "      <div class='modal-header'>";
+		deviceActionModalTemplate += "        <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
+		deviceActionModalTemplate += "        <h4 class='modal-title'>{1} <small>#{2}</small> - Actions</h4>";
+		deviceActionModalTemplate += "      </div>";
+		deviceActionModalTemplate += "      <div class='modal-body'>";
+		deviceActionModalTemplate += " 	<table class='table table-condensed' >";
+		deviceActionModalTemplate += "       <thead>";
+		deviceActionModalTemplate += "         <tr>";
+		deviceActionModalTemplate += "           <th>"+_T("Action")+"</th>";
+		deviceActionModalTemplate += "           <th>"+_T("Parameters")+"</th>";
+		deviceActionModalTemplate += "         </tr>";
+		deviceActionModalTemplate += "       </thead>";
+		deviceActionModalTemplate += "       <tbody>";
+		deviceActionModalTemplate += "       {0}";					// lines goes here
+		deviceActionModalTemplate += "       </tbody>";
+		deviceActionModalTemplate += "     </table>";
+		deviceActionModalTemplate += "      </div>";
+		deviceActionModalTemplate += "      <div class='modal-footer'>";
+		deviceActionModalTemplate += "        <button type='button' class='btn btn-primary' data-dismiss='modal'>"+_T("Close")+"</button>";
+		deviceActionModalTemplate += "      </div>";
+		deviceActionModalTemplate += "    </div><!-- /.modal-content -->";
+		deviceActionModalTemplate += "  </div><!-- /.modal-dialog -->";
+		deviceActionModalTemplate += "</div><!-- /.modal -->";
 
-$("body").prepend(body);
+		// 0: title, 1: body
+		defaultDialogModalTemplate = "<div id='dialogModal' class='modal fade'>";
+		defaultDialogModalTemplate += "  <div class='modal-dialog modal-lg'>";
+		defaultDialogModalTemplate += "    <form class='form' data-toggle='validator' onsubmit='return false;'>";
+		defaultDialogModalTemplate += "    <div class='modal-content'>";
+		defaultDialogModalTemplate += "      <div class='modal-header'>";
+		defaultDialogModalTemplate += "        <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
+		defaultDialogModalTemplate += "        <h4 class='modal-title'>{0} </h4>";
+		defaultDialogModalTemplate += "      </div>";
+		defaultDialogModalTemplate += "      <div class='modal-body'>";
+		defaultDialogModalTemplate += "      <div class='row-fluid'>";
+		defaultDialogModalTemplate += "      {1}";
+		defaultDialogModalTemplate += "      </div>";
+		defaultDialogModalTemplate += "      </div>";
+		defaultDialogModalTemplate += "      <div class='modal-footer'>";
+		defaultDialogModalTemplate += "        <button type='button' class='btn btn-default' data-dismiss='modal'>"+_T("Close")+"</button>";
+		defaultDialogModalTemplate += "        <button type='submit' class='btn btn-primary'>"+_T("Save Changes")+"</button>";
+		defaultDialogModalTemplate += "      </div>";
+		defaultDialogModalTemplate += "    </div><!-- /.modal-content -->";
+		defaultDialogModalTemplate += "    </form>";
+		defaultDialogModalTemplate += "  </div><!-- /.modal-dialog -->";
+		defaultDialogModalTemplate += "</div><!-- /.modal -->";
+
+		loadGlyph = glyphTemplate.format( "open", _T("Load") , "");
+		infoGlyph = glyphTemplate.format( "info-sign", _T("Info") , "");
+		picGlyph = glyphTemplate.format( "picture", _T("Image") , "");
+		runGlyph = glyphTemplate.format( "play", _T("Run Scene") , "");
+		editGlyph = glyphTemplate.format( "pencil", _T("Edit") , "");
+		cameraGlyph = glyphTemplate.format( "facetime-video", _T("Camera") , "");
+		onoffGlyph = glyphTemplate.format( "off", _T("On Off") , "");
+		scaleGlyph = glyphTemplate.format( "scale", _T("Gauge") , "");
+		helpGlyph = glyphTemplate.format( "question-sign", "" , "");
+		
+		UIManager.initLocalizedGlobals();
 	
+		var body = "";
+		body+="<!-- Fixed navbar -->";
+		body+="<nav class='navbar navbar-default navbar-fixed-top'>";
+		body+="  <div class='container'>";
+		body+="	<div class='navbar-header'>";
+		body+="	  <button type='button' class='navbar-toggle collapsed' data-toggle='collapse' data-target='#navbar' aria-expanded='false' aria-controls='navbar'>";
+		body+="		<span class='sr-only'>Toggle navigation</span>";
+		body+="		<span class='icon-bar'></span>";
+		body+="		<span class='icon-bar'></span>";
+		body+="		<span class='icon-bar'></span>";
+		body+="	  </button>		  ";
+		body+="	  <a class='navbar-brand' href='#'></a>";
+		body+="	</div>";
+		body+="	<div id='navbar' class='navbar-collapse collapse'>";
+		body+="	  <ul class='nav navbar-nav'>";
+		body+="		<li class='active'><div class='imgLogo'></div></li>";
+		body+="		<li><a id='menu_room' href='#'  >"+_T("Rooms")+"</a></li>";
+		body+="		<li><a id='menu_device' href='#'  >"+_T("Devices")+"</a></li>";
+		body+="		<li><a id='menu_scene' href='#'  >"+_T("Scenes")+"</a></li>";
+		body+="		<li><a id='menu_plugins' href='#'  >"+_T("Plugins")+"</a></li>";
+		body+="		<li class='dropdown'>";
+		body+="			<a href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-expanded='false'>"+_T("Custom Pages")+" <span class='caret'></span></a>";
+		body+="			<ul class='dropdown-menu' role='menu'>";
+		body+="				<li><a id='altui-pages-see' href='#' >"+_T("Use Custom Pages")+"</a></li>";
+		body+="				<li><a id='altui-pages-edit' href='#' >"+_T("Edit Custom Pages")+"</a></li>";
+		body+="			</ul>";
+		body+="		</li>";
+		body+="		<li class='dropdown'>";
+		body+="		  <a href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-expanded='false'>"+_T("More")+"... <span class='caret'></span></a>";
+		body+="		  <ul class='dropdown-menu' role='menu'>";
+		body+="			<li><a id='altui-remoteaccess' href='#' >"+_T("Remote Access Login")+"</a></li>";
+		body+="			<li><a id='altui-reload' href='#' >"+_T("Reload Luup Engine")+"</a></li>";
+		body+="			<li class='divider'></li>";
+		body+="			<li class='dropdown-header'>Lua</li>";
+		body+="			<li><a id='altui-luastart' href='#' >"+_T("Lua Startup Code")+"</a></li>";
+		body+="			<li><a id='altui-luatest' href='#' >"+_T("Lua Test Code")+"</a></li>";
+		body+="			<li class='divider'></li>";
+		body+="			<li class='dropdown-header'>Admin</li>";
+		body+="			<li><a id='altui-optimize' href='#'>"+_T("Optimizations")+"</a></li>";
+		body+="			<li><a id='altui-localize' href='#'>"+_T("Localization")+"</a></li>";
+		body+="			<li class='divider'></li>";
+		body+="			<li class='dropdown-header'>"+_T("Misc")+"</li>";
+		body+="			<li><a id='altui-credits' href='#'>"+_T("Credits")+"</a></li>";
+		body+="		  </ul>";
+		body+="		</li>";
+		body+="	  </ul>";
+		body+="	</div><!--/.nav-collapse -->";
+		body+="  </div>";
+		body+="</nav>";
+		body+="<div class='container-fluid theme-showcase' role='main'>";
+		body+="	<div class='row'>";
+		body+="		<div class='col-sm-10 col-sm-push-2'>";
+		body+="			<h1 id='altui-pagetitle' >"+_T("Welcome to VERA Alternate UI")+"</h1>";
+		body+="			<div id='dialogs'></div>";
+		body+="			<div class='altui-mainpanel row'>";
+		body+="			</div>";
+		body+="		</div>";
+		body+="		<div class='col-sm-2 col-sm-pull-10'>";
+		body+="			<div class='altui-leftnav btn-group-vertical' role='group' aria-label='...'>";
+		body+="				<!--";
+		body+="				<button type='button' class='btn btn-default'>One</button>";
+		body+="				<button type='button' class='btn btn-default'>Deux</button>";
+		body+="				<button type='button' class='btn btn-default'>Trois</button>";
+		body+="				-->";
+		body+="			</div>";
+		body+="		</div>";
+		body+="	</div>";
+		body+="</div> <!-- /container -->";
+		$("body").prepend(body);
+		PageMessage.init();
+		UIManager.pageHome();
+	};
+
+	AltuiDebug.SetDebug( g_DeviceTypes.info["debug"] ) ;
+	AltuiDebug.debug("starting engines");
+	AltuiDebug.debug("Configuration: "+JSON.stringify(g_DeviceTypes));
+	AltuiDebug.debug("Custom Pages: "+JSON.stringify(g_CustomPages));
+
+	var language = getQueryStringValue("lang") || window.navigator.userLanguage || window.navigator.language;
+	console.log("language:"+language);
+	if (language != 'en') {
+		var scriptLocationAndName = 'J_ALTUI_loc_'+ language.substring(0, 2) + '.js' ;
+		var head = document.getElementsByTagName('head')[0];
+		var script = document.createElement('script');
+		script.type = 'text/javascript';
+		script.src = scriptLocationAndName;
+		console.log("loading script :"+scriptLocationAndName);
+		// once script is loaded, we can call style function in it
+		$(script).load(  _initLocalizedGlobals );
+		head.appendChild(script);
+	} else {
+		console.log("going with English language");
+		_initLocalizedGlobals();
+	}
+	VeraBox.initEngine();
+
 	var styles ="					\
 	.solid-border {	\
 		border:1px solid;: 0px;\
@@ -5168,15 +5287,14 @@ $("body").prepend(body);
 		margin-top: 1px;	\
 		width: 50px;		\
 	}";				
-
-	AltuiDebug.SetDebug( g_DeviceTypes.info["debug"] ) ;
-	AltuiDebug.debug("starting engines");
-	AltuiDebug.debug("Configuration: "+JSON.stringify(g_DeviceTypes));
-	AltuiDebug.debug("Custom Pages: "+JSON.stringify(g_CustomPages));
-	PageMessage.init();
-	VeraBox.initEngine(  );
 	UIManager.initEngine(styles.format(window.location.hostname), g_DeviceTypes, g_CustomTheme);
 	UIManager.initCustomPages(g_CustomPages);
+
+	$(window).on('resize', function () {
+	  /*if (window.innerWidth > tabletSize) */
+	  $(".navbar-collapse").collapse('hide');
+	  UIManager.refreshUI( true ,false  );	// full but not first time
+	});			
 	$( window ).unload(function() {
 		// save state to accelerate the launch next time
 		// UIManager.saveEngine();	
@@ -5184,189 +5302,34 @@ $("body").prepend(body);
 		AltuiDebug.debug("exiting");
 	});
 	
-	// collapse on click on small screens
-	$(".navbar-nav a").on("click",function() {
-		//	$(".navbar-toggle").click();
-		if ($(this).data("toggle") != "dropdown")	// not for the More... button
-			$(".navbar-collapse").collapse('hide');
-	});
-
-	$(".imgLogo").click( function() {
-		UIManager.pageHome();
-	});
-	
-	$("#menu_room").click( function()
-	{
-		UIManager.pageRooms();
-	});
-	$("#menu_device").click( function()
-	{
-		UIManager.pageDevices();
-	});
-	$("#menu_scene").click( function()
-	{
-		UIManager.pageScenes();
-	});
-	$("#menu_plugins").click( function()
-	{
-		UIManager.pagePlugins();
-	});
-	$("#altui-pages-see").click( function()
-	{
-		UIManager.pageUsePages();
-	});
-	$("#altui-pages-edit").click( function()
-	{
-		UIManager.pageEditPages();
-	});
-
 	$(".altui-debug-div").toggle(false);
 	
 	$( document )
+		.on ("click", ".navbar-nav a", function() {		// collapse on click on small screens
+			//	$(".navbar-toggle").click();
+			if ($(this).data("toggle") != "dropdown")	// not for the More... button
+				$(".navbar-collapse").collapse('hide');
+		} )
+		.on ("click", ".imgLogo", UIManager.pageHome )
+		.on ("click", "#menu_room", UIManager.pageRooms )
+		.on ("click", "#menu_device", UIManager.pageDevices )
+		.on ("click", "#menu_scene", UIManager.pageScenes )
+		.on ("click", "#menu_plugins", UIManager.pagePlugins )
+		.on ("click", "#altui-pages-see", UIManager.pageUsePages )
+		.on ("click", "#altui-pages-edit", UIManager.pageEditPages )
+		.on( "click", "#altui-reload", VeraBox.reloadEngine )
+		.on( "click", "#altui-remoteaccess", UIManager.pageRemoteAccess )
+		.on( "click", "#altui-credits", UIManager.pageCredits )
+		.on( "click", "#altui-luastart", UIManager.pageLuaStart )
+		.on( "click", "#altui-luatest", UIManager.pageLuaTest )
+		.on( "click", "#altui-optimize", UIManager.pageOptimize )
+		.on( "click", "#altui-localize", Localization.dump )
 		.on( "click", "#altui-debug-btn", function() {
 			$(".altui-debug-div").toggle();
 			$("#altui-debug-btn span.caret").toggleClass( "caret-reversed" );
 		})
-		.on( "click", "#altui-reload", function() {
-			VeraBox.reloadEngine();
-		})
-		.on( "click", "#altui-remoteaccess", function() {
-			UIManager.pageRemoteAccess();
-		})
-		.on( "click", "#altui-credits", function() {
-			UIManager.pageCredits();
-		})
-		.on( "click", "#altui-luastart", function() {
-			UIManager.pageLuaStart();
-		})
-		.on( "click", "#altui-luatest", function() {
-			UIManager.pageLuaTest();
-		})
-		.on( "click", "#altui-optimize", function() {
-			UIManager.pageOptimize();
-		})
-		.on( "click", "#altui-localize", function() {
-			Localization.dump();
-		});
+		;
 
-	UIManager.pageHome();
 	AltuiDebug.debug("init done");
 });
 
-function _initLocalizedGlobals() {
-	_HouseModes = [
-		{id:1, text:_T("Home"), cls:"preset_home"},
-		{id:2, text:_T("Away"), cls:"preset_away"},
-		{id:3, text:_T("Night"), cls:"preset_night"},
-		{id:4, text:_T("Vacation"), cls:"preset_vacation"}
-	];
-	// 0: table  1: devicename 2: id
-	deviceModalTemplate = "<div id='deviceModal' class='modal fade'>";
-	deviceModalTemplate += "  <div class='modal-dialog modal-lg'>";
-	deviceModalTemplate += "    <div class='modal-content'>";
-	deviceModalTemplate += "      <div class='modal-header'>";
-	deviceModalTemplate += "        <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
-	deviceModalTemplate += "        <h4 class='modal-title'>{1} <small>#{2}</small> - Variables</h4>";
-	deviceModalTemplate += "      </div>";
-	deviceModalTemplate += "      <div class='modal-body'>";
-	deviceModalTemplate += "      <div class='row-fluid'>";
-	deviceModalTemplate += " <table class='table table-condensed'>";
-	deviceModalTemplate += "       <thead>";
-	deviceModalTemplate += "         <tr>";
-	// deviceModalTemplate += "           <th>#</th>";
-	deviceModalTemplate += "           <th>"+_T("Variable")+"</th>";
-	deviceModalTemplate += "           <th>"+_T("Value")+"</th>";
-	deviceModalTemplate += "         </tr>";
-	deviceModalTemplate += "       </thead>";
-	deviceModalTemplate += "       <tbody>";
-	deviceModalTemplate += "       {0}";					// lines goes here
-	deviceModalTemplate += "       </tbody>";
-	deviceModalTemplate += "     </table>";
-	deviceModalTemplate += "      </div>";
-	deviceModalTemplate += "      </div>";
-	deviceModalTemplate += "      <div class='modal-footer'>";
-	deviceModalTemplate += "        <button type='button' class='btn btn-primary' data-dismiss='modal'>"+_T("Close")+"</button>";
-	// deviceModalTemplate += "        <button type='button' class='btn btn-primary'>Save changes</button>";
-	deviceModalTemplate += "      </div>";
-	deviceModalTemplate += "    </div><!-- /.modal-content -->";
-	deviceModalTemplate += "  </div><!-- /.modal-dialog -->";
-	deviceModalTemplate += "</div><!-- /.modal -->";
-
-	// 0: table  1: devicename 2: id
-	deviceActionModalTemplate = "<div id='deviceActionModal' class='modal fade'>";
-	deviceActionModalTemplate += "  <div class='modal-dialog'>";
-	deviceActionModalTemplate += "    <div class='modal-content'>";
-	deviceActionModalTemplate += "      <div class='modal-header'>";
-	deviceActionModalTemplate += "        <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
-	deviceActionModalTemplate += "        <h4 class='modal-title'>{1} <small>#{2}</small> - Actions</h4>";
-	deviceActionModalTemplate += "      </div>";
-	deviceActionModalTemplate += "      <div class='modal-body'>";
-	deviceActionModalTemplate += " 	<table class='table table-condensed' >";
-	deviceActionModalTemplate += "       <thead>";
-	deviceActionModalTemplate += "         <tr>";
-	deviceActionModalTemplate += "           <th>"+_T("Action")+"</th>";
-	deviceActionModalTemplate += "           <th>"+_T("Parameters")+"</th>";
-	deviceActionModalTemplate += "         </tr>";
-	deviceActionModalTemplate += "       </thead>";
-	deviceActionModalTemplate += "       <tbody>";
-	deviceActionModalTemplate += "       {0}";					// lines goes here
-	deviceActionModalTemplate += "       </tbody>";
-	deviceActionModalTemplate += "     </table>";
-	deviceActionModalTemplate += "      </div>";
-	deviceActionModalTemplate += "      <div class='modal-footer'>";
-	deviceActionModalTemplate += "        <button type='button' class='btn btn-primary' data-dismiss='modal'>"+_T("Close")+"</button>";
-	deviceActionModalTemplate += "      </div>";
-	deviceActionModalTemplate += "    </div><!-- /.modal-content -->";
-	deviceActionModalTemplate += "  </div><!-- /.modal-dialog -->";
-	deviceActionModalTemplate += "</div><!-- /.modal -->";
-
-	// 0: title, 1: body
-	defaultDialogModalTemplate = "<div id='dialogModal' class='modal fade'>";
-	defaultDialogModalTemplate += "  <div class='modal-dialog modal-lg'>";
-	defaultDialogModalTemplate += "    <form class='form' data-toggle='validator' onsubmit='return false;'>";
-	defaultDialogModalTemplate += "    <div class='modal-content'>";
-	defaultDialogModalTemplate += "      <div class='modal-header'>";
-	defaultDialogModalTemplate += "        <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
-	defaultDialogModalTemplate += "        <h4 class='modal-title'>{0} </h4>";
-	defaultDialogModalTemplate += "      </div>";
-	defaultDialogModalTemplate += "      <div class='modal-body'>";
-	defaultDialogModalTemplate += "      <div class='row-fluid'>";
-	defaultDialogModalTemplate += "      {1}";
-	defaultDialogModalTemplate += "      </div>";
-	defaultDialogModalTemplate += "      </div>";
-	defaultDialogModalTemplate += "      <div class='modal-footer'>";
-	defaultDialogModalTemplate += "        <button type='button' class='btn btn-default' data-dismiss='modal'>"+_T("Close")+"</button>";
-	defaultDialogModalTemplate += "        <button type='submit' class='btn btn-primary'>"+_T("Save Changes")+"</button>";
-	defaultDialogModalTemplate += "      </div>";
-	defaultDialogModalTemplate += "    </div><!-- /.modal-content -->";
-	defaultDialogModalTemplate += "    </form>";
-	defaultDialogModalTemplate += "  </div><!-- /.modal-dialog -->";
-	defaultDialogModalTemplate += "</div><!-- /.modal -->";
-
-	loadGlyph = glyphTemplate.format( "open", _T("Load") , "");
-	infoGlyph = glyphTemplate.format( "info-sign", _T("Info") , "");
-	picGlyph = glyphTemplate.format( "picture", _T("Image") , "");
-	runGlyph = glyphTemplate.format( "play", _T("Run Scene") , "");
-	editGlyph = glyphTemplate.format( "pencil", _T("Edit") , "");
-	cameraGlyph = glyphTemplate.format( "facetime-video", _T("Camera") , "");
-	onoffGlyph = glyphTemplate.format( "off", _T("On Off") , "");
-	scaleGlyph = glyphTemplate.format( "scale", _T("Gauge") , "");
-	helpGlyph = glyphTemplate.format( "question-sign", "" , "");
-	
-	UIManager.initLocalizedGlobals();
-};
-
-var language = getQueryStringValue("lang") || window.navigator.userLanguage || window.navigator.language;
-if (language != 'en') {
-	var scriptLocationAndName = 'J_ALTUI_loc_'+ language.substring(0, 2) + '.js' ;
-	var head = document.getElementsByTagName('head')[0];
-	var script = document.createElement('script');
-	script.type = 'text/javascript';
-	script.src = scriptLocationAndName;
-
-	// once script is loaded, we can call style function in it
-	$(script).load(  _initLocalizedGlobals );
-	head.appendChild(script);
-} else {
-	_initLocalizedGlobals();
-}
