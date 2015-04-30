@@ -8,7 +8,10 @@
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-
+function getQueryStringValue (key) {  
+  return unescape(window.location.search.replace(new RegExp("^(?:.*[&\\?]" + escape(key).replace(/[\.\+\*]/g, "\\$&") + "(?:\\=([^&]*))?)?.*$", "i"), "$1"));  
+} 
+	
 var Localization = ( function (undefined) {
 	var _unknown_terms = {};
 	var _terms = {};
@@ -31,10 +34,11 @@ var Localization = ( function (undefined) {
 			console.log( JSON.stringify(_unknown_terms) );
 			console.log( JSON.stringify(_terms) );
 		}
-		var text = "browser userlanguage:{0} language:{1}\n Unknown terms:{2}".format(
+		var text = "browser query:{3} userlanguage:{0} language:{1}\n Unknown terms:{2}".format(
 			window.navigator.userLanguage || "",
 			window.navigator.language || "",
-			JSON.stringify(_unknown_terms)
+			JSON.stringify(_unknown_terms),
+			getQueryStringValue("lang")
 		);
 		UIManager.pageEditorForm("Localization information",text,_T("Close"),function() {
 			UIManager.pageHome();

@@ -86,10 +86,20 @@ Localization.init( {
   "Action to switch OFF":"Action pour Eteindre",
   "Action to switch ON":"Action pour Allumer",
   "Action":"Action",
-  "Group Action":"Groupe d'Action",
   "Device Variable Properties":"Propriétés du Périphérique",
   "Parameters":"Paramètres",
   "Value":"Valeur",
   "Variable":"Variable",
-  "Attributes":"Attributs"
+  "Attributes":"Attributs",
+  "Load":"Charge",
+  "Info":"Info",
+  "Image":"Image",
+  "Run Scene":"Exécute Scene",
+  "Edit":"Edit",
+  "Camera":"Caméra",
+  "On Off":"On Off",
+  "Gauge":"Jauge",
+  "Device Icon":"Icone",
+  "Scene":"Scène",
+  "Multi State":"Multi Etats"
 });

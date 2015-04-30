@@ -10,119 +10,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
 
 // UIManager.loadScript('https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["corechart","table","gauge"]}]}');
-var _HouseModes = [
-	{id:1, text:_T("Home"), cls:"preset_home"},
-	{id:2, text:_T("Away"), cls:"preset_away"},
-	{id:3, text:_T("Night"), cls:"preset_night"},
-	{id:4, text:_T("Vacation"), cls:"preset_vacation"}
-];
+var _HouseModes = [];
 var deviceModalTemplate = "";
 var deviceActionModalTemplate = "";
 var defaultDialogModalTemplate = "";
-
-var language = window.navigator.userLanguage || window.navigator.language;
-if (language != 'en') {
-	var scriptLocationAndName = 'J_ALTUI_loc_'+ language.substring(0, 2) + '.js' ;
-	var head = document.getElementsByTagName('head')[0];
-	var script = document.createElement('script');
-	script.type = 'text/javascript';
-	script.src = scriptLocationAndName;
-
-	// once script is loaded, we can call style function in it
-	$(script).load(  function() {
-		_HouseModes = [
-			{id:1, text:_T("Home"), cls:"preset_home"},
-			{id:2, text:_T("Away"), cls:"preset_away"},
-			{id:3, text:_T("Night"), cls:"preset_night"},
-			{id:4, text:_T("Vacation"), cls:"preset_vacation"}
-		];
-		// 0: table  1: devicename 2: id
-		deviceModalTemplate = "<div id='deviceModal' class='modal fade'>";
-		deviceModalTemplate += "  <div class='modal-dialog modal-lg'>";
-		deviceModalTemplate += "    <div class='modal-content'>";
-		deviceModalTemplate += "      <div class='modal-header'>";
-		deviceModalTemplate += "        <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
-		deviceModalTemplate += "        <h4 class='modal-title'>{1} <small>#{2}</small> - Variables</h4>";
-		deviceModalTemplate += "      </div>";
-		deviceModalTemplate += "      <div class='modal-body'>";
-		deviceModalTemplate += "      <div class='row-fluid'>";
-		deviceModalTemplate += " <table class='table table-condensed'>";
-		deviceModalTemplate += "       <thead>";
-		deviceModalTemplate += "         <tr>";
-		// deviceModalTemplate += "           <th>#</th>";
-		deviceModalTemplate += "           <th>"+_T("Variable")+"</th>";
-		deviceModalTemplate += "           <th>"+_T("Value")+"</th>";
-		deviceModalTemplate += "         </tr>";
-		deviceModalTemplate += "       </thead>";
-		deviceModalTemplate += "       <tbody>";
-		deviceModalTemplate += "       {0}";					// lines goes here
-		deviceModalTemplate += "       </tbody>";
-		deviceModalTemplate += "     </table>";
-		deviceModalTemplate += "      </div>";
-		deviceModalTemplate += "      </div>";
-		deviceModalTemplate += "      <div class='modal-footer'>";
-		deviceModalTemplate += "        <button type='button' class='btn btn-primary' data-dismiss='modal'>"+_T("Close")+"</button>";
-		// deviceModalTemplate += "        <button type='button' class='btn btn-primary'>Save changes</button>";
-		deviceModalTemplate += "      </div>";
-		deviceModalTemplate += "    </div><!-- /.modal-content -->";
-		deviceModalTemplate += "  </div><!-- /.modal-dialog -->";
-		deviceModalTemplate += "</div><!-- /.modal -->";
-
-		// 0: table  1: devicename 2: id
-		deviceActionModalTemplate = "<div id='deviceActionModal' class='modal fade'>";
-		deviceActionModalTemplate += "  <div class='modal-dialog'>";
-		deviceActionModalTemplate += "    <div class='modal-content'>";
-		deviceActionModalTemplate += "      <div class='modal-header'>";
-		deviceActionModalTemplate += "        <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
-		deviceActionModalTemplate += "        <h4 class='modal-title'>{1} <small>#{2}</small> - Actions</h4>";
-		deviceActionModalTemplate += "      </div>";
-		deviceActionModalTemplate += "      <div class='modal-body'>";
-		deviceActionModalTemplate += " 	<table class='table table-condensed' >";
-		deviceActionModalTemplate += "       <thead>";
-		deviceActionModalTemplate += "         <tr>";
-		deviceActionModalTemplate += "           <th>"+_T("Action")+"</th>";
-		deviceActionModalTemplate += "           <th>"+_T("Parameters")+"</th>";
-		deviceActionModalTemplate += "         </tr>";
-		deviceActionModalTemplate += "       </thead>";
-		deviceActionModalTemplate += "       <tbody>";
-		deviceActionModalTemplate += "       {0}";					// lines goes here
-		deviceActionModalTemplate += "       </tbody>";
-		deviceActionModalTemplate += "     </table>";
-		deviceActionModalTemplate += "      </div>";
-		deviceActionModalTemplate += "      <div class='modal-footer'>";
-		deviceActionModalTemplate += "        <button type='button' class='btn btn-primary' data-dismiss='modal'>"+_T("Close")+"</button>";
-		deviceActionModalTemplate += "      </div>";
-		deviceActionModalTemplate += "    </div><!-- /.modal-content -->";
-		deviceActionModalTemplate += "  </div><!-- /.modal-dialog -->";
-		deviceActionModalTemplate += "</div><!-- /.modal -->";
-
-		// 0: title, 1: body
-		defaultDialogModalTemplate = "<div id='dialogModal' class='modal fade'>";
-		defaultDialogModalTemplate += "  <div class='modal-dialog modal-lg'>";
-		defaultDialogModalTemplate += "    <form class='form' data-toggle='validator' onsubmit='return false;'>";
-		defaultDialogModalTemplate += "    <div class='modal-content'>";
-		defaultDialogModalTemplate += "      <div class='modal-header'>";
-		defaultDialogModalTemplate += "        <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
-		defaultDialogModalTemplate += "        <h4 class='modal-title'>{0} </h4>";
-		defaultDialogModalTemplate += "      </div>";
-		defaultDialogModalTemplate += "      <div class='modal-body'>";
-		defaultDialogModalTemplate += "      <div class='row-fluid'>";
-		defaultDialogModalTemplate += "      {1}";
-		defaultDialogModalTemplate += "      </div>";
-		defaultDialogModalTemplate += "      </div>";
-		defaultDialogModalTemplate += "      <div class='modal-footer'>";
-		defaultDialogModalTemplate += "        <button type='button' class='btn btn-default' data-dismiss='modal'>"+_T("Close")+"</button>";
-		defaultDialogModalTemplate += "        <button type='submit' class='btn btn-primary'>"+_T("Save Changes")+"</button>";
-		defaultDialogModalTemplate += "      </div>";
-		defaultDialogModalTemplate += "    </div><!-- /.modal-content -->";
-		defaultDialogModalTemplate += "    </form>";
-		defaultDialogModalTemplate += "  </div><!-- /.modal-dialog -->";
-		defaultDialogModalTemplate += "</div><!-- /.modal -->";
-
-	});
-	head.appendChild(script);
-}
-
 // 0:modeid 1:modetext 2:modeclss for bitmap 3:preset_unselected or preset_selected
 var houseModeButtonTemplate = "  <button type='button' class='btn btn-default altui-housemode'><div>{1}</div><div id='altui-mode{0}' class='col-xs-3 {2} {3} housemode'></div></button>";							
 var leftNavButtonTemplate = "<button id='{0}' type='button' class='altui-leftbutton btn btn-default'>{1}</button>";
@@ -138,15 +29,15 @@ var searchGlyph="<span class='glyphicon glyphicon-search' aria-hidden='true' dat
 var plusGlyph="<span class='glyphicon glyphicon-plus' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Add'></span>";
 var saveGlyph="<span class='glyphicon glyphicon-save' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Save'></span>";
 var labelGlyph="<span class='glyphicon glyphicon-font' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Label'></span>";
-var loadGlyph = glyphTemplate.format( "open", _T("Load") , "");
-var infoGlyph = glyphTemplate.format( "info-sign", _T("Info") , "");
-var picGlyph = glyphTemplate.format( "picture", _T("Image") , "");
-var runGlyph = glyphTemplate.format( "play", _T("Run Scene") , "");
-var editGlyph = glyphTemplate.format( "pencil", _T("Edit") , "");
-var cameraGlyph = glyphTemplate.format( "facetime-video", _T("Camera") , "");
-var onoffGlyph = glyphTemplate.format( "off", _T("On Off") , "");
-var scaleGlyph = glyphTemplate.format( "scale", _T("Gauge") , "");
-var helpGlyph = glyphTemplate.format( "question-sign", "" , "");
+var loadGlyph = "";
+var infoGlyph = "";
+var picGlyph = "";
+var runGlyph = "";
+var editGlyph = "";
+var cameraGlyph = "";
+var onoffGlyph = "";
+var scaleGlyph = "";
+var helpGlyph = "";
 var smallbuttonTemplate = "<button id='{0}' type='button' class='{1} btn btn-default btn-sm' aria-label='tbd' title='{3}'>{2}</button>";
 var buttonTemplate 		= "<button id='{0}' type='button' class='{1} btn btn-{3}' aria-label='tbd'>{2}</button>";
 var buttonDebugHtml = "<button type='button' class='btn btn-default' id='altui-debug-btn' >Debug<span class='caret'></span></button>";
@@ -171,7 +62,6 @@ var deviceActionLineTemplate = "  <tr>";
 deviceActionLineTemplate += "         <td><span title='{2}'><button class='btn btn-default btn-sm altui-run-action' data-devid='{3}' data-service='{2}' >{0}</button></span></td>";
 deviceActionLineTemplate += "         <td>{1}</td>";
 deviceActionLineTemplate += "     </tr>";
-
 
 var LuaEditor = (function () {
 	// 0: Lua code to edit
@@ -709,9 +599,7 @@ var DialogManager = ( function() {
 //=====================================================================		
 // Scene Editor
 //=====================================================================		
-
 var SceneEditor = function (scene) {
-
 	var _timerTypes = [
 		{value:0,text:'**Illegal**'},
 		{value:1,text:'interval'},
@@ -1106,7 +994,7 @@ var SceneEditor = function (scene) {
 			return res;
 		};
 		
-		var dialog = DialogManager.createPropertyDialog(_T('Group Action'));
+		var dialog = DialogManager.createPropertyDialog(_T('Action'));
 		DialogManager.dlgAddDevices( dialog , action.device, function() {
 			var widget = {
 				properties: {
@@ -1667,6 +1555,200 @@ var PageMessage = (function(window, undefined ) {
 })();
 
 var UIManager  = ( function( window, undefined ) {  
+	var edittools = [];
+	var tools = [];
+	function _initLocalizedGlobals() 
+	{
+		edittools = [
+			{id:1000, glyph:'object-align-top' , onclick: onAlignTop},
+			{id:1010, glyph:'object-align-horizontal', onclick: onAlignHorizontal },
+			{id:1020, glyph:'object-align-bottom' , onclick: onAlignBottom },
+			{id:1030, glyph:'object-align-left' , onclick: onAlignLeft },
+			{id:1040, glyph:'object-align-vertical' , onclick: onAlignVertical},
+			{id:1050, glyph:'object-align-right' , onclick: onAlignRight}
+		];
+		tools = [
+			{ 	id:10, 
+				cls:'altui-widget-label', 
+				no_refresh:true,
+				html: _toolHtml(labelGlyph,_T("Label")),
+				property: _onPropertyLabel, 
+				widgetdisplay: function(widget,bEdit)	{ return "<p>{0}</p>".format(widget.properties.label); },
+				properties: {
+					label:'Default Label'
+				} 
+			},
+			{ 	id:20, 
+				cls:'altui-widget-variable', 
+				html: _toolHtml(infoGlyph,_T("Variable")),
+				property: _onPropertyVariable, 
+				widgetdisplay: function(widget,bEdit)	{ 
+					return "<p>{0}</p>".format( 
+						(widget.properties.deviceid!=0) 
+						? VeraBox.getStatus( widget.properties.deviceid, widget.properties.service, widget.properties.variable )
+						: 'not defined');
+				},
+				properties: {
+					deviceid:0,
+					service:'',
+					variable:''
+				} 
+			},
+			{ 	id:30, 
+				cls:'altui-widget-image', 
+				no_refresh:true,
+				html: _toolHtml(picGlyph,_T("Image")),
+				property: _onPropertyImage, 
+				onWidgetResize: _onResizeImage,
+				widgetdisplay: function(widget,bEdit)	{ 
+					return "<img src='{0}' style='max-height:100%; max-width:100%;'></img>".format( widget.properties.url);
+				},
+				properties: {
+					url:'data:image/png;base64,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'
+				} 
+			},
+			{ 	id:40, 
+				cls:'altui-widget-icon', 
+				html: _toolHtml(picGlyph,_T("Device Icon")),
+				property: _onPropertyIcon, 
+				widgetdisplay: function(widget,bEdit)	{ 
+					return (widget.properties.deviceid==0) ? ("<p>"+picGlyph+"</p>") : _deviceIconHtml( null, widget.properties.deviceid);
+				},
+				properties: {
+					deviceid:0
+				} 
+			},
+			{ 	id:50, 
+				cls:'altui-widget-runscene', 
+				no_refresh:true,
+				html: _toolHtml(runGlyph,_T("Scene")),
+				property: _onPropertyRunscene, 
+				widgetdisplay: function(widget,bEdit)	{ 
+					return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='VeraBox.runScene({0})' >{2}</button>".format(
+						widget.properties.sceneid,
+						'altui-widget-runscene-button',
+						runGlyph,
+						(bEdit==true)?'disabled':''
+						);
+				},
+				properties: {
+					sceneid:0
+				} 
+			},
+			{ 	id:60, 
+				cls:'altui-widget-upnpaction', 
+				no_refresh:true,
+				html: _toolHtml(runGlyph,_T("Action")),
+				property: _onPropertyUpnpAction, 
+				widgetdisplay: function(widget,bEdit)	{ 
+					return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='UPnPHelper.UPnPAction( {0}, \"{4}\", \"{5}\", {6} )' >{2}</button>".format(
+						widget.properties.deviceid,
+						'altui-widget-upnpaction-button',
+						runGlyph,
+						(bEdit==true)?'disabled':'',
+						widget.properties.service,
+						widget.properties.action,
+						JSON.stringify(widget.properties.params)
+						);
+				},
+				properties: {	//( deviceID, service, action, params, cbfunc )
+					deviceid:0,
+					service:'',
+					action:'',
+					params:{}
+				} 
+			},
+			{ 	id:65, 
+				cls:'altui-widget-2statebtn', 
+				html: _toolHtml(onoffGlyph,_T("Multi State")),
+				property: _onPropertyOnOffButton, 
+				widgetdisplay: function(widget,bEdit)	{
+					var status=0;
+					if (widget.properties.deviceid>0)
+					{
+						status = VeraBox.getStatus(widget.properties.deviceid, widget.properties.service, widget.properties.variable);
+						if  ((status==undefined) || (status==false) || (status=='0') )
+							status = 0;
+						else if ((status=='true') || (status=='1') || (status>=1))
+							status = 1;
+						if (widget.properties.inverted==true)
+							status = 1-status;
+					}
+					var htmlLabels=$("<div class='altui-widget-2statebtn-labels'></div>");
+					if ( (status==0) && (widget.properties.labels[0]!=undefined) )
+						htmlLabels.append( $("<small class='pull-right'></small>").text(widget.properties.labels[0]));
+					if ( (status==1) && (widget.properties.labels[1]!=undefined) )
+						htmlLabels.append( $("<small class='pull-left'></small>").text(widget.properties.labels[1]));
+					htmlLabels = htmlLabels.wrap( "<div></div>" ).parent().html();
+					
+					return "<button {3}  type='button' style='color:{4};' class='{1} btn btn-default' aria-label='Run Scene' onclick='UIManager.onoffOnClick( {5})' >{2}</button>".format(
+						widget.properties.deviceid,					// id
+						'altui-widget-2statebtn',					// class
+						onoffGlyph,									// content
+						(bEdit==true)?'disabled':'',				// editmode
+						// widget.properties.service,					// action service
+						// widget.properties.action,					// action name
+						// JSON.stringify(widget.properties.params),	// action parameter
+						(status==0) ? 'red' : 'green',		// status & color of button
+						widget.id
+						)+htmlLabels;
+				},
+				properties: {	//( deviceID, service, action, params, cbfunc )
+					deviceid:0,
+					service:'',		// display state service
+					variable:'',	// display state variable
+					inverted:0,	// inverted to that onstate is value 0
+					labels: [],		// 0:onlabel , 1:offlabel
+					action_off: {
+						service:'',
+						action:'',
+						params:{}
+					},
+					action_on: {
+						service:'',
+						action:'',
+						params:{}
+					}
+				} 
+			},
+			{ 	id:70, 
+				cls:'altui-widget-camera', 
+				no_refresh:true,
+				html: _toolHtml(cameraGlyph,_T("Camera")),
+				onWidgetResize: _onResizeCamera,
+				aspectRatio: true,
+				property: _onPropertyCamera, 
+				widgetdisplay: function(widget,bEdit)	{ 
+					return (widget.properties.deviceid>0) ? _cameraDraw(widget.properties.deviceid,widget.size) : "<img src='{0}' style='max-height:100%; max-width:100%;'></img>".format(cameraURI);	//"<div class='altui-camera-div'>xxx</div>";
+				},
+				properties: {	//( deviceID, service, action, params, cbfunc )
+					deviceid:0
+				} 
+			}
+			,{ 	id:80, 
+				cls:'altui-widget-gauge', 
+				html: _toolHtml(scaleGlyph,_T("Gauge")),
+				property: _onPropertyGauge, 
+				widgetdisplay: function(widget,bEdit)	{ 
+					return "<div class='altui-gauge-div' id='altui-gauge-{0}'></div>".format(widget.id);
+				},
+				onWidgetDisplay: _onDisplayGauge,
+				properties: {	//( deviceID, service, action, params, cbfunc )
+					label:'',
+					deviceid:0,
+					min:0,
+					max:100,
+					greenfrom:'',
+					orangefrom:'',
+					redfrom:'',
+					majorTicks:[],
+					service:'',
+					variable:''
+				} 
+			}	
+			];		
+	};
+	
 	//---------------------------------------------------------
 	// private functions
 	//---------------------------------------------------------
@@ -3356,11 +3438,6 @@ var UIManager  = ( function( window, undefined ) {
 
 		var chart = new google.visualization.Gauge(document.getElementById("altui-gauge-"+widgetid));
 		chart.draw(data, options);
-
-		// setInterval(function() {
-		  // data.setValue(0, 1, 40 + Math.round(60 * Math.random()));
-		  // chart.draw(data, options);
-		// }, 1000);
 	};
 		
 	// ------------------------------------------
@@ -3438,195 +3515,7 @@ var UIManager  = ( function( window, undefined ) {
 	function _toolHtml(glyph,label) {
 		return "<span class='pull-left'>{0}</span><small class='pull-right'>{1}</small>".format(glyph,label);
 	};
-	var edittools = [
-		{id:1000, glyph:'object-align-top' , onclick: onAlignTop},
-		{id:1010, glyph:'object-align-horizontal', onclick: onAlignHorizontal },
-		{id:1020, glyph:'object-align-bottom' , onclick: onAlignBottom },
-		{id:1030, glyph:'object-align-left' , onclick: onAlignLeft },
-		{id:1040, glyph:'object-align-vertical' , onclick: onAlignVertical},
-		{id:1050, glyph:'object-align-right' , onclick: onAlignRight}
-	];
-	var tools = [
-		{ 	id:10, 
-			cls:'altui-widget-label', 
-			no_refresh:true,
-			html: _toolHtml(labelGlyph,"Label"),
-			property: _onPropertyLabel, 
-			widgetdisplay: function(widget,bEdit)	{ return "<p>{0}</p>".format(widget.properties.label); },
-			properties: {
-				label:'Default Label'
-			} 
-		},
-		{ 	id:20, 
-			cls:'altui-widget-variable', 
-			html: _toolHtml(infoGlyph,"Variable"),
-			property: _onPropertyVariable, 
-			widgetdisplay: function(widget,bEdit)	{ 
-				return "<p>{0}</p>".format( 
-					(widget.properties.deviceid!=0) 
-					? VeraBox.getStatus( widget.properties.deviceid, widget.properties.service, widget.properties.variable )
-					: 'not defined');
-			},
-			properties: {
-				deviceid:0,
-				service:'',
-				variable:''
-			} 
-		},
-		{ 	id:30, 
-			cls:'altui-widget-image', 
-			no_refresh:true,
-			html: _toolHtml(picGlyph,"Image"),
-			property: _onPropertyImage, 
-			onWidgetResize: _onResizeImage,
-			widgetdisplay: function(widget,bEdit)	{ 
-				return "<img src='{0}' style='max-height:100%; max-width:100%;'></img>".format( widget.properties.url);
-			},
-			properties: {
-				url:'data:image/png;base64,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'
-			} 
-		},
-		{ 	id:40, 
-			cls:'altui-widget-icon', 
-			html: _toolHtml(picGlyph,"Device Icon"),
-			property: _onPropertyIcon, 
-			widgetdisplay: function(widget,bEdit)	{ 
-				return (widget.properties.deviceid==0) ? ("<p>"+picGlyph+"</p>") : _deviceIconHtml( null, widget.properties.deviceid);
-			},
-			properties: {
-				deviceid:0
-			} 
-		},
-		{ 	id:50, 
-			cls:'altui-widget-runscene', 
-			no_refresh:true,
-			html: _toolHtml(runGlyph,"Scene"),
-			property: _onPropertyRunscene, 
-			widgetdisplay: function(widget,bEdit)	{ 
-				return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='VeraBox.runScene({0})' >{2}</button>".format(
-					widget.properties.sceneid,
-					'altui-widget-runscene-button',
-					runGlyph,
-					(bEdit==true)?'disabled':''
-					);
-			},
-			properties: {
-				sceneid:0
-			} 
-		},
-		{ 	id:60, 
-			cls:'altui-widget-upnpaction', 
-			no_refresh:true,
-			html: _toolHtml(runGlyph,"Action"),
-			property: _onPropertyUpnpAction, 
-			widgetdisplay: function(widget,bEdit)	{ 
-				return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='UPnPHelper.UPnPAction( {0}, \"{4}\", \"{5}\", {6} )' >{2}</button>".format(
-					widget.properties.deviceid,
-					'altui-widget-upnpaction-button',
-					runGlyph,
-					(bEdit==true)?'disabled':'',
-					widget.properties.service,
-					widget.properties.action,
-					JSON.stringify(widget.properties.params)
-					);
-			},
-			properties: {	//( deviceID, service, action, params, cbfunc )
-				deviceid:0,
-				service:'',
-				action:'',
-				params:{}
-			} 
-		},
-		{ 	id:65, 
-			cls:'altui-widget-2statebtn', 
-			html: _toolHtml(onoffGlyph,"Multi State"),
-			property: _onPropertyOnOffButton, 
-			widgetdisplay: function(widget,bEdit)	{
-				var status=0;
-				if (widget.properties.deviceid>0)
-				{
-					status = VeraBox.getStatus(widget.properties.deviceid, widget.properties.service, widget.properties.variable);
-					if  ((status==undefined) || (status==false) || (status=='0') )
-						status = 0;
-					else if ((status=='true') || (status=='1') || (status>=1))
-						status = 1;
-					if (widget.properties.inverted==true)
-						status = 1-status;
-				}
-				var htmlLabels=$("<div class='altui-widget-2statebtn-labels'></div>");
-				if ( (status==0) && (widget.properties.labels[0]!=undefined) )
-					htmlLabels.append( $("<small class='pull-right'></small>").text(widget.properties.labels[0]));
-				if ( (status==1) && (widget.properties.labels[1]!=undefined) )
-					htmlLabels.append( $("<small class='pull-left'></small>").text(widget.properties.labels[1]));
-				htmlLabels = htmlLabels.wrap( "<div></div>" ).parent().html();
-				
-				return "<button {3}  type='button' style='color:{4};' class='{1} btn btn-default' aria-label='Run Scene' onclick='UIManager.onoffOnClick( {5})' >{2}</button>".format(
-					widget.properties.deviceid,					// id
-					'altui-widget-2statebtn',					// class
-					onoffGlyph,									// content
-					(bEdit==true)?'disabled':'',				// editmode
-					// widget.properties.service,					// action service
-					// widget.properties.action,					// action name
-					// JSON.stringify(widget.properties.params),	// action parameter
-					(status==0) ? 'red' : 'green',		// status & color of button
-					widget.id
-					)+htmlLabels;
-			},
-			properties: {	//( deviceID, service, action, params, cbfunc )
-				deviceid:0,
-				service:'',		// display state service
-				variable:'',	// display state variable
-				inverted:0,	// inverted to that onstate is value 0
-				labels: [],		// 0:onlabel , 1:offlabel
-				action_off: {
-					service:'',
-					action:'',
-					params:{}
-				},
-				action_on: {
-					service:'',
-					action:'',
-					params:{}
-				}
-			} 
-		},
-		{ 	id:70, 
-			cls:'altui-widget-camera', 
-			no_refresh:true,
-			html: _toolHtml(cameraGlyph,"Camera"),
-			onWidgetResize: _onResizeCamera,
-			aspectRatio: true,
-			property: _onPropertyCamera, 
-			widgetdisplay: function(widget,bEdit)	{ 
-				return (widget.properties.deviceid>0) ? _cameraDraw(widget.properties.deviceid,widget.size) : "<img src='{0}' style='max-height:100%; max-width:100%;'></img>".format(cameraURI);	//"<div class='altui-camera-div'>xxx</div>";
-			},
-			properties: {	//( deviceID, service, action, params, cbfunc )
-				deviceid:0
-			} 
-		}
-		,{ 	id:80, 
-			cls:'altui-widget-gauge', 
-			html: _toolHtml(scaleGlyph,"Gauge"),
-			property: _onPropertyGauge, 
-			widgetdisplay: function(widget,bEdit)	{ 
-				return "<div class='altui-gauge-div' id='altui-gauge-{0}'></div>".format(widget.id);
-			},
-			onWidgetDisplay: _onDisplayGauge,
-			properties: {	//( deviceID, service, action, params, cbfunc )
-				label:'',
-				deviceid:0,
-				min:0,
-				max:100,
-				greenfrom:'',
-				orangefrom:'',
-				redfrom:'',
-				majorTicks:[],
-				service:'',
-				variable:''
-			} 
-		}	
-		];		
-	
+
 	function _getToolByClass( cls )
 	{
 		var result = null;
@@ -3726,6 +3615,7 @@ var UIManager  = ( function( window, undefined ) {
 	//---------------------------------------------------------
 	initEngine 		: _initEngine, 
 	initCustomPages : _initCustomPages,
+	initLocalizedGlobals : _initLocalizedGlobals,
 	loadScript 		: _loadScript,	//(scriptLocationAndName) 
 	clearScripts	: _clearScripts,
 	
@@ -5362,3 +5252,121 @@ $("body").prepend(body);
 	UIManager.pageHome();
 	AltuiDebug.debug("init done");
 });
+
+function _initLocalizedGlobals() {
+	_HouseModes = [
+		{id:1, text:_T("Home"), cls:"preset_home"},
+		{id:2, text:_T("Away"), cls:"preset_away"},
+		{id:3, text:_T("Night"), cls:"preset_night"},
+		{id:4, text:_T("Vacation"), cls:"preset_vacation"}
+	];
+	// 0: table  1: devicename 2: id
+	deviceModalTemplate = "<div id='deviceModal' class='modal fade'>";
+	deviceModalTemplate += "  <div class='modal-dialog modal-lg'>";
+	deviceModalTemplate += "    <div class='modal-content'>";
+	deviceModalTemplate += "      <div class='modal-header'>";
+	deviceModalTemplate += "        <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
+	deviceModalTemplate += "        <h4 class='modal-title'>{1} <small>#{2}</small> - Variables</h4>";
+	deviceModalTemplate += "      </div>";
+	deviceModalTemplate += "      <div class='modal-body'>";
+	deviceModalTemplate += "      <div class='row-fluid'>";
+	deviceModalTemplate += " <table class='table table-condensed'>";
+	deviceModalTemplate += "       <thead>";
+	deviceModalTemplate += "         <tr>";
+	// deviceModalTemplate += "           <th>#</th>";
+	deviceModalTemplate += "           <th>"+_T("Variable")+"</th>";
+	deviceModalTemplate += "           <th>"+_T("Value")+"</th>";
+	deviceModalTemplate += "         </tr>";
+	deviceModalTemplate += "       </thead>";
+	deviceModalTemplate += "       <tbody>";
+	deviceModalTemplate += "       {0}";					// lines goes here
+	deviceModalTemplate += "       </tbody>";
+	deviceModalTemplate += "     </table>";
+	deviceModalTemplate += "      </div>";
+	deviceModalTemplate += "      </div>";
+	deviceModalTemplate += "      <div class='modal-footer'>";
+	deviceModalTemplate += "        <button type='button' class='btn btn-primary' data-dismiss='modal'>"+_T("Close")+"</button>";
+	// deviceModalTemplate += "        <button type='button' class='btn btn-primary'>Save changes</button>";
+	deviceModalTemplate += "      </div>";
+	deviceModalTemplate += "    </div><!-- /.modal-content -->";
+	deviceModalTemplate += "  </div><!-- /.modal-dialog -->";
+	deviceModalTemplate += "</div><!-- /.modal -->";
+
+	// 0: table  1: devicename 2: id
+	deviceActionModalTemplate = "<div id='deviceActionModal' class='modal fade'>";
+	deviceActionModalTemplate += "  <div class='modal-dialog'>";
+	deviceActionModalTemplate += "    <div class='modal-content'>";
+	deviceActionModalTemplate += "      <div class='modal-header'>";
+	deviceActionModalTemplate += "        <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
+	deviceActionModalTemplate += "        <h4 class='modal-title'>{1} <small>#{2}</small> - Actions</h4>";
+	deviceActionModalTemplate += "      </div>";
+	deviceActionModalTemplate += "      <div class='modal-body'>";
+	deviceActionModalTemplate += " 	<table class='table table-condensed' >";
+	deviceActionModalTemplate += "       <thead>";
+	deviceActionModalTemplate += "         <tr>";
+	deviceActionModalTemplate += "           <th>"+_T("Action")+"</th>";
+	deviceActionModalTemplate += "           <th>"+_T("Parameters")+"</th>";
+	deviceActionModalTemplate += "         </tr>";
+	deviceActionModalTemplate += "       </thead>";
+	deviceActionModalTemplate += "       <tbody>";
+	deviceActionModalTemplate += "       {0}";					// lines goes here
+	deviceActionModalTemplate += "       </tbody>";
+	deviceActionModalTemplate += "     </table>";
+	deviceActionModalTemplate += "      </div>";
+	deviceActionModalTemplate += "      <div class='modal-footer'>";
+	deviceActionModalTemplate += "        <button type='button' class='btn btn-primary' data-dismiss='modal'>"+_T("Close")+"</button>";
+	deviceActionModalTemplate += "      </div>";
+	deviceActionModalTemplate += "    </div><!-- /.modal-content -->";
+	deviceActionModalTemplate += "  </div><!-- /.modal-dialog -->";
+	deviceActionModalTemplate += "</div><!-- /.modal -->";
+
+	// 0: title, 1: body
+	defaultDialogModalTemplate = "<div id='dialogModal' class='modal fade'>";
+	defaultDialogModalTemplate += "  <div class='modal-dialog modal-lg'>";
+	defaultDialogModalTemplate += "    <form class='form' data-toggle='validator' onsubmit='return false;'>";
+	defaultDialogModalTemplate += "    <div class='modal-content'>";
+	defaultDialogModalTemplate += "      <div class='modal-header'>";
+	defaultDialogModalTemplate += "        <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
+	defaultDialogModalTemplate += "        <h4 class='modal-title'>{0} </h4>";
+	defaultDialogModalTemplate += "      </div>";
+	defaultDialogModalTemplate += "      <div class='modal-body'>";
+	defaultDialogModalTemplate += "      <div class='row-fluid'>";
+	defaultDialogModalTemplate += "      {1}";
+	defaultDialogModalTemplate += "      </div>";
+	defaultDialogModalTemplate += "      </div>";
+	defaultDialogModalTemplate += "      <div class='modal-footer'>";
+	defaultDialogModalTemplate += "        <button type='button' class='btn btn-default' data-dismiss='modal'>"+_T("Close")+"</button>";
+	defaultDialogModalTemplate += "        <button type='submit' class='btn btn-primary'>"+_T("Save Changes")+"</button>";
+	defaultDialogModalTemplate += "      </div>";
+	defaultDialogModalTemplate += "    </div><!-- /.modal-content -->";
+	defaultDialogModalTemplate += "    </form>";
+	defaultDialogModalTemplate += "  </div><!-- /.modal-dialog -->";
+	defaultDialogModalTemplate += "</div><!-- /.modal -->";
+
+	loadGlyph = glyphTemplate.format( "open", _T("Load") , "");
+	infoGlyph = glyphTemplate.format( "info-sign", _T("Info") , "");
+	picGlyph = glyphTemplate.format( "picture", _T("Image") , "");
+	runGlyph = glyphTemplate.format( "play", _T("Run Scene") , "");
+	editGlyph = glyphTemplate.format( "pencil", _T("Edit") , "");
+	cameraGlyph = glyphTemplate.format( "facetime-video", _T("Camera") , "");
+	onoffGlyph = glyphTemplate.format( "off", _T("On Off") , "");
+	scaleGlyph = glyphTemplate.format( "scale", _T("Gauge") , "");
+	helpGlyph = glyphTemplate.format( "question-sign", "" , "");
+	
+	UIManager.initLocalizedGlobals();
+};
+
+var language = getQueryStringValue("lang") || window.navigator.userLanguage || window.navigator.language;
+if (language != 'en') {
+	var scriptLocationAndName = 'J_ALTUI_loc_'+ language.substring(0, 2) + '.js' ;
+	var head = document.getElementsByTagName('head')[0];
+	var script = document.createElement('script');
+	script.type = 'text/javascript';
+	script.src = scriptLocationAndName;
+
+	// once script is loaded, we can call style function in it
+	$(script).load(  _initLocalizedGlobals );
+	head.appendChild(script);
+} else {
+	_initLocalizedGlobals();
+}
