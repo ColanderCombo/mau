@@ -601,29 +601,29 @@ var DialogManager = ( function() {
 //=====================================================================		
 var SceneEditor = function (scene) {
 	var _timerTypes = [
-		{value:0,text:'**Illegal**'},
-		{value:1,text:'interval'},
-		{value:2,text:'day of week'},
-		{value:3,text:'day of month'},
-		{value:4,text:'absolute'}
+		{value:0,text:_T('**Illegal**')},
+		{value:1,text:_T('interval')},
+		{value:2,text:_T('day of week')},
+		{value:3,text:_T('day of month')},
+		{value:4,text:_T('absolute')}
 	];
 	var _timerDOW = [
-		{value:1,text:'Mo'},
-		{value:2,text:'Tu'},
-		{value:3,text:'We'},
-		{value:4,text:'Th'},
-		{value:5,text:'Fr'},
-		{value:6,text:'Sa'},
-		{value:7,text:'Su'}
+		{value:1,text:_T('Mo')},
+		{value:2,text:_T('Tu')},
+		{value:3,text:_T('We')},
+		{value:4,text:_T('Th')},
+		{value:5,text:_T('Fr')},
+		{value:6,text:_T('Sa')},
+		{value:7,text:_T('Su')}
 	];
 	var _timerRelative = [
-		{value:"{0}",text:'At a certain time of day'},
-		{value:"00:00:00R",text:'At sunrise'},
-		{value:"-{0}R",text:'Before sunrise'},
-		{value:"{0}R",text:'After sunrise'},
-		{value:"00:00:00T",text:'At sunset'},
-		{value:"-{0}T",text:'Before sunset'},
-		{value:"{0}T",text:'After sunset'}
+		{value:"{0}",text:_T('At a certain time of day')},
+		{value:"00:00:00R",text:_T('At sunrise')},
+		{value:"-{0}R",text:_T('Before sunrise')},
+		{value:"{0}R",text:_T('After sunrise')},
+		{value:"00:00:00T",text:_T('At sunset')},
+		{value:"-{0}T",text:_T('Before sunset')},
+		{value:"{0}T",text:_T('After sunset')}
 	];
 
 	var scene = scene;
