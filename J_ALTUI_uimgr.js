@@ -1404,7 +1404,6 @@ var PageMessage = (function(window, undefined ) {
 	var _badgeTemplate = '<span class="badge">{0}</span>&nbsp;';
 	var _msgTemplate = '<span class="altui-pagemessage-txt" >{0}</span>';
 	var _pageMessageIdx = 0;
-
 	
 	function _toDataset(dataset) {
 		if (dataset == undefined)
@@ -1414,7 +1413,8 @@ var PageMessage = (function(window, undefined ) {
 			lines.push( "data-{0}='{1}'".format(key,val));
 		});
 		return lines.join(' ');
-	};			
+	};		
+	
 	// dataset enables to mark messages and find them back later, it is a {} object translated into data-* attributes
 	function _messageRow(_pageMessageIdx, badge, now,txt,html,level,dataset)
 	{
@@ -1430,8 +1430,25 @@ var PageMessage = (function(window, undefined ) {
 		return htmlmsg;
 	};	
 
+	function _updateMessageButtonColor() {
+		function _setColor(cls) {
+			$("#altui-toggle-messages").attr("class","btn "+"btn-"+cls);
+		};
+		if ($("div#altui-pagemessage  tr.danger").length>0)
+			_setColor('danger');
+		else if ($("div#altui-pagemessage  tr.warning").length>0)
+			_setColor('warning');
+		else if ($("div#altui-pagemessage  tr.info").length>0)
+			_setColor('info');
+		else if ($("div#altui-pagemessage  tr.success").length>0)
+			_setColor('success');
+		else
+			_setColor('default');
+	};
+	
 	function _clearMessage( msgidx ) {
 		$("div#altui-pagemessage  tr[data-idx='" + msgidx + "']").remove();
+		_updateMessageButtonColor();
 	};
 	
 	function _message(txt,level,bReload,dataset)		
@@ -1457,10 +1474,11 @@ var PageMessage = (function(window, undefined ) {
 				return false;
 			}
 		}); 
+		var idx = _pageMessageIdx;
 		if (found != null)
 		{
 			var tr = $(found).parent();
-			var idx = $(tr).data('idx');
+			idx = $(tr).data('idx');
 			var badge = $(tr).find("span.badge");
 			var n = 2;
 			if (badge.length>0)
@@ -1470,20 +1488,18 @@ var PageMessage = (function(window, undefined ) {
 			$(tr).replaceWith( _messageRow(idx, n, now.toLocaleString(),txt,html.format(idx),level,dataset) );
 			if (level== "success")
 				setTimeout( function () { PageMessage.clearMessage( idx ) ; }, 5000 );
-			return idx;
 		}
 		else {
-			var htmlmsg = _messageRow(_pageMessageIdx, 1, now.toLocaleString(),txt,html.format(_pageMessageIdx),level,dataset);
+			var htmlmsg = _messageRow(idx, 1, now.toLocaleString(),txt,html.format(idx),level,dataset);
 			$("div#altui-pagemessage tbody").prepend( htmlmsg );
-			$("div#altui-pagemessage  tr.success[data-idx='" + _pageMessageIdx + "']").each( function(idx,elem) {
+			$("div#altui-pagemessage  tr.success[data-idx='" + idx + "']").each( function(idx,elem) {
 				var that = $(elem);
-				setTimeout( function() { 
-					$(that).remove(); 
-					} , 5000 );
+				setTimeout( function() { $(that).remove();_updateMessageButtonColor(); } , 5000 );
 			});
 			_pageMessageIdx++;
-			return _pageMessageIdx-1;
 		}
+		_updateMessageButtonColor();
+		return idx;
 	};
 	
 	function _jobMessage(device,job)
@@ -1545,7 +1561,8 @@ var PageMessage = (function(window, undefined ) {
 		// close button for pageMessages
 		$( document )
 			.on( "click", ".altui-pagemessage-close", function() {
-				$(this).closest("tr").remove();
+				// $(this).closest("tr").remove();
+				PageMessage.clearMessage( $(this).closest("tr").data('idx') );
 			})
 			.on( "click", "#altui-toggle-messages", function() {
 				$(this).find("span").toggleClass( "caret-reversed" );
@@ -2468,7 +2485,7 @@ var UIManager  = ( function( window, undefined ) {
 		catch(err) {
 			set_panel_html("an error occurred while displaying the javascript tab. devid: "+devid+" err:"+err.message+" <pre>stack:"+err.stack+"</pre>");
 		}		
-		_fixHeight(domparent);
+		// _fixHeight(domparent);
 	};
 	
 	function  _deviceDrawControlPanelTab(devid, device, tab, domparent ) {
