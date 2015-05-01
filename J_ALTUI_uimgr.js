@@ -1416,24 +1416,34 @@ var PageMessage = (function(window, undefined ) {
 		return lines.join(' ');
 	};			
 	// dataset enables to mark messages and find them back later, it is a {} object translated into data-* attributes
-	function _messageRow(_pageMessageIdx, badge, now,txt,level,dataset)
+	function _messageRow(_pageMessageIdx, badge, now,txt,html,level,dataset)
 	{
 		var close = "<button class='close altui-pagemessage-close' type='button' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
 		var badgehtml = (badge>1) ? _badgeTemplate.format(badge) : "";
-		var htmlmsg = ("<tr data-idx='{0}' {4} class='{3}'><td>"+close+"</td><td>"+badgehtml+"</td><td>{1}</td><td class='altui-pagemessage-txt'>{2}</td></tr>").format( 
+		var htmlmsg = ("<tr data-idx='{0}' {4} class='{3}'><td>"+close+"</td><td>"+badgehtml+"</td><td>{1}</td><td class='altui-pagemessage-txt'>{2}</td><td>{5}</td></tr>").format( 
 			_pageMessageIdx,
 			now.toLocaleString(),
 			txt.htmlEncode(),
 			level,
-			_toDataset(dataset));
+			_toDataset(dataset),
+			html || "");
 		return htmlmsg;
 	};	
 
+	function _clearMessage( msgidx ) {
+		$("div#altui-pagemessage  tr[data-idx='" + msgidx + "']").remove();
+	};
+	
 	function _message(txt,level,bReload,dataset)		
 	{
+		var html="";
+		
 		// level =success, info, warning, danger
 		if ((level!="success") &&  (level!="info" ) &&  (level!="warning") &&  (level!="danger"))	{
 			level = "info";
+		}
+		if (bReload==true) {
+			html += "<button class='btn btn-default btn-sm altui-savechanges-button' onclick='VeraBox.saveChangeCaches(\"{0}\")'>Save Changes</button>";
 		}
 
 		//
@@ -1457,12 +1467,13 @@ var PageMessage = (function(window, undefined ) {
 			{
 				n = 1+parseInt(badge.html());
 			}
-			$(tr).replaceWith( _messageRow(idx, n, now.toLocaleString(),txt,level,dataset) );
+			$(tr).replaceWith( _messageRow(idx, n, now.toLocaleString(),txt,html.format(idx),level,dataset) );
 			if (level== "success")
-				setTimeout( function () { $("div#altui-pagemessage  tr[data-idx='" + idx + "']").remove(); }, 5000 );
+				setTimeout( function () { PageMessage.clearMessage( idx ) ; }, 5000 );
+			return idx;
 		}
 		else {
-			var htmlmsg = _messageRow(_pageMessageIdx, 1, now.toLocaleString(),txt,level,dataset);
+			var htmlmsg = _messageRow(_pageMessageIdx, 1, now.toLocaleString(),txt,html.format(_pageMessageIdx),level,dataset);
 			$("div#altui-pagemessage tbody").prepend( htmlmsg );
 			$("div#altui-pagemessage  tr.success[data-idx='" + _pageMessageIdx + "']").each( function(idx,elem) {
 				var that = $(elem);
@@ -1471,6 +1482,7 @@ var PageMessage = (function(window, undefined ) {
 					} , 5000 );
 			});
 			_pageMessageIdx++;
+			return _pageMessageIdx-1;
 		}
 	};
 	
@@ -1483,7 +1495,7 @@ var PageMessage = (function(window, undefined ) {
 			var idx = $(tr).data('idx');
 			var badge = $(tr).find("span.badge");
 			$(tr).replaceWith( 
-				_messageRow(idx, 1, now.toLocaleString(),txt, UIManager.jobStatusToColor( job.status ), {
+				_messageRow(idx, 1, now.toLocaleString(),txt, "", UIManager.jobStatusToColor( job.status ), {
 					devid : device.id,	//device concerned
 					jobid : job.id	 	//message for this job, will replace old one
 				}) 
@@ -1548,6 +1560,7 @@ var PageMessage = (function(window, undefined ) {
 	return {
 		init			: _init,
 		clear			: _clear,
+		clearMessage	: _clearMessage,
 		message			: _message, // (txt,level,bReload,dataset)	
 		jobMessage		: _jobMessage,
 		clearJobMessage	: _clearJobMessage,
@@ -1797,6 +1810,24 @@ var UIManager  = ( function( window, undefined ) {
 		return context[func].call(context, id,device, extraparam);
 	};
 
+	function _fixScriptPostLoad( name, code ) {
+		if (name=="J_WakeUpLight.js") {
+			// https://regex101.com/
+			var re = /\$\((.*?)\).value/g; 
+			var subst = '$(\'#\'+$1).val()'; 
+			code = code.replace(re, subst);
+			
+			re = /\$\((.*?)\).checked/g; 
+			subst = '$(\'#\'+$1).is(\':checked\')'; 
+			code = code.replace(re, subst);
+			
+			re = /\(\$\((.*?)\)\)/g; 
+			subst = '($(\'#\'+$1).length>0)';
+			code = code.replace(re, subst);
+		}
+		return code;
+	};
+	
 	function _initDB(devicetypes) {
 		$.extend(true,_devicetypesDB,devicetypes);
 		// foreach load the module if needed
@@ -1810,7 +1841,7 @@ var UIManager  = ( function( window, undefined ) {
 				var len = $('script[src="'+obj.ScriptFile+'"]').length;
 				if (len==0) {
 					// not loaded yet
-					_loadScript(obj.ScriptFile, function() {
+					_loadScript(obj.ScriptFile, function() {						
 						// script has been loaded , check if style needs to be loaded and if so, load them
 						$.each(_devicetypesDB,function(idx,dt) {
 							if ( (dt.ScriptFile == scriptLocationAndName) && (dt.StyleFunc != undefined) ) {
@@ -2429,7 +2460,7 @@ var UIManager  = ( function( window, undefined ) {
 			return;	// do not want UI5 tool pages !
 		var func = tab.Function;
 		set_set_panel_html_callback(function(html) {
-			$(domparent).append(html);
+			$(domparent).html(html);
 		});
 		try {
 			var result = eval( func+"("+devid+")" );
@@ -2906,6 +2937,8 @@ var UIManager  = ( function( window, undefined ) {
 					_toLoad ++;
 					FileDB.getFileContent( scriptname, function(data) {
 						_toLoad --;
+						// vague tentative to fix the code of loaded script !!!
+						data = _fixScriptPostLoad( scriptname , data );
 						var code = "//@ sourceURL="+scriptname+"\n"+data;
 						$('script[data-src="'+scriptname+'"]').text(code);
 						_defereddisplay(true);
@@ -4792,7 +4825,7 @@ var UIManager  = ( function( window, undefined ) {
 		color = FileDB.isDB() ? "text-success" : "text-danger";
 		var okGlyph2 = glyphTemplate.format( "ok-sign", "OK" , color );
 		
-		color = VeraBox.isEngineCached() ? "text-success" : "text-danger";
+		color = VeraBox.isUserDataCached() ? "text-success" : "text-danger";
 		var okGlyph3 = glyphTemplate.format( "ok-sign", "OK" , color );
 		
 		color =  MyLocalStorage.get("Pages")!=null ? "text-success" : "text-danger";
@@ -5311,6 +5344,7 @@ $(document).ready(function() {
 				$(".navbar-collapse").collapse('hide');
 		} )
 		.on ("click", ".imgLogo", UIManager.pageHome )
+		// .on ("click", ".altui-savechanges-button", VeraBox.saveChangeCaches )
 		.on ("click", "#menu_room", UIManager.pageRooms )
 		.on ("click", "#menu_device", UIManager.pageDevices )
 		.on ("click", "#menu_scene", UIManager.pageScenes )

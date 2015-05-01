@@ -441,6 +441,7 @@ var VeraBox = ( function( window, undefined ) {
 	var _categories = null;
 	var _devicetypes = {};
 	var _user_data = {};
+	var _change_cached_user_data = {};
 	var _user_data_DataVersion = 1;
 	var _user_data_LoadTime = null;
 	var _status_data_DataVersion = 1;
@@ -451,6 +452,19 @@ var VeraBox = ( function( window, undefined ) {
 	function _setScenes(arr) 		{	_scenes = arr;		};
 	function _setCategories(arr)	{	_categories = arr;	};
 	function _setDevices(arr) 		{	_devices = arr;		};
+	
+	function _saveChangeCaches( msgidx ) {
+		UPnPHelper.ModifyUserData( _change_cached_user_data, function() {
+			PageMessage.message("ModifyUserData called & returned, a restart will occur now","success");
+			PageMessage.clearMessage(msgidx);
+		});
+		_change_cached_user_data={};
+	};
+	
+	function _updateChangeCache( target ) {
+		$.extend(true, _change_cached_user_data, target);
+		PageMessage.message("You need to save your changes","info", true );
+	};
 	
 	function _reloadEngine()
 	{
@@ -689,13 +703,8 @@ var VeraBox = ( function( window, undefined ) {
 		
 		return arr[0].states;
 	};	
-	
-	function _setStatus( deviceid, service, variable, value ) {
-		UPnPHelper.UPnPSet( deviceid, service, variable, value );
-	};
-	
-	function _getStatus( deviceid, service, variable )
-	{
+		
+	function _getStatusObject( deviceid, service, variable ) {
 		if (deviceid==0)
 			return null;
 		
@@ -703,15 +712,54 @@ var VeraBox = ( function( window, undefined ) {
 		if (states==null)
 			return null;
 		
-		var state = $.grep( states , function( state,idx) {
+		var states = $.grep( states , function( state,idx) {
 			return ( state.service == service ) && (state.variable == variable);
 		});
-		if (state.length==0)
+		if (states.length==0)
 			return null;
 		
-		return state[0].value;
+		return states[0];
 	};
+	
+	function _getStatus( deviceid, service, variable )
+	{
+		var state = _getStatusObject( deviceid, service, variable )
+		if (state==null)
+			return null;
+		return state.value;
+	};
+	
+	// dynamic
+	// undefined or -1 : ALTUI mode , triggers a UPNP http save
+	// 0 : means not dynamic, will require a save
+	// 1 : means dynamic, lost at the next restart if not save
+	function _setStatus( deviceid, service, variable, value, dynamic ) {
+		// update local cache
+		var statusobj= _getStatusObject( deviceid, service, variable ) 
+		if (statusobj==null)
+			return;
 
+		if (dynamic >= 0 )  {
+			statusobj.value=value;	// in memory but lost at next restart
+			
+			// if dynamic ==0 permits the user to save
+			if (dynamic==0) {
+				var target = {};
+				target.devices={};
+				target.devices["devices_"+deviceid]={};
+				target.devices["devices_"+deviceid].states = {};
+				target.devices["devices_"+deviceid].states["states_"+statusobj.id] = {
+					"value": value
+				};
+				_updateChangeCache( target );
+			}
+		}
+		else {
+			// update vera
+			UPnPHelper.UPnPSet( deviceid, service, variable, value );
+		}
+	};
+	
 	function _evaluateConditions(deviceid,conditions) {
 		var bResult = false;
 		var expressions=[];
@@ -859,7 +907,7 @@ var VeraBox = ( function( window, undefined ) {
 		}
 	};
 
-	function _isEngineCached() {	return MyLocalStorage.get("VeraBox")!=null; }
+	function _isUserDataCached() {	return MyLocalStorage.get("VeraBox")!=null; }
 	
 	function _saveEngine() {
 		AltuiDebug.debug("_saveEngine()");
@@ -1314,10 +1362,15 @@ var VeraBox = ( function( window, undefined ) {
 	getDeviceTypes 	: function() 	{	return _devicetypes; },
 	isRemoteAccess	: function() 	{ 	return window.location.origin.indexOf("mios.com")!=-1; /*return true;*/ },
 
+	// caching user data changes and saving them at user request
+	updateChangeCache :_updateChangeCache,
+	saveChangeCaches  :_saveChangeCaches,
+	
+	// save page data into altui plugin device
 	saveData		: _saveData,		//  name, data , cbfunc
 	saveEngine 		: _saveEngine, 
 	loadEngine 		: _loadEngine, 
-	isEngineCached	: _isEngineCached,
+	isUserDataCached	: _isUserDataCached,
 	initEngine		: function() 	{
 						_loadEngine();
 						_initDataEngine();				// init the data collection engine
@@ -1579,7 +1632,12 @@ function get_device_state(deviceId, serviceId, variable, dynamic) {
 };
 
 function set_device_state (deviceId, serviceId, variable, value, dynamic) {
-	VeraBox.setStatus( deviceId, serviceId, variable, value );
+	// -1 : ALTUI mode , triggers a UPNP http save
+	// 0 : means not dynamic, will require a save
+	// 1 : means dynamic, lost at the next restart if not save
+	if (dynamic==undefined)
+		dynamic = 0;
+	VeraBox.setStatus( deviceId, serviceId, variable, value  , dynamic );
 	return true;
 };
 
@@ -1593,6 +1651,56 @@ function set_panel_html(html) {
 	if ($.isFunction(set_panel_html_cb))
 		(set_panel_html_cb)(html);
 };
+
+function log_message(msg) {
+	PageMessage.message( msg, "info");
+};
+
+function set_infobox(str,mode){
+	PageMessage.message( str, (mode=="success") || (mode=="error") ? mode : "info" );
+};
+
+function has_changes(msg) {
+	PageMessage.message( msg, "info");
+};
+
+//
+// some device like Wakeup Light uses this from ergy.js
+//
+function trim(stringToTrim)
+{
+    return stringToTrim.replace(/^\s+|\s+$/g,"");
+}
+function get_node_obj(nodeObj,nodeID)
+{
+    var itemsCount=nodeObj.length;
+    for(var i=0;i<itemsCount;i++){
+        if(nodeObj[i] && nodeObj[i].id==parseInt(nodeID)){
+            return nodeObj[i];
+        }
+    }
+    return undefined;
+}
+function get_node_index(nodeObj,nodeID){
+    var itemsCount=nodeObj.length;
+    for(var i=0;i<itemsCount;i++){
+        if(nodeObj[i] && nodeObj[i].id==nodeID){
+            return i;
+        }
+    }
+    return 0;
+}
+
+function get_new_timer_id(timersArray){
+    var timersNo = timersArray.length;
+    var maxID=0;
+    for(var i=0;i<timersNo;i++){
+        if(timersArray[i].id>maxID){
+            maxID = timersArray[i].id;
+        }
+    }
+    return maxID+1;
+}
 
 var Ajax = (function(window,undefined) {
 	return {

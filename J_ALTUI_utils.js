@@ -60,6 +60,30 @@ if (typeof RegExp.escape == 'undefined') {
 	};
 };
 
+if (typeof Array.prototype.in_array != 'function') {
+	Array.prototype.in_array = function ( obj ) {
+		var len = this.length;
+		for ( var x = 0 ; x <= len ; x++ ) {
+			if ( this[x] == obj ) return true;
+		}
+		return false;
+	}
+};
+
+if (typeof Number.prototype.toPaddedString != 'function') {
+	function toPaddedString(number, length, radix) {
+		var string = number.toString(radix || 10),
+			slength = string.length;
+		for (var i=0; i<(length - slength); i++) string = '0' + string;
+		return string;
+	}
+
+	Number.prototype.toPaddedString = function(length, radix) {
+		var number = this;
+		return toPaddedString(number, length, radix);
+	}
+};
+
 if (typeof String.prototype.escapeQuotes != 'function') {
   // see below for better implementation!
   String.prototype.escapeQuotes = function (){
