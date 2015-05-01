@@ -15,7 +15,8 @@ jsonp.ud={};
 jsonp.ud.devices=[];
 jsonp.ud.scenes=[];
 jsonp.ud.rooms=[];
-
+jsonp.ud.static_data=[];
+var user_changes=0;
 
 var UPnPHelper = (function(window,undefined) {
 	//---------------------------------------------------------
@@ -459,11 +460,13 @@ var VeraBox = ( function( window, undefined ) {
 			PageMessage.clearMessage(msgidx);
 		});
 		_change_cached_user_data={};
+		user_changes=0;	//UI5 compat
 	};
 	
 	function _updateChangeCache( target ) {
 		$.extend(true, _change_cached_user_data, target);
 		PageMessage.message("You need to save your changes","info", true );
+		user_changes=1; //UI5 compat
 	};
 	
 	function _reloadEngine()
@@ -475,6 +478,8 @@ var VeraBox = ( function( window, undefined ) {
 				_devices = null;
 				_scenes = null;
 				_devicetypes = [];
+				_change_cached_user_data={};
+				user_changes=0;	//UI5 compat
 			}
 		});
 	};
@@ -875,9 +880,19 @@ var VeraBox = ( function( window, undefined ) {
 			_devices = data.devices;
 			
 			// UI5 compatibility
-			jsonp.ud.devices = data.devices;
-			jsonp.ud.scenes = data.scenes;
-			jsonp.ud.rooms = data.rooms;
+			jsonp.ud.devices=[];
+			jsonp.ud.scenes=[];
+			jsonp.ud.rooms=[];
+			jsonp.ud.static_data=data.static_data;
+			$.each(data.devices, function(idx,device) {
+				jsonp.ud.devices.push(device);
+			});
+			$.each(data.scenes, function(idx,scene) {
+				jsonp.ud.scenes.push(scene);
+			});
+			$.each(data.rooms, function(idx,room) {
+				jsonp.ud.rooms.push(room);
+			});
 			
 			// update the static ui information for the future displays
 			$.each(_user_data.static_data || [], function(idx,ui_static_data) {
@@ -1700,6 +1715,52 @@ function get_new_timer_id(timersArray){
         }
     }
     return maxID+1;
+}
+
+//
+// PLEG uses this from cpanel
+//
+function sortByName(a, b) {
+    var x = a.name.toLowerCase();
+    var y = b.name.toLowerCase();
+    return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+};
+
+function get_device_obj(deviceID){
+
+    var devicesCount=jsonp.ud.devices.length;
+    for(var i=0;i<devicesCount;i++){
+        if(jsonp.ud.devices[i] && jsonp.ud.devices[i].id==deviceID){
+            return jsonp.ud.devices[i];
+        }
+    }
+};
+
+function cloneObject(obj) {
+    if (Object.prototype.toString.call(obj) === '[object Array]') {
+        var out = [], i = 0, len = obj.length;
+        for ( ; i < len; i++ ) {
+            out[i] = arguments.callee(obj[i]);
+        }
+        return out;
+    }
+    if (typeof obj === 'object') {
+        var out = {}, i;
+        for ( i in obj ) {
+            out[i] = arguments.callee(obj[i]);
+        }
+        return out;
+    }
+    return obj;
+};
+
+function get_event_definition(DeviceType){
+    var itemsCount=jsonp.ud.static_data.length;
+    for(var i=0;i<itemsCount;i++){
+        if(jsonp.ud.static_data[i] && jsonp.ud.static_data[i].DeviceType==DeviceType){
+            return jsonp.ud.static_data[i].eventList2;
+        }
+    }
 }
 
 var Ajax = (function(window,undefined) {
