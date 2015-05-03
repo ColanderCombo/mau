@@ -131,5 +131,9 @@ Localization.init( {
 	"All":"xxx",
 	"No Room":"xxx",
 	"Device creation failed":"xxx",
-	"Device {0} created successfully":"xxx {0} xxx"
+	"Device {0} created successfully":"xxx {0} xxx",
+	"Filter":"xxx",
+	"Category":"xxx",
+    "Could not create Room":"Could not create Room"
+
 });

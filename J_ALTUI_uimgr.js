@@ -5056,7 +5056,7 @@ $(document).ready(function() {
 		onoffGlyph = glyphTemplate.format( "off", _T("On Off") , "");
 		scaleGlyph = glyphTemplate.format( "scale", _T("Gauge") , "");
 		homeGlyph = glyphTemplate.format( "home", _T("Rooms") , "");
-		tagsGlyph = glyphTemplate.format( "tags", _T("Categories") , "");
+		tagsGlyph = glyphTemplate.format( "tags", _T("Category") , "");
 		helpGlyph = glyphTemplate.format( "question-sign", "" , "");
 		
 		UIManager.initLocalizedGlobals();

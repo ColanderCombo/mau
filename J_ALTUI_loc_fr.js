@@ -131,5 +131,8 @@ Localization.init( {
   "All":"Tous",
   "No Room":"Pas de Pièce",
   "Device creation failed":"Echec de la creation du Périphérique",
-  "Device {0} created successfully":"Périphérique {0} créé"
+  "Device {0} created successfully":"Périphérique {0} créé",
+  "Filter":"Filtre",
+  "Category":"Catégorie",
+  "Could not create Room":"Echec de création de la pièce"
 });
