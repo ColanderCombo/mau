@@ -127,5 +127,9 @@ Localization.init( {
   "No Match":"Aucun",
   "Reboot Vera":"Redémarrer Vera",
   "This plugin is a work in progress, it will continuously evolves over time.":"Ce Plugin est un projet en cours, il continue d'évoluer au fil du temps.",
-  "You may check out the evolutions on the Micasaverde <a href='http://forum.micasaverde.com/index.php/topic,30310.msg216129.html#msg216129'>Forum</a>":"Vous pouvez suivre les evolutions sur le <a href='http://forum.micasaverde.com/index.php/topic,30310.msg216129.html#msg216129'>Forum</a> Micasaverde"
+  "You may check out the evolutions on the Micasaverde <a href='http://forum.micasaverde.com/index.php/topic,30310.msg216129.html#msg216129'>Forum</a>":"Vous pouvez suivre les evolutions sur le <a href='http://forum.micasaverde.com/index.php/topic,30310.msg216129.html#msg216129'>Forum</a> Micasaverde",
+  "All":"Tous",
+  "No Room":"Pas de Pièce",
+  "Device creation failed":"Echec de la creation du Périphérique",
+  "Device {0} created successfully":"Périphérique {0} créé"
 });

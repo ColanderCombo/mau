@@ -1361,6 +1361,7 @@ var VeraBox = ( function( window, undefined ) {
     getRooms		: _getRooms,		// in the future getRooms could cache the information and only call _getRooms when needed
     getRoomsSync	: function() { return _rooms; },
 	getDevices		: _getDevices,
+    getDevicesSync	: function() { return _devices; },
 	getDeviceByID 	: _getDeviceByID, 
 	getDeviceBatteryLevel : _deviceBatteryLevel,
 	getDeviceStaticUI : _getDeviceStaticUI,

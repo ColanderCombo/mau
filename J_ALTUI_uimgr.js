@@ -38,6 +38,8 @@ var cameraGlyph = "";
 var onoffGlyph = "";
 var scaleGlyph = "";
 var helpGlyph = "";
+var homeGlyph = "";
+var tagsGlyph = "";
 var smallbuttonTemplate = "<button id='{0}' type='button' class='{1} btn btn-default btn-sm' aria-label='tbd' title='{3}'>{2}</button>";
 var buttonTemplate 		= "<button id='{0}' type='button' class='{1} btn btn-{3}' aria-label='tbd'>{2}</button>";
 var buttonDebugHtml = "<button type='button' class='btn btn-default' id='altui-debug-btn' >Debug<span class='caret'></span></button>";
@@ -2034,7 +2036,7 @@ var UIManager  = ( function( window, undefined ) {
 	function _deviceCreate() {
 		// prepare modal
 		// show
-		$('button.btn-primary')
+		$('#deviceCreateModal button.btn-primary')
 			.off('click')
 			.on('click', function() {
 				if (confirm("Are you sure you want to create this device")) {			
@@ -2046,9 +2048,9 @@ var UIManager  = ( function( window, undefined ) {
 						function ( newid ) {
 							$('#deviceCreateModal').modal('hide');
 							if (newid)
-								PageMessage.message( "Device "+newid+" created successfully", "success");
+								PageMessage.message( _T("Device {0} created successfully").format(newid), "success");
 							else
-								PageMessage.message( "Device creation failed", "danger");
+								PageMessage.message( _T("Device creation failed"), "danger");
 						}
 					);
 				}
@@ -3769,8 +3771,9 @@ var UIManager  = ( function( window, undefined ) {
 		else
 			$("#altui-pagetitle").empty();
 		$(".altui-mainpanel").empty();
-		$("#dialogs").empty();
 		$(".altui-leftnav").empty();
+		$(".altui-device-toolbar").remove();
+		$("#dialogs").empty();
 		$(".altui-scripts").remove();
 		$("body").append("<div class='altui-scripts'></div>");
 	},
@@ -3796,8 +3799,8 @@ var UIManager  = ( function( window, undefined ) {
 	leftnavRooms : function ( clickFunction )
 	{
 		$("body").off("click",".altui-leftbutton");
-		$(".altui-leftnav").append( leftNavButtonTemplate.format( -1, "All") );
-		$(".altui-leftnav").append( leftNavButtonTemplate.format( 0, "No Room") );
+		$(".altui-leftnav").append( leftNavButtonTemplate.format( -1, _T("All")) );
+		$(".altui-leftnav").append( leftNavButtonTemplate.format( 0, _T("No Room")) );
 		// install a click handler on button
 		if ($.isFunction( clickFunction ))  {
 			$("body").off("click",".altui-leftbutton");
@@ -3937,8 +3940,7 @@ var UIManager  = ( function( window, undefined ) {
 				&& ( (batteryLevel != null) || (false == _deviceDisplayFilter.batterydevice));
 		}
 		
-		function _createDeviceModalHtml()
-		{
+		function _createDeviceModalHtml() {
 			var deviceCreateModalTemplate = "<div id='deviceCreateModal' class='modal fade'>";
 			deviceCreateModalTemplate += "  <div class='modal-dialog modal-lg'>";
 			deviceCreateModalTemplate += "    <div class='modal-content'>";
@@ -3988,8 +3990,7 @@ var UIManager  = ( function( window, undefined ) {
 			domPanel.append(devicecontainerTemplate.format(device.id));	
 		};
 
-		function _drawDevices(filterfunc)
-		{
+		function _drawDeviceToolbar() {
 			var filterHtml="";
 			// filterHtml+="<div class='btn-group'>";
 			filterHtml+="<div class='altui-pagefilter'>";
@@ -4012,11 +4013,6 @@ var UIManager  = ( function( window, undefined ) {
 						filterHtml+="  </label>";
 						filterHtml+="</div>";
 					filterHtml+="</div>";
-					filterHtml+="<div class='form-group'>";
-						filterHtml+="<label for='altui-device-category'>Category:</label>";
-						filterHtml+="<select id='altui-device-category' class='form-control'>";
-						filterHtml+="</select>";
-					filterHtml+="</div>";
 				filterHtml+="</form>";
 			filterHtml+="  </div>";
 			filterHtml+="</div>";
@@ -4027,47 +4023,59 @@ var UIManager  = ( function( window, undefined ) {
 			filterHtml+="<span class='input-group-addon' id='altui-device-remove-btn'>"+removeGlyph+"</span>";
 			filterHtml+="<input type='text' class='form-control' placeholder='Device Name' aria-describedby='sizing-addon2'>";
 			filterHtml+="</div>";
-
-			var toolbatrHtml="";
-			toolbatrHtml+="  <button type='button' class='btn btn-default' id='altui-device-filter' >";
-			toolbatrHtml+="    Filter <span class='caret'></span>";
-			toolbatrHtml+="  </button>";			
-			toolbatrHtml+="  <button type='button' class='btn btn-default' id='altui-device-create' >";
-			toolbatrHtml+=(_T("Create")+"&nbsp;"+plusGlyph);
-			toolbatrHtml+="  </button>";			
-
-			UIManager.clearPage(_T('Devices'),"Devices "+toolbatrHtml);
 			
-			// Dialogs
-			$(".altui-mainpanel").append(deviceModalTemplate.format( '', '', 0 ));
-			$(".altui-mainpanel").append(deviceActionModalTemplate.format( '', '', 0 ));
-			$(".altui-mainpanel").append( _createDeviceModalHtml() );
-			
-			// Title
-			$("#altui-pagetitle")
-				.after(filterHtml)
-				.css("display","inline");
-			$(".altui-pagefilter").css("display","inline");
-			
-			// Category & Form filter
-			var devnames = [];
-			VeraBox.getDevices( 
-				function(idx,device) {
-					devnames.push( device.name );
+			var toolbarHtml="";
+			toolbarHtml+="  <button type='button' class='btn btn-default' id='altui-device-filter' >";
+			toolbarHtml+=  (searchGlyph + '&nbsp;' +_T('Filter') + "<span class='caret'></span>");
+			toolbarHtml+="  </button>";			
+			toolbarHtml+="	<div class='btn-group' id='altui-device-room-filter'>";
+				toolbarHtml+="  <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown' aria-expanded='false'>";
+				toolbarHtml+=  (homeGlyph + '&nbsp;' +_T('Rooms') + "<span class='caret'></span>");
+				toolbarHtml+="  </button>";
+				toolbarHtml+="  <ul class='dropdown-menu' role='menu'>";
+					var rooms = VeraBox.getRoomsSync();
+					$.each([{id:-1,name:_T('All')},{id:0,name:_T('No Room')}], function( idx, room) {
+						toolbarHtml+="<li><a href='#' id='{1}'>{0}</a></li>".format(room.name,room.id);
+					});
+					$.each(rooms, function( idx, room) {
+						toolbarHtml+="<li><a href='#' id='{1}'>{0}</a></li>".format(room.name,room.id);
+					});
+					toolbarHtml+="  </ul>";
+			toolbarHtml+="</div>";			
+			toolbarHtml+="	<div class='btn-group' id='altui-device-category-filter'>";
+			toolbarHtml+="  <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown' aria-expanded='false'>";
+			toolbarHtml+=  (tagsGlyph + '&nbsp;' +_T('Category') + "<span class='caret'></span>");
+			toolbarHtml+="  </button>";
+			toolbarHtml+="  <ul class='dropdown-menu' role='menu'>";
+			toolbarHtml+="<li><a href='#' id='{0}'>{1}</a></li>".format(0,_T('All'));
+			VeraBox.getCategories(
+				function(idx,category) {
+					toolbarHtml+="<li><a href='#' id='{0}'>{1}</a></li>".format(category.id,category.name);
 				},
 				null,
-				function () {
-					$("#altui-device-remove-btn").off("click touchend");
-					$("#altui-device-remove-btn").on("click touchend",function() { 
+				function(categories) {
+					toolbarHtml+="  </ul>";
+					toolbarHtml+="</div>";			
+					toolbarHtml+="  <button type='button' class='btn btn-default' id='altui-device-create' >";
+					toolbarHtml+= (plusGlyph + "&nbsp;" + _T("Create"));
+					toolbarHtml+="  </button>";			
+					
+					// Display
+					$(".altui-device-toolbar").replaceWith( "<div class='altui-device-toolbar'>"+toolbarHtml+filterHtml+"</div>" );
+					$(".altui-pagefilter").css("display","inline");
+					
+					// interactivity					
+					$("#altui-device-remove-btn").off("click touchend").on("click touchend",function() { 
 						$(this).parent().find("input").val("");
 						_deviceDisplayFilter.filtername = "";
 						MyLocalStorage.setSettings("DeviceFilterName",_deviceDisplayFilter.filtername);
 						_drawDevices(deviceFilter);
 					});
-					$("#altui-device-search-btn").off("click touchend");
-					$("#altui-device-search-btn").on("click touchend",function() { $(this).focus(); });
+					
+					$("#altui-device-search-btn").off("click touchend").on("click touchend",function() { $(this).focus(); });
+
 					$("#altui-device-name-filter input").autocomplete({
-						source: devnames,
+						source: $.map( VeraBox.getDevicesSync() , function( device, i ) { return device.name; }  ),
 						appendTo: "#altui-device-name-filter",
 						delay: 500,
 						// minLength: 3,
@@ -4090,73 +4098,59 @@ var UIManager  = ( function( window, undefined ) {
 							}
 							$("#altui-device-name-filter").addClass("has-error");
 							ui.content.push( { label:_T('No Match'), value:'' } );
-					},
-						// search: function(event, ui ) {
-							// var v= $(this).val();
-							// _deviceDisplayFilter.filtername = v;
-							// _drawDevices(deviceFilter);
-						// }
+						},
 					});
 					$("#altui-device-name-filter input").val(_deviceDisplayFilter.filtername);
 					var v=$("#altui-device-name-filter input").val();
 					if (v.length>0)
 						$("#altui-device-name-filter input").focus();
-			}
-			);
-
-			
-			// $("#altui-device-name-filter input").keyup( function() {
-				// var v= $(this).val();
-				// _deviceDisplayFilter.filtername = v;
-				// _drawDevices(deviceFilter);
-			// });
-
-			$("#altui-device-category").append("<option value=0 "+((_deviceDisplayFilter.category==0) ? "selected" : "" )+">All</option>");
-			VeraBox.getCategories(function(idx,category) {
-				$("#altui-device-category").append("<option value={0} {2}>{1}</option>".format(category.id,category.name,(_deviceDisplayFilter.category==category.id) ? " selected " : ""));
-			});
-			$("#altui-device-filter").html($("#altui-device-category option:selected" ).text() + " <span class='caret'></span>");
 					
-			$("#altui-device-filter-form").toggle(_deviceDisplayFilter.filterformvisible);
-			$("#altui-device-filter").click( function() {
-				_deviceDisplayFilter.filterformvisible = !_deviceDisplayFilter.filterformvisible;
-				$("#altui-device-filter-form").toggle();
-				$("#altui-device-filter span.caret").toggleClass( "caret-reversed" );
-			});
+					$("#altui-device-filter-form").toggle(_deviceDisplayFilter.filterformvisible);
+					$("#altui-device-filter").click( function() {
+						_deviceDisplayFilter.filterformvisible = !_deviceDisplayFilter.filterformvisible;
+						$("#altui-device-filter-form").toggle();
+						$("#altui-device-filter span.caret").toggleClass( "caret-reversed" );
+					});
 
-			$("#altui-device-category").change( function() {
-				_deviceDisplayFilter.category = this.value;
-				_drawDevices(deviceFilter);
-			});
+					$("#altui-show-battery").prop('checked',_deviceDisplayFilter.batterydevice);
+					$("#altui-show-battery").click( function() {
+						_deviceDisplayFilter.batterydevice = $(this).prop('checked');
+						_drawDevices(deviceFilter);
+					});
 
-			$("#altui-show-battery").prop('checked',_deviceDisplayFilter.batterydevice);
-			$("#altui-show-battery").click( function() {
-				_deviceDisplayFilter.batterydevice = $(this).prop('checked');
-				_drawDevices(deviceFilter);
-			});
+					$("#altui-show-invisible").prop('checked',_deviceDisplayFilter.invisible);
+					$("#altui-show-invisible").click( function() {
+						_deviceDisplayFilter.invisible = $(this).prop('checked');
+						MyLocalStorage.setSettings("ShowInvisibleDevice",_deviceDisplayFilter.invisible);
+						_drawDevices(deviceFilter);
+					});
 
-			$("#altui-show-invisible").prop('checked',_deviceDisplayFilter.invisible);
-			$("#altui-show-invisible").click( function() {
-				_deviceDisplayFilter.invisible = $(this).prop('checked');
-				MyLocalStorage.setSettings("ShowInvisibleDevice",_deviceDisplayFilter.invisible);
-				_drawDevices(deviceFilter);
-			});
-
-			$(".altui-leftnav").empty();
-
-			// create button
-			$("#altui-device-create").click( function() {
-				UIManager.deviceCreate( );
-			});
-
-			// on the left, get the rooms
-			UIManager.leftnavRooms( _onClickRoomButton );
+					$("#altui-device-create").click( UIManager.deviceCreate );
+					$("#altui-device-room-filter a").click( function() {
+						$(this).closest(".dropdown-menu").find("li.active").removeClass("active");
+						$(this).parent().addClass("active");
+						_onClickRoomButton( $(this).prop('id') );
+					});
+					$("#altui-device-category-filter a").click( function() {
+						$(this).closest(".dropdown-menu").find("li.active").removeClass("active");
+						$(this).parent().addClass("active");
+						_deviceDisplayFilter.category = $(this).prop('id');
+						_drawDevices(deviceFilter);
+					});
+				}
+			);
+		};
+		
+		function _drawDevices(filterfunc)
+		{
+			$(".altui-mainpanel").empty();
+			// Category & Form filter
 			VeraBox.getDevices( drawDeviceContainer , filterfunc, endDrawDevice);
 		};
 		
-		function _onClickRoomButton()
+		function _onClickRoomButton(roomid)
 		{
-			var roomid = $(this).prop('id');
+			// var roomid = $(this).prop('id');
 			_deviceDisplayFilter.room = roomid;	
 			_drawDevices(deviceFilter);
 			
@@ -4176,6 +4170,21 @@ var UIManager  = ( function( window, undefined ) {
 			$('div#dialogModal').modal();
 		};
 		
+		// Page Preparation
+		UIManager.clearPage(_T('Devices'),"Devices");
+		$("#altui-pagetitle").css("display","inline").after("<div class='altui-device-toolbar'></div>");
+		
+		// Dialogs
+		$("div#dialogs").append(deviceModalTemplate.format( '', '', 0 ));
+		$("div#dialogs").append(deviceActionModalTemplate.format( '', '', 0 ));
+		$("div#dialogs").append( _createDeviceModalHtml() );
+		
+		// on the left, get the rooms
+		$(".altui-leftnav").empty();
+		UIManager.leftnavRooms( function() {
+			_onClickRoomButton( $(this).prop('id') ); 
+		});
+		_drawDeviceToolbar();
 		_drawDevices(deviceFilter);
 
 		// deletegated event for title click / rename for device
@@ -4255,14 +4264,17 @@ var UIManager  = ( function( window, undefined ) {
 		function _drawScenes( filterfunc )
 		{
 			UIManager.clearPage(_T('Scenes'),_T("Scenes"));
-			var toolbatrHtml="";
-			toolbatrHtml+="  <button type='button' class='btn btn-default' id='altui-scene-create' >";
-			toolbatrHtml+=(_T("Create")+"&nbsp;"+plusGlyph);
-			toolbatrHtml+="  </button>";			
-			$("#altui-pagetitle").append(toolbatrHtml);
+			var toolbarHtml="";
+			toolbarHtml+="  <button type='button' class='btn btn-default' id='altui-scene-create' >";
+			toolbarHtml+=(_T("Create")+"&nbsp;"+plusGlyph);
+			toolbarHtml+="  </button>";			
+			$("#altui-pagetitle").append(toolbarHtml);
 
 			// on the left, get the rooms
-			UIManager.leftnavRooms( _onClickRoomButton );
+			UIManager.leftnavRooms( function() {
+				_onClickRoomButton( $(this).prop('id') ); 
+			});
+
 			VeraBox.getScenes( sceneDraw , filterfunc, afterSceneListDraw )
 			
 			$("#altui-scene-create").click( function() {
@@ -4270,8 +4282,8 @@ var UIManager  = ( function( window, undefined ) {
 			});
 		}
 		
-		function _onClickRoomButton() {
-			var roomid = $(this).prop('id');
+		function _onClickRoomButton(roomid) {
+			// var roomid = $(this).prop('id');
 			// filter function
 			function _sceneInThisRoom(scene) {
 				return (roomid==-1) || (scene!=null && scene.room==roomid);
@@ -5043,12 +5055,15 @@ $(document).ready(function() {
 		cameraGlyph = glyphTemplate.format( "facetime-video", _T("Camera") , "");
 		onoffGlyph = glyphTemplate.format( "off", _T("On Off") , "");
 		scaleGlyph = glyphTemplate.format( "scale", _T("Gauge") , "");
+		homeGlyph = glyphTemplate.format( "home", _T("Rooms") , "");
+		tagsGlyph = glyphTemplate.format( "tags", _T("Categories") , "");
 		helpGlyph = glyphTemplate.format( "question-sign", "" , "");
 		
 		UIManager.initLocalizedGlobals();
 	
 		var body = "";
 		body+="<!-- Fixed navbar -->";
+		body+="<div id='dialogs'></div>";
 		body+="<nav class='navbar navbar-default navbar-fixed-top'>";
 		body+="  <div class='container'>";
 		body+="	<div class='navbar-header'>";
@@ -5101,7 +5116,6 @@ $(document).ready(function() {
 		body+="	<div class='row'>";
 		body+="		<div class='col-sm-10 col-sm-push-2'>";
 		body+="			<h1 id='altui-pagetitle' >"+_T("Welcome to VERA Alternate UI")+"</h1>";
-		body+="			<div id='dialogs'></div>";
 		body+="			<div class='altui-mainpanel row'>";
 		body+="			</div>";
 		body+="		</div>";
@@ -5161,6 +5175,9 @@ $(document).ready(function() {
 		height:100px;		\
 		background-color: #f5f5f5;	\
 		overflow-y: auto; 			\
+	}						\
+	div#altui-pagemessage-panel td {	\
+		color:black;	\
 	}						\
 	.altui-leftnav .altui-edittoolbox { \
 		border:1px solid;: 0px;\
