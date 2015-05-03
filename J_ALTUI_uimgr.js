@@ -25,10 +25,10 @@ var timeGlyph="<span class='glyphicon glyphicon-time' aria-hidden='true' data-to
 var okGlyph="<span class='glyphicon glyphicon-ok' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='OK'></span>";
 var wrenchGlyph="<span class='glyphicon glyphicon-wrench' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Settings'></span>";
 var optHorGlyph="<span class='glyphicon glyphicon-option-horizontal' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Time'></span>";
-var searchGlyph="<span class='glyphicon glyphicon-search' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Search'></span>";
 var plusGlyph="<span class='glyphicon glyphicon-plus' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Add'></span>";
 var saveGlyph="<span class='glyphicon glyphicon-save' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Save'></span>";
 var labelGlyph="<span class='glyphicon glyphicon-font' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Label'></span>";
+var searchGlyph = "";
 var loadGlyph = "";
 var infoGlyph = "";
 var picGlyph = "";
@@ -4009,7 +4009,8 @@ var UIManager  = ( function( window, undefined ) {
 			filterHtml+="</div>";
 
 			filterHtml+="<div id='altui-device-name-filter' class='input-group'>";
-			filterHtml+="<span class='input-group-addon' id='altui-device-search-glyph'>"+searchGlyph+"</span>";
+			filterHtml+="<span class='input-group-addon' id='altui-device-search-btn'>"+searchGlyph+"</span>";
+			filterHtml+="<span class='input-group-addon' id='altui-device-remove-btn'>"+removeGlyph+"</span>";
 			filterHtml+="<input type='text' class='form-control' placeholder='Device Name' aria-describedby='sizing-addon2'>";
 			filterHtml+="</div>";
 
@@ -4042,8 +4043,14 @@ var UIManager  = ( function( window, undefined ) {
 				},
 				null,
 				function () {
-					$("#altui-device-search-glyph").off("click touchend");
-					$("#altui-device-search-glyph").on("click touchend",function() { $(this).focus(); });
+					$("#altui-device-remove-btn").off("click touchend");
+					$("#altui-device-remove-btn").on("click touchend",function() { 
+						$(this).parent().find("input").val("");
+						_deviceDisplayFilter.filtername = "";
+						_drawDevices(deviceFilter);
+					});
+					$("#altui-device-search-btn").off("click touchend");
+					$("#altui-device-search-btn").on("click touchend",function() { $(this).focus(); });
 					$("#altui-device-name-filter input").autocomplete({
 						source: devnames,
 						appendTo: "#altui-device-name-filter",
@@ -4999,6 +5006,9 @@ $(document).ready(function() {
 		defaultDialogModalTemplate += "  </div><!-- /.modal-dialog -->";
 		defaultDialogModalTemplate += "</div><!-- /.modal -->";
 
+	//"<span class='glyphicon glyphicon-search' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Search'></span>"
+		searchGlyph=glyphTemplate.format( "search", _T("Search"), "" );
+		removeGlyph=glyphTemplate.format( "remove", _T("Remove"), "" );
 		loadGlyph = glyphTemplate.format( "open", _T("Load") , "");
 		infoGlyph = glyphTemplate.format( "info-sign", _T("Info") , "");
 		picGlyph = glyphTemplate.format( "picture", _T("Image") , "");
@@ -5091,7 +5101,7 @@ $(document).ready(function() {
 
 	var language = getQueryStringValue("lang") || window.navigator.userLanguage || window.navigator.language;
 	console.log("language:"+language);
-	if (language != 'en') {
+	if (language.substring(0, 2) != 'en') {
 		var scriptLocationAndName = 'J_ALTUI_loc_'+ language.substring(0, 2) + '.js' ;
 		var head = document.getElementsByTagName('head')[0];
 		var script = document.createElement('script');
