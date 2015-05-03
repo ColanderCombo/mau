@@ -198,6 +198,7 @@ var UPnPHelper = (function(window,undefined) {
 	{
 		_exec( _buildUPnPRunLua( code), cbfunc );
 	};
+
 	function _reloadEngine(cbfunc)
 	{
 		// Resets the Luup engine with any new configuration settings.
@@ -469,6 +470,15 @@ var VeraBox = ( function( window, undefined ) {
 		user_changes=1; //UI5 compat
 	};
 	
+	function _reboot()
+	{
+		VeraBox.runLua("os.execute('reboot')", function(result) {
+			if ( result == "Passed")
+				PageMessage.message( "Test code succeeded", "success");
+			else
+				PageMessage.message( "Test code failed", "danger");
+		});
+	};
 	function _reloadEngine()
 	{
 		UPnPHelper.reloadEngine( function(data) {
@@ -1376,6 +1386,7 @@ var VeraBox = ( function( window, undefined ) {
 	editScene		: _editScene,			//(sceneid,scene);
 	deleteScene		: _deleteScene,
 	reloadEngine	: _reloadEngine,	
+	reboot			: _reboot,
 	setStartupCode	: _setStartupCode,
 	
 	getCategoryTitle : _getCategoryTitle,

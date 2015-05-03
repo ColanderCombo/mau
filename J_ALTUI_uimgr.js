@@ -5078,6 +5078,7 @@ $(document).ready(function() {
 		body+="		  <ul class='dropdown-menu' role='menu'>";
 		body+="			<li><a id='altui-remoteaccess' href='#' >"+_T("Remote Access Login")+"</a></li>";
 		body+="			<li><a id='altui-reload' href='#' >"+_T("Reload Luup Engine")+"</a></li>";
+		body+="			<li><a id='altui-reboot' href='#' >"+_T("Reboot Vera")+"</a></li>";
 		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>Lua</li>";
 		body+="			<li><a id='altui-luastart' href='#' >"+_T("Lua Startup Code")+"</a></li>";
@@ -5404,6 +5405,7 @@ $(document).ready(function() {
 		.on ("click", "#altui-pages-see", UIManager.pageUsePages )
 		.on ("click", "#altui-pages-edit", UIManager.pageEditPages )
 		.on( "click", "#altui-reload", VeraBox.reloadEngine )
+		.on( "click", "#altui-reboot", VeraBox.reboot )
 		.on( "click", "#altui-remoteaccess", UIManager.pageRemoteAccess )
 		.on( "click", "#altui-credits", UIManager.pageCredits )
 		.on( "click", "#altui-luastart", UIManager.pageLuaStart )

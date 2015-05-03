@@ -1,0 +1,56 @@
+//# sourceURL=J_ALTUI_loc_it.js
+// http://192.168.1.16:3480/data_request?id=lr_ALTUI_Handler&command=home
+// This program is free software: you can redistribute it and/or modify
+// it under the condition that it is for private or home useage and 
+// this whole comment is reproduced in the source code file.
+// Commercial utilisation is not authorized without the appropriate
+// written agreement from amg0 / alexis . mermet @ gmail . com
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+
+Localization.init( {
+  "Home": "Casa",
+  "Welcome to VERA Alternate UI": "Benvenuti a VERA UI Alternativo",
+  "Rooms": "Stanze",
+  "Devices": "Dispositivi",
+  "Control Panel": "Pannello di Controllo",
+  "Scenes": "Scena",
+  "Scene Edit": "Scena Modificare",
+  "Plugins": "Plugins",
+  "Custom Pages": "Pagine Personalizzate",
+  "Edit Pages": "Modifica Pagine",
+  "Credits": "Crediti",
+  "LuaTest": "LuaTesy",
+  "LuaStart": "LuaInizio",
+  "Optimize": "Ottimizza",
+  "Editor": "Editore",
+  "Custom Pages Editor": "Pagine Personalizzate Editore",
+  "Lua Startup": "Lua Avviare",
+  "Lua Code Test":"Lua Codice Verificare",
+  "Optimizations": "Ottimizzazioni",
+  "Unmuted,Muted":"Normale,Muto",
+  "Normal,Debug":"Normale,Debug",
+  "Up":"Alza",
+  "Stop":"Fermare",
+  "Down":"Giù",
+  "Open":"Apri",
+  "Unlock,Lock":"Sbloccare,Serratura",
+  "Bypass,Arm":"Free,Armata",
+  "Use Custom Pages":"Pagine Usare Personalizzate",
+  "Edit Custom Pages":"Modifica di Pagine Personalizzate",
+  "More":"Più",
+  "Remote Access Login":"Accesso Remoto Log",
+  "Reload Luup Engine":"Ricaricare Luup Motore",
+  "Lua Startup Code":"Lua Codice Avviamento",
+  "Lua Test Code":"Avvio Codice Lua",
+  "Localization":"Localizzazione",
+  "Misc":"Vario",
+  "Create":"Crea",
+  "Runs in mode": "Funziona in modalità",
+  "Run" : "Eseguire",
+  "OFF,ON":"Spento,Acceso",
+  "Working":"Lavorare",
+  "Holiday":"Vacanze",
+  "Wind":"Vento"
+});
