@@ -124,5 +124,6 @@ Localization.init( {
   "absolute":"Heure Fixe",
   "Search":"Chercher",
   "Remove":"Effacer",
-  "No Match":"Aucun"
+  "No Match":"Aucun",
+  "Reboot Vera":"Redémarrer Vera"
 });
