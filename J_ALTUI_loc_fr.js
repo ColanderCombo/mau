@@ -46,7 +46,7 @@ Localization.init( {
   "Edit Custom Pages":"Edit Pages",
   "More":"Plus",
   "Remote Access Login":"Accès à Distance",
-  "Reload Luup Engine":"Redemarrer Luup",
+  "Reload Luup Engine":"Redémarrer Luup",
   "Lua Startup Code":"Code Démarrage Lua",
   "Lua Test Code":"Code Test Lua",
   "Localization":"Localisation",

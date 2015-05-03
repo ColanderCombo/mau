@@ -3822,7 +3822,7 @@ var UIManager  = ( function( window, undefined ) {
 		formHtml+=" <div class='input-group col-sm-6'>";
 		formHtml+="       <input id='altui-create-room-name' type='text' class='form-control' placeholder='Room name...'>";
 		formHtml+="       <span class='input-group-btn'>";
-		formHtml+="         <button id='altui-create-room' class='btn btn-default' type='button'>"+_T("Create")+plusGlyph+"</button>";
+		formHtml+="         <button id='altui-create-room' class='btn btn-default' type='button'>"+plusGlyph+"&nbsp;"+_T("Create")+"</button>";
 		formHtml+="       </span>";
 		formHtml+="     </div><!-- /input-group -->";
 	
@@ -4266,7 +4266,7 @@ var UIManager  = ( function( window, undefined ) {
 			UIManager.clearPage(_T('Scenes'),_T("Scenes"));
 			var toolbarHtml="";
 			toolbarHtml+="  <button type='button' class='btn btn-default' id='altui-scene-create' >";
-			toolbarHtml+=(_T("Create")+"&nbsp;"+plusGlyph);
+			toolbarHtml+=(plusGlyph + "&nbsp;" + _T("Create"));
 			toolbarHtml+="  </button>";			
 			$("#altui-pagetitle").append(toolbarHtml);
 
