@@ -3909,7 +3909,7 @@ var UIManager  = ( function( window, undefined ) {
 			invisible 		: (MyLocalStorage.getSettings("ShowInvisibleDevice")==true),
 			batterydevice	: false,
 			category		: 0,
-			filtername		: ""
+			filtername		: MyLocalStorage.getSettings("DeviceFilterName") || ""
 		};
 
 		// filter function
@@ -4047,6 +4047,7 @@ var UIManager  = ( function( window, undefined ) {
 					$("#altui-device-remove-btn").on("click touchend",function() { 
 						$(this).parent().find("input").val("");
 						_deviceDisplayFilter.filtername = "";
+						MyLocalStorage.setSettings("DeviceFilterName",_deviceDisplayFilter.filtername);
 						_drawDevices(deviceFilter);
 					});
 					$("#altui-device-search-btn").off("click touchend");
@@ -4059,13 +4060,23 @@ var UIManager  = ( function( window, undefined ) {
 						change: function(event, ui ) {
 							var v= $(this).val();
 							_deviceDisplayFilter.filtername = v;
+							MyLocalStorage.setSettings("DeviceFilterName",_deviceDisplayFilter.filtername);
 							_drawDevices(deviceFilter);
 						},
 						select: function( event, ui ) {
 							var v= ui.item.label;
 							_deviceDisplayFilter.filtername = v;
+							MyLocalStorage.setSettings("DeviceFilterName",_deviceDisplayFilter.filtername);
 							_drawDevices(deviceFilter);
-						}
+						},
+						response: function( event, ui ) {
+							if (ui.content.length>0) {
+								$("#altui-device-name-filter").removeClass("has-error");
+								return;
+							}
+							$("#altui-device-name-filter").addClass("has-error");
+							ui.content.push( { label:_T('No Match'), value:'' } );
+					},
 						// search: function(event, ui ) {
 							// var v= $(this).val();
 							// _deviceDisplayFilter.filtername = v;

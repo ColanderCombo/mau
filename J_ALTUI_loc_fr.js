@@ -121,5 +121,8 @@ Localization.init( {
   "interval":"intervalle",
   "day of week":"Jour de la Semaine",
   "day of month":"Jour du Mois",
-  "absolute":"Heure Fixe"
+  "absolute":"Heure Fixe",
+  "Search":"Chercher",
+  "Remove":"Effacer",
+  "No Match":"Aucun"
 });
