@@ -109,7 +109,6 @@ function altui_Settings(deviceID) {
 	var themecss = get_device_state(deviceID,  altui_Svs, 'ThemeCSS',1);
 	var style='	<style>\
 	  table.altui_table td:first-child{\
-		background-color: #E0E0E0;\
 		width: 140px;\
 	  }\
 	  hr.altui_hr {\

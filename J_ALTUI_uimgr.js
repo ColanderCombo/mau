@@ -1572,6 +1572,7 @@ var PageMessage = (function(window, undefined ) {
 	
 	function _clear() {
 		$("#altui-pagemessage tbody").empty();
+		_updateMessageButtonColor();
 	};
 	
 	return {
