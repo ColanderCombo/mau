@@ -4835,7 +4835,8 @@ var UIManager  = ( function( window, undefined ) {
 
 		var html = "";				
 		html +="<div class='col-xs-12'>";
-		html +="	<p>This is a project under work, more to come.</p>";
+		html +="	<p>"+_T("This plugin is a work in progress, it will continuously evolves over time.")+"</p>";
+		html +="	<p>"+_T("You may check out the evolutions on the Micasaverde <a href='http://forum.micasaverde.com/index.php/topic,30310.msg216129.html#msg216129'>Forum</a>")+"</p>";
 		html +="	<div class='altui-housemode row'>";
 
 		if (_ui7Check==true) {
