@@ -709,7 +709,7 @@ var VeraBox = ( function( window, undefined ) {
 		return arr[0].states;
 	};	
 		
-	function _getStatusObject( deviceid, service, variable ) {
+	function _getStatusObject( deviceid, service, variable, bCreate ) {
 		if (deviceid==0)
 			return null;
 		
@@ -720,8 +720,16 @@ var VeraBox = ( function( window, undefined ) {
 		var states = $.grep( states , function( state,idx) {
 			return ( state.service == service ) && (state.variable == variable);
 		});
-		if (states.length==0)
-			return null;
+		
+		if (states.length==0) {
+			if (bCreate != true)
+				return null;
+			states.push( {
+				service: service,
+				variable: variable,
+				value: null
+			} );
+		}
 		
 		return states[0];
 	};
@@ -740,9 +748,7 @@ var VeraBox = ( function( window, undefined ) {
 	// 1 : means dynamic, lost at the next restart if not save
 	function _setStatus( deviceid, service, variable, value, dynamic ) {
 		// update local cache
-		var statusobj= _getStatusObject( deviceid, service, variable ) 
-		if (statusobj==null)
-			return;
+		var statusobj= _getStatusObject( deviceid, service, variable , true ) //bCreate==true
 
 		if (dynamic >= 0 )  {
 			statusobj.value=value;	// in memory but lost at next restart

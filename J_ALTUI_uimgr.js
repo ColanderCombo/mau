@@ -1829,18 +1829,31 @@ var UIManager  = ( function( window, undefined ) {
 	};
 
 	function _fixScriptPostLoad( name, code ) {
-		if (name=="J_WakeUpLight.js") {
+		// if (name=="J_WakeUpLight.js") {
 			// https://regex101.com/
 			var re = /\$\((.*?)\).value/g; 
 			var subst = '$(\'#\'+$1).val()'; 
 			code = code.replace(re, subst);
 			
+			re = /\$\((.*?)\).innerHTML\s*?=\s*?(.*?);/g; 
+			var subst = '$(\'#\'+$1).html($2)'; 
+			code = code.replace(re, subst);
+
+			re = /\$\((.*?)\).innerHTML/g; 
+			var subst = '$(\'#\'+$1).html()'; 
+			code = code.replace(re, subst);
+
 			re = /\$\((.*?)\).checked/g; 
 			subst = '$(\'#\'+$1).is(\':checked\')'; 
 			code = code.replace(re, subst);
-			
-			re = /\(\$\((.*?)\)\)/g; 
-			subst = '($(\'#\'+$1).length>0)';
+
+			re = /\(\$\(([^#]*?)\)\)?/g; 
+			subst = '($(\'#\'+$1).length>0)'; 
+			code = code.replace(re, subst);
+		// } 			
+		if (name=="J_ProgramLogicC.js") {
+			re = /!\$\((selectedEventObj)\)/g; 
+			subst = '($("#"+selectedEventObj).length==0)'; 
 			code = code.replace(re, subst);
 		}
 		return code;
