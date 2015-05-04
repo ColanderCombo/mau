@@ -2991,6 +2991,25 @@ var UIManager  = ( function( window, undefined ) {
 		$("small#altui-footer").append( "<span>"+UIManager.getPayPalButtonHtml( false ) + "</span>");
 	};
 	
+	function _drawRoomFilterButton() {
+		var toolbarHtml="";
+		toolbarHtml+="	<div class='btn-group' id='altui-device-room-filter'>";
+			toolbarHtml+="  <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown' aria-expanded='false'>";
+			toolbarHtml+=  (homeGlyph + '&nbsp;' +_T('Rooms') + "<span class='caret'></span>");
+			toolbarHtml+="  </button>";
+			toolbarHtml+="  <ul class='dropdown-menu' role='menu'>";
+				var rooms = VeraBox.getRoomsSync();
+				$.each([{id:-1,name:_T('All')},{id:0,name:_T('No Room')}], function( idx, room) {
+					toolbarHtml+="<li><a href='#' id='{1}'>{0}</a></li>".format(room.name,room.id);
+				});
+				$.each(rooms, function( idx, room) {
+					toolbarHtml+="<li><a href='#' id='{1}'>{0}</a></li>".format(room.name,room.id);
+				});
+				toolbarHtml+="  </ul>";
+		toolbarHtml+="</div>";			
+		return toolbarHtml;
+	};
+		
 	function _refreshUI( bFull, bFirstTime ) {
 		// refresh rooms
 		// refresh devices
@@ -4028,20 +4047,9 @@ var UIManager  = ( function( window, undefined ) {
 			toolbarHtml+="  <button type='button' class='btn btn-default' id='altui-device-filter' >";
 			toolbarHtml+=  (searchGlyph + '&nbsp;' +_T('Filter') + "<span class='caret'></span>");
 			toolbarHtml+="  </button>";			
-			toolbarHtml+="	<div class='btn-group' id='altui-device-room-filter'>";
-				toolbarHtml+="  <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown' aria-expanded='false'>";
-				toolbarHtml+=  (homeGlyph + '&nbsp;' +_T('Rooms') + "<span class='caret'></span>");
-				toolbarHtml+="  </button>";
-				toolbarHtml+="  <ul class='dropdown-menu' role='menu'>";
-					var rooms = VeraBox.getRoomsSync();
-					$.each([{id:-1,name:_T('All')},{id:0,name:_T('No Room')}], function( idx, room) {
-						toolbarHtml+="<li><a href='#' id='{1}'>{0}</a></li>".format(room.name,room.id);
-					});
-					$.each(rooms, function( idx, room) {
-						toolbarHtml+="<li><a href='#' id='{1}'>{0}</a></li>".format(room.name,room.id);
-					});
-					toolbarHtml+="  </ul>";
-			toolbarHtml+="</div>";			
+
+			toolbarHtml+=_drawRoomFilterButton();
+			
 			toolbarHtml+="	<div class='btn-group' id='altui-device-category-filter'>";
 			toolbarHtml+="  <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown' aria-expanded='false'>";
 			toolbarHtml+=  (tagsGlyph + '&nbsp;' +_T('Category') + "<span class='caret'></span>");
@@ -4232,6 +4240,15 @@ var UIManager  = ( function( window, undefined ) {
 	pageScenes: function ()
 	{
 		
+		function _onClickRoomButton(roomid) {
+			// var roomid = $(this).prop('id');
+			// filter function
+			function _sceneInThisRoom(scene) {
+				return (roomid==-1) || (scene!=null && scene.room==roomid);
+			}
+			_drawScenes( _sceneInThisRoom );
+		};
+		
 		function sceneDraw(idx, scene) {
 			var html = UIManager.sceneDraw(scene.id, scene);
 			var scenecontainerTemplate="<div class=' col-sm-6  col-lg-4 '>";
@@ -4242,22 +4259,28 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		
 		function afterSceneListDraw() {
-			$(".altui-mainpanel").off("click",".altui-delscene");
-			$(".altui-mainpanel").on("click",".altui-delscene",function() {
-				var sceneid = $(this).prop("id");
-				VeraBox.deleteScene( sceneid );
-			});
-			
-			$(".altui-mainpanel").off("click",".altui-runscene");
-			$(".altui-mainpanel").on("click",".altui-runscene",function() {
-				var sceneid = $(this).prop("id");
-				$(this).removeClass("btn-primary").addClass("btn-success");
-				VeraBox.runScene( sceneid );
-			});
-			$(".altui-mainpanel").off("click",".altui-editscene");
-			$(".altui-mainpanel").on("click",".altui-editscene",function() {
-				var sceneid = $(this).prop("id");
-				UIManager.pageSceneEdit( sceneid );
+			$(".altui-mainpanel")
+				.off("click",".altui-delscene")
+				.on("click",".altui-delscene",function() {
+					var sceneid = $(this).prop("id");
+					VeraBox.deleteScene( sceneid );
+				})
+				.off("click",".altui-runscene")
+				.on("click",".altui-runscene",function() {
+					var sceneid = $(this).prop("id");
+					$(this).removeClass("btn-primary").addClass("btn-success");
+					VeraBox.runScene( sceneid );
+				})
+				.off("click",".altui-editscene")
+				.on("click",".altui-editscene",function() {
+					var sceneid = $(this).prop("id");
+					UIManager.pageSceneEdit( sceneid );
+				});
+	
+			$("#altui-device-room-filter a").click( function() {
+				$(this).closest(".dropdown-menu").find("li.active").removeClass("active");
+				$(this).parent().addClass("active");
+				_onClickRoomButton( $(this).prop('id') );
 			});
 		};
 		
@@ -4265,6 +4288,7 @@ var UIManager  = ( function( window, undefined ) {
 		{
 			UIManager.clearPage(_T('Scenes'),_T("Scenes"));
 			var toolbarHtml="";
+			toolbarHtml+=_drawRoomFilterButton();
 			toolbarHtml+="  <button type='button' class='btn btn-default' id='altui-scene-create' >";
 			toolbarHtml+=(plusGlyph + "&nbsp;" + _T("Create"));
 			toolbarHtml+="  </button>";			
@@ -4281,15 +4305,6 @@ var UIManager  = ( function( window, undefined ) {
 				UIManager.pageSceneEdit(-1);
 			});
 		}
-		
-		function _onClickRoomButton(roomid) {
-			// var roomid = $(this).prop('id');
-			// filter function
-			function _sceneInThisRoom(scene) {
-				return (roomid==-1) || (scene!=null && scene.room==roomid);
-			}
-			_drawScenes( _sceneInThisRoom );
-		};
 		
 		_drawScenes( null );
 	},
@@ -5119,7 +5134,7 @@ $(document).ready(function() {
 		body+="			<div class='altui-mainpanel row'>";
 		body+="			</div>";
 		body+="		</div>";
-		body+="		<div class='col-sm-2 col-sm-pull-10'>";
+		body+="		<div class='col-sm-2 col-sm-pull-10 hidden-xs '>";
 		body+="			<div class='altui-leftnav btn-group-vertical' role='group' aria-label='...'>";
 		body+="				<!--";
 		body+="				<button type='button' class='btn btn-default'>One</button>";
