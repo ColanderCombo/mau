@@ -459,15 +459,12 @@ local htmlLayout = [[
 	
     <!-- http://192.168.1.5/port_3480/J_ALTUI_utils.js?_=1421533594990 -->
 	<script src="J_ALTUI_jquery.ui.touch-punch.min.js"></script>
-    <script src="J_ALTUI_utils.js"></script>
-    <script src="J_ALTUI_verabox.js"></script>
-	<script src="J_ALTUI_uimgr.js"></script>
-	<script type="text/javascript"
-	  src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["gauge","table"]}]}'>
+	<script type="text/javascript" 
+	  src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["gauge","table"]}]}' >
 	</script>
 	
 	@optional_scripts@
-	<script type='text/javascript'>
+	<script type='text/javascript' >
 		google.setOnLoadCallback(drawVisualization);
 		function drawVisualization() {
 			AltuiDebug.debug('google loaded');
@@ -476,6 +473,9 @@ local htmlLayout = [[
 		var g_CustomPages = @custompages@;
 		var g_CustomTheme = '@ThemeCSS@';
 	</script>
+    <script src="J_ALTUI_utils.js" ></script>
+    <script src="J_ALTUI_verabox.js" ></script>
+	<script src="J_ALTUI_uimgr.js" ></script>
 	<hr>
 	<footer><p class="text-center"><small id="altui-footer">AltUI, amg0, <span class="bg-danger">Waiting Initial Data</span></small></p><span id="debug"></span></footer>
 </body>

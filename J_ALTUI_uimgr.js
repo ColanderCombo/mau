@@ -5154,25 +5154,24 @@ $(document).ready(function() {
 	AltuiDebug.debug("starting engines");
 	AltuiDebug.debug("Configuration: "+JSON.stringify(g_DeviceTypes));
 	AltuiDebug.debug("Custom Pages: "+JSON.stringify(g_CustomPages));
-
+	
 	var language = getQueryStringValue("lang") || window.navigator.userLanguage || window.navigator.language;
-	console.log("language:"+language);
+	AltuiDebug.debug("language:"+language);
 	if (language.substring(0, 2) != 'en') {
 		var scriptLocationAndName = 'J_ALTUI_loc_'+ language.substring(0, 2) + '.js' ;
 		var head = document.getElementsByTagName('head')[0];
 		var script = document.createElement('script');
 		script.type = 'text/javascript';
 		script.src = scriptLocationAndName;
-		console.log("loading script :"+scriptLocationAndName);
+		AltuiDebug.debug("loading script :"+scriptLocationAndName);
 		// once script is loaded, we can call style function in it
 		$(script).load(  _initLocalizedGlobals );
 		head.appendChild(script);
 	} else {
-		console.log("going with English language");
+		AltuiDebug.debug("going with English language");
 		_initLocalizedGlobals();
 	}
 	VeraBox.initEngine();
-
 	var styles ="					\
 	.solid-border {	\
 		border:1px solid;: 0px;\
@@ -5448,9 +5447,7 @@ $(document).ready(function() {
 		.on( "click", "#altui-debug-btn", function() {
 			$(".altui-debug-div").toggle();
 			$("#altui-debug-btn span.caret").toggleClass( "caret-reversed" );
-		})
-		;
-
+		});
 	AltuiDebug.debug("init done");
 });
 
