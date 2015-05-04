@@ -4847,12 +4847,10 @@ var UIManager  = ( function( window, undefined ) {
 
 		var html = "";				
 		html +="<div class='col-xs-12'>";
-		html +="	<p>"+_T("This plugin is a work in progress, it will continuously evolves over time.")+"</p>";
-		html +="	<p>"+_T("You may check out the evolutions on the Micasaverde <a href='http://forum.micasaverde.com/index.php/topic,30310.msg216129.html#msg216129'>Forum</a>")+"</p>";
 		html +="	<div class='altui-housemode row'>";
 
 		if (_ui7Check==true) {
-			html += "<div class='btn-group' role='group' aria-label='...'>";
+			html += "<div class='col-xs-12 btn-group' role='group' aria-label='...'>";
 			$.each(_HouseModes, function(idx,mode) {
 				html += (houseModeButtonTemplate.format(mode.id, mode.text, mode.cls , "preset_unselected"));
 			});
@@ -4865,6 +4863,8 @@ var UIManager  = ( function( window, undefined ) {
 			html += "<p>No Housemode feature on UI5</p>";
 		}		
 		html +="	</div>";
+		html +="	<p>"+_T("This plugin is a work in progress, it will continuously evolves over time.");
+		html +=	_T("You may check out the evolutions on the Micasaverde <a href='http://forum.micasaverde.com/index.php/topic,30310.msg216129.html#msg216129'>Forum</a>")+"</p>";
 		html +="</div>";
 		$(".altui-mainpanel").append( html );
 		UIManager.refreshModes();
@@ -5065,9 +5065,9 @@ $(document).ready(function() {
 		body+="<!-- Fixed navbar -->";
 		body+="<div id='dialogs'></div>";
 		body+="<nav class='navbar navbar-default navbar-fixed-top'>";
-		body+="  <div class='container'>";
+		body+=" <div class='container'>";
 		body+="	<div class='navbar-header'>";
-		body+="	  <button type='button' class='navbar-toggle collapsed' data-toggle='collapse' data-target='#navbar' aria-expanded='false' aria-controls='navbar'>";
+		body+="	  <button type='button' class='navbar-toggle collapsed pull-left' data-toggle='collapse' data-target='#navbar' aria-expanded='false' aria-controls='navbar'>";
 		body+="		<span class='sr-only'>Toggle navigation</span>";
 		body+="		<span class='icon-bar'></span>";
 		body+="		<span class='icon-bar'></span>";
