@@ -158,9 +158,12 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		// http://192.168.1.16/port_3480/data_request?id=action&DeviceNum=26&serviceId=urn:upnp-org:serviceId:WindowCovering1&action=Up
 		// http://192.168.1.16/port_3480/data_request?id=action&DeviceNum=26&serviceId=urn:upnp-org:serviceId:WindowCovering1&action=Down
 		// http://192.168.1.16/port_3480/data_request?id=action&DeviceNum=26&serviceId=urn:upnp-org:serviceId:WindowCovering1&action=Stop
-		var actionname = e.prop('id').substr("altui-window-".length);
 		var deviceid = e.parent().prop('id').substr("altui-wc-".length);
-		UPnPHelper.UPnPAction( deviceid, "urn:upnp-org:serviceId:WindowCovering1", actionname, {} );
+		var actionname = e.prop('id').substr("altui-window-".length);
+		if (actionname=="Stop") 
+			UPnPHelper.UPnPAction( deviceid, "urn:upnp-org:serviceId:WindowCovering1", "Stop", {} );
+		else
+			UPnPHelper.UPnPAction( deviceid, "urn:upnp-org:serviceId:Dimming1", "SetLoadLevelTarget", {newLoadlevelTarget: ((actionname=="Up") ? 100 : 0) } );
 	};
 
 	function _drawWindowCover(devid, device) {

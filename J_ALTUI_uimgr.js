@@ -5303,8 +5303,8 @@ $(document).ready(function() {
 		margin:5px 3px;	\
 	}					\
 	.altui-scene-body button {\
-		margin-left:5px;			\
-		margin-right:5px;			\
+		margin-left:1px;			\
+		margin-right:1px;			\
 	}\
 	.altui-plugin-icon { 			\
 		font-size: 1.5em;				\
