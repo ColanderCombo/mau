@@ -2396,8 +2396,10 @@ var UIManager  = ( function( window, undefined ) {
 		var label = ((scene.hidden==true) ? hiddenGlyph+' ' : '') + scene.name;
 
 		var lastrun = (scene.last_run != undefined) ? okGlyph+" "+_toIso(new Date(scene.last_run*1000)) : '';
+		lastrun = lastrun.replace('T',' ');
 		var nextrun = _findSceneNextRun(scene);
 		nextrun = (nextrun==0) ? '' : timeGlyph+" "+_toIso(new Date(nextrun*1000));
+		nextrun = nextrun.replace('T',' ');
 		
 		var idDisplay = "<div class='pull-right text-muted'><small>#"+scene.id+" </small></div>";
 				
