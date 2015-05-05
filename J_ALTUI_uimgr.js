@@ -2983,13 +2983,15 @@ var UIManager  = ( function( window, undefined ) {
 	};
 	
 	function _refreshFooter() {
-		// refresh footer
-		var info = VeraBox.getBoxInfo();
-		var infotbl=[];
-		for( var key in info) { infotbl.push( info[key] || "") };
-		$("small#altui-footer").html( "AltUI {0}, amg0, {1}".format(_version,infotbl.join(", ")));
-		$("small#altui-footer").append( "<p>$Revision$,$Date$</p>");
-		$("small#altui-footer").append( "<span>"+UIManager.getPayPalButtonHtml( false ) + "</span>");
+		// refresh footer if needed
+		if ($("small#altui-footer span.bg-danger").length == 1) {
+			var info = VeraBox.getBoxInfo();
+			var infotbl=[];
+			for( var key in info) { infotbl.push( info[key] || "") };
+			$("small#altui-footer").html( "AltUI {0}, amg0, {1}".format(_version,infotbl.join(", ")));
+			$("small#altui-footer").append( "<p>$Revision$,$Date$</p>");
+			$("small#altui-footer").append( "<span>"+UIManager.getPayPalButtonHtml( false ) + "</span>");
+		}
 	};
 	
 	function _drawRoomFilterButton() {
@@ -5431,7 +5433,7 @@ $(document).ready(function() {
 			if ($(this).data("toggle") != "dropdown")	// not for the More... button
 				$(".navbar-collapse").collapse('hide');
 		} )
-		.on ("click", ".imgLogo", UIManager.pageHome )
+		.on ("click touchend", ".imgLogo", UIManager.pageHome )
 		// .on ("click", ".altui-savechanges-button", VeraBox.saveChangeCaches )
 		.on ("click", "#menu_room", UIManager.pageRooms )
 		.on ("click", "#menu_device", UIManager.pageDevices )
