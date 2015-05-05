@@ -463,7 +463,6 @@ local htmlLayout = [[
 	  src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["gauge","table"]}]}' >
 	</script>
 	
-	@optional_scripts@
 	<script type='text/javascript' >
 		google.setOnLoadCallback(drawVisualization);
 		function drawVisualization() {
@@ -476,6 +475,7 @@ local htmlLayout = [[
     <script src="J_ALTUI_utils.js" ></script>
     <script src="J_ALTUI_verabox.js" ></script>
 	<script src="J_ALTUI_uimgr.js" ></script>
+	@optional_scripts@
 	<hr>
 	<footer><p class="text-center"><small id="altui-footer">AltUI, amg0, <span class="bg-danger">Waiting Initial Data</span></small></p><span id="debug"></span></footer>
 </body>
@@ -541,6 +541,9 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 					if (v["ScriptFile"]  ~= nil) then
 						scripts[v["ScriptFile"]] = ""
 					end
+				end
+				if ( (lul_parameters["lang"]~=nil) and (lul_parameters["lang"]~="en") ) then
+					scripts["J_ALTUI_loc_"..lul_parameters["lang"]..".js"] = ""
 				end
 				for k,v in pairs(scripts) do
 					-- scripts[k] = getScriptContent(k)

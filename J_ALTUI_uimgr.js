@@ -1519,7 +1519,7 @@ var PageMessage = (function(window, undefined ) {
 				}) 
 			);
 			if (job.status==4)
-				setTimeout( function () { $("div#altui-pagemessage  tr[data-jobid='" + job.id + "']").remove(); }, 5000 );
+				setTimeout( function () { _clearMessage( idx ) }, 5000 );
 		}
 		else
 		{
@@ -1541,6 +1541,7 @@ var PageMessage = (function(window, undefined ) {
 		var devicemessages = $(".altui-pagemessage[data-devid='"+device.id+"']");
 		setTimeout( function() {
 			$(devicemessages).remove();			
+			_updateMessageButtonColor();
 		}, 5000 );
 	};
 
@@ -5157,7 +5158,9 @@ $(document).ready(function() {
 	
 	var language = getQueryStringValue("lang") || window.navigator.userLanguage || window.navigator.language;
 	AltuiDebug.debug("language:"+language);
-	if (language.substring(0, 2) != 'en') {
+	// if lang is on the url, the js is already loaded by the LUA module. 
+	if ( (language.substring(0, 2) != 'en') && (getQueryStringValue("lang")=="") ){
+	// if (false) {
 		var scriptLocationAndName = 'J_ALTUI_loc_'+ language.substring(0, 2) + '.js' ;
 		var head = document.getElementsByTagName('head')[0];
 		var script = document.createElement('script');
@@ -5168,7 +5171,7 @@ $(document).ready(function() {
 		$(script).load(  _initLocalizedGlobals );
 		head.appendChild(script);
 	} else {
-		AltuiDebug.debug("going with English language");
+		AltuiDebug.debug("Locale file not needed");
 		_initLocalizedGlobals();
 	}
 	VeraBox.initEngine();
