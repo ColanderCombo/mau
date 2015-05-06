@@ -1549,7 +1549,7 @@ var PageMessage = (function(window, undefined ) {
 		var Html="";
 		Html+="<div class='' id='altui-pagemessage'>";
 		Html+="	<button id='altui-toggle-messages' class='btn btn-default' type='button' data-toggle='collapse' data-target='#altui-pagemessage-panel' >";
-		Html+="	  Messages&nbsp;<span class='caret'></span>";
+		Html+=( _T("Messages") + "&nbsp;<span class='caret'></span>");
 		Html+="	</button>";
 		Html+="	<div class='panel panel-default collapse' id='altui-pagemessage-panel' >";
 		Html+="		<div class='panel-body'>";
@@ -3790,7 +3790,7 @@ var UIManager  = ( function( window, undefined ) {
 		$("#altui-device-name-filter").remove();
 		if (title) {
 			$("#altui-pagetitle").html( title );
-			$("#altui-pagetitle").before ( UIManager.breadCumb( breadcumb ) );
+			$("#altui-toggle-messages").before ( UIManager.breadCumb( breadcumb ) );
 		}
 		else
 			$("#altui-pagetitle").empty();
@@ -4233,12 +4233,12 @@ var UIManager  = ( function( window, undefined ) {
 			UIManager.deviceDrawActions(id);
 		});
 
-		$(".altui-mainpanel").off("click",".altui-device-controlpanelitem");
-		$(".altui-mainpanel").on("click",".altui-device-controlpanelitem",function(){ 
-			var id = $(this).prop('id');
-			$(".altui-mainpanel").off("click touchend");
-			UIManager.pageControlPanel(id);
-		});
+		$(".altui-mainpanel")
+			.off("click",".altui-device-controlpanelitem")
+			.on("click",".altui-device-controlpanelitem , .altui-device .altui-device-icon",function(){ 
+				var id = $(this).parents(".altui-device").prop('id');
+				UIManager.pageControlPanel(id);
+			});
 
 	},
 

@@ -143,5 +143,6 @@ Localization.init( {
   "Name":"Nom",
   "Version":"Version",
   "Update":"Mise à jour",
-  "Uninstall":"Désinstaller"
+  "Uninstall":"Désinstaller",
+  "Messages":"Messages"
 });
