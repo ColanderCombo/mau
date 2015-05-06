@@ -3634,10 +3634,10 @@ var UIManager  = ( function( window, undefined ) {
 			actions+="Actions <span class='caret'></span>";
 			actions+="</a>";
 			actions+="<ul class='dropdown-menu' role='menu'>";
-			actions+="<li><a id='altui-page-action-new' href='#'>New Page</a></li>";
-			actions+="<li><a id='altui-page-action-properties' href='#'>Page Properties</a></li>";
-			actions+="<li><a id='altui-page-action-delete' href='#'>Delete this Page</a></li>";
-			actions+="<li><a id='altui-page-action-save' href='#'>Save Pages</a></li>";
+			actions+="<li><a id='altui-page-action-new' href='#'>"+_T("New Page")+"</a></li>";
+			actions+="<li><a id='altui-page-action-properties' href='#'>"+_T("Page Properties")+"</a></li>";
+			actions+="<li><a id='altui-page-action-delete' href='#'>"+_T("Delete this Page")+"</a></li>";
+			actions+="<li><a id='altui-page-action-save' href='#'>"+_T("Save All Pages")+"</a></li>";
 			actions+="</ul>";
 			actions+="</li>";
 		}
@@ -4362,7 +4362,7 @@ var UIManager  = ( function( window, undefined ) {
 			var html = "";
 			html +="<div class='btn-group'>";
 			html +="  <button id='{0}' type='button' class='btn btn-default dropdown-toggle altui-plugin-files' data-toggle='dropdown' aria-expanded='false'>".format(plugin.id);
-			html +="    Files <span class='caret'></span>";
+			html +=  (_T("Files")+" <span class='caret'></span>");
 			html +="  </button>";
 			html +="  <ul class='dropdown-menu' role='menu'>";
 			if (plugin.Files)
@@ -4438,7 +4438,7 @@ var UIManager  = ( function( window, undefined ) {
 			});
 		};	
 		
-		$(".altui-mainpanel").append($("<table id='table' class='table table-condensed'><thead><tr><th></th><th>Name</th><th>Version</th><th>Files</th><th>Actions</th><th>Update</th><th>Uninstall</th></tr></thead><tbody></tbody></table>"));
+		$(".altui-mainpanel").append($("<table id='table' class='table table-condensed'><thead><tr><th></th><th>"+_T("Name")+"</th><th>"+_T("Version")+"</th><th>"+_T("Files")+"</th><th>Actions</th><th>"+_T("Update")+"</th><th>"+_T("Uninstall")+"</th></tr></thead><tbody></tbody></table>"));
 		VeraBox.getPlugins( drawPlugin , endDrawPlugin);
 	},
 

@@ -134,6 +134,14 @@ Localization.init( {
 	"Device {0} created successfully":"xxx {0} xxx",
 	"Filter":"xxx",
 	"Category":"xxx",
-    "Could not create Room":"Could not create Room"
-
-});
+    "Could not create Room":"Could not create Room",
+	"New Page":"New Page",
+	"Page Properties":"Page Properties",
+	"Delete this Page":"Delete this Page",
+	"Save All Pages":"Save All Pages",
+	"Files":"Fichiers",
+	"Name":"Name",
+	"Version":"Version",
+	"Update":"Update",
+	"Uninstall":"Uninstall"
+	});

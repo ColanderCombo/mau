@@ -134,5 +134,14 @@ Localization.init( {
   "Device {0} created successfully":"Périphérique {0} créé",
   "Filter":"Filtre",
   "Category":"Catégorie",
-  "Could not create Room":"Echec de création de la pièce"
+  "Could not create Room":"Echec de création de la pièce",
+  "New Page":"Nouvelle Page",
+  "Page Properties":"Propriétés",
+  "Delete this Page":"Détruite cette page",
+  "Save All Pages":"Sauver les pages",
+  "Files":"Fichiers",
+  "Name":"Nom",
+  "Version":"Version",
+  "Update":"Mise à jour",
+  "Uninstall":"Désinstaller"
 });
