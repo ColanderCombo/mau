@@ -132,6 +132,16 @@ function isInteger(data) {
     return (data === parseInt(data, 10));
 };
 
+var getCSS = function (prop, fromClass) {
+    var $inspector = $("<div>").css('display', 'none').addClass(fromClass);
+    $("body").append($inspector); // add to DOM, in order to read the CSS property
+    try {
+        return $inspector.css(prop);
+    } finally {
+        $inspector.remove(); // and remove from DOM
+    }
+};
+
 var AltuiDebug = ( function (undefined) {
 	var g_debug = false;
 	

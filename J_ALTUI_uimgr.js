@@ -4878,15 +4878,15 @@ var UIManager  = ( function( window, undefined ) {
 					}							\
 					.d3chart .cellule {			\
 					}							\
-					.d3chart text.active {		\
-					  fill: red;				\
-					}							\
 					.d3chart line {				\
 						stroke-width: 1px;		\
 						stroke: #fff;			\
 					}							\
 					.d3chart text {				\
-						fill: white;			\
+						fill: "+$("#altui-pagetitle").css("color")+";			\
+					}							\
+					.d3chart text.active {		\
+						fill: "+getCSS('color','text-danger')+";				\
 					}							\
 				</style>"
 			);
@@ -4909,11 +4909,12 @@ var UIManager  = ( function( window, undefined ) {
 				return result;
 			};
 			
+			$(".d3chart").html("");
 			var data = $.grep( VeraBox.getDevicesSync() , function(d) {return d.id_parent==1;} );
 			var n = data.length;
 			
 			var margin = {top: 150, right: 0, bottom: 10, left: 150},
-				width = $("#altui-pagetitle").innerWidth() - margin.left - margin.right,
+				width = $(".altui-mainpanel").innerWidth() - margin.left - margin.right-30,
 				height = width;
 
 			var x = d3.scale.ordinal()
@@ -5008,6 +5009,9 @@ var UIManager  = ( function( window, undefined ) {
 		}
 		else 
 			_drawchart();
+		
+		$( window ).off( "resize", _drawchart )
+			.on( "resize", _drawchart );
 	},
 	
 	drawHouseMode: function ()
