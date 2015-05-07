@@ -3749,6 +3749,7 @@ var UIManager  = ( function( window, undefined ) {
 			{ id:13, title:_T('LuaStart'), onclick:'UIManager.pageLuaStart()', parent:0 },
 			{ id:14, title:_T('Optimize'), onclick:'UIManager.pageOptimize()', parent:0 },
 			{ id:15, title:_T('Editor'), onclick:'UIManager.pageEditor()', parent:8 },
+			{ id:16, title:_T('ZWave'), onclick:'UIManager.pageZwave()', parent:0 },
 		];
 		
 		function _parentsOf(child) {
@@ -4779,6 +4780,7 @@ var UIManager  = ( function( window, undefined ) {
 			["jQueryUI","http://jqueryui.com/","jQuery User Interface widgets ( like slider )"],
 			["Touch Punch","http://touchpunch.furf.com/","jQuery UI fix for touch screen devices"],
 			["Bootstrap Validator","https://github.com/1000hz/bootstrap-validator","Form validator in Bootstrap 3 style"],
+			["D3js","http://d3js.org/","D3 Data Driven Documents"],
 			["amg0","http://forum.micasaverde.com/","reachable as amg0 on this forum "]
 		];
 		var html = "<dl>";
@@ -4860,6 +4862,143 @@ var UIManager  = ( function( window, undefined ) {
 		});
 	},
 
+	pageZwave: function() 
+	{
+		UIManager.clearPage(_T('ZWave'),_T("ZWave Network"));
+		$(".altui-mainpanel")
+			.append("<svg class='d3chart'></svg>")
+			.append(
+				"<style>				\
+					.d3chart {			\
+						font: 12px sans-serif;	\
+					}							\
+					.d3chart .ligne {			\
+					}							\
+					.d3chart .colonne {			\
+					}							\
+					.d3chart .cellule {			\
+					}							\
+					.d3chart line {				\
+						stroke-width: 1px;		\
+						stroke: #fff;			\
+					}							\
+					.d3chart text {				\
+						fill: white;			\
+					}							\
+				</style>"
+			);
+
+		function _drawchart()
+		{
+			function _nodename(d)		{ return "{0}, #{1}".format(d.name, d.id); }
+			function _NeighborsOf(device)	{ 
+				var result = [];
+				$.each( device.states, function(i,s) {
+					if (s.variable=="Neighbors") {
+						result = s.value.split(',');
+						$.each(result, function(i,r) {
+							var device = VeraBox.getDeviceByAltID( 1, r );	// 1=zWave controller, r=altid
+							result[i] = (device) ? device.id : null;
+						});
+						return false;
+					}
+				})
+				return result;
+			};
+			
+			var data = $.grep( VeraBox.getDevicesSync() , function(d) {return d.id_parent==1;} );
+			var n = data.length;
+			
+			var margin = {top: 150, right: 0, bottom: 10, left: 150},
+				width = $("#altui-pagetitle").innerWidth() - margin.left - margin.right,
+				height = width;
+
+			var x = d3.scale.ordinal()
+				.domain($.map( data, function(d) { return d.id; }))
+				.rangeBands([0, width]);
+
+			var y = d3.scale.ordinal()
+				.domain($.map( data, function(d) { return d.id; }))
+				.rangeBands([0, height]);
+
+			var chart = d3.select(".d3chart")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+				// .style("margin-left", -margin.left + "px")
+				.append("g")
+					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+					
+			chart.append("line")
+					.attr({
+						x1: width,
+						x2: width,
+						y1: 0,
+						y2: height});
+						
+			chart.append("line")
+					.attr({
+						x1: 0,
+						x2: width,
+						y1: height,
+						y2: height});
+									
+			var row = chart.selectAll(".ligne").data(data);
+			row.enter()
+				.append("g")
+					.attr("class","ligne")
+					.attr("transform",function(d,i) { return "translate(0,"+y(d.id)+")"; } )
+				.append("text")
+				  .attr("x", -6)
+				  .attr("y", x.rangeBand() / 2)
+				  .attr("dy", ".32em")
+				  .attr("text-anchor", "end")
+				  .text(function(d) { return _nodename(d); });
+					
+			row.append("line")
+				.attr("x2", width);
+			row.exit().remove();
+				
+			var cell = row.selectAll(".cellule")
+				.data( function(d)  { return _NeighborsOf(d); } );
+				
+			cell.enter().append("rect")
+					.attr("class","cellule")
+					.attr("x", function(d) { return x(d); } )
+					.attr("width",x.rangeBand())
+					.attr("height",y.rangeBand())
+					.style("fill","red");
+					
+			cell.exit().remove();
+			
+			var col = chart.selectAll(".colonne").data(data);
+			col.enter().append("g")
+				.attr("class","colonne")
+				.attr("transform",function(d,i) { return "translate("+x(d.id)+",0) rotate(-90)"; } )
+				.append("text")
+				  .attr("x", 6)
+				  .attr("y", x.rangeBand() / 2)
+				  .attr("dy", ".32em")
+				  .attr("text-anchor", "start")
+				  .text(function(d) { return _nodename(d); });
+
+			col.append("line")
+				.attr("x1", -width);
+				
+			col.exit().remove();
+		};
+
+		//D3 scripts if needed
+		scriptname = "http://d3js.org/d3.v3.min.js";
+		var len = $('script[src="'+scriptname+'"]').length;
+		if (len==0) {				// not loaded yet
+			UIManager.loadScript(scriptname,function() {
+				_drawchart();
+			});
+		}
+		else 
+			_drawchart();
+	},
+	
 	drawHouseMode: function ()
 	{	
 		// http://192.168.1.5/cmh/skins/default/img/other/spritemap_640_480_preset_modes_active.png
@@ -5120,6 +5259,8 @@ $(document).ready(function() {
 		body+="			<li><a id='altui-luastart' href='#' >"+_T("Lua Startup Code")+"</a></li>";
 		body+="			<li><a id='altui-luatest' href='#' >"+_T("Lua Test Code")+"</a></li>";
 		body+="			<li class='divider'></li>";
+		body+="			<li class='dropdown-header'>Graphics</li>";
+		body+="			<li><a id='altui-zwavenetwork' href='#' >"+_T("zWave Network")+"</a></li>";
 		body+="			<li class='dropdown-header'>Admin</li>";
 		body+="			<li><a id='altui-optimize' href='#'>"+_T("Optimizations")+"</a></li>";
 		body+="			<li><a id='altui-localize' href='#'>"+_T("Localization")+"</a></li>";
@@ -5449,6 +5590,7 @@ $(document).ready(function() {
 		.on( "click", "#altui-credits", UIManager.pageCredits )
 		.on( "click", "#altui-luastart", UIManager.pageLuaStart )
 		.on( "click", "#altui-luatest", UIManager.pageLuaTest )
+		.on( "click", "#altui-zwavenetwork", UIManager.pageZwave )		
 		.on( "click", "#altui-optimize", UIManager.pageOptimize )
 		.on( "click", "#altui-localize", Localization.dump )
 		.on( "click", "#altui-debug-btn", function() {

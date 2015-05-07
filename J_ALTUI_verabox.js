@@ -681,6 +681,17 @@ var VeraBox = ( function( window, undefined ) {
 		return idx;
 	};
 
+	function _getDeviceByAltID( parentdevid , altid ) {
+		var idx=-1;
+		$.each(_user_data.devices, function(i,device) {
+			if ( (device.id_parent==parentdevid) && (device.altid==altid) ) {
+				idx = i;
+				return false;
+			}
+		});
+		return (idx == -1) ? null : _user_data.devices[idx];
+	};
+	
 	function _getDeviceByID( devid ) {
 		var idx = _findDeviceIdxByID(devid);
 		if (idx!=-1) {
@@ -1362,6 +1373,7 @@ var VeraBox = ( function( window, undefined ) {
     getRoomsSync	: function() { return _rooms; },
 	getDevices		: _getDevices,
     getDevicesSync	: function() { return _devices; },
+	getDeviceByAltID : _getDeviceByAltID,
 	getDeviceByID 	: _getDeviceByID, 
 	getDeviceBatteryLevel : _deviceBatteryLevel,
 	getDeviceStaticUI : _getDeviceStaticUI,
