@@ -4878,6 +4878,9 @@ var UIManager  = ( function( window, undefined ) {
 					}							\
 					.d3chart .cellule {			\
 					}							\
+					.d3chart text.active {		\
+					  fill: red;				\
+					}							\
 					.d3chart line {				\
 						stroke-width: 1px;		\
 						stroke: #fff;			\
@@ -4966,8 +4969,16 @@ var UIManager  = ( function( window, undefined ) {
 					.attr("x", function(d) { return x(d); } )
 					.attr("width",x.rangeBand())
 					.attr("height",y.rangeBand())
-					.style("fill","red");
-					
+					.style("fill","red")
+					.on("mouseover", function(p) {
+						var lignedatum = d3.select(this.parentNode).datum();
+						d3.selectAll(".ligne text").classed("active", function(d, i) { return d.id == lignedatum.id; });
+						d3.selectAll(".colonne text").classed("active", function(d, i) { return d.id == p; });						
+					})
+					.on("mouseout", function(p) {
+						d3.selectAll("text").classed("active", false);						
+					});
+		
 			cell.exit().remove();
 			
 			var col = chart.selectAll(".colonne").data(data);
