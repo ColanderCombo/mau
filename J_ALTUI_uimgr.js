@@ -4864,7 +4864,8 @@ var UIManager  = ( function( window, undefined ) {
 
 	pageZwave: function() 
 	{
-		UIManager.clearPage(_T('ZWave'),_T("ZWave Network"));
+		UIManager.clearPage(_T('ZWave'),_T("zWave Network"));
+		$("div#dialogs").append(deviceModalTemplate.format( '', '', 0 ));
 		$(".altui-mainpanel")
 			.append("<svg class='d3chart'></svg>")
 			.append(
@@ -4956,7 +4957,10 @@ var UIManager  = ( function( window, undefined ) {
 				  .attr("y", x.rangeBand() / 2)
 				  .attr("dy", ".32em")
 				  .attr("text-anchor", "end")
-				  .text(function(d) { return _nodename(d); });
+				  .text(function(d) { return _nodename(d); })
+				  .on('click',function(d,i) {
+					  UIManager.deviceDrawVariables(d.id);
+				  });
 					
 			row.append("line")
 				.attr("x2", width);
@@ -4978,6 +4982,10 @@ var UIManager  = ( function( window, undefined ) {
 					})
 					.on("mouseout", function(p) {
 						d3.selectAll("text").classed("active", false);						
+					})
+					.on('click',function(d,i) {
+						var lignedatum = d3.select(this.parentNode).datum();
+						UIManager.deviceDrawVariables(lignedatum.id);
 					});
 		
 			cell.exit().remove();
@@ -5274,8 +5282,9 @@ $(document).ready(function() {
 		body+="			<li><a id='altui-luastart' href='#' >"+_T("Lua Startup Code")+"</a></li>";
 		body+="			<li><a id='altui-luatest' href='#' >"+_T("Lua Test Code")+"</a></li>";
 		body+="			<li class='divider'></li>";
-		body+="			<li class='dropdown-header'>Graphics</li>";
+		body+="			<li class='dropdown-header'>Graphic</li>";
 		body+="			<li><a id='altui-zwavenetwork' href='#' >"+_T("zWave Network")+"</a></li>";
+		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>Admin</li>";
 		body+="			<li><a id='altui-optimize' href='#'>"+_T("Optimizations")+"</a></li>";
 		body+="			<li><a id='altui-localize' href='#'>"+_T("Localization")+"</a></li>";
