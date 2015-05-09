@@ -700,6 +700,10 @@ local function getDefaultConfig()
 		["StyleFunc"]="ALTUI_PluginDisplays.getStyle",
 		-- ["ControlPanelFunc"]="ALTUI_PluginDisplays.drawBinLightControlPanel",
 	}
+	tbl["urn:schemas-upnp-org:device:RGBController:1"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawBinaryLight",
+	}
 	tbl["urn:antor-fr:device:SamsungTVRemote:1"]= {
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawBinaryLight",

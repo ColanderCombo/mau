@@ -1669,7 +1669,10 @@ var FileDB = ( function (window, undefined) {
 } )( window );
 
 
+// ======================================================================
 // Global for UI5 UI7 javascript compatibility
+// ======================================================================
+
 var data_request_url = UPnPHelper.getUrlHead()+'?';
 var command_url = UPnPHelper.getUrlHead().replace('/data_request','');
 function get_device_state(deviceId, serviceId, variable, dynamic) {
@@ -1830,3 +1833,101 @@ var Ajax = (function(window,undefined) {
 	};
 })();
 
+// extract from constant.js
+var DEVICETYPE_HOME_AUTO_GATEWAY = "urn:schemas-micasaverde-com:device:HomeAutomationGateway:1";
+var DEVICETYPE_BINARY_LIGHT = "urn:schemas-upnp-org:device:BinaryLight:1";
+var DEVICETYPE_DIMMABLE_LIGHT = "urn:schemas-upnp-org:device:DimmableLight:1";
+var DEVICETYPE_THERMOSTAT = "urn:schemas-upnp-org:device:HVAC_ZoneThermostat:1";
+var DEVICETYPE_HEATER = "urn:schemas-upnp-org:device:Heater:1";
+var DEVICETYPE_HUMIDITY_SENSOR = "urn:schemas-micasaverde-com:device:HumiditySensor:1";
+var DEVICETYPE_MULTI_IO = "urn:schemas-micasaverde-com:device:MultiIO:1";
+var DEVICETYPE_DOOR_LOCK = "urn:schemas-micasaverde-com:device:DoorLock:1";
+var DEVICETYPE_DOOR_SENSOR = "urn:schemas-micasaverde-com:device:DoorSensor:1";
+var DEVICETYPE_ZWAVE_NETWORK = "urn:schemas-micasaverde-com:device:ZWaveNetwork:1";
+var DEVICETYPE_ZIGBEE_NETWORK = "urn:schemas-micasaverde-com:device:ZigbeeNetwork:1";
+var DEVICETYPE_INSTEON_NETWORK = "urn:schemas-micasaverde-com:device:InsteonNetwork:1";
+var DEVICETYPE_USB_UIRT = "urn:schemas-micasaverde-com:device:USBUIRT:1";
+var DEVICETYPE_TEMPERATURE_SENSOR = "urn:schemas-micasaverde-com:device:TemperatureSensor:1";
+var DEVICETYPE_POWER_METER = "urn:schemas-micasaverde-com:device:PowerMeter:1";
+var DEVICETYPE_MOTION_SENSOR = "urn:schemas-micasaverde-com:device:MotionSensor:1";
+var DEVICETYPE_SMOKE_SENSOR = "urn:schemas-micasaverde-com:device:SmokeSensor:1";
+var DEVICETYPE_GENERIC_SENSOR = "urn:schemas-micasaverde-com:device:GenericSensor:1";
+var DEVICETYPE_LIGHT_SENSOR = "urn:schemas-micasaverde-com:device:LightSensor:1";
+var DEVICETYPE_IR_TRANSMITTER = "urn:schemas-micasaverde-com:device:IrTransmitter:1";
+var DEVICETYPE_WINDOW_COVERING = "urn:schemas-micasaverde-com:device:WindowCovering:1";
+var DEVICETYPE_GENERIC_IO = "urn:schemas-micasaverde-com:device:GenericIO:1";
+var DEVICETYPE_REMOTE_CONTROL = "urn:schemas-micasaverde-com:device:RemoteControl:1";
+var DEVICETYPE_COMBO_DEVICE = "urn:schemas-micasaverde-com:device:ComboDevice:1";
+var DEVICETYPE_CAMERA = "urn:schemas-upnp-org:device:DigitalSecurityCamera:1";
+var DEVICETYPE_SERIALPORT = "urn:micasaverde-org:device:SerialPort:1";
+var DEVICETYPE_SERIALPORTROOT = "urn:micasaverde-org:device:SerialPortRoot:1";
+var DEVICETYPE_SCENE_CONTROLLER = "urn:schemas-micasaverde-com:device:SceneController:1";
+var DEVICETYPE_SCENE_CONTR_LED = "urn:schemas-micasaverde-com:device:SceneControllerLED:1";
+var DEVICETYPE_ENERGY_CALCULATOR = "urn:schemas-micasaverde-com:device:EnergyCalculator:1";
+var DEVICETYPE_TEMP_LEAK_SENSOR = "urn:schemas-micasaverde-com:device:TemperatureLeakSensor:1";
+var DEVICETYPE_TEMP_LEAK_SENSOR_2 = "urn:schemas-micasaverde-com:device:TempLeakSensor:1";
+var DEVICETYPE_RELAY = "urn:schemas-micasaverde-com:device:Relay:1";
+var DEVICETYPE_SIREN = "urn:schemas-micasaverde-com:device:Siren:1";
+var DEVICETYPE_ALARMPANEL = "urn:schemas-micasaverde-com:device:AlarmPanel:1";
+var DEVICETYPE_ALARMPARTITION1 = "urn:schemas-micasaverde-com:device:AlarmPartition:1";
+var DEVICETYPE_ALARMPARTITION2 = "urn:schemas-micasaverde-com:device:AlarmPartition:2";
+var DEVICETYPE_SCENE = "urn:schemas-micasaverde-com:device:Scene:1";
+var DEVICETYPE_IR = "urn:schemas-micasaverde-com:device:IrDevice:1";
+var DEVICETYPE_TV = "urn:schemas-micasaverde-com:device:tv:1";
+var DEVICETYPE_CABLE = "urn:schemas-micasaverde-com:device:cable:1";
+var DEVICETYPE_SATELLITE = "urn:schemas-micasaverde-com:device:satellite:1";
+var DEVICETYPE_VIDEO_ACCESSORY = "urn:schemas-micasaverde-com:device:videoaccessory:1";
+var DEVICETYPE_VCR_DVR = "urn:schemas-micasaverde-com:device:vcrdvd:1";
+var DEVICETYPE_DVD_BLURAY = "urn:schemas-micasaverde-com:device:dvdbluray:1";
+var DEVICETYPE_RECEIVER = "urn:schemas-micasaverde-com:device:receiver:1";
+var DEVICETYPE_AMP = "urn:schemas-micasaverde-com:device:amp:1";
+var DEVICETYPE_CD = "urn:schemas-micasaverde-com:device:cd:1";
+var DEVICETYPE_MISC_HOME_CONTROL = "urn:schemas-micasaverde-com:device:mischomecontrol:1";
+var DEVICETYPE_AV_MISC = "urn:schemas-micasaverde-com:device:avmisc:1";
+var DEVICETYPE_VIRTUAL_DEVICE = "urn:schemas-micasaverde-com:device:VirtualDevice:1";
+var DEVICETYPE_FLOOD_SENSOR = "urn:schemas-micasaverde-com:device:FloodSensor:1";
+
+var api = {
+	version: "UI5",
+	getListOfDevices: function () {
+		return jsonp.ud.devices;
+	},
+	setCpanelContent: function (html) {
+		set_panel_html(html);
+	},
+	getDeviceStateVariable: function (deviceId, service, variable, options) {
+		return get_device_state(deviceId, service, variable, (options.dynamic === true ? 1: 0));
+	},
+	setDeviceStateVariable: function (deviceId, service, variable, value, options) {
+		set_device_state(deviceId, service, variable, value, (options.dynamic === true ? 1: 0));
+	},
+	setDeviceStateVariablePersistent: function (deviceId, service, variable, value, options) {
+		set_device_state(deviceId, service, variable, value, 0);
+	},
+	performActionOnDevice: function (deviceId, service, action, options) {
+		var query = "id=lu_action&output_format=json&DeviceNum=" + deviceId + "&serviceId=" + service + "&action=" + action;
+		$.each(options.actionArguments, function (key, value) {
+			query += "&" + key + "=" + value;
+		});
+		
+		$.ajax({
+			url: data_request_url + query,
+			success: function (data, textStatus, jqXHR) {
+				if (typeof(options.onSuccess) == 'function') {
+					options.onSuccess({
+						responseText: jqXHR.responseText,
+						status: jqXHR.status
+					});
+				}
+			},
+			error: function (jqXHR, textStatus, errorThrown) {
+				if (typeof(options.onFailure) != 'undefined') {
+					options.onFailure({
+						responseText: jqXHR.responseText,
+						status: jqXHR.status
+					});
+				}
+			}
+		});
+	}
+};

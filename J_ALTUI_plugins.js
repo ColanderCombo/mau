@@ -27,7 +27,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-motion {font-size: 22px;}";
 		style += ".altui-weather-text {font-size: 13px;}";
 		style += ".altui-windowcover {}";
-		style += ".altui-dimmable-slider { margin-left: 50px; }";	
+		style += ".altui-dimmable-slider { margin-left: 60px; }";	
 		style += ".altui-infoviewer-log,.altui-window-btn { margin-top: 10px; }";	
 		style += "div.altui-windowcover button.btn-sm { width: 4em; }";
 		return style;
@@ -89,8 +89,9 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	function _toggleButton(devid, htmlselector, service, variable, cbfunc) {
 		//'#altui-onoffbtn-'+devid
 		var status = VeraBox.getStatus( devid, service, variable );
-		if (status!=null)
+		if ($.isNumeric(status))
 		{
+			status = parseInt( status );
 			if (status>0)		// special case of dimmer
 				status=1;
 			$(htmlselector).removeClass("on").addClass("spinner");
@@ -194,7 +195,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 
 		var html = "";
 		var onebody = $(".altui-device-body");
-		var sliderwidth = (onebody.length>=1) ? onebody.first().width()-50-70  : 95;
+		var sliderwidth = (onebody.length>=1) ? onebody.first().width()-65-70  : 95;
 		var bodywidth=$(".altui-device-body").first().width();
 		
 		// load level

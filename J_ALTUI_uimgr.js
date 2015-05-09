@@ -1831,7 +1831,11 @@ var UIManager  = ( function( window, undefined ) {
 		return context[func].call(context, id,device, extraparam);
 	};
 
-	function _fixScriptPostLoad( name, code ) {
+	// func is the function to call, if it contains module.funcname it is a UI7 style. otherwise it is assumed UI5 style
+	// UI7 style already uses jquery normally
+	function _fixScriptPostLoad( name, code, ui7style ) {
+		if (!ui7style) 
+		{
 		// if (name=="J_WakeUpLight.js") {
 			// https://regex101.com/
 			var re = /\$\((.*?)\).value/g; 
@@ -1854,10 +1858,11 @@ var UIManager  = ( function( window, undefined ) {
 			subst = '($(\'#\'+$1).length>0)'; 
 			code = code.replace(re, subst);
 		// } 			
-		if (name=="J_ProgramLogicC.js") {
-			re = /!\$\((selectedEventObj)\)/g; 
-			subst = '($("#"+selectedEventObj).length==0)'; 
-			code = code.replace(re, subst);
+			if (name=="J_ProgramLogicC.js") {
+				re = /!\$\((selectedEventObj)\)/g; 
+				subst = '($("#"+selectedEventObj).length==0)'; 
+				code = code.replace(re, subst);
+			}
 		}
 		return code;
 	};
@@ -2551,8 +2556,9 @@ var UIManager  = ( function( window, undefined ) {
 					var value2 = VeraBox.getStatus( devid, control.states[1].Display.Service, control.states[1].Display.Variable );
 					var armedValue1 = control.states[0].Display.Value;
 					var armedValue2 = control.states[1].Display.Value;
-					var csvlabel = "{0},{1}".format( control.states[1].Label.text,control.states[0].Label.text);
-					var onoff = (value1==armedValue1);
+					var bInverted = (armedValue2>armedValue1);
+					var csvlabel = (bInverted ? "{1},{0}" : "{0},{1}").format( control.states[1].Label.text,control.states[0].Label.text);
+					var onoff = (bInverted ? (value2==armedValue2): (value1==armedValue1) );
 					if (device.device_type == "urn:schemas-upnp-org:device:DimmableLight:1")		// special case ! VERA is not following the JSON file here
 						onoff = parseInt(VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status' )); 
 					var uniqid = devid+"-"+idx;
@@ -2571,9 +2577,10 @@ var UIManager  = ( function( window, undefined ) {
 					}
 					$("div#altui-device-msb-"+uniqid).off('click touchend');
 					$("div#altui-device-msb-"+uniqid).on('click touchend',function() {
-						ALTUI_PluginDisplays.toggleButton(devid, "div#altui-device-msb-"+uniqid, control.states[0].Display.Service, control.states[0].Display.Variable, function(id,newval) {
+						var state = (bInverted) ? control.states[1] : control.states[0];
+						ALTUI_PluginDisplays.toggleButton(devid, "div#altui-device-msb-"+uniqid, state.Display.Service, state.Display.Variable, function(id,newval) {
 							var parameters = {};
-							var whichone = 1-newval;
+							var whichone = (bInverted) ? newval : 1-newval;
 							parameters[ control.states[whichone].Command.Parameters[0].Name ] = control.states[whichone].Command.Parameters[0].Value; 
 							UPnPHelper.UPnPAction( devid, 
 								control.states[whichone].Command.Service, control.states[whichone].Command.Action, 
@@ -2966,7 +2973,7 @@ var UIManager  = ( function( window, undefined ) {
 			if (Object.keys(scripts).length==0)
 				_defereddisplay(true);
 			else
-				$.each( scripts , function (scriptname,functions){
+				$.each( scripts , function (scriptname,func){
 				var len = $('script[data-src="'+scriptname+'"]').length;
 				if (len==0) {				// not loaded yet
 					_createScript( scriptname );
@@ -2974,7 +2981,14 @@ var UIManager  = ( function( window, undefined ) {
 					FileDB.getFileContent( scriptname, function(data) {
 						_toLoad --;
 						// vague tentative to fix the code of loaded script !!!
-						data = _fixScriptPostLoad( scriptname , data );
+						var ui7style = false;
+						$.each(func, function(i,f) {
+							if (f.indexOf('.')!=-1) {
+								ui7style=true;
+								return false;
+							}
+						});
+						data = _fixScriptPostLoad( scriptname , data, ui7style );
 						var code = "//@ sourceURL="+scriptname+"\n"+data;
 						$('script[data-src="'+scriptname+'"]').text(code);
 						_defereddisplay(true);
@@ -4958,9 +4972,15 @@ var UIManager  = ( function( window, undefined ) {
 				  .attr("dy", ".32em")
 				  .attr("text-anchor", "end")
 				  .text(function(d) { return _nodename(d); })
-				  .on('click',function(d,i) {
-					  UIManager.deviceDrawVariables(d.id);
-				  });
+					.on("mouseover", function(p) {
+						d3.select(this).classed("active", true);						
+					})
+					.on("mouseout", function(p) {
+						d3.select(this).classed("active", false);						
+					})
+					.on('click',function(d,i) {
+						UIManager.deviceDrawVariables(d.id);
+					});
 					
 			row.append("line")
 				.attr("x2", width);
