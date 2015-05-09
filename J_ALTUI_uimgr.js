@@ -3764,6 +3764,7 @@ var UIManager  = ( function( window, undefined ) {
 			{ id:14, title:_T('Optimize'), onclick:'UIManager.pageOptimize()', parent:0 },
 			{ id:15, title:_T('Editor'), onclick:'UIManager.pageEditor()', parent:8 },
 			{ id:16, title:_T('ZWave'), onclick:'UIManager.pageZwave()', parent:0 },
+			{ id:17, title:_T('Localize'), onclick:'UIManager.pageLocalization()', parent:0 },
 		];
 		
 		function _parentsOf(child) {
@@ -5080,6 +5081,11 @@ var UIManager  = ( function( window, undefined ) {
 
 	},
 	
+	pageLocalization: function() {
+		UIManager.clearPage(_T('Localize'),_T("Localizations"));
+		Localization.dump();
+	},
+	
 	pageOptimize: function() {
 		UIManager.clearPage(_T('Optimize'),_T("Optimizations"));
 
@@ -5636,7 +5642,7 @@ $(document).ready(function() {
 		.on( "click", "#altui-luatest", UIManager.pageLuaTest )
 		.on( "click", "#altui-zwavenetwork", UIManager.pageZwave )		
 		.on( "click", "#altui-optimize", UIManager.pageOptimize )
-		.on( "click", "#altui-localize", Localization.dump )
+		.on( "click", "#altui-localize", UIManager.pageLocalization  )
 		.on( "click", "#altui-debug-btn", function() {
 			$(".altui-debug-div").toggle();
 			$("#altui-debug-btn span.caret").toggleClass( "caret-reversed" );
