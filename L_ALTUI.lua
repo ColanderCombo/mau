@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.47"
+local version = "v0.48"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 -- local updateFrequencySec = 120	-- refreshes every x seconds
 -- local socket = require("socket")
@@ -727,6 +727,10 @@ local function getDefaultConfig()
 	tbl["urn:schemas-micasaverde-com:device:LightSensor:1"]= {
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawLight",
+	}
+	tbl["urn:schemas-cd-jackson-com:device:DataMine:1"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawDataMine",
 	}
 	tbl["urn:schemas-a-lurker-com:device:InfoViewer:1"]= {
 		["ScriptFile"]="J_ALTUI_plugins.js",

@@ -28,7 +28,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-weather-text {font-size: 13px;}";
 		style += ".altui-windowcover {}";
 		style += ".altui-dimmable-slider { margin-left: 60px; }";	
-		style += ".altui-infoviewer-log,.altui-window-btn { margin-top: 10px; }";	
+		style += ".altui-infoviewer-log,.altui-window-btn,.altui-datamine-open { margin-top: 10px; }";	
 		style += "div.altui-windowcover button.btn-sm { width: 4em; }";
 		return style;
 	};
@@ -341,6 +341,16 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var newsrc = "http://icons.wxug.com/i/c/i/"+conditionGroup+".gif";
 		return "<img class='altui-device-icon pull-left img-rounded' src='"+newsrc+"' alt='"+conditionGroup+"' onerror='UIManager.onDeviceIconError("+device.id+")' ></img>";
 	};
+
+	function _drawDataMine(devid, device) {
+		var html ="";
+		var url = window.location.protocol+'//'+window.location.hostname+"/dm/index.html";
+		html+="<button type='button' class='pull-right altui-datamine-open btn btn-default btn-sm '>"+_T("Open")+"</button>" ;
+		html += "<script type='text/javascript'>";
+		html += " $('div.altui-device#{0} button.altui-datamine-open').on('click', function() { window.open('{1}','_blank'); } );".format(devid,url);
+		html += "</script>";
+		return html;
+	};	
 	
 	function _drawInfoViewer(devid, device) {
 		var html ="";
@@ -391,6 +401,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawWeather     : _drawWeather,
 	drawWeatherIcon : _drawWeatherIcon,
 	drawInfoViewer  : _drawInfoViewer,
+	drawDataMine 	: _drawDataMine,
 	toggleButton    : _toggleButton,
 	toggleOnOffButton : function (devid,htmlid) {
 		_toggleButton(devid, htmlid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status', function(id,newval) {

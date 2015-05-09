@@ -3844,7 +3844,11 @@ var UIManager  = ( function( window, undefined ) {
 		// install a click handler on button
 		if ($.isFunction( clickFunction ))  {
 			$("body").off("click",".altui-leftbutton");
-			$("body").on("click",".altui-leftbutton",clickFunction);
+			$("body").on("click",".altui-leftbutton",function() {
+				$(this).parent().children().removeClass("active")
+				$(this).addClass("active");
+				clickFunction.apply($(this), arguments);
+			});
 		}
 
 		VeraBox.getRooms( function( id, room) {
@@ -4260,10 +4264,7 @@ var UIManager  = ( function( window, undefined ) {
 
 	pageScenes: function ()
 	{
-		
 		function _onClickRoomButton(roomid) {
-			// var roomid = $(this).prop('id');
-			// filter function
 			function _sceneInThisRoom(scene) {
 				return (roomid==-1) || (scene!=null && scene.room==roomid);
 			}
@@ -4307,25 +4308,25 @@ var UIManager  = ( function( window, undefined ) {
 		
 		function _drawScenes( filterfunc )
 		{
-			UIManager.clearPage(_T('Scenes'),_T("Scenes"));
-			var toolbarHtml="";
-			toolbarHtml+=_drawRoomFilterButton();
-			toolbarHtml+="  <button type='button' class='btn btn-default' id='altui-scene-create' >";
-			toolbarHtml+=(plusGlyph + "&nbsp;" + _T("Create"));
-			toolbarHtml+="  </button>";			
-			$("#altui-pagetitle").append(toolbarHtml);
-
-			// on the left, get the rooms
-			UIManager.leftnavRooms( function() {
-				_onClickRoomButton( $(this).prop('id') ); 
-			});
-
+			$(".altui-mainpanel").empty();
 			VeraBox.getScenes( sceneDraw , filterfunc, afterSceneListDraw )
-			
-			$("#altui-scene-create").click( function() {
-				UIManager.pageSceneEdit(-1);
-			});
 		}
+		
+		UIManager.clearPage(_T('Scenes'),_T("Scenes"));
+		var toolbarHtml="";
+		toolbarHtml+=_drawRoomFilterButton();
+		toolbarHtml+="  <button type='button' class='btn btn-default' id='altui-scene-create' >";
+		toolbarHtml+=(plusGlyph + "&nbsp;" + _T("Create"));
+		toolbarHtml+="  </button>";			
+		$("#altui-pagetitle").append(toolbarHtml);
+		$("#altui-scene-create").click( function() {
+			UIManager.pageSceneEdit(-1);
+		});
+		
+		// on the left, get the rooms
+		UIManager.leftnavRooms( function() {
+			_onClickRoomButton( $(this).prop('id') ); 
+		});
 		
 		_drawScenes( null );
 	},

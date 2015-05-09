@@ -146,5 +146,7 @@ Localization.init( {
 	"Uninstall":"Uninstall",
 	"Messages":"Messages",
 	"zWave Network":"zWave Network",
-	"ZWave":"ZWave"
+	"ZWave":"ZWave",
+	"Localize":"Localize",
+	"Localizations":"Localizations"
 	});
