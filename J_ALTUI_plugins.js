@@ -278,7 +278,6 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	// return the html string inside the .panel-body of the .altui-device#id panel
 	
 	function _drawBinaryLight(devid, device) {
-		var wattTemplate = "<span class='altui-watts '>{0} <small>Watts</small></span>";
 		var html ="";
 		
 		var watts = parseInt(VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'Watts' )); 

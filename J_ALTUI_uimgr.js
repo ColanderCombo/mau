@@ -4,7 +4,7 @@
 // it under the condition that it is for private or home useage and 
 // this whole comment is reproduced in the source code file
 // Commercial utilisation is not authorized without the appropriate
-// written agreement from amg0 / alexis . mermet @ gmail . com
+// written devagreement from amg0 / alexis . mermet @ gmail . com
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -14,6 +14,7 @@ var _HouseModes = [];
 var deviceModalTemplate = "";
 var deviceActionModalTemplate = "";
 var defaultDialogModalTemplate = "";
+var wattTemplate = "<span class='altui-watts '>{0} <small>Watts</small></span>";
 // 0:modeid 1:modetext 2:modeclss for bitmap 3:preset_unselected or preset_selected
 var houseModeButtonTemplate = "  <button type='button' class='btn btn-default altui-housemode'><div>{1}</div><div id='altui-mode{0}' class='col-xs-3 {2} {3} housemode'></div></button>";							
 var leftNavButtonTemplate = "<button id='{0}' type='button' class='altui-leftbutton btn btn-default'>{1}</button>";
@@ -2157,7 +2158,15 @@ var UIManager  = ( function( window, undefined ) {
 		return title;
 	}
 	
-	function _defaultDeviceDraw( id, device ) {
+	function _defaultDeviceDraw( devid, device ) {
+		var watts = parseInt(VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'Watts' )); 
+		if (isNaN(watts)==false) 
+			html += wattTemplate.format(watts);
+		else {
+			watts = parseInt(VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'UserSuppliedWattage' )); 
+			if (isNaN(watts)==false) 
+				html += wattTemplate.format(watts);
+		}
 		return optHorGlyph ;
 	};
 
