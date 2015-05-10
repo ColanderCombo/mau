@@ -4913,16 +4913,44 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		UIManager.clearPage(_T('Energy'),_T("Energy Chart"));
 		
-		VeraBox.getEnergy( function(res) {
-			// prepare data
-			var data = res.trim().split('\n');
-			$.each(data, function(i,line) {
-					data[i] = line.split('\t');
-			});
-			
-			// async func to draw the chart
-			function _drawEnergyChart() {
-				$(".d3chart").html("");
+		// prepare and load D3 then draw the chart
+		$(".altui-mainpanel")
+			.append(
+				"<style>				\
+					.altui-energy-d3chart {			\
+						font: 12px sans-serif;	\
+					}							\
+					.altui-energy-d3chart .axis {			\
+						font: 10px sans-serif;	\
+					}							\
+					.altui-energy-d3chart .axis path, .altui-energy-d3chart .axis line {	\
+					  fill: none;				\
+					  stroke: "+getCSS('color','bg-info')+";				\
+					  shape-rendering: crispEdges;	\
+					}							\
+					.altui-energy-d3chart rect {				\
+						fill: "+getCSS('background-color','bg-info')+";			\
+					}							\
+					.altui-energy-d3chart text {				\
+						fill: "+getCSS('color','bg-info')+";		\
+					}							\
+				</style>"
+			)
+			.append("<svg class='altui-energy-d3chart'></svg>");
+
+		function _drawEnergyChart() {
+			VeraBox.getEnergy( function(res) {
+				if ($(".altui-energy-d3chart").length==0)
+					return;	// stop refreshing
+				
+				// prepare data
+				var data = res.trim().split('\n');
+				$.each(data, function(i,line) {
+						data[i] = line.split('\t');
+				});
+				
+				// async func to draw the chart
+				$(".altui-energy-d3chart").html("");
 				var margin = {top: 10, right: 50, bottom: 10, left: 150},
 					width = $(".altui-mainpanel").innerWidth() - margin.left - margin.right-30,
 					barHeight = 20,
@@ -4936,7 +4964,7 @@ var UIManager  = ( function( window, undefined ) {
 					.scale(x)
 					.orient("top");
 					
-				var chart = d3.select(".d3chart")
+				var chart = d3.select(".altui-energy-d3chart")
 					.attr("width", width + margin.left + margin.right)
 					.attr("height", height + margin.top + margin.bottom)
 					.append("g")
@@ -4948,7 +4976,7 @@ var UIManager  = ( function( window, undefined ) {
 					.call(xAxis);
 					
 				chart.append("text")
-					.attr("x",width)
+					.attr("x",-10)
 					.attr("y",barHeight / 2)
 					.attr("text-anchor","end")
 					.text("Watts");
@@ -4976,34 +5004,12 @@ var UIManager  = ( function( window, undefined ) {
 					  .attr("dy", ".35em")
 					  .attr("text-anchor","end")
 					  .text(function(d) { return "{0}, #{1}".format(d[1],d[0]); });
-			};
 
-			// prepare and load D3 then draw the chart
-			$(".altui-mainpanel")
-				.append(
-					"<style>				\
-						.d3chart {			\
-							font: 12px sans-serif;	\
-						}							\
-						.d3chart .axis {			\
-							font: 10px sans-serif;	\
-						}							\
-						.d3chart .axis path, .d3chart .axis line {	\
-						  fill: none;				\
-						  stroke: "+getCSS('color','bg-info')+";				\
-						  shape-rendering: crispEdges;	\
-						}							\
-						.d3chart rect {				\
-							fill: "+getCSS('background-color','bg-info')+";			\
-						}							\
-						.d3chart text {				\
-							fill: "+getCSS('color','bg-info')+";		\
-						}							\
-					</style>"
-				)
-				.append("<svg class='d3chart'></svg>");
-			UIManager.loadD3Script( _drawEnergyChart );
-		});
+				setTimeout( _drawEnergyChart , 5000 );
+			});
+		}
+		
+		UIManager.loadD3Script( _drawEnergyChart );
 	},
 	
 	pageZwave: function() 
