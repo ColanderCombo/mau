@@ -1822,7 +1822,20 @@ var UIManager  = ( function( window, undefined ) {
 		$(script).load( cbfunc );
 		head.appendChild(script);
 	};
-
+	
+	function _loadD3Script( drawfunc ) {
+		//D3 scripts if needed
+		scriptname = "http://d3js.org/d3.v3.min.js";
+		var len = $('script[src="'+scriptname+'"]').length;
+		if (len==0) {				// not loaded yet
+			UIManager.loadScript(scriptname,function() {
+				(drawfunc)();
+			});
+			return;
+		}
+		(drawfunc)();
+	};
+	
 	function _executeFunctionByName(functionName, context , id, device, extraparam) {
 		var namespaces = functionName.split(".");
 		var func = namespaces.pop();
@@ -3733,6 +3746,7 @@ var UIManager  = ( function( window, undefined ) {
 	initCustomPages : _initCustomPages,
 	initLocalizedGlobals : _initLocalizedGlobals,
 	loadScript 		: _loadScript,	//(scriptLocationAndName) 
+	loadD3Script	: _loadD3Script,
 	clearScripts	: _clearScripts,
 	
 	// UI helpers
@@ -4894,19 +4908,6 @@ var UIManager  = ( function( window, undefined ) {
 			}
 		});
 	},
-
-	loadD3Script( drawfunc ) {
-		//D3 scripts if needed
-		scriptname = "http://d3js.org/d3.v3.min.js";
-		var len = $('script[src="'+scriptname+'"]').length;
-		if (len==0) {				// not loaded yet
-			UIManager.loadScript(scriptname,function() {
-				(drawfunc)();
-			});
-			return;
-		}
-		(drawfunc)();
-	},
 	
 	pageEnergy: function() 
 	{
@@ -4920,7 +4921,7 @@ var UIManager  = ( function( window, undefined ) {
 			});
 			
 			// async func to draw the chart
-			function _drawchart() {
+			function _drawEnergyChart() {
 				$(".d3chart").html("");
 				var margin = {top: 10, right: 50, bottom: 10, left: 150},
 					width = $(".altui-mainpanel").innerWidth() - margin.left - margin.right-30,
@@ -5001,7 +5002,7 @@ var UIManager  = ( function( window, undefined ) {
 					</style>"
 				)
 				.append("<svg class='d3chart'></svg>");
-			UIManager.loadD3Script( _drawchart );
+			UIManager.loadD3Script( _drawEnergyChart );
 		});
 	},
 	
@@ -5035,7 +5036,7 @@ var UIManager  = ( function( window, undefined ) {
 				</style>"
 			);
 
-		function _drawchart()
+		function _drawzWavechart()
 		{
 			function _nodename(d)		{ return "{0}, #{1}".format(d.name, d.id); }
 			function _NeighborsOf(device)	{ 
@@ -5057,9 +5058,14 @@ var UIManager  = ( function( window, undefined ) {
 			var data = $.grep( VeraBox.getDevicesSync() , function(d) {return d.id_parent==1;} );
 			var n = data.length;
 			var available_height = $(window).height() - $("#altui-pagemessage").outerHeight() - $("#altui-pagetitle").outerHeight() - $("footer").outerHeight();
+			
 			var margin = {top: 150, right: 0, bottom: 10, left: 150},
 				width = $(".altui-mainpanel").innerWidth() - margin.left - margin.right-30,
 				height = Math.min(width,available_height - margin.top - margin.bottom);
+			if (width<height)
+				height = width;
+			else
+				width = height;
 
 			var x = d3.scale.ordinal()
 				.domain($.map( data, function(d) { return d.id; }))
@@ -5155,12 +5161,11 @@ var UIManager  = ( function( window, undefined ) {
 				
 			col.exit().remove();
 		};
-
-		UIManager.loadD3Script( _drawchart );
 		
-		// $( window )
-			// .off( "resize", _drawchart )
-			// .on( "resize", _drawchart );
+		UIManager.loadD3Script( _drawzWavechart );
+		$( window )
+			.off( "resize", _drawzWavechart )
+			.on( "resize", _drawzWavechart );
 	},
 	
 	drawHouseMode: function ()
@@ -5762,7 +5767,7 @@ $(document).ready(function() {
 		.on( "click", "#altui-luastart", UIManager.pageLuaStart )
 		.on( "click", "#altui-luatest", UIManager.pageLuaTest )
 		.on( "click", "#altui-zwavenetwork", UIManager.pageZwave )		
-		.on( "click", "#altui-energy", UIManager.pageEnergy )			
+		.on( "click", "#altui-energy", UIManager.pageEnergy )	
 		.on( "click", "#altui-optimize", UIManager.pageOptimize )
 		.on( "click", "#altui-localize", UIManager.pageLocalization  )
 		.on( "click", "#altui-debug-btn", function() {
