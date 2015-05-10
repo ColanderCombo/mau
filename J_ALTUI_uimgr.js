@@ -4406,7 +4406,7 @@ var UIManager  = ( function( window, undefined ) {
 		
 		UIManager.clearPage(_T('Plugins'),_T("Plugins"));
 
-		function _getFileButton(plugin) {
+		function _getFileButton(plugin,files) {
 			var html = "";
 			html +="<div class='btn-group'>";
 			html +="  <button id='{0}' type='button' class='btn btn-default dropdown-toggle altui-plugin-files' data-toggle='dropdown' aria-expanded='false'>".format(plugin.id);
@@ -4423,6 +4423,7 @@ var UIManager  = ( function( window, undefined ) {
 			return html;
 		};
 		
+		var pluginTemplate = "<tr><td>{6}</td><td>{0}</td><td>{1}.{2}</td><td>{7}</td><td>{3} {4}</td><td>{5}</td><td>{8}</td></tr>";
 		function drawPlugin(idx, plugin) {
 			var iconTemplate = "<img class='altui-plugin-icon' src='https://apps.mios.com/{0}'></img>";
 			var filebutton = _getFileButton(plugin);
@@ -4431,7 +4432,6 @@ var UIManager  = ( function( window, undefined ) {
 			var updatebutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-update',  glyphTemplate.format("retweet","Update Now",""), "Update");
 			var deletebutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-uninstall',  glyphTemplate.format("remove","Uninstall",""), "Uninstall");
 
-			var pluginTemplate = "<tr><td>{6}</td><td>{0}</td><td>{1}.{2}</td><td>{7}</td><td>{3} {4}</td><td>{5}</td><td>{8}</td></tr>";
 			var pluginTxt = pluginTemplate.format(
 				plugin.Title,
 				plugin.VersionMajor,
@@ -4448,6 +4448,29 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		
 		function endDrawPlugin() {
+			// adding manually installed plugin
+			var devices = VeraBox.getDevicesSync();
+			var manual_plugins={};
+			$.each( $.grep(jsonp.ud.devices,function(d){ return d.id_parent==0  && d.plugin==undefined}) , function(i,d) {
+				manual_plugins[d.device_file] = {
+					dtype : d.device_type,
+					files : [d.device_file, d.device_json, d.impl_file]
+				};
+			});
+			$.each(manual_plugins, function( key,value) {
+				var pluginTxt = pluginTemplate.format(
+					key,
+					"?",
+					"?",
+					"",
+					"",
+					"",
+					"",
+					"",
+					""
+					);
+				$(".altui-mainpanel tbody").append(pluginTxt);
+			});
 			$(".altui-plugin-question-sign").click(function() {
 				var url = $(this).data("url"); 
 				window.open( url, '_blank');

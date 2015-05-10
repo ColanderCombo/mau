@@ -150,5 +150,6 @@ Localization.init( {
 	"Localize":"Localize",
 	"Localizations":"Localizations",
 	"Energy Chart":"Energy Chart",
-	"Energy":"Energy"
+	"Energy":"Energy",
+	"Localization information":"Localization information"
 	});

@@ -150,5 +150,6 @@ Localization.init( {
   "Localize":"Traduire",
   "Localizations":"Traductions",
   "Energy Chart":"Graphique Energétique",
-  "Energy":"Energie"
+  "Energy":"Energie",
+  "Localization information":"Information de Traduction"
 });
