@@ -509,28 +509,27 @@ var VeraBox = ( function( window, undefined ) {
 			endfunc(arr);			
 		}
 	};
-	
-	// call VERA, gets data back, process the async response, call the setter to initialize the cache
-	// function _getData( url, func, setterfunc, filterfunc , endfunc) {
-		// var jqxhr = $.ajax( {
-			// url: url,
-			// type: "GET",
-			// dataType: "text",
-			// cache: false
-		// })
-		// .done(function(data) {
-			// var arr = JSON.parse(data);
-			// if ( $.isFunction( setterfunc ) )  {
-				// setterfunc(arr);			
-			// }
-		// })
-		// .fail(function(jqXHR, textStatus) {
-			// PageMessage.message( "VERA did not respond: " + textStatus , "danger");
-		// })
-		// .always(function() {
-		// });
-	// };
 
+	function _getEnergy(cbfunc) {
+		var url = "data_request?id=live_energy_usage";
+		var jqxhr = $.ajax( {
+			url: url,
+			type: "GET",
+			dataType: "text",
+			cache: false
+		})
+		.done(function(data) {
+			if ( $.isFunction( cbfunc ) )  {
+				(cbfunc)(data);
+			}
+		})
+		.fail(function(jqXHR, textStatus) {
+			PageMessage.message( _T("VERA did not respond")+": " + textStatus , "danger");
+		})
+		.always(function() {
+		});
+	};
+	
 	function _getWeatherSettings()
 	{
 		var target = {tempFormat: "", weatherCountry: "", weatherCity: ""};
@@ -1407,6 +1406,8 @@ var VeraBox = ( function( window, undefined ) {
 	getDeviceTypes 	: function() 	{	return _devicetypes; },
 	isRemoteAccess	: function() 	{ 	return window.location.origin.indexOf("mios.com")!=-1; /*return true;*/ },
 
+	// energy
+	getEnergy	: _getEnergy,
 	// caching user data changes and saving them at user request
 	updateChangeCache :_updateChangeCache,
 	saveChangeCaches  :_saveChangeCaches,

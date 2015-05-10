@@ -23,7 +23,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	function _getStyle() {
 		var style="";
 		style += ".altui-watts, .altui-volts, .altui-dimmable  {font-size: 16px;}";
-		style += ".altui-temperature, .altui-humidity  {font-size: 18px;}";
+		style += ".altui-temperature, .altui-humidity, .altui-light  {font-size: 18px;}";
 		style += ".altui-motion {font-size: 22px;}";
 		style += ".altui-weather-text {font-size: 13px;}";
 		style += ".altui-windowcover {}";
@@ -150,7 +150,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	function _drawLight(devid, device) {
 		var html = "";
 		var status = parseInt(VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:LightSensor1', 'CurrentLevel' )); 
-		html += ("<span class='altui-humidity' >"+status+" % </span>");
+		var unit = (status>100) ? "lux" : "% or lux";
+		html += ("<span class='altui-light' >{0} {1}</span>".format(status,unit));
 		return html;
 	};
 
@@ -279,17 +280,9 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	
 	function _drawBinaryLight(devid, device) {
 		var html ="";
-		
-		var watts = parseInt(VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'Watts' )); 
-		if (isNaN(watts)==false) 
-			html += wattTemplate.format(watts);
-		else {
-			watts = parseInt(VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'UserSuppliedWattage' )); 
-			if (isNaN(watts)==false) 
-				html += wattTemplate.format(watts);
-		}
+		html += UIManager.defaultDeviceDrawWatts(devid, device);
+
 		var status = parseInt(VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status' )); 
-		
 		// if ( ( ( device.Jobs != null ) && ( device.Jobs.length>0) ) || (device.status==1) || (device.status==5) ) {  
 		// if ( (device.status==1) || (device.status==5))  {  
 		if ( _isBusyStatus(device) )  {  

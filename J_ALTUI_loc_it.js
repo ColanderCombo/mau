@@ -148,5 +148,7 @@ Localization.init( {
 	"zWave Network":"zWave Network",
 	"ZWave":"ZWave",
 	"Localize":"Localize",
-	"Localizations":"Localizations"
+	"Localizations":"Localizations",
+	"Energy Chart":"Energy Chart",
+	"Energy":"Energy"
 	});

@@ -2158,7 +2158,8 @@ var UIManager  = ( function( window, undefined ) {
 		return title;
 	}
 	
-	function _defaultDeviceDraw( devid, device ) {
+	function _defaultDeviceDrawWatts( devid, device ) {
+		html ="";
 		var watts = parseInt(VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'Watts' )); 
 		if (isNaN(watts)==false) 
 			html += wattTemplate.format(watts);
@@ -2167,7 +2168,12 @@ var UIManager  = ( function( window, undefined ) {
 			if (isNaN(watts)==false) 
 				html += wattTemplate.format(watts);
 		}
-		return optHorGlyph ;
+		return html;
+	};
+	
+	function _defaultDeviceDraw( devid, device ) {
+		var html = _defaultDeviceDrawWatts();
+		return html+optHorGlyph ;
 	};
 
 	function _isObject(obj)
@@ -3740,6 +3746,7 @@ var UIManager  = ( function( window, undefined ) {
 	
 	//drawing functions
 	jobStatusToColor	: _jobStatusToColor,
+	defaultDeviceDrawWatts: _defaultDeviceDrawWatts,	// default HTML for Watts & UserSuppliedWattage variable
 	deviceDraw 			: _deviceDraw,					// draw the mini device on device page; can be customized by a plugin by ["DeviceDrawFunc"]
 	deviceDrawVariables : _deviceDrawVariables,			// draw the device variables
 	deviceDrawActions 	: _deviceDrawActions,			// draw the device Upnp Actions
@@ -3774,6 +3781,7 @@ var UIManager  = ( function( window, undefined ) {
 			{ id:15, title:_T('Editor'), onclick:'UIManager.pageEditor()', parent:8 },
 			{ id:16, title:_T('ZWave'), onclick:'UIManager.pageZwave()', parent:0 },
 			{ id:17, title:_T('Localize'), onclick:'UIManager.pageLocalization()', parent:0 },
+			{ id:18, title:_T('Energy'), onclick:'UIManager.pageEnergy()', parent:0 },
 		];
 		
 		function _parentsOf(child) {
@@ -4887,6 +4895,116 @@ var UIManager  = ( function( window, undefined ) {
 		});
 	},
 
+	loadD3Script( drawfunc ) {
+		//D3 scripts if needed
+		scriptname = "http://d3js.org/d3.v3.min.js";
+		var len = $('script[src="'+scriptname+'"]').length;
+		if (len==0) {				// not loaded yet
+			UIManager.loadScript(scriptname,function() {
+				(drawfunc)();
+			});
+			return;
+		}
+		(drawfunc)();
+	},
+	
+	pageEnergy: function() 
+	{
+		UIManager.clearPage(_T('Energy'),_T("Energy Chart"));
+		
+		VeraBox.getEnergy( function(res) {
+			// prepare data
+			var data = res.trim().split('\n');
+			$.each(data, function(i,line) {
+					data[i] = line.split('\t');
+			});
+			
+			// async func to draw the chart
+			function _drawchart() {
+				$(".d3chart").html("");
+				var margin = {top: 10, right: 50, bottom: 10, left: 150},
+					width = $(".altui-mainpanel").innerWidth() - margin.left - margin.right-30,
+					barHeight = 20,
+					height = (1+data.length)*(barHeight +1);
+					
+				var x = d3.scale.linear()
+						.range([0, width])
+						.domain([0, d3.max(data, function(d) { return +d[4]; })]);	// d[4] is watts and is text, must convert to int
+						
+				var xAxis = d3.svg.axis()
+					.scale(x)
+					.orient("top");
+					
+				var chart = d3.select(".d3chart")
+					.attr("width", width + margin.left + margin.right)
+					.attr("height", height + margin.top + margin.bottom)
+					.append("g")
+						.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+				
+				chart.append("g")
+					.attr("class","axis")
+					.attr("transform", "translate(0,"+(barHeight-1)+")")
+					.call(xAxis);
+					
+				chart.append("text")
+					.attr("x",width)
+					.attr("y",barHeight / 2)
+					.attr("text-anchor","end")
+					.text("Watts");
+					
+				var bar = chart.selectAll("g.device")
+					.data(data)
+					.enter()
+						.append("g")
+						.attr("class","device")
+						.attr("transform", function(d, i) { return "translate(0," + (i+1) * barHeight + ")"; });
+					
+				bar.append("rect")
+						.attr("width", function(d) { return x(d[4]); })
+						.attr("height", barHeight - 1);
+
+				bar.append("text")
+					  .attr("x", function(d) { return /*Math.max( x(d[4]) - 3, 10 );*/ x(d[4])-3 })
+					  .attr("y", barHeight / 2)
+					  .attr("dy", ".35em")
+					  .attr("text-anchor","end")
+					  .text(function(d) { return (parseInt(d[4])!=0) ? d[4] : ''; });
+				bar.append("text")
+					  .attr("x", -5)
+					  .attr("y", barHeight / 2)
+					  .attr("dy", ".35em")
+					  .attr("text-anchor","end")
+					  .text(function(d) { return "{0}, #{1}".format(d[1],d[0]); });
+			};
+
+			// prepare and load D3 then draw the chart
+			$(".altui-mainpanel")
+				.append(
+					"<style>				\
+						.d3chart {			\
+							font: 12px sans-serif;	\
+						}							\
+						.d3chart .axis {			\
+							font: 10px sans-serif;	\
+						}							\
+						.d3chart .axis path, .d3chart .axis line {	\
+						  fill: none;				\
+						  stroke: "+getCSS('color','bg-info')+";				\
+						  shape-rendering: crispEdges;	\
+						}							\
+						.d3chart rect {				\
+							fill: "+getCSS('background-color','bg-info')+";			\
+						}							\
+						.d3chart text {				\
+							fill: "+getCSS('color','bg-info')+";		\
+						}							\
+					</style>"
+				)
+				.append("<svg class='d3chart'></svg>");
+			UIManager.loadD3Script( _drawchart );
+		});
+	},
+	
 	pageZwave: function() 
 	{
 		UIManager.clearPage(_T('ZWave'),_T("zWave Network"));
@@ -4906,7 +5024,7 @@ var UIManager  = ( function( window, undefined ) {
 					}							\
 					.d3chart line {				\
 						stroke-width: 1px;		\
-						stroke: #fff;			\
+						stroke: "+$("#altui-pagetitle").css("color")+";			\
 					}							\
 					.d3chart text {				\
 						fill: "+$("#altui-pagetitle").css("color")+";			\
@@ -4938,10 +5056,10 @@ var UIManager  = ( function( window, undefined ) {
 			$(".d3chart").html("");
 			var data = $.grep( VeraBox.getDevicesSync() , function(d) {return d.id_parent==1;} );
 			var n = data.length;
-			
+			var available_height = $(window).height() - $("#altui-pagemessage").outerHeight() - $("#altui-pagetitle").outerHeight() - $("footer").outerHeight();
 			var margin = {top: 150, right: 0, bottom: 10, left: 150},
 				width = $(".altui-mainpanel").innerWidth() - margin.left - margin.right-30,
-				height = width;
+				height = Math.min(width,available_height - margin.top - margin.bottom);
 
 			var x = d3.scale.ordinal()
 				.domain($.map( data, function(d) { return d.id; }))
@@ -5038,19 +5156,11 @@ var UIManager  = ( function( window, undefined ) {
 			col.exit().remove();
 		};
 
-		//D3 scripts if needed
-		scriptname = "http://d3js.org/d3.v3.min.js";
-		var len = $('script[src="'+scriptname+'"]').length;
-		if (len==0) {				// not loaded yet
-			UIManager.loadScript(scriptname,function() {
-				_drawchart();
-			});
-		}
-		else 
-			_drawchart();
+		UIManager.loadD3Script( _drawchart );
 		
-		$( window ).off( "resize", _drawchart )
-			.on( "resize", _drawchart );
+		// $( window )
+			// .off( "resize", _drawchart )
+			// .on( "resize", _drawchart );
 	},
 	
 	drawHouseMode: function ()
@@ -5320,6 +5430,7 @@ $(document).ready(function() {
 		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>Graphic</li>";
 		body+="			<li><a id='altui-zwavenetwork' href='#' >"+_T("zWave Network")+"</a></li>";
+		body+="			<li><a id='altui-energy' href='#' >"+_T("Energy Chart")+"</a></li>";
 		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>Admin</li>";
 		body+="			<li><a id='altui-optimize' href='#'>"+_T("Optimizations")+"</a></li>";
@@ -5651,6 +5762,7 @@ $(document).ready(function() {
 		.on( "click", "#altui-luastart", UIManager.pageLuaStart )
 		.on( "click", "#altui-luatest", UIManager.pageLuaTest )
 		.on( "click", "#altui-zwavenetwork", UIManager.pageZwave )		
+		.on( "click", "#altui-energy", UIManager.pageEnergy )			
 		.on( "click", "#altui-optimize", UIManager.pageOptimize )
 		.on( "click", "#altui-localize", UIManager.pageLocalization  )
 		.on( "click", "#altui-debug-btn", function() {
