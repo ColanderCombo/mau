@@ -25,7 +25,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-watts, .altui-volts, .altui-dimmable  {font-size: 16px;}";
 		style += ".altui-temperature, .altui-humidity, .altui-light  {font-size: 18px;}";
 		style += ".altui-motion {font-size: 22px;}";
-		style += ".altui-weather-text {font-size: 13px;}";
+		style += ".altui-weather-text, .altui-lasttrip-text {font-size: 13px;}";
 		style += ".altui-windowcover {}";
 		style += ".altui-dimmable-slider { margin-left: 60px; }";	
 		style += ".altui-infoviewer-log,.altui-window-btn,.altui-datamine-open { margin-top: 10px; }";	
@@ -241,7 +241,11 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var status = VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:DoorLock1', 'Status' );
 		var html ="";
 		html += ALTUI_PluginDisplays.createOnOffButton( status,"altui-onoffbtn-"+devid, _T("Unlock,Lock") , "pull-right");
-
+		
+		var lasttrip = VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'LastTrip' );
+		var lasttripdate = new Date(lasttrip*1000).toLocaleString();
+		html+= "<div class='altui-lasttrip-text text-muted'>{0} {1}</div>".format( timeGlyph,lasttripdate );
+		
 		html += "<script type='text/javascript'>";
 		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleDoorLock({0},'div#altui-onoffbtn-{0}'); } );".format(devid);
 		html += "</script>";
@@ -269,6 +273,9 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var armed = parseInt(VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Armed' )); 
 		html += _createOnOffButton( armed,"altui-onoffbtn-"+devid, _T("Bypass,Arm"), "pull-right" );
 		
+		var lasttrip = VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'LastTrip' );
+		var lasttripdate = new Date(lasttrip*1000).toLocaleString();
+		html+= "<div class='altui-lasttrip-text text-muted'>{0} {1}</div>".format( timeGlyph,lasttripdate );
 		// armed
 		html += "<script type='text/javascript'>";
 		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleArmed({0},'div#altui-onoffbtn-{0}'); } );".format(devid);
