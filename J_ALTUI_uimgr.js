@@ -5037,6 +5037,13 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pageZwave: function() 
 	{
+		var width=0, height=0, chart=null, orders=null;
+		var data = $.grep( VeraBox.getDevicesSync() , function(d) {return d.id_parent==1;} );
+		orders = {
+			id:$.map( data.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function(d) { return d.id; }),
+			name: $.map( data.sort( sortByName ), function(d) { return d.id; })
+		};
+
 		UIManager.clearPage(_T('ZWave'),_T("zWave Network"));
 		$("div#dialogs").append(deviceModalTemplate.format( '', '', 0 ));
 		var html = "";
@@ -5078,7 +5085,7 @@ var UIManager  = ( function( window, undefined ) {
 				</style>"
 			);
 
-		function _drawChart( chart, width, height, orderby  ) {
+		function _drawChart( chart, width, height, orderby  ) {	
 			function _nodename(d)		{ return "{0}, #{1}".format(d.name, d.id); }
 			function _NeighborsOf(device)	{ 
 				var result = [];
@@ -5095,12 +5102,6 @@ var UIManager  = ( function( window, undefined ) {
 				return result;
 			};
 			
-			var data = $.grep( VeraBox.getDevicesSync() , function(d) {return d.id_parent==1;} );
-			var orders = {
-				id:$.map( data.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function(d) { return d.id; }),
-				name: $.map( data.sort( sortByName ), function(d) { return d.id; })
-			};
-
 			var x = d3.scale.ordinal()
 				.domain( orders[orderby] )
 				.rangeBands([0, width]);
@@ -5114,21 +5115,21 @@ var UIManager  = ( function( window, undefined ) {
 				.append("g")
 					.attr("class","ligne")
 					.attr("transform",function(d,i) { return "translate(0,"+y(d.id)+")"; } )
-				.append("text")
-				  .attr("x", -6)
-				  .attr("y", x.rangeBand() / 2)
-				  .attr("dy", ".32em")
-				  .attr("text-anchor", "end")
-				  .text(function(d) { return _nodename(d); })
-					.on("mouseover", function(p) {
-						d3.select(this).classed("active", true);						
-					})
-					.on("mouseout", function(p) {
-						d3.select(this).classed("active", false);						
-					})
-					.on('click',function(d,i) {
-						UIManager.deviceDrawVariables(d.id);
-					});
+					.append("text")
+					  .attr("x", -6)
+					  .attr("y", x.rangeBand() / 2)
+					  .attr("dy", ".32em")
+					  .attr("text-anchor", "end")
+					  .text(function(d) { return _nodename(d); })
+						.on("mouseover", function(p) {
+							d3.select(this).classed("active", true);						
+						})
+						.on("mouseout", function(p) {
+							d3.select(this).classed("active", false);						
+						})
+						.on('click',function(d,i) {
+							UIManager.deviceDrawVariables(d.id);
+						});
 					
 			row.append("line")
 				.attr("x2", width);
@@ -5162,15 +5163,16 @@ var UIManager  = ( function( window, undefined ) {
 				.remove();
 			
 			var col = chart.selectAll(".colonne").data(data);
-			col.enter().append("g")
-				.attr("class","colonne")
-				.attr("transform",function(d,i) { return "translate("+x(d.id)+",0) rotate(-90)"; } )
-				.append("text")
-				  .attr("x", 6)
-				  .attr("y", x.rangeBand() / 2)
-				  .attr("dy", ".32em")
-				  .attr("text-anchor", "start")
-				  .text(function(d) { return _nodename(d); });
+			col.enter()
+				.append("g")
+					.attr("class","colonne")
+					.attr("transform",function(d,i) { return "translate("+x(d.id)+",0) rotate(-90)"; } )
+					.append("text")
+					  .attr("x", 6)
+					  .attr("y", x.rangeBand() / 2)
+					  .attr("dy", ".32em")
+					  .attr("text-anchor", "start")
+					  .text(function(d) { return _nodename(d); });
 
 			col.append("line")
 				.attr("x1", -width);
@@ -5181,17 +5183,17 @@ var UIManager  = ( function( window, undefined ) {
 		
 		function _drawzWavechart()
 		{
-			$(".d3chart").html("");
+			$(".d3chart").replaceWith("<svg class='d3chart'></svg>");
 			var available_height = $(window).height() - $("#altui-pagemessage").outerHeight() - $("#altui-pagetitle").outerHeight() - $("footer").outerHeight();
-			var margin = {top: 150, right: 0, bottom: 10, left: 150},
-				width = $(".altui-zwavechart-container").innerWidth() - margin.left - margin.right-30,
-				height = Math.min(width,available_height - margin.top - margin.bottom);
+			var margin = {top: 150, right: 10, bottom: 10, left: 150};
+			width = $(".altui-zwavechart-container").innerWidth() - margin.left - margin.right-30;
+			height = Math.min(width,available_height - margin.top - margin.bottom);
 			if (width<height)
 				height = width;
 			else
 				width = height;
 				
-			var chart = d3.select(".d3chart")
+			chart = d3.select(".d3chart")
 				.attr("width", width + margin.left + margin.right)
 				.attr("height", height + margin.top + margin.bottom)
 				// .style("margin-left", -margin.left + "px")
@@ -5200,8 +5202,8 @@ var UIManager  = ( function( window, undefined ) {
 					
 			chart.append("line")
 					.attr({
-						x1: width,
-						x2: width,
+						x1: width-1,
+						x2: width-1,
 						y1: 0,
 						y2: height});
 			chart.append("line")
@@ -5214,7 +5216,27 @@ var UIManager  = ( function( window, undefined ) {
 			_drawChart( chart, width, height, $("#altui-zwavechart-order").val() );
 		};
 		UIManager.loadD3Script( _drawzWavechart );
-		$("#altui-zwavechart-order").change( _drawzWavechart );
+		$("#altui-zwavechart-order").change( function() {
+			var orderby=$(this).val();
+			
+			var x = d3.scale.ordinal()
+				.domain( orders[orderby] )
+				.rangeBands([0, width]);
+
+			var y = d3.scale.ordinal()
+				.domain( orders[orderby] )
+				.rangeBands([0, height]);
+			var t= chart.transition().duration(2000)	
+			var row = t.selectAll(".ligne")
+					.delay(function(d, i) { return y(d.id) * 4; })
+					.attr("transform",function(d,i) { return "translate(0,"+y(d.id)+")"; } )
+				.selectAll(".cellule")
+					.delay(function(d, i) { return x(d) * 4; })
+					.attr("x", function(d) { return x(d); } )
+			var col = t.selectAll(".colonne")
+					.delay(function(d, i) { return x(d.id) * 4; })
+					.attr("transform",function(d,i) { return "translate("+x(d.id)+",0) rotate(-90)"; } )
+		});
 		$( window )
 			.off( "resize", _drawzWavechart )
 			.on( "resize", _drawzWavechart );
