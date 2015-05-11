@@ -4850,7 +4850,7 @@ var UIManager  = ( function( window, undefined ) {
 			["jQueryUI","http://jqueryui.com/","jQuery User Interface widgets ( like slider )"],
 			["Touch Punch","http://touchpunch.furf.com/","jQuery UI fix for touch screen devices"],
 			["Bootstrap Validator","https://github.com/1000hz/bootstrap-validator","Form validator in Bootstrap 3 style"],
-			["D3js","http://d3js.org/","D3 Data Driven Documents"],
+			["D3js","http://d3js.org/","D3 Data Driven Documents & Les Miserables tutorial"],
 			["amg0","http://forum.micasaverde.com/","reachable as amg0 on this forum "]
 		];
 		var html = "<dl>";
@@ -5037,28 +5037,55 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pageZwave: function() 
 	{
+		function _nodename(d)		{ return "{0}, #{1}".format(d.name, d.id); }
+		function _countNeighbors(device) {
+			var n=0;
+			$.each( device.states, function(i,s) {
+				if (s.variable=="Neighbors") {
+					n = s.value.split(',').length;
+					return false;
+				}
+			});
+			return n;
+		};
+		function _NeighborsOf(device)	{ 
+			var result = [];
+			$.each( device.states, function(i,s) {
+				if (s.variable=="Neighbors") {
+					result = s.value.split(',');
+					$.each(result, function(i,r) {
+						var device = VeraBox.getDeviceByAltID( 1, r );	// 1=zWave controller, r=altid
+						result[i] = (device) ? device.id : null;
+					});
+					return false;
+				}
+			})
+			return result;
+		};
 		var width=0, height=0, chart=null, orders=null;
 		var data = $.grep( VeraBox.getDevicesSync() , function(d) {return d.id_parent==1;} );
 		orders = {
 			id:$.map( data.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function(d) { return d.id; }),
-			name: $.map( data.sort( sortByName ), function(d) { return d.id; })
+			name: $.map( data.sort( sortByName ), function(d) { return d.id; }),
+			mesh:$.map( data.sort(function(a, b){return _countNeighbors(b)-_countNeighbors(a)}), function(d) { return d.id; })
 		};
 
 		UIManager.clearPage(_T('ZWave'),_T("zWave Network"));
 		$("div#dialogs").append(deviceModalTemplate.format( '', '', 0 ));
 		var html = "";
-		html += "<div class='row'>";
-			html += "<div class='col-sm-2'>";
+		html += "<form class='form-inline'>";
+			html += "<div class='form-group'>";
 				html += "<label class='control-label ' for='altui-zwavechart-order' >Order By:</label>";
 				html += "<select id='altui-zwavechart-order' class='form-control'>";
-					html += "<option>id</option>";
-					html += "<option>name</option>";
+					html += "<option value='id'>ID</option>";
+					html += "<option value='name'>"+_T("Name")+"</option>";
+					html += "<option value='mesh'>"+_T("Mesh")+"</option>";
 				html += "</select>";
 			html += "</div>";
-			html += "<div class='altui-zwavechart-container col-sm-10'>";
+		html += "</form>";
+			html += "<div class='altui-zwavechart-container'>";
 				html += "<svg class='d3chart'></svg>";
 			html += "</div>";
-		html += "</div>";
 		$(".altui-mainpanel")
 			.append(html)
 			.append(
@@ -5086,22 +5113,6 @@ var UIManager  = ( function( window, undefined ) {
 			);
 
 		function _drawChart( chart, width, height, orderby  ) {	
-			function _nodename(d)		{ return "{0}, #{1}".format(d.name, d.id); }
-			function _NeighborsOf(device)	{ 
-				var result = [];
-				$.each( device.states, function(i,s) {
-					if (s.variable=="Neighbors") {
-						result = s.value.split(',');
-						$.each(result, function(i,r) {
-							var device = VeraBox.getDeviceByAltID( 1, r );	// 1=zWave controller, r=altid
-							result[i] = (device) ? device.id : null;
-						});
-						return false;
-					}
-				})
-				return result;
-			};
-			
 			var x = d3.scale.ordinal()
 				.domain( orders[orderby] )
 				.rangeBands([0, width]);
@@ -5184,7 +5195,7 @@ var UIManager  = ( function( window, undefined ) {
 		function _drawzWavechart()
 		{
 			$(".d3chart").replaceWith("<svg class='d3chart'></svg>");
-			var available_height = $(window).height() - $("#altui-pagemessage").outerHeight() - $("#altui-pagetitle").outerHeight() - $("footer").outerHeight();
+			var available_height = $(window).height() - $("#altui-pagemessage").outerHeight() - $("#altui-pagetitle").outerHeight() - $("#altui-zwavechart-order").outerHeight() - $("footer").outerHeight();
 			var margin = {top: 150, right: 10, bottom: 10, left: 150};
 			width = $(".altui-zwavechart-container").innerWidth() - margin.left - margin.right-30;
 			height = Math.min(width,available_height - margin.top - margin.bottom);

@@ -151,5 +151,6 @@ Localization.init( {
   "Localizations":"Traductions",
   "Power Chart":"Graphique Puissance",
   "Power":"Puissance",
-  "Localization information":"Information de Traduction"
+  "Localization information":"Information de Traduction",
+  "Mesh":"Couverture"
 });

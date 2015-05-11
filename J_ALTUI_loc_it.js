@@ -151,5 +151,6 @@ Localization.init( {
 	"Localizations":"Localizations",
 	"Power Chart":"Power Chart",
 	"Power":"Power",
-	"Localization information":"Localization information"
+	"Localization information":"Localization information",
+	"Mesh":"Mesh"
 	});
