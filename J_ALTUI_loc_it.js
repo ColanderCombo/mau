@@ -149,7 +149,7 @@ Localization.init( {
 	"ZWave":"ZWave",
 	"Localize":"Localize",
 	"Localizations":"Localizations",
-	"Energy Chart":"Energy Chart",
-	"Energy":"Energy",
+	"Power Chart":"Power Chart",
+	"Power":"Power",
 	"Localization information":"Localization information"
 	});

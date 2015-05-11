@@ -149,7 +149,7 @@ Localization.init( {
   "ZWave":"ZWave",
   "Localize":"Traduire",
   "Localizations":"Traductions",
-  "Energy Chart":"Graphique Energétique",
-  "Energy":"Energie",
+  "Power Chart":"Graphique Puissance",
+  "Power":"Puissance",
   "Localization information":"Information de Traduction"
 });

@@ -3795,7 +3795,7 @@ var UIManager  = ( function( window, undefined ) {
 			{ id:15, title:_T('Editor'), onclick:'UIManager.pageEditor()', parent:8 },
 			{ id:16, title:_T('ZWave'), onclick:'UIManager.pageZwave()', parent:0 },
 			{ id:17, title:_T('Localize'), onclick:'UIManager.pageLocalization()', parent:0 },
-			{ id:18, title:_T('Energy'), onclick:'UIManager.pageEnergy()', parent:0 },
+			{ id:18, title:_T('Power'), onclick:'UIManager.pagePower()', parent:0 },
 		];
 		
 		function _parentsOf(child) {
@@ -4932,9 +4932,9 @@ var UIManager  = ( function( window, undefined ) {
 		});
 	},
 	
-	pageEnergy: function() 
+	pagePower: function() 
 	{
-		UIManager.clearPage(_T('Energy'),_T("Energy Chart"));
+		UIManager.clearPage(_T('Power'),_T("Power Chart"));
 		
 		// prepare and load D3 then draw the chart
 		$(".altui-mainpanel")
@@ -4961,8 +4961,8 @@ var UIManager  = ( function( window, undefined ) {
 			)
 			.append("<svg class='altui-energy-d3chart'></svg>");
 
-		function _drawEnergyChart() {
-			VeraBox.getEnergy( function(res) {
+		function _drawPowerChart() {
+			VeraBox.getPower( function(res) {
 				if ($(".altui-energy-d3chart").length==0)
 					return;	// stop refreshing
 				
@@ -5028,11 +5028,11 @@ var UIManager  = ( function( window, undefined ) {
 					  .attr("text-anchor","end")
 					  .text(function(d) { return "{0}, #{1}".format(d[1],d[0]); });
 
-				setTimeout( _drawEnergyChart , 5000 );
+				setTimeout( _drawPowerChart , 5000 );
 			});
 		}
 		
-		UIManager.loadD3Script( _drawEnergyChart );
+		UIManager.loadD3Script( _drawPowerChart );
 	},
 	
 	pageZwave: function() 
@@ -5464,7 +5464,7 @@ $(document).ready(function() {
 		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>Graphic</li>";
 		body+="			<li><a id='altui-zwavenetwork' href='#' >"+_T("zWave Network")+"</a></li>";
-		body+="			<li><a id='altui-energy' href='#' >"+_T("Energy Chart")+"</a></li>";
+		body+="			<li><a id='altui-energy' href='#' >"+_T("Power Chart")+"</a></li>";
 		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>Admin</li>";
 		body+="			<li><a id='altui-optimize' href='#'>"+_T("Optimizations")+"</a></li>";
@@ -5796,7 +5796,7 @@ $(document).ready(function() {
 		.on( "click", "#altui-luastart", UIManager.pageLuaStart )
 		.on( "click", "#altui-luatest", UIManager.pageLuaTest )
 		.on( "click", "#altui-zwavenetwork", UIManager.pageZwave )		
-		.on( "click", "#altui-energy", UIManager.pageEnergy )	
+		.on( "click", "#altui-energy", UIManager.pagePower )	
 		.on( "click", "#altui-optimize", UIManager.pageOptimize )
 		.on( "click", "#altui-localize", UIManager.pageLocalization  )
 		.on( "click", "#altui-debug-btn", function() {

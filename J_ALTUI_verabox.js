@@ -510,7 +510,7 @@ var VeraBox = ( function( window, undefined ) {
 		}
 	};
 
-	function _getEnergy(cbfunc) {
+	function _getPower(cbfunc) {
 		var url = "data_request?id=live_energy_usage";
 		var jqxhr = $.ajax( {
 			url: url,
@@ -1407,7 +1407,7 @@ var VeraBox = ( function( window, undefined ) {
 	isRemoteAccess	: function() 	{ 	return window.location.origin.indexOf("mios.com")!=-1; /*return true;*/ },
 
 	// energy
-	getEnergy	: _getEnergy,
+	getPower	: _getPower,
 	// caching user data changes and saving them at user request
 	updateChangeCache :_updateChangeCache,
 	saveChangeCaches  :_saveChangeCaches,
