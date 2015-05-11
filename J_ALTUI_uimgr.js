@@ -5096,12 +5096,17 @@ var UIManager  = ( function( window, undefined ) {
 			else
 				width = height;
 
+			var orders = {
+				id:$.map( data.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function(d) { return d.id; }),
+				name: $.map( data.sort( sortByName ), function(d) { return d.id; })
+			};
+			
 			var x = d3.scale.ordinal()
-				.domain($.map( data, function(d) { return d.id; }))
+				.domain( orders.id )
 				.rangeBands([0, width]);
 
 			var y = d3.scale.ordinal()
-				.domain($.map( data, function(d) { return d.id; }))
+				.domain(orders.id)
 				.rangeBands([0, height]);
 
 			var chart = d3.select(".d3chart")
