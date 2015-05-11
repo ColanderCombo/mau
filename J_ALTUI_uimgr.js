@@ -5075,7 +5075,7 @@ var UIManager  = ( function( window, undefined ) {
 		var html = "";
 		html += "<form class='form-inline'>";
 			html += "<div class='form-group'>";
-				html += "<label class='control-label ' for='altui-zwavechart-order' >Order By:</label>";
+				html += "<label class='control-label ' for='altui-zwavechart-order' >"+_T("Order By")+":</label>";
 				html += "<select id='altui-zwavechart-order' class='form-control'>";
 					html += "<option value='id'>ID</option>";
 					html += "<option value='name'>"+_T("Name")+"</option>";
