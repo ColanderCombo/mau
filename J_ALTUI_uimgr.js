@@ -5039,8 +5039,21 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		UIManager.clearPage(_T('ZWave'),_T("zWave Network"));
 		$("div#dialogs").append(deviceModalTemplate.format( '', '', 0 ));
+		var html = "";
+		html += "<div class='row'>";
+			html += "<div class='col-sm-2'>";
+				html += "<label class='control-label ' for='altui-zwavechart-order' >Order By:</label>";
+				html += "<select id='altui-zwavechart-order' class='form-control'>";
+					html += "<option>id</option>";
+					html += "<option>name</option>";
+				html += "</select>";
+			html += "</div>";
+			html += "<div class='altui-zwavechart-container col-sm-10'>";
+				html += "<svg class='d3chart'></svg>";
+			html += "</div>";
+		html += "</div>";
 		$(".altui-mainpanel")
-			.append("<svg class='d3chart'></svg>")
+			.append(html)
 			.append(
 				"<style>				\
 					.d3chart {			\
@@ -5065,8 +5078,7 @@ var UIManager  = ( function( window, undefined ) {
 				</style>"
 			);
 
-		function _drawzWavechart()
-		{
+		function _drawChart( chart, width, height, orderby  ) {
 			function _nodename(d)		{ return "{0}, #{1}".format(d.name, d.id); }
 			function _NeighborsOf(device)	{ 
 				var result = [];
@@ -5083,53 +5095,20 @@ var UIManager  = ( function( window, undefined ) {
 				return result;
 			};
 			
-			$(".d3chart").html("");
 			var data = $.grep( VeraBox.getDevicesSync() , function(d) {return d.id_parent==1;} );
-			var n = data.length;
-			var available_height = $(window).height() - $("#altui-pagemessage").outerHeight() - $("#altui-pagetitle").outerHeight() - $("footer").outerHeight();
-			
-			var margin = {top: 150, right: 0, bottom: 10, left: 150},
-				width = $(".altui-mainpanel").innerWidth() - margin.left - margin.right-30,
-				height = Math.min(width,available_height - margin.top - margin.bottom);
-			if (width<height)
-				height = width;
-			else
-				width = height;
-
 			var orders = {
 				id:$.map( data.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function(d) { return d.id; }),
 				name: $.map( data.sort( sortByName ), function(d) { return d.id; })
 			};
-			
+
 			var x = d3.scale.ordinal()
-				.domain( orders.id )
+				.domain( orders[orderby] )
 				.rangeBands([0, width]);
 
 			var y = d3.scale.ordinal()
-				.domain(orders.id)
+				.domain( orders[orderby] )
 				.rangeBands([0, height]);
-
-			var chart = d3.select(".d3chart")
-				.attr("width", width + margin.left + margin.right)
-				.attr("height", height + margin.top + margin.bottom)
-				// .style("margin-left", -margin.left + "px")
-				.append("g")
-					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-					
-			chart.append("line")
-					.attr({
-						x1: width,
-						x2: width,
-						y1: 0,
-						y2: height});
-						
-			chart.append("line")
-					.attr({
-						x1: 0,
-						x2: width,
-						y1: height,
-						y2: height});
-									
+				
 			var row = chart.selectAll(".ligne").data(data);
 			row.enter()
 				.append("g")
@@ -5153,12 +5132,14 @@ var UIManager  = ( function( window, undefined ) {
 					
 			row.append("line")
 				.attr("x2", width);
-			row.exit().remove();
+			row.exit()
+				.remove();
 				
 			var cell = row.selectAll(".cellule")
 				.data( function(d)  { return _NeighborsOf(d); } );
 				
-			cell.enter().append("rect")
+			cell.enter()
+				.append("rect")
 					.attr("class","cellule")
 					.attr("x", function(d) { return x(d); } )
 					.attr("width",x.rangeBand())
@@ -5177,7 +5158,8 @@ var UIManager  = ( function( window, undefined ) {
 						UIManager.deviceDrawVariables(lignedatum.id);
 					});
 		
-			cell.exit().remove();
+			cell.exit()
+				.remove();
 			
 			var col = chart.selectAll(".colonne").data(data);
 			col.enter().append("g")
@@ -5196,7 +5178,43 @@ var UIManager  = ( function( window, undefined ) {
 			col.exit().remove();
 		};
 		
+		
+		function _drawzWavechart()
+		{
+			$(".d3chart").html("");
+			var available_height = $(window).height() - $("#altui-pagemessage").outerHeight() - $("#altui-pagetitle").outerHeight() - $("footer").outerHeight();
+			var margin = {top: 150, right: 0, bottom: 10, left: 150},
+				width = $(".altui-zwavechart-container").innerWidth() - margin.left - margin.right-30,
+				height = Math.min(width,available_height - margin.top - margin.bottom);
+			if (width<height)
+				height = width;
+			else
+				width = height;
+				
+			var chart = d3.select(".d3chart")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+				// .style("margin-left", -margin.left + "px")
+				.append("g")
+					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+					
+			chart.append("line")
+					.attr({
+						x1: width,
+						x2: width,
+						y1: 0,
+						y2: height});
+			chart.append("line")
+					.attr({
+						x1: 0,
+						x2: width,
+						y1: height,
+						y2: height});
+
+			_drawChart( chart, width, height, $("#altui-zwavechart-order").val() );
+		};
 		UIManager.loadD3Script( _drawzWavechart );
+		$("#altui-zwavechart-order").change( _drawzWavechart );
 		$( window )
 			.off( "resize", _drawzWavechart )
 			.on( "resize", _drawzWavechart );

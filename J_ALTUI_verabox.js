@@ -432,6 +432,32 @@ var UPnPHelper = (function(window,undefined) {
 }) (window);
 
 
+// url : http://192.168.1.16/port_49451/upnp/control/dev_1
+// POST /port_49451/upnp/control/dev_1 HTTP/1.1
+// Host: 192.168.1.16
+// Connection: keep-alive
+// Content-Length: 250
+// Origin: http://192.168.1.16
+// User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36
+// Content-Type: text/xml;charset=UTF-8
+// Accept: */*
+// X-Requested-With: XMLHttpRequest
+// SOAPACTION: "urn:schemas-micasaverde-org:service:ZWaveNetwork:1#BackupDongle"
+// MIME-Version: 1.0
+// Referer: http://192.168.1.16/cmh/
+// Accept-Encoding: gzip, deflate
+// Accept-Language: fr,fr-FR;q=0.8,en;q=0.6,en-US;q=0.4
+
+// request payload
+// <s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+    // xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+    // <s:Body>
+        // <u:BackupDongle
+            // xmlns:u="urn:schemas-micasaverde-org:service:ZWaveNetwork:1">
+        // </u:BackupDongle>
+    // </s:Body>
+// </s:Envelope>
+
 var VeraBox = ( function( window, undefined ) {
   //---------------------------------------------------------
   // private functions
