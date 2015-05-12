@@ -128,6 +128,23 @@ if (typeof String.prototype.htmlEncode == 'undefined') {
 	}
 };
 
+function _formatPad(d) {
+	return ("0"+d).substr(-2);
+};	
+
+function _toIso(date,sep) {
+	sep = sep || 'T';
+	var iso = "{0}-{1}-{2}{6}{3}:{4}:{5}".format(
+		date.getFullYear(),
+		_formatPad(date.getMonth()+1),
+		_formatPad(date.getDate()),
+		_formatPad(date.getHours()),
+		_formatPad(date.getMinutes()),
+		_formatPad(date.getSeconds()),
+		sep		);
+	return iso;
+};
+
 function isInteger(data) {
     return (data === parseInt(data, 10));
 };

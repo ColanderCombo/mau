@@ -1967,21 +1967,6 @@ var UIManager  = ( function( window, undefined ) {
 		_devicetypesDB[devtype].ui_static_data = ui_definitions;
 	};
 
-	function _format(d) {
-		return ("0"+d).substr(-2);
-	};	
-
-	function _toIso(date) {
-		var iso = "{0}-{1}-{2}T{3}:{4}:{5}".format(
-			date.getFullYear(),
-			_format(date.getMonth()+1),
-			_format(date.getDate()),
-			_format(date.getHours()),
-			_format(date.getMinutes()),
-			_format(date.getSeconds()) );
-		return iso;
-	};
-	
 	function _enhanceValue(value) 
 	{
 		//try to guess what is the value

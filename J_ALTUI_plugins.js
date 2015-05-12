@@ -243,7 +243,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		html += ALTUI_PluginDisplays.createOnOffButton( status,"altui-onoffbtn-"+devid, _T("Unlock,Lock") , "pull-right");
 		
 		var lasttrip = VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'LastTrip' );
-		var lasttripdate = new Date(lasttrip*1000).toLocaleString();
+		var lasttripdate = _toIso(new Date(lasttrip*1000),' ');
 		html+= "<div class='altui-lasttrip-text text-muted'>{0} {1}</div>".format( timeGlyph,lasttripdate );
 		
 		html += "<script type='text/javascript'>";
@@ -274,7 +274,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		html += _createOnOffButton( armed,"altui-onoffbtn-"+devid, _T("Bypass,Arm"), "pull-right" );
 		
 		var lasttrip = VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'LastTrip' );
-		var lasttripdate = new Date(lasttrip*1000).toLocaleString();
+		var lasttripdate = _toIso(new Date(lasttrip*1000),' ');
 		html+= "<div class='altui-lasttrip-text text-muted'>{0} {1}</div>".format( timeGlyph,lasttripdate );
 		// armed
 		html += "<script type='text/javascript'>";
