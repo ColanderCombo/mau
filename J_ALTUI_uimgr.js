@@ -4391,7 +4391,27 @@ var UIManager  = ( function( window, undefined ) {
 		
 		UIManager.clearPage(_T('Plugins'),_T("Plugins"));
 
-		function _getFileButton(plugin,files) {
+		function _getScriptFileList(devicetype) {
+			var dtdb = UIManager.getDeviceTypesDB();
+			var dt = dtdb[devicetype];
+			var scripts = {};
+			if ( dt.ui_static_data && dt.ui_static_data.Tabs )
+			{
+				$.each( dt.ui_static_data.Tabs, function( idx,tab) {
+					if (tab.TabType=="javascript" && tab.ScriptName!="shared.js")
+					{
+						var script = tab.ScriptName;
+						var func = tab.Function;
+						if (scripts[script] == undefined)
+							scripts[script]=[];
+						scripts[script].push( func );
+					}
+				});
+			}
+			return scripts;
+		};
+		
+		function _getFileButton(plugin) {
 			var html = "";
 			html +="<div class='btn-group'>";
 			html +="  <button id='{0}' type='button' class='btn btn-default dropdown-toggle altui-plugin-files' data-toggle='dropdown' aria-expanded='false'>".format(plugin.id);
@@ -4436,22 +4456,35 @@ var UIManager  = ( function( window, undefined ) {
 			// adding manually installed plugin
 			var devices = VeraBox.getDevicesSync();
 			var manual_plugins={};
+
+			// first aggregate to find manually installed plugin
 			$.each( $.grep(jsonp.ud.devices,function(d){ return d.id_parent==0  && d.plugin==undefined}) , function(i,d) {
 				manual_plugins[d.device_file] = {
-					dtype : d.device_type,
-					files : [d.device_file, d.device_json, d.impl_file]
+					devtype : d.device_type,
+					files   : [ {SourceName:d.device_file}, {SourceName:d.device_json}, {SourceName:d.impl_file}]
 				};
 			});
+
+			// for each, create a virtual plugin structure so we can display
 			$.each(manual_plugins, function( key,value) {
+				// add also the JS files used for the tabs for such device type
+				var scripts = _getScriptFileList( value.devtype ); 
+				$.each(scripts, function(key,script) {
+					value.files.push({SourceName:key});
+				});
+				var plugin = {
+					id:-1,
+					Files: value.files
+				};
 				var pluginTxt = pluginTemplate.format(
 					key,
 					"?",
-					"?",
 					"",
 					"",
 					"",
 					"",
-					"",
+					"<img class='altui-plugin-icon' src='https://apps.mios.com/images/plugin.png'></img>",
+					_getFileButton(plugin),
 					""
 					);
 				$(".altui-mainpanel tbody").append(pluginTxt);
@@ -4958,7 +4991,7 @@ var UIManager  = ( function( window, undefined ) {
 				});
 				
 				// async func to draw the chart
-				$(".altui-energy-d3chart").html("");
+				$(".altui-energy-d3chart").replaceWith("<svg class='altui-energy-d3chart'></svg>");
 				var margin = {top: 10, right: 50, bottom: 10, left: 150},
 					width = $(".altui-mainpanel").innerWidth() - margin.left - margin.right-30,
 					barHeight = 20,
