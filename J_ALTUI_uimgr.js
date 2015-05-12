@@ -4979,23 +4979,69 @@ var UIManager  = ( function( window, undefined ) {
 			)
 			.append("<svg class='altui-energy-d3chart'></svg>");
 
-		function _drawPowerChart() {
+		var margin = {top: 10, right: 50, bottom: 10, left: 150},
+			width = $(".altui-mainpanel").innerWidth() - margin.left - margin.right-30,
+			barHeight = 20,
+			height = 0; // calculated later
+
+		function _processEnergyData(input)
+		{
+			// prepare data
+			var data = input.trim().split('\n');
+			$.each(data, function(i,line) {
+					data[i] = line.split('\t');
+			});
+			return data;
+		};
+		
+		function _refreshPowerChart() {
+			if ($(".altui-energy-d3chart").length==0)
+				return;	// stop refreshing
 			VeraBox.getPower( function(res) {
-				if ($(".altui-energy-d3chart").length==0)
-					return;	// stop refreshing
+				var data = _processEnergyData(res);
+				var x = d3.scale.linear()
+						.range([0, width])
+						.domain([0, d3.max(data, function(d) { return +d[4]; })]);	// d[4] is watts and is text, must convert to int
+						
+				var xAxis = d3.svg.axis()
+					.scale(x)
+					.orient("top");
+					
+				var chart = d3.select(".altui-energy-d3chart");
+				chart.selectAll("g.device").data(data);
 				
+				var t = chart.transition().duration(1000);
+				t.select(".axis").call(xAxis);
+				
+				var bar = t.selectAll("g.device");
+				bar.select("text.wattage")
+						.attr("x", function(d) { return /*Math.max( x(d[4]) - 3, 10 );*/ x(d[4])-3 })
+						.attr("y", barHeight / 2)
+						.attr("dy", ".35em")
+						.attr("text-anchor","end")
+						.text(function(d) { return (parseInt(d[4])!=0) ? d[4] : ''; });
+				bar.select("rect")
+						.attr("width", function(d) { return x(d[4]); })
+						.attr("height", barHeight - 1);
+
+				setTimeout( _refreshPowerChart , 5000 );
+			});
+		};
+		
+		function _drawPowerChart() {
+			if ($(".altui-energy-d3chart").length==0)
+				return;	// stop refreshing
+
+			VeraBox.getPower( function(res) {
 				// prepare data
-				var data = res.trim().split('\n');
-				$.each(data, function(i,line) {
-						data[i] = line.split('\t');
-				});
+				var data = _processEnergyData(res);
 				
 				// async func to draw the chart
 				$(".altui-energy-d3chart").replaceWith("<svg class='altui-energy-d3chart'></svg>");
-				var margin = {top: 10, right: 50, bottom: 10, left: 150},
-					width = $(".altui-mainpanel").innerWidth() - margin.left - margin.right-30,
-					barHeight = 20,
-					height = (1+data.length)*(barHeight +1);
+				margin = {top: 10, right: 50, bottom: 10, left: 150};
+				width = $(".altui-mainpanel").innerWidth() - margin.left - margin.right-30;
+				barHeight = 20;
+				height = (1+data.length)*(barHeight +1);
 					
 				var x = d3.scale.linear()
 						.range([0, width])
@@ -5034,19 +5080,21 @@ var UIManager  = ( function( window, undefined ) {
 						.attr("height", barHeight - 1);
 
 				bar.append("text")
-					  .attr("x", function(d) { return /*Math.max( x(d[4]) - 3, 10 );*/ x(d[4])-3 })
-					  .attr("y", barHeight / 2)
-					  .attr("dy", ".35em")
-					  .attr("text-anchor","end")
-					  .text(function(d) { return (parseInt(d[4])!=0) ? d[4] : ''; });
+						.attr("class","wattage")
+						.attr("x", function(d) { return /*Math.max( x(d[4]) - 3, 10 );*/ x(d[4])-3 })
+						.attr("y", barHeight / 2)
+						.attr("dy", ".35em")
+						.attr("text-anchor","end")
+						.text(function(d) { return (parseInt(d[4])!=0) ? d[4] : ''; });
 				bar.append("text")
-					  .attr("x", -5)
-					  .attr("y", barHeight / 2)
-					  .attr("dy", ".35em")
-					  .attr("text-anchor","end")
-					  .text(function(d) { return "{0}, #{1}".format(d[1],d[0]); });
+						.attr("class","name")
+						.attr("x", -5)
+						.attr("y", barHeight / 2)
+						.attr("dy", ".35em")
+						.attr("text-anchor","end")
+						.text(function(d) { return "{0}, #{1}".format(d[1],d[0]); });
 
-				setTimeout( _drawPowerChart , 5000 );
+				setTimeout( _refreshPowerChart , 5000 );
 			});
 		}
 		
@@ -5294,7 +5342,7 @@ var UIManager  = ( function( window, undefined ) {
 			html += "<p>No Housemode feature on UI5</p>";
 		}		
 		html +="	</div>";
-		html +="	<p>"+_T("This plugin is a work in progress, it will continuously evolves over time.");
+		html +="	<br><p>"+_T("This plugin is a work in progress, it will continuously evolves over time.");
 		html +=	_T("You may check out the evolutions on the Micasaverde <a href='http://forum.micasaverde.com/index.php/topic,30310.msg216129.html#msg216129'>Forum</a>")+"</p>";
 		html +="</div>";
 		$(".altui-mainpanel").append( html );
