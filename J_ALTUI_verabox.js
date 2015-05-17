@@ -1385,6 +1385,9 @@ var VeraBox = ( function( window, undefined ) {
 		return [];
 	};
 	
+	function _resetPollCounters() {
+	};
+	
   // explicitly return public methods when this object is instantiated
   return {
 	//---------------------------------------------------------
@@ -1434,6 +1437,10 @@ var VeraBox = ( function( window, undefined ) {
 
 	// energy
 	getPower	: _getPower,
+	
+	// stats
+	resetPollCounters : _resetPollCounters,
+	
 	// caching user data changes and saving them at user request
 	updateChangeCache :_updateChangeCache,
 	saveChangeCaches  :_saveChangeCaches,

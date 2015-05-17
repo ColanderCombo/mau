@@ -5118,6 +5118,15 @@ var UIManager  = ( function( window, undefined ) {
 	pageZwave: function() 
 	{
 		function _nodename(d)		{ return "{0}, #{1}".format(d.name, d.id); }
+		function _commQuality(id) {
+			//PollOk/(PollOk+PollNoReply)
+			var service="urn:micasaverde-com:serviceId:ZWaveDevice1"
+			var PollNoReply = parseInt(VeraBox.getStatus(id,service,"PollNoReply"));
+			var PollOk = parseInt(VeraBox.getStatus(id,service,"PollOk"));
+			if (PollOk+PollNoReply>0)
+				return ( PollOk / (PollOk+PollNoReply) );
+			return 1;
+		};
 		function _countNeighbors(device) {
 			var n=0;
 			$.each( device.states, function(i,s) {
@@ -5162,6 +5171,7 @@ var UIManager  = ( function( window, undefined ) {
 					html += "<option value='mesh'>"+_T("Mesh")+"</option>";
 				html += "</select>";
 			html += "</div>";
+			html += ("<button type='button' id='altui-reset-pollcounters' class='btn btn-default' >"+_T("Reset Poll Counters")+"</button>");
 		html += "</form>";
 			html += "<div class='altui-zwavechart-container'>";
 				html += "<svg class='d3chart'></svg>";
@@ -5200,7 +5210,11 @@ var UIManager  = ( function( window, undefined ) {
 			var y = d3.scale.ordinal()
 				.domain( orders[orderby] )
 				.rangeBands([0, height]);
-				
+			
+			var c = d3.scale.linear()
+				.domain( [0,0.5,1] )
+				.range(["red","yellow","green"]);
+
 			var row = chart.selectAll(".ligne").data(data);
 			row.enter()
 				.append("g")
@@ -5228,15 +5242,23 @@ var UIManager  = ( function( window, undefined ) {
 				.remove();
 				
 			var cell = row.selectAll(".cellule")
-				.data( function(d)  { return _NeighborsOf(d); } );
+				.data( function(d)  { 
+					return _NeighborsOf(d); 
+					} );
 				
 			cell.enter()
 				.append("rect")
 					.attr("class","cellule")
-					.attr("x", function(d) { return x(d); } )
+					.attr("x", function(d) {
+							return x(d); 
+							// return x(d.id); 
+							} )
 					.attr("width",x.rangeBand())
 					.attr("height",y.rangeBand())
-					.style("fill","red")
+					// .style("fill",c(_commQuality(d)))
+					.style("fill",function(d) { 
+						return c(_commQuality(d3.select(this.parentNode).datum().id));
+						})
 					.on("mouseover", function(p) {
 						var lignedatum = d3.select(this.parentNode).datum();
 						d3.selectAll(".ligne text").classed("active", function(d, i) { return d.id == lignedatum.id; });
@@ -5307,6 +5329,11 @@ var UIManager  = ( function( window, undefined ) {
 			_drawChart( chart, width, height, $("#altui-zwavechart-order").val() );
 		};
 		UIManager.loadD3Script( _drawzWavechart );
+		
+		$("#altui-reset-pollcounters").click(function() {
+			VeraBox.resetPollCounters();
+		});
+		
 		$("#altui-zwavechart-order").change( function() {
 			var orderby=$(this).val();
 			

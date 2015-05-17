@@ -14,7 +14,7 @@ Localization.init( {
   "Away":"Distant",
   "Night":"Nuit",
   "Vacation":"Vacances",
-  "Welcome to VERA Alternate UI": "Bienvenu dans AltUI pour VERA",
+  "Welcome to VERA Alternate UI": "Bienvenue dans AltUI pour VERA",
   "Rooms": "Pieces",
   "Device": "Périphérique",
   "Devices": "Périphériques",
