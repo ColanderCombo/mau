@@ -5211,9 +5211,9 @@ var UIManager  = ( function( window, undefined ) {
 				.domain( orders[orderby] )
 				.rangeBands([0, height]);
 			
-			var c = d3.scale.linear()
-				.domain( [0,0.5,1] )
-				.range(["red","yellow","green"]);
+			var c = d3.scale.quantize()
+				.domain( [0,1] )
+				.range(["red","orange","yellow","green"]);
 
 			var row = chart.selectAll(".ligne").data(data);
 			row.enter()
