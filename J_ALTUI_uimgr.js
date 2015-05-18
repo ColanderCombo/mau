@@ -5778,6 +5778,7 @@ $(document).ready(function() {
 		padding-right: 10px;\
 		padding-bottom: 5px;\
 		padding-left: 10px;\
+		overflow: hidden;\
 	}\
 	.altui-device-body {\
 		height:52px;\
