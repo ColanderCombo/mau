@@ -259,6 +259,11 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	};
 
 	// return the html string inside the .panel-body of the .altui-device#id panel
+	function _drawSmoke(devid, device) {
+		return _drawMotion(devid, device);
+	};
+	
+	// return the html string inside the .panel-body of the .altui-device#id panel
 	function _drawMotion(devid, device) {
 		var html = "";
 		
@@ -395,6 +400,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawDoorLock   : _drawDoorLock,
 	drawDimmable   : _drawDimmable,
 	drawMotion 	   : _drawMotion,
+	drawSmoke 	   : _drawSmoke,
 	drawHumidity   : _drawHumidity,
 	drawLight   	: _drawLight,
 	drawWindowCover : _drawWindowCover,
