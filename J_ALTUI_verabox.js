@@ -1386,6 +1386,24 @@ var VeraBox = ( function( window, undefined ) {
 	};
 	
 	function _resetPollCounters() {
+		VeraBox.getDevices( 
+			function(luaid,device) {
+				var id = device.id;
+				var service="urn:micasaverde-com:serviceId:ZWaveDevice1"
+				var PollNoReply = parseInt(VeraBox.getStatus(id,service,"PollNoReply"));
+				var PollOk = parseInt(VeraBox.getStatus(id,service,"PollOk"));
+				if (! isNaN(PollNoReply) ) {
+					VeraBox.setStatus( id, service, "PollNoReply", "0"  , 0 );
+				}
+				if (! isNaN(PollOk) ) {
+					VeraBox.setStatus( id, service, "PollOk", "0"  , 0 );
+				}
+			}, 
+			function(device) {
+				return (device.id_parent==1);
+			}, 
+			null 
+		);		
 	};
 	
   // explicitly return public methods when this object is instantiated
