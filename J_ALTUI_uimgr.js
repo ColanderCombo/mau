@@ -3795,8 +3795,9 @@ var UIManager  = ( function( window, undefined ) {
 			{ id:16, title:_T('ZWave'), onclick:'UIManager.pageZwave()', parent:0 },
 			{ id:17, title:_T('Localize'), onclick:'UIManager.pageLocalization()', parent:0 },
 			{ id:18, title:_T('Power'), onclick:'UIManager.pagePower()', parent:0 },
+			{ id:18, title:_T('Parent/Child'), onclick:'UIManager.pageChildren()', parent:0 },
 		];
-		
+
 		function _parentsOf(child) {
 			var html = "";
 			$.each(tbl, function( idx,line) {
@@ -5360,6 +5361,28 @@ var UIManager  = ( function( window, undefined ) {
 			.on( "resize", _drawzWavechart );
 	},
 	
+	pageChildren: function() {
+		var margin = {top: 10, right: 50, bottom: 10, left: 150},
+			width = $(".altui-mainpanel").innerWidth() - margin.left - margin.right-30,
+			barHeight = 20,
+			height = width; // calculated later
+			
+		function _drawChart() {
+			$(".altui-children-d3chart").replaceWith("<svg class='altui-children-d3chart'></svg>");
+			// VeraBox.getDevices();
+			alert('wip');
+		};
+		
+		// prepare and load D3 then draw the chart
+		UIManager.clearPage(_T('Parent/Child'),_T("Parent Child Chart"));
+		$(".altui-mainpanel")
+			.append(
+				"<style>				\
+				</style>" )
+			.append("<svg class='altui-children-d3chart'></svg>");
+		UIManager.loadD3Script( _drawChart );
+	},
+	
 	drawHouseMode: function ()
 	{	
 		// http://192.168.1.5/cmh/skins/default/img/other/spritemap_640_480_preset_modes_active.png
@@ -5628,6 +5651,7 @@ $(document).ready(function() {
 		body+="			<li class='dropdown-header'>Graphic</li>";
 		body+="			<li><a id='altui-zwavenetwork' href='#' >"+_T("zWave Network")+"</a></li>";
 		body+="			<li><a id='altui-energy' href='#' >"+_T("Power Chart")+"</a></li>";
+		body+="			<li><a id='altui-childrennetwork' href='#' >"+_T("Parent/Child Network")+"</a></li>";
 		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>Admin</li>";
 		body+="			<li><a id='altui-optimize' href='#'>"+_T("Optimizations")+"</a></li>";
@@ -5961,6 +5985,7 @@ $(document).ready(function() {
 		.on( "click", "#altui-luastart", UIManager.pageLuaStart )
 		.on( "click", "#altui-luatest", UIManager.pageLuaTest )
 		.on( "click", "#altui-zwavenetwork", UIManager.pageZwave )		
+		.on( "click", "#altui-childrennetwork", UIManager.pageChildren )		
 		.on( "click", "#altui-energy", UIManager.pagePower )	
 		.on( "click", "#altui-optimize", UIManager.pageOptimize )
 		.on( "click", "#altui-localize", UIManager.pageLocalization  )

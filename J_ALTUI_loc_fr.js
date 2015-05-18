@@ -153,5 +153,6 @@ Localization.init( {
   "Power":"Puissance",
   "Localization information":"Information de Traduction",
   "Mesh":"Couverture",
-  "Order By":"Trier par"
+  "Order By":"Trier par",
+  "Reset Poll Counters":"Remise a Zéro des compteurs"
 });

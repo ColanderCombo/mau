@@ -153,5 +153,6 @@ Localization.init( {
 	"Power":"Power",
 	"Localization information":"Localization information",
 	"Mesh":"Mesh",
-	"Order By":"Order By"
+	"Order By":"Order By",
+	"Reset Poll Counters":"Reset Poll Counters"
 	});
