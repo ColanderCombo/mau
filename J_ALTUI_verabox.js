@@ -817,21 +817,23 @@ var VeraBox = ( function( window, undefined ) {
 		}
 	};
 	
-	function _evaluateConditions(deviceid,conditions) {
+	function _evaluateConditions(deviceid,devsubcat,conditions) {
 		var bResult = false;
 		var expressions=[];
 		$.each(conditions, function(i,condition){
 			// strange device JSON sometime ... ex zWave repeater, condition is not defined
-			if ( (condition.service!=undefined) && (condition.variable!=undefined))
+			if ( (condition.service!=undefined) && (condition.variable!=undefined) &&
+				 ( (condition.subcategory_num==undefined) || (condition.subcategory_num==devsubcat) ) )
 			{
 				var str = "";
 				if (isInteger( condition.value )) {
 					var val = VeraBox.getStatus( deviceid, condition.service, condition.variable );
 					if (val=="")
-						AltuiDebug.debug( "devid:{0} service:{1} variable:{2} value:'{3}' should not be null".format( 
+						AltuiDebug.debug( "devid:{0} service:{1} variable:{2} devsubcat:{3} value:'{4}' should not be null".format( 
 							deviceid,
 							condition.service, 
 							condition.variable,
+							devsubcat,
 							val));
 					val = val || 0;
 					str = "({0} {1} {2})".format(
@@ -854,7 +856,7 @@ var VeraBox = ( function( window, undefined ) {
 			}
 		});
 		var str = expressions.join(" && ");
-		AltuiDebug.debug("_evaluateConditions(deviceid:{0} str:{1} conditions:{2})".format(deviceid,str,JSON.stringify(conditions)));
+		AltuiDebug.debug("_evaluateConditions(deviceid:{0} devsubcat:{1} str:{2} conditions:{3})".format(deviceid,devsubcat,str,JSON.stringify(conditions)));
 		var bResult = eval(str);
 		return bResult;
 	};
