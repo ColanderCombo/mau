@@ -823,7 +823,7 @@ var VeraBox = ( function( window, undefined ) {
 		$.each(conditions, function(i,condition){
 			// strange device JSON sometime ... ex zWave repeater, condition is not defined
 			if ( (condition.service!=undefined) && (condition.variable!=undefined) &&
-				 ( (condition.subcategory_num==undefined) || (condition.subcategory_num==devsubcat) ) )
+				 ( (condition.subcategory_num==undefined) || (condition.subcategory_num==0) || (devsubcat==-1) || (condition.subcategory_num==devsubcat) ) )
 			{
 				var str = "";
 				if (isInteger( condition.value )) {

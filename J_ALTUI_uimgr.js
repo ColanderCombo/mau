@@ -2231,7 +2231,7 @@ var UIManager  = ( function( window, undefined ) {
 						if (_isObject(obj) && (obj.img!=undefined) ) {
 							// obj.conditions is an array
 							// obj.img s the icon
-							if (VeraBox.evaluateConditions(device.id, device.subcategory_num || 0, obj.conditions))
+							if (VeraBox.evaluateConditions(device.id, device.subcategory_num || -1, obj.conditions))
 							{
 								bFound = true;
 								str = obj.img;
