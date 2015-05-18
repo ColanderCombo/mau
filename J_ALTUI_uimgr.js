@@ -5213,7 +5213,7 @@ var UIManager  = ( function( window, undefined ) {
 			
 			var c = d3.scale.quantize()
 				.domain( [0,1] )
-				.range(["red","orange","yellow","green"]);
+				.range(["red","orange","yellow","yellowgreen","green"]);
 
 			var row = chart.selectAll(".ligne").data(data);
 			row.enter()
@@ -5778,7 +5778,6 @@ $(document).ready(function() {
 		padding-right: 10px;\
 		padding-bottom: 5px;\
 		padding-left: 10px;\
-		overflow: hidden;\
 	}\
 	.altui-device-body {\
 		height:52px;\
