@@ -2377,7 +2377,7 @@ var UIManager  = ( function( window, undefined ) {
 		dropdownTemplate += "<div class='pull-right text-muted'><small>#"+device.id+" </small></div>";
 
 		var devicecontainerTemplate	= "<div class='panel panel-{4} altui-device ' id='{0}'>"
-		devicecontainerTemplate	+=		"<div class='panel-heading altui-device-heading'>"+dropdownTemplate+batteryHtml+"<span class='panel-title altui-device-title' data-toggle='tooltip' data-placement='left' title='{2}'><small>{1}</small></span></div>";
+		devicecontainerTemplate	+=		"<div class='panel-heading altui-device-heading'>"+dropdownTemplate+batteryHtml+"<div class='panel-title altui-device-title' data-toggle='tooltip' data-placement='left' title='{2}'><small>{1}</small></div></div>";
 		devicecontainerTemplate	+=  	"<div class='panel-body altui-device-body'>";
 		devicecontainerTemplate	+= 	  	iconHtml;
 		devicecontainerTemplate	+= 	  	"{3}";
@@ -5772,6 +5772,10 @@ $(document).ready(function() {
 		font-size:12px;					\
 		font-family:Arial;				\
 	}									\
+	.altui-device-title {		\
+		overflow: hidden;		\
+		height: 28px;			\
+	}		\
 	.altui-device-heading,.altui-scene-heading {	\
 		height:30px;\
 		padding-top: 5px;\
@@ -5877,8 +5881,6 @@ $(document).ready(function() {
 	}		\
 	.altui-leftnav {		\
 		width: 100%;		\
-	}		\
-	.altui-device-command {		\
 	}		\
 	.on-off-device {		\
 	  width: 70px;		\
