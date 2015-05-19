@@ -3000,30 +3000,37 @@ var UIManager  = ( function( window, undefined ) {
 			if (Object.keys(scripts).length==0)
 				_defereddisplay(true);
 			else
+			{
 				$.each( scripts , function (scriptname,func){
-				var len = $('script[data-src="'+scriptname+'"]').length;
-				if (len==0) {				// not loaded yet
-					_createScript( scriptname );
-					_toLoad ++;
-					FileDB.getFileContent( scriptname, function(data) {
-						_toLoad --;
-						// vague tentative to fix the code of loaded script !!!
-						var ui7style = false;
-						$.each(func, function(i,f) {
-							if (f.indexOf('.')!=-1) {
-								ui7style=true;
-								return false;
-							}
-						});
-						data = _fixScriptPostLoad( scriptname , data, ui7style );
-						var code = "//@ sourceURL="+scriptname+"\n"+data;
-						$('script[data-src="'+scriptname+'"]').text(code);
-						_defereddisplay(true);
-					})
-				}
-			});
-		};
-	};
+					var len = $('script[data-src="'+scriptname+'"]').length;
+					if (len==0) {				// not loaded yet
+						_toLoad ++;
+					}
+				});
+				$.each( scripts , function (scriptname,func){
+					var len = $('script[data-src="'+scriptname+'"]').length;
+					if (len==0) {				// not loaded yet
+						_createScript( scriptname );
+						FileDB.getFileContent( scriptname, function(data) {
+							_toLoad --;
+							// vague tentative to fix the code of loaded script !!!
+							var ui7style = false;
+							$.each(func, function(i,f) {
+								if (f.indexOf('.')!=-1) {
+									ui7style=true;
+									return false;
+								}
+							});
+							data = _fixScriptPostLoad( scriptname , data, ui7style );
+							var code = "//@ sourceURL="+scriptname+"\n"+data;
+							$('script[data-src="'+scriptname+'"]').text(code);
+							_defereddisplay(true);
+						})
+					}
+				})
+			}
+		}
+	}
 	
 	function _refreshFooter() {
 		// refresh footer if needed
@@ -4286,11 +4293,17 @@ var UIManager  = ( function( window, undefined ) {
 
 		$(".altui-mainpanel")
 			.off("click",".altui-device-controlpanelitem")
-			.on("click",".altui-device-controlpanelitem , .altui-device .altui-device-icon",function(){ 
+			.on("click",".altui-device-controlpanelitem",function(){ 
 				var id = $(this).parents(".altui-device").prop('id');
 				UIManager.pageControlPanel(id);
 			});
-
+			
+		$(".altui-mainpanel")
+			.off("click",".altui-device-icon")
+			.on("click",".altui-device-icon",function(){ 
+				var id = $(this).parents(".altui-device").prop('id');
+				UIManager.pageControlPanel(id);
+			});
 	},
 
 	pageScenes: function ()
@@ -5502,7 +5515,7 @@ var UIManager  = ( function( window, undefined ) {
 
 $(document).ready(function() {
 	function _initLocalizedGlobals() {
-		console.log("_initLocalizedGlobals()");
+		// console.log("_initLocalizedGlobals()");
 		_HouseModes = [
 			{id:1, text:_T("Home"), cls:"preset_home"},
 			{id:2, text:_T("Away"), cls:"preset_away"},
