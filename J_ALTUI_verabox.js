@@ -763,21 +763,23 @@ var VeraBox = ( function( window, undefined ) {
 		if (states==null)
 			return null;
 		
-		var states = $.grep( states , function( state,idx) {
+		var found = $.grep( states , function( state,idx) {
 			return ( state.service == service ) && (state.variable == variable);
 		});
 		
-		if (states.length==0) {
+		if (found.length==0) {
 			if (bCreate != true)
 				return null;
-			states.push( {
+			var newstate = {
 				service: service,
 				variable: variable,
 				value: null
-			} );
+			};
+			states.push( newstate );
+			return newstate;
 		}
 		
-		return states[0];
+		return found[0];
 	};
 	
 	function _getStatus( deviceid, service, variable )
@@ -1848,6 +1850,22 @@ function get_event_definition(DeviceType){
             return jsonp.ud.static_data[i].eventList2;
         }
     }
+}
+
+function new_scene_id(){
+	return VeraBox.getNewSceneID();
+    // var sceneIDs=[];
+    // var indexNo=jsonp.ud.scenes.length;
+    // if(indexNo==0){
+        // return offset_id+1;
+    // }
+    // for(var i=0;i<indexNo;i++){
+        // sceneIDs[sceneIDs.length]=jsonp.ud.scenes[i].id;
+    // }
+    // var sceneID=sceneIDs.max()+1;
+    // sceneID=(sceneID<offset_id)?(parseInt(sceneID)+offset_id):sceneID;
+
+    // return sceneID;
 }
 
 var Ajax = (function(window,undefined) {

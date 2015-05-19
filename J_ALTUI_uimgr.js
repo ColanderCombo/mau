@@ -1852,7 +1852,11 @@ var UIManager  = ( function( window, undefined ) {
 		{
 		// if (name=="J_WakeUpLight.js") {
 			// https://regex101.com/
-			var re = /\$\((.*?)\).value/g; 
+			var re = /\$\((.*?)\).value\s*=(.*);/g; 
+			var subst = '$(\'#\'+$1).val($2);'; 
+			code = code.replace(re, subst);
+
+			re = /\$\((.*?)\).value/g; 
 			var subst = '$(\'#\'+$1).val()'; 
 			code = code.replace(re, subst);
 			
@@ -1875,6 +1879,10 @@ var UIManager  = ( function( window, undefined ) {
 			if (name=="J_ProgramLogicC.js") {
 				re = /!\$\((selectedEventObj)\)/g; 
 				subst = '($("#"+selectedEventObj).length==0)'; 
+				code = code.replace(re, subst);
+				
+				re = /\$\$\((.*?)\)/g; 
+				subst = '$($1)'; 
 				code = code.replace(re, subst);
 			}
 		}
