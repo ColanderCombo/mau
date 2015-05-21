@@ -4494,7 +4494,7 @@ var UIManager  = ( function( window, undefined ) {
 			var manual_plugins={};
 
 			// first aggregate to find manually installed plugin
-			$.each( $.grep(jsonp.ud.devices,function(d){ return d.id_parent==0  && d.plugin==undefined}) , function(i,d) {
+			$.each( $.grep(devices,function(d){ return d.id_parent==0  && d.plugin==undefined}) , function(i,d) {
 				manual_plugins[d.device_file] = {
 					devtype : d.device_type,
 					files   : [ {SourceName:d.device_file}, {SourceName:d.device_json}, {SourceName:d.impl_file}]
@@ -5383,24 +5383,118 @@ var UIManager  = ( function( window, undefined ) {
 	},
 	
 	pageChildren: function() {
-		var margin = {top: 10, right: 50, bottom: 10, left: 150},
-			width = $(".altui-mainpanel").innerWidth() - margin.left - margin.right-30,
-			barHeight = 20,
-			height = width; // calculated later
+		var height = width = null;
 			
+		function _prepareData() {
+			var data = { nodes: [] ,links: [] };
+			var xref = {};
+			var color = {};
+			var nColor = 0;
+			var devices = VeraBox.getDevicesSync();
+			data.nodes.push( { id:0, name:"root" } );
+			xref[0] = data.nodes.length-1;
+			$.each( devices, function( idx,device ) {
+				if (color[device.device_type]==undefined)
+					color[device.device_type]=nColor++;
+				data.nodes.push( { id:device.id, name:device.name, color:color[device.device_type] } );
+				xref[device.id] = data.nodes.length-1;
+			});
+			$.each( devices, function( idx,device ) {
+				data.links.push( { source:xref[device.id_parent || 0], target:xref[device.id] } );
+			});
+			return data;
+		};
+		
 		function _drawChart() {
 			$(".altui-children-d3chart").replaceWith("<svg class='altui-children-d3chart'></svg>");
-			// VeraBox.getDevices();
-			alert('wip');
+			var available_height = $(window).height() - $("#altui-pagemessage").outerHeight() - $("#altui-pagetitle").outerHeight() - $("#altui-zwavechart-order").outerHeight() - $("footer").outerHeight();
+			var margin = {top: 20, right: 10, bottom: 10, left: 20};
+			width = $(".altui-children-d3chart-container").innerWidth() - margin.left - margin.right-30;
+			height = Math.min(width,available_height - margin.top - margin.bottom);
+			if (width<height)
+				height = width;
+			else
+				width = height;
+			
+			//Set up the colour scale
+			var color = d3.scale.category20();
+
+			var svg = d3.select(".altui-children-d3chart")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+				// .style("margin-left", -margin.left + "px")
+				.append("g")
+					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+			//Set up the force layout
+			var data = _prepareData();
+			var force = d3.layout.force()
+				.charge(-120)
+				.linkDistance(30)
+				.size([width, height])
+				.nodes( data.nodes )
+				.links( data.links )
+				.start();
+			
+			var link = svg.selectAll(".link")
+				.data( data.links )
+				.enter()
+					.append("line")
+					.attr("class", "link")
+					.style("stroke-width", 1 );
+					
+			var node = svg.selectAll(".node")
+				.data( data.nodes )
+				.enter()
+					.append("circle")
+					.attr("class", "node")
+					.attr("r", 8)
+					.style("fill", function (d) {
+						return color(d.color);
+					})
+				.call( force.drag );
+				
+			//Now we are giving the SVGs co-ordinates - the force layout is generating the co-ordinates which this code is using to update the attributes of the SVG elements
+			force.on("tick", function () {
+				link.attr("x1", function (d) {
+						return d.source.x;
+					})
+					.attr("y1", function (d) {
+						return d.source.y;
+					})
+					.attr("x2", function (d) {
+						return d.target.x;
+					})
+					.attr("y2", function (d) {
+						return d.target.y;
+					});
+
+				node.attr("cx", function (d) {
+						return d.x;
+					})
+					.attr("cy", function (d) {
+						return d.y;
+					});
+			});
 		};
 		
 		// prepare and load D3 then draw the chart
 		UIManager.clearPage(_T('Parent/Child'),_T("Parent Child Chart"));
 		$(".altui-mainpanel")
 			.append(
-				"<style>				\
+				"<style>					\
+				.node {						\
+					stroke: #fff;			\
+					stroke-width: 1.5px;	\
+				}							\
+				.link {						\
+					stroke: #999;			\
+					stroke-opacity: .6;		\
+				}							\
 				</style>" )
-			.append("<svg class='altui-children-d3chart'></svg>");
+			.append("<div class='altui-children-d3chart-container'>")
+			.append(	"<svg class='altui-children-d3chart'></svg>")
+			.append("</div>");
 		UIManager.loadD3Script( _drawChart );
 	},
 	
