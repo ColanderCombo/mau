@@ -5384,7 +5384,7 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pageChildren: function() {
 		var height = width = null;
-			
+		
 		function _prepareData() {
 			var data = { nodes: [] ,links: [] };
 			var xref = {};
@@ -5396,25 +5396,44 @@ var UIManager  = ( function( window, undefined ) {
 			$.each( devices, function( idx,device ) {
 				if (color[device.device_type]==undefined)
 					color[device.device_type]=nColor++;
-				data.nodes.push( { id:device.id, name:device.name, color:color[device.device_type] } );
+				data.nodes.push( { 
+					id:device.id, 
+					name:device.name, 
+					color:color[device.device_type] 
+					} );
 				xref[device.id] = data.nodes.length-1;
 			});
 			$.each( devices, function( idx,device ) {
-				data.links.push( { source:xref[device.id_parent || 0], target:xref[device.id] } );
+				data.links.push( { source:xref[device.id_parent || 0], target:xref[device.id]} );
 			});
+			$.each( data.links, function( idx,link ) {
+				if (idx==0)
+					link.distance = 80;
+				else {
+					// if destination node has no children , distance should be shorter
+					var destnode = link.target;
+					var childrens = $.grep( data.links , function (l) { return l.source==destnode } );
+					link.distance = (childrens.length==0) ? 100 : 150;
+				}
+			});
+			
 			return data;
 		};
 		
 		function _drawChart() {
+			function dblclick(d) {
+				d3.select(this).classed("fixed", d.fixed = false);
+			}
+
+			function dragstart(d) {
+				d3.select(this).classed("fixed", d.fixed = true);
+			}
+			
 			$(".altui-children-d3chart").replaceWith("<svg class='altui-children-d3chart'></svg>");
 			var available_height = $(window).height() - $("#altui-pagemessage").outerHeight() - $("#altui-pagetitle").outerHeight() - $("#altui-zwavechart-order").outerHeight() - $("footer").outerHeight();
 			var margin = {top: 20, right: 10, bottom: 10, left: 20};
 			width = $(".altui-children-d3chart-container").innerWidth() - margin.left - margin.right-30;
 			height = Math.min(width,available_height - margin.top - margin.bottom);
-			if (width<height)
-				height = width;
-			else
-				width = height;
 			
 			//Set up the colour scale
 			var color = d3.scale.category20();
@@ -5430,7 +5449,8 @@ var UIManager  = ( function( window, undefined ) {
 			var data = _prepareData();
 			var force = d3.layout.force()
 				.charge(-120)
-				.linkDistance(30)
+				.gravity(0.05)
+				.linkDistance(function(d) { return  d.distance; })
 				.size([width, height])
 				.nodes( data.nodes )
 				.links( data.links )
@@ -5443,38 +5463,38 @@ var UIManager  = ( function( window, undefined ) {
 					.attr("class", "link")
 					.style("stroke-width", 1 );
 					
+			var drag = force.drag().on("dragstart", dragstart);
 			var node = svg.selectAll(".node")
 				.data( data.nodes )
 				.enter()
-					.append("circle")
+					.append("g")
 					.attr("class", "node")
+				.on("dblclick", dblclick)
+				.call( drag );
+
+			node.append("circle")					
 					.attr("r", 8)
 					.style("fill", function (d) {
 						return color(d.color);
-					})
-				.call( force.drag );
+					});
+			node.append("text")					
+					.attr("dx", 15)
+					.attr("dy", ".35em")
+					.text(function (d) { return d.name; });
 				
 			//Now we are giving the SVGs co-ordinates - the force layout is generating the co-ordinates which this code is using to update the attributes of the SVG elements
 			force.on("tick", function () {
-				link.attr("x1", function (d) {
-						return d.source.x;
-					})
-					.attr("y1", function (d) {
-						return d.source.y;
-					})
-					.attr("x2", function (d) {
-						return d.target.x;
-					})
-					.attr("y2", function (d) {
-						return d.target.y;
-					});
+				link.attr("x1", function(d) { return d.source.x; })
+					.attr("y1", function(d) { return d.source.y; })
+					.attr("x2", function(d) { return d.target.x; })
+					.attr("y2", function(d) { return d.target.y; });
 
-				node.attr("cx", function (d) {
-						return d.x;
-					})
-					.attr("cy", function (d) {
-						return d.y;
-					});
+				d3.selectAll("circle")
+					.attr("cx", function (d) { return d.x; })
+					.attr("cy", function (d) { return d.y; });
+				d3.selectAll("text")
+					.attr("x", function (d) { return d.x; })
+					.attr("y", function (d) { return d.y; });
 			});
 		};
 		
@@ -5484,17 +5504,27 @@ var UIManager  = ( function( window, undefined ) {
 			.append(
 				"<style>					\
 				.node {						\
+					cursor: move;			\
+				}							\
+				.node circle {		\
 					stroke: #fff;			\
 					stroke-width: 1.5px;	\
+				}							\
+				.node.fixed circle {		\
+					stroke: #f00;			\
+					stroke-width: 1.5px;	\
+				}							\
+				.node text {				\
+					fill: gray;				\
+					pointer-events: none;	\
+					font-size: 10px;		\
 				}							\
 				.link {						\
 					stroke: #999;			\
 					stroke-opacity: .6;		\
 				}							\
 				</style>" )
-			.append("<div class='altui-children-d3chart-container'>")
-			.append(	"<svg class='altui-children-d3chart'></svg>")
-			.append("</div>");
+			.append("<div class='altui-children-d3chart-container'><svg class='altui-children-d3chart'></svg></div>")
 		UIManager.loadD3Script( _drawChart );
 	},
 	
