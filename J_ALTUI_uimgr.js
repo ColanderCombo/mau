@@ -5384,10 +5384,10 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pageChildren: function() {
 		var height = width = null;
+		var data = { nodes: [] ,links: [] };
+		var xref = {};
 		
 		function _prepareData() {
-			var data = { nodes: [] ,links: [] };
-			var xref = {};
 			var color = {};
 			var nColor = 0;
 			var devices = VeraBox.getDevicesSync();
@@ -5408,12 +5408,12 @@ var UIManager  = ( function( window, undefined ) {
 			});
 			$.each( data.links, function( idx,link ) {
 				if (idx==0)
-					link.distance = 80;
+					link.distance = 25;
 				else {
 					// if destination node has no children , distance should be shorter
 					var destnode = link.target;
 					var childrens = $.grep( data.links , function (l) { return l.source==destnode } );
-					link.distance = (childrens.length==0) ? 100 : 150;
+					link.distance = (childrens.length==0) ? 50 : 100;
 				}
 			});
 			
@@ -5421,11 +5421,26 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		
 		function _drawChart() {
+			function sglclick(d) {
+				if (d3.event.defaultPrevented) return;
+				var selectednode = d3.select(this);
+				var collapsed = selectednode.classed("closed");
+				if (collapsed) {
+					// if node was closed : add children/links and open it
+					selectednode.classed("closed",false);
+				}
+				else {
+					// if node was opened : remove children/links and close it
+					selectednode.classed("closed",true);
+				}
+			}
+			
 			function dblclick(d) {
 				d3.select(this).classed("fixed", d.fixed = false);
 			}
 
 			function dragstart(d) {
+				d3.event.sourceEvent.stopPropagation(); // silence other listeners
 				d3.select(this).classed("fixed", d.fixed = true);
 			}
 			
@@ -5457,30 +5472,33 @@ var UIManager  = ( function( window, undefined ) {
 				.start();
 			
 			var link = svg.selectAll(".link")
-				.data( data.links )
-				.enter()
+				.data( data.links );
+			link.enter()
 					.append("line")
 					.attr("class", "link")
 					.style("stroke-width", 1 );
+			link.exit().remove()
 					
 			var drag = force.drag().on("dragstart", dragstart);
 			var node = svg.selectAll(".node")
-				.data( data.nodes )
-				.enter()
+				.data( data.nodes );
+				
+			var groups = node.enter()
 					.append("g")
-					.attr("class", "node")
-				.on("dblclick", dblclick)
-				.call( drag );
-
-			node.append("circle")					
-					.attr("r", 8)
-					.style("fill", function (d) {
-						return color(d.color);
-					});
-			node.append("text")					
-					.attr("dx", 15)
-					.attr("dy", ".35em")
-					.text(function (d) { return d.name; });
+						.attr("class", "node")
+						.on("dblclick", dblclick)
+						.on("click", sglclick )
+						.call( drag );
+			groups.append("circle")					
+						.attr("r", 8)
+						.style("fill", function (d) {
+							return color(d.color);
+						});
+			groups.append("text")					
+						.attr("dx", 15)
+						.attr("dy", ".35em")
+						.text(function (d) { return d.name; });
+			node.exit().remove();
 				
 			//Now we are giving the SVGs co-ordinates - the force layout is generating the co-ordinates which this code is using to update the attributes of the SVG elements
 			force.on("tick", function () {
@@ -5513,6 +5531,10 @@ var UIManager  = ( function( window, undefined ) {
 				.node.fixed circle {		\
 					stroke: #f00;			\
 					stroke-width: 1.5px;	\
+				}							\
+				.node.closed circle {		\
+					stroke: white !important;		\
+					fill: white !important;			\
 				}							\
 				.node text {				\
 					fill: gray;				\
