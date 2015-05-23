@@ -4768,7 +4768,7 @@ var UIManager  = ( function( window, undefined ) {
 		
 		// draw page & toolbox
 		UIManager.clearPage(_T('Edit Pages'),_T("Custom Pages Editor"));
-		PageMessage.message("Drag and Drop to add/move/delete controls. use Ctrl+Click or lasso to select multiple controls","info");
+		PageMessage.message(_T("Drag and Drop to add/move/delete controls. use Ctrl+Click or lasso to select multiple controls"),"info");
 
 		// register dialog
 		$("div#dialogs").append(defaultDialogModalTemplate.format( 'vide', 'vide'));
@@ -5463,18 +5463,24 @@ var UIManager  = ( function( window, undefined ) {
 				.linkDistance(function(d) { return  50+(d.source.children ? 3*d.source.children.length:0 ) })
 				.size([width, height])
 				.on("tick", function () {
-					d3.selectAll(".link")
-						.attr("x1", function(d) { return d.source.x; })
-						.attr("y1", function(d) { return d.source.y; })
-						.attr("x2", function(d) { return d.target.x; })
-						.attr("y2", function(d) { return d.target.y; });
+					// avoid asynchronous tick when the user changed the page
+					// this crashed d3
+					if ($("#altui-pagetitle").html()==_T("Parent/Child Network")) 
+					{
+						d3.selectAll(".link")
+							.attr("x1", function(d) { return d.source.x; })
+							.attr("y1", function(d) { return d.source.y; })
+							.attr("x2", function(d) { return d.target.x; })
+							.attr("y2", function(d) { return d.target.y; });
 
-					d3.selectAll("circle")
-						.attr("cx", function (d) { return d.x; })
-						.attr("cy", function (d) { return d.y; });
-					d3.selectAll("text")
-						.attr("x", function (d) { return d.x; })
-						.attr("y", function (d) { return d.y; });
+						d3.selectAll("circle")
+							.attr("cx", function (d) { return d.x; })
+							.attr("cy", function (d) { return d.y; });
+						d3.selectAll("text")
+							.attr("x", function (d) { 
+							return d.x; })
+							.attr("y", function (d) { return d.y; });
+					}
 				});
 			
 			var drag = force.drag().on("dragstart", dragstart);			
@@ -5483,11 +5489,15 @@ var UIManager  = ( function( window, undefined ) {
 				if (d3.event.defaultPrevented) return;
 				// console.log('click');
 				if (d.children) {
+					if (d.children.length==0)
+						return;	// non collapsible node
 					d._children = d.children;
 					d.children = null;
 				} else {
-					d.children = d._children;
-					d._children = null;
+					if (d._children) {
+						d.children = d._children;
+						d._children = null;
+					}
 				}
 				var selection = d3.select(this);
 				selection.classed("closed", d._children!=null );
@@ -5559,6 +5569,7 @@ var UIManager  = ( function( window, undefined ) {
 		
 		// prepare and load D3 then draw the chart
 		UIManager.clearPage(_T('Parent/Child'),_T("Parent/Child Network"));
+		PageMessage.message(_T("Drag and Drop to fix the position of a node. Simple Click to open or collapse a parent node"),"info");
 		$(".altui-mainpanel")
 			.append(
 				"<style>					\
