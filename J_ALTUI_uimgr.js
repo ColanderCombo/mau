@@ -5384,66 +5384,61 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pageChildren: function() {
 		var height = width = null;
-		var data = { nodes: [] ,links: [] };
-		var xref = {};
+		var data = { root:[], nodes:[] , links:[] };
+		
+		// Returns a list of all nodes under the root.
+		function _flatten(root) {
+			var nodes = [], i = 0;
+			function recurse(node) {
+				if (node.children) node.children.forEach(recurse);
+				// if (!node.id) node.id = ++i;
+				nodes.push(node);
+			}
+			recurse(root);
+			return nodes;
+		};
+		
+		function _findNode( root, id ) {
+			var found=null;
+			if (root.id == id )
+				return root;
+			if (root.children)
+				$.each( root.children, function (i,n) {
+					found = _findNode( n, id );
+					return ( found==null );
+				});				
+			return found;
+		};
+		
+		function _addNode( node ) {
+			var parent = _findNode( data.root, node.id_parent );
+			if (parent==null)	
+				alert('error');
+			else
+				parent.children.push( node );
+		};
 		
 		function _prepareData() {
 			var color = {};
 			var nColor = 0;
 			var devices = VeraBox.getDevicesSync();
-			data.nodes.push( { id:0, name:"root" } );
-			xref[0] = data.nodes.length-1;
+			data.root={ id:0, name:"root", children:[] };
 			$.each( devices, function( idx,device ) {
 				if (color[device.device_type]==undefined)
 					color[device.device_type]=nColor++;
-				data.nodes.push( { 
+				_addNode({ 
 					id:device.id, 
 					name:device.name, 
-					color:color[device.device_type] 
-					} );
-				xref[device.id] = data.nodes.length-1;
-			});
-			$.each( devices, function( idx,device ) {
-				data.links.push( { source:xref[device.id_parent || 0], target:xref[device.id]} );
-			});
-			$.each( data.links, function( idx,link ) {
-				if (idx==0)
-					link.distance = 25;
-				else {
-					// if destination node has no children , distance should be shorter
-					var destnode = link.target;
-					var childrens = $.grep( data.links , function (l) { return l.source==destnode } );
-					link.distance = (childrens.length==0) ? 50 : 100;
-				}
+					color:color[device.device_type] ,
+					id_parent:device.id_parent || 0,
+					children: []
+					});
 			});
 			
 			return data;
 		};
 		
 		function _drawChart() {
-			function sglclick(d) {
-				if (d3.event.defaultPrevented) return;
-				var selectednode = d3.select(this);
-				var collapsed = selectednode.classed("closed");
-				if (collapsed) {
-					// if node was closed : add children/links and open it
-					selectednode.classed("closed",false);
-				}
-				else {
-					// if node was opened : remove children/links and close it
-					selectednode.classed("closed",true);
-				}
-			}
-			
-			function dblclick(d) {
-				d3.select(this).classed("fixed", d.fixed = false);
-			}
-
-			function dragstart(d) {
-				d3.event.sourceEvent.stopPropagation(); // silence other listeners
-				d3.select(this).classed("fixed", d.fixed = true);
-			}
-			
 			$(".altui-children-d3chart").replaceWith("<svg class='altui-children-d3chart'></svg>");
 			var available_height = $(window).height() - $("#altui-pagemessage").outerHeight() - $("#altui-pagetitle").outerHeight() - $("#altui-zwavechart-order").outerHeight() - $("footer").outerHeight();
 			var margin = {top: 20, right: 10, bottom: 10, left: 20};
@@ -5463,61 +5458,107 @@ var UIManager  = ( function( window, undefined ) {
 			//Set up the force layout
 			var data = _prepareData();
 			var force = d3.layout.force()
-				.charge(-120)
+				.charge(function(d) { return -120 - (d.children ? 2*d.children.length : 0) } )
 				.gravity(0.05)
-				.linkDistance(function(d) { return  d.distance; })
+				.linkDistance(function(d) { return  50+(d.source.children ? 3*d.source.children.length:0 ) })
 				.size([width, height])
-				.nodes( data.nodes )
-				.links( data.links )
-				.start();
+				.on("tick", function () {
+					d3.selectAll(".link")
+						.attr("x1", function(d) { return d.source.x; })
+						.attr("y1", function(d) { return d.source.y; })
+						.attr("x2", function(d) { return d.target.x; })
+						.attr("y2", function(d) { return d.target.y; });
+
+					d3.selectAll("circle")
+						.attr("cx", function (d) { return d.x; })
+						.attr("cy", function (d) { return d.y; });
+					d3.selectAll("text")
+						.attr("x", function (d) { return d.x; })
+						.attr("y", function (d) { return d.y; });
+				});
 			
-			var link = svg.selectAll(".link")
-				.data( data.links );
-			link.enter()
-					.append("line")
-					.attr("class", "link")
-					.style("stroke-width", 1 );
-			link.exit().remove()
-					
-			var drag = force.drag().on("dragstart", dragstart);
-			var node = svg.selectAll(".node")
-				.data( data.nodes );
+			var drag = force.drag().on("dragstart", dragstart);			
+			
+			function sglclick(d) {
+				if (d3.event.defaultPrevented) return;
+				// console.log('click');
+				if (d.children) {
+					d._children = d.children;
+					d.children = null;
+				} else {
+					d.children = d._children;
+					d._children = null;
+				}
+				var selection = d3.select(this);
+				selection.classed("closed", d._children!=null );
+				_updateChart(data);
+			};
+			function dblclick(d) {
+				// console.log('dblclick');
+				d3.select(this).classed("fixed", d.fixed = false);
+			};
+			function dragstart(d) {
+				// console.log('dragstart');
+				d3.event.sourceEvent.stopPropagation(); // silence other listeners
+				d3.select(this).classed("fixed", d.fixed = true);
+			};				
+			function _updateChart(data) {
 				
-			var groups = node.enter()
-					.append("g")
-						.attr("class", "node")
-						.on("dblclick", dblclick)
-						.on("click", sglclick )
-						.call( drag );
-			groups.append("circle")					
-						.attr("r", 8)
+				data.nodes = _flatten(data.root);
+				data.links = d3.layout.tree().links(data.nodes);
+
+				force
+					.nodes( data.nodes )
+					.links( data.links )
+					.start();
+					
+				var link = svg.selectAll(".link").data( data.links , function(d) { return d.target.id; } );
+				var node = svg.selectAll(".node").data( data.nodes , function(d) { return d.id; } );
+				
+				link.exit().remove();
+				link.enter()
+					.insert("line", ".node")		// so that node allways hide links
+					.attr("class", "link")
+					.style("stroke-width", 1 )
+					.attr("x1", function(d) { return d.source.x; })
+					.attr("y1", function(d) { return d.source.y; })
+					.attr("x2", function(d) { return d.target.x; })
+					.attr("y2", function(d) { return d.target.y; });					
+
+				node.exit().remove();				
+				node.classed("fixed", function(d) { 
+						return d.fixed })
+					.classed("closed", function(d) { 
+						return d._children!=null } );
+					
+				var groups = node.enter().append("g")
+							.attr("class", "node")
+							.classed("fixed", function(d) { 
+							return d.fixed } )
+							.classed("closed", function(d) {
+								return d._children!=null } )
+							.on("dblclick", dblclick)
+							.on("click", sglclick )
+							.call( drag );
+					groups.append("circle")					
+						.attr("r", function(d) { 
+							return 8+ (d.children ? d.children.length/2 : 0);
+						} )
 						.style("fill", function (d) {
-							return color(d.color);
+							return color(d._children ? "#3182bd" : d.color);
 						});
-			groups.append("text")					
+					groups.append("text")					
 						.attr("dx", 15)
 						.attr("dy", ".35em")
 						.text(function (d) { return d.name; });
-			node.exit().remove();
-				
-			//Now we are giving the SVGs co-ordinates - the force layout is generating the co-ordinates which this code is using to update the attributes of the SVG elements
-			force.on("tick", function () {
-				link.attr("x1", function(d) { return d.source.x; })
-					.attr("y1", function(d) { return d.source.y; })
-					.attr("x2", function(d) { return d.target.x; })
-					.attr("y2", function(d) { return d.target.y; });
 
-				d3.selectAll("circle")
-					.attr("cx", function (d) { return d.x; })
-					.attr("cy", function (d) { return d.y; });
-				d3.selectAll("text")
-					.attr("x", function (d) { return d.x; })
-					.attr("y", function (d) { return d.y; });
-			});
+			};		
+	
+			_updateChart(data);
 		};
 		
 		// prepare and load D3 then draw the chart
-		UIManager.clearPage(_T('Parent/Child'),_T("Parent Child Chart"));
+		UIManager.clearPage(_T('Parent/Child'),_T("Parent/Child Network"));
 		$(".altui-mainpanel")
 			.append(
 				"<style>					\
@@ -5533,7 +5574,11 @@ var UIManager  = ( function( window, undefined ) {
 					stroke-width: 1.5px;	\
 				}							\
 				.node.closed circle {		\
-					stroke: white !important;		\
+					stroke: white;		\
+					fill: white !important;			\
+				}							\
+				.node.closed.fixed circle {		\
+					stroke: #f00;		\
 					fill: white !important;			\
 				}							\
 				.node text {				\

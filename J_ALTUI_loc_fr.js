@@ -154,5 +154,6 @@ Localization.init( {
   "Localization information":"Information de Traduction",
   "Mesh":"Couverture",
   "Order By":"Trier par",
-  "Reset Poll Counters":"Remise a Zéro des compteurs"
+  "Reset Poll Counters":"Remise a Zéro des compteurs",
+  "Parent/Child Network":"Réseau Parent/Enfant","Parent/Child":"Parent/Enfant"
 });

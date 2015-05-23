@@ -154,5 +154,6 @@ Localization.init( {
 	"Localization information":"Localization information",
 	"Mesh":"Mesh",
 	"Order By":"Order By",
-	"Reset Poll Counters":"Reset Poll Counters"
+	"Reset Poll Counters":"Reset Poll Counters",
+	"Parent/Child Network":"Parent/Child Network","Parent/Child":"Parent/Child"
 	});
