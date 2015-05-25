@@ -5416,10 +5416,11 @@ var UIManager  = ( function( window, undefined ) {
 		
 		function _addNode( node ) {
 			var parent = _findNode( data.root, node.id_parent );
-			if (parent==null)	
-				alert('error');
-			else
-				parent.children.push( node );
+			if (parent==null){	
+				PageMessage.message("Error building node hierarchy","warning");
+				return;
+			}
+			parent.children.push( node );
 		};
 		
 		function _prepareData() {
@@ -5427,17 +5428,18 @@ var UIManager  = ( function( window, undefined ) {
 			var nColor = 0;
 			var devices = VeraBox.getDevicesSync();
 			data.root={ id:0, name:"root", children:[] };
-			$.each( devices, function( idx,device ) {
-				if (color[device.device_type]==undefined)
-					color[device.device_type]=nColor++;
-				_addNode({ 
-					id:device.id, 
-					name:device.name, 
-					color:color[device.device_type] ,
-					id_parent:device.id_parent || 0,
-					children: []
-					});
-			});
+			if (devices)
+				$.each( devices.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function( idx,device ) {
+					if (color[device.device_type]==undefined)
+						color[device.device_type]=nColor++;
+					_addNode({ 
+						id:device.id, 
+						name:device.name, 
+						color:color[device.device_type] ,
+						id_parent:device.id_parent || 0,
+						children: []
+						});
+				});
 			
 			return data;
 		};
