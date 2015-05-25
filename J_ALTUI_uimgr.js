@@ -1435,7 +1435,7 @@ var PageMessage = (function(window, undefined ) {
 
 	function _updateMessageButtonColor() {
 		function _setColor(cls) {
-			$("#altui-toggle-messages").attr("class","btn "+"btn-"+cls);
+			$("#altui-toggle-messages").attr("class","dropdown-toggle btn "+"btn-"+cls);
 		};
 		if ($("div#altui-pagemessage  tr.danger").length>0)
 			_setColor('danger');
@@ -1445,8 +1445,12 @@ var PageMessage = (function(window, undefined ) {
 			_setColor('info');
 		else if ($("div#altui-pagemessage  tr.success").length>0)
 			_setColor('success');
-		else
+		else {
 			_setColor('default');
+			// $("#altui-toggle-messages").dropdown("toggle");
+			$("#altui-toggle-messages").next(".collapse").removeClass("in");
+			$("#altui-toggle-messages span").removeClass( "caret-reversed" );
+		}
 	};
 	
 	function _clearMessage( msgidx ) {
@@ -1549,7 +1553,7 @@ var PageMessage = (function(window, undefined ) {
 	function _init() {
 		var Html="";
 		Html+="<div class='' id='altui-pagemessage'>";
-		Html+="	<button id='altui-toggle-messages' class='btn btn-default' type='button' data-toggle='collapse' data-target='#altui-pagemessage-panel' >";
+		Html+="	<button id='altui-toggle-messages' class='btn btn-default dropdown-toggle' type='button' data-toggle='collapse' data-target='#altui-pagemessage-panel' >";
 		Html+=( _T("Messages") + "&nbsp;<span class='caret'></span>");
 		Html+="	</button>";
 		Html+="	<div class='panel panel-default collapse' id='altui-pagemessage-panel' >";
@@ -5484,28 +5488,36 @@ var UIManager  = ( function( window, undefined ) {
 				});
 			
 			var drag = force.drag().on("dragstart", dragstart);			
-			
+
 			function sglclick(d) {
 				if (d3.event.defaultPrevented) return;
 				// console.log('click');
-				if (d.children) {
-					if (d.children.length==0)
-						return;	// non collapsible node
-					d._children = d.children;
-					d.children = null;
-				} else {
-					if (d._children) {
-						d.children = d._children;
-						d._children = null;
-					}
-				}
 				var selection = d3.select(this);
-				selection.classed("closed", d._children!=null );
+				if (d3.event.shiftKey) {
+					d.fixed =  false;
+					selection.classed("fixed", false  );
+				}
+				else {
+					if (d.children) {
+						if (d.children.length==0)
+							return;	// non collapsible node
+						d._children = d.children;
+						d.children = null;
+						selection.append("text")
+							.text("+")
+							.attr("class", "plussign")
+							.attr("dx", 0)
+							.attr("dy", ".35em")
+					} else {
+						if (d._children) {
+							d.children = d._children;
+							d._children = null;
+						}
+						selection.selectAll(".plussign").remove();
+					}
+					selection.classed("closed", d._children!=null );
+				}
 				_updateChart(data);
-			};
-			function dblclick(d) {
-				// console.log('dblclick');
-				d3.select(this).classed("fixed", d.fixed = false);
 			};
 			function dragstart(d) {
 				// console.log('dragstart');
@@ -5516,7 +5528,6 @@ var UIManager  = ( function( window, undefined ) {
 				
 				data.nodes = _flatten(data.root);
 				data.links = d3.layout.tree().links(data.nodes);
-
 				force
 					.nodes( data.nodes )
 					.links( data.links )
@@ -5525,7 +5536,7 @@ var UIManager  = ( function( window, undefined ) {
 				var link = svg.selectAll(".link").data( data.links , function(d) { return d.target.id; } );
 				var node = svg.selectAll(".node").data( data.nodes , function(d) { return d.id; } );
 				
-				link.exit().remove();
+				link.exit().transition().duration(500).style("opacity","0").remove();
 				link.enter()
 					.insert("line", ".node")		// so that node allways hide links
 					.attr("class", "link")
@@ -5535,19 +5546,17 @@ var UIManager  = ( function( window, undefined ) {
 					.attr("x2", function(d) { return d.target.x; })
 					.attr("y2", function(d) { return d.target.y; });					
 
-				node.exit().remove();				
+				node.exit().transition().duration(1000).style("opacity","0").remove();				
 				node.classed("fixed", function(d) { 
 						return d.fixed })
 					.classed("closed", function(d) { 
 						return d._children!=null } );
-					
-				var groups = node.enter().append("g")
+
+			var groups = node.enter().append("g")
 							.attr("class", "node")
-							.classed("fixed", function(d) { 
-							return d.fixed } )
-							.classed("closed", function(d) {
-								return d._children!=null } )
-							.on("dblclick", dblclick)
+							.classed("fixed", function(d) { return d.fixed } )
+							.classed("closed", function(d) { return d._children!=null } )
+							// .on("dblclick", dblclick)
 							.on("click", sglclick )
 							.call( drag );
 					groups.append("circle")					
@@ -5561,7 +5570,11 @@ var UIManager  = ( function( window, undefined ) {
 						.attr("dx", 15)
 						.attr("dy", ".35em")
 						.text(function (d) { return d.name; });
-
+						
+				// node.selectAll("g.closed").append("text")					
+					// .attr("dx", -15)
+					// .attr("dy", ".35em")
+					// .text("+");	
 			};		
 	
 			_updateChart(data);
@@ -5569,7 +5582,7 @@ var UIManager  = ( function( window, undefined ) {
 		
 		// prepare and load D3 then draw the chart
 		UIManager.clearPage(_T('Parent/Child'),_T("Parent/Child Network"));
-		PageMessage.message(_T("Drag and Drop to fix the position of a node. Simple Click to open or collapse a parent node"),"info");
+		PageMessage.message(_T("Drag and Drop to fix the position of a node. Simple Click to open or collapse a parent node, Shift Click to free a fixed node"),"info");
 		$(".altui-mainpanel")
 			.append(
 				"<style>					\
@@ -5591,6 +5604,10 @@ var UIManager  = ( function( window, undefined ) {
 				.node.closed.fixed circle {		\
 					stroke: #f00;		\
 					fill: white !important;			\
+				}							\
+				.node text.plussign {				\
+					font-size: 18px;		\
+					text-anchor: middle;	\
 				}							\
 				.node text {				\
 					fill: gray;				\

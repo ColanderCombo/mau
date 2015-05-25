@@ -157,5 +157,5 @@ Localization.init( {
 	"Reset Poll Counters":"Reset Poll Counters",
 	"Parent/Child Network":"Parent/Child Network","Parent/Child":"Parent/Child",
 	"Drag and Drop to add/move/delete controls. use Ctrl+Click or lasso to select multiple controls":"Drag and Drop to add/move/delete controls. use Ctrl+Click or lasso to select multiple controls",
-	"Drag and Drop to fix the position of a node. Simple Click to open or collapse a parent node":"Drag and Drop to fix the position of a node. Simple Click to open or collapse a parent node"	
+	"Drag and Drop to fix the position of a node. Simple Click to open or collapse a parent node, Shift Click to free a fixed node":"Drag and Drop to fix the position of a node. Simple Click to open or collapse a parent node, Shift Click to free a fixed node"	
 	});
