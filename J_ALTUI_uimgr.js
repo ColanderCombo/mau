@@ -1829,7 +1829,8 @@ var UIManager  = ( function( window, undefined ) {
 	
 	function _loadD3Script( drawfunc ) {
 		//D3 scripts if needed
-		scriptname = "http://d3js.org/d3.v3.min.js";
+		// scriptname = "http://d3js.org/d3.v3.min.js";
+		scriptname = "//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js";	//supports https
 		var len = $('script[src="'+scriptname+'"]').length;
 		if (len==0) {				// not loaded yet
 			UIManager.loadScript(scriptname,function() {
