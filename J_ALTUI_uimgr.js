@@ -2379,6 +2379,7 @@ var UIManager  = ( function( window, undefined ) {
 		}
 		
 		var dropdownTemplate =  "";
+		
 		dropdownTemplate +=  "<div class='btn-group pull-right'>";
 		dropdownTemplate += "<button class='btn btn-default btn-xs dropdown-toggle altui-device-command' type='button' data-toggle='dropdown' aria-expanded='false'>"; 
 		dropdownTemplate += "<span class='caret'></span>";
@@ -2954,11 +2955,13 @@ var UIManager  = ( function( window, undefined ) {
 				return lines.join('')+html;
 			};
 			function _deviceDrawWireFrame(devid,device,container) {
+				var htmlDeleteButton= buttonTemplate.format( devid, 'btn-xs altui-deldevice pull-right', deleteGlyph,'default');;
 				html ="";
 				html+="<div class='row'>";
 					html +="<div id='altui-device-controlpanel-"+devid+"' class='col-xs-12 altui-device-controlpanel' data-devid='"+devid+"'>";
 					html +="	<div class='panel panel-default'>";
 					html +="		<div class='panel-heading'>";
+					html += htmlDeleteButton;
 					html +="			<h1 class='panel-title'>{0} {1} {2} (#{3})</h1>";
 					html +="		</div>";
 					html +="		<div class='panel-body'>";
@@ -3988,6 +3991,10 @@ var UIManager  = ( function( window, undefined ) {
 		//
 		$("#altui-device-attributes-"+devid).toggle(false);			// hide them by default;
 		$(".altui-debug-div").toggle(false);						// hide
+		$(".altui-deldevice").click( function() {
+			var id = $(this).prop('id');
+			VeraBox.deleteDevice(id);
+		});
 		
 		$("#altui-room-list").change( function() {
 			UPnPHelper.renameDevice(devid, device.name, $(this).val() );

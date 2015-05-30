@@ -1125,6 +1125,31 @@ var VeraBox = ( function( window, undefined ) {
 		});
 	};
 
+	function _deleteDevice(id)
+	{
+		if (confirm(_T("Are you sure you want to delete device ({0})").format(id))) {
+			var url = "data_request?id=device&action=delete&device="+id;
+			var jqxhr = $.ajax( {
+				url: url,
+				type: "GET",
+				dataType: "text"
+			})
+			.done(function(data) {
+				if (data!="ERROR") {
+					PageMessage.message(_T("Deleted Device {0} successfully ").format(id), "success", true);
+				}
+				else {
+					PageMessage.message(_T("Could not delete Device {0}").format(id), "warning");
+				}
+			})
+			.fail(function(jqXHR, textStatus) {
+				PageMessage.message( _T("Delete Device failed")+": " + textStatus , "danger");
+			})
+			.always(function() {
+			});
+		}
+	};
+	
 	function _deleteScene(id)
 	{
 		if (confirm(_T("Are you sure you want to delete scene ({0})").format(id))) {
@@ -1442,6 +1467,7 @@ var VeraBox = ( function( window, undefined ) {
 	evaluateConditions : _evaluateConditions,		// evaluate a device condition table ( AND between conditions )
 	
 	createDevice	: _createDevice,
+	deleteDevice	: _deleteDevice,
 	createRoom		: _createRoom,
 	deleteRoom		: _deleteRoom,
 	runLua			: _runLua,
