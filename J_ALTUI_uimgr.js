@@ -1255,6 +1255,7 @@ var SceneEditor = function (scene) {
 		.on("click",".altui-scene-editbutton",function(){ 
 			scene.lua = $("#altui-luascene").val();
 			scene.name = $("#altui-scene-name-input").val();
+			scene.paused = 0;		// UI7 seems to use this but could not find where in UI7.
 			if (UIManager.UI7Check()==true) {
 				var selectedmode = $(".altui-housemode div.preset_selected");
 				scene.modeStatus = $.map( selectedmode, function(elem,idx) {

@@ -1397,10 +1397,10 @@ var VeraBox = ( function( window, undefined ) {
 				var PollNoReply = parseInt(VeraBox.getStatus(id,service,"PollNoReply"));
 				var PollOk = parseInt(VeraBox.getStatus(id,service,"PollOk"));
 				if (! isNaN(PollNoReply) ) {
-					VeraBox.setStatus( id, service, "PollNoReply", "0"  , 0 );
+					VeraBox.setStatus( id, service, "PollNoReply", 0   );
 				}
 				if (! isNaN(PollOk) ) {
-					VeraBox.setStatus( id, service, "PollOk", "0"  , 0 );
+					VeraBox.setStatus( id, service, "PollOk", 0   );
 				}
 			}, 
 			function(device) {
