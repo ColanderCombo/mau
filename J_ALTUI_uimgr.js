@@ -5434,7 +5434,7 @@ var UIManager  = ( function( window, undefined ) {
 			parent.children.push( node );
 		};
 		
-		function _prepareData( kind ) {
+		function _prepareDataParents(  ) {
 			data = { root:[], nodes:[] , links:[] };
 			var color = {};
 			var nColor = 0;
@@ -5442,120 +5442,117 @@ var UIManager  = ( function( window, undefined ) {
 
 			data.root={ id:0, zwid:0, name:"root", children:[] };
 			if (devices) {
-				switch(kind) {
-					case "parents": {
-						$.each( devices.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function( idx,device ) {
-							if (color[device.device_type]==undefined)
-								color[device.device_type]=nColor++;
-							_addNode({ 
-								id:device.id, 
-								name:device.name, 
-								color:color[device.device_type] ,
-								id_parent:device.id_parent || 0,
-								children: []
-								});
+				$.each( devices.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function( idx,device ) {
+					if (color[device.device_type]==undefined)
+						color[device.device_type]=nColor++;
+					_addNode({ 
+						id:device.id, 
+						name:device.name, 
+						color:color[device.device_type] ,
+						id_parent:device.id_parent || 0,
+						children: []
 						});
-						break;
-					}
-					case "routes": {
-						// first search for the zwave network
-						var zwavenet = VeraBox.getDeviceByType("urn:schemas-micasaverde-com:device:ZWaveNetwork:1");
-						if (zwavenet) {
-							color[zwavenet.device_type]=nColor++;
-							data.nodes.push({ 
-								id:parseInt(zwavenet.id), 
-								zwid:0,
-								name:zwavenet.name, 
-								color:color[zwavenet.device_type] ,
-								id_parent:null,
-								routes: []
-								});
-							$.each( devices.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function( idx,device ) {
-								var ManualRoute = VeraBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","ManualRoute");
-								var AutoRoute = VeraBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","AutoRoute");
-								if ( ManualRoute || AutoRoute)
-								{
-									var route = ( ManualRoute && (ManualRoute!="undefined")) ? ManualRoute : AutoRoute;
-									if (color[device.device_type]==undefined)
-										color[device.device_type]=nColor++;
-									data.nodes.push({ 
-										id:parseInt(device.id), 
-										zwid:parseInt(device.altid),
-										name:device.name+':'+device.id+'#'+device.altid, 
-										children: [],
-										color:color[device.device_type] ,
-										id_parent:device.id_parent || 0,
-										routes: route.split(",")
-										});
-								}
-							});
-						}
-						break;
-					}
-				}
+				});
 			}
 			return data;
 		};
 		
-		function _updateData( kind) {
+		function _drawChartRoutes() {
 			function _findNodeByZwID(zwid) {
 				var found=null;
-				$.each(data.nodes, function(idx,node) {
-					if (node.zwid == zwid) {
+				$.each(data.nodes,function( idx, node) {
+					if (node.zwid==zwid) {
 						found=node;
 						return false;
 					}
 				});
 				return found;
+			}
+			function _prepareDataRoutes(  ) {
+				data = { root:[], nodes:[] , links:[] };
+				var color = {};
+				var nColor = 0;
+				var devices = VeraBox.getDevicesSync();
+
+				data.root={ id:0, zwid:0, name:"root", children:[] };
+				if (devices) {
+					var zwavenet = VeraBox.getDeviceByType("urn:schemas-micasaverde-com:device:ZWaveNetwork:1");
+					if (zwavenet) {
+						color[zwavenet.device_type]=nColor++;
+						data.nodes.push({ 
+							x:width/2,
+							y:height/2,
+							id:parseInt(zwavenet.id), 
+							zwid:0,
+							name:zwavenet.name, 
+							color:color[zwavenet.device_type] ,
+							id_parent:null,
+							routes: []
+							});
+						$.each( devices.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function( idx,device ) {
+							var ManualRoute = VeraBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","ManualRoute");
+							var AutoRoute = VeraBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","AutoRoute");
+							if ( ManualRoute || AutoRoute)
+							{
+								var route = ( ManualRoute && (ManualRoute!="undefined")) ? ManualRoute : AutoRoute;
+								if (color[device.device_type]==undefined)
+									color[device.device_type]=nColor++;
+								data.nodes.push({ 
+									x:Math.random()*width,
+									y:Math.random()*height,
+									id:parseInt(device.id), 
+									zwid:parseInt(device.altid),
+									name:device.name+':'+device.id+'#'+device.altid, 
+									children: [],
+									color:color[device.device_type] ,
+									id_parent:device.id_parent || 0,
+									routes: route.split(",")
+								});
+							}
+						});
+					}
+				}
+				return data;
 			};
-			switch(kind) {
-				case "parents":
-					data.nodes = _flatten(data.root);
-					data.links = d3.layout.tree().links(data.nodes);
-					break;
-				case "routes":
-					// data.nodes = _flatten(data.root);
-					// enum devices and create a link per route  ManualRoute AutoRoute 
-					// urn:micasaverde-com:serviceId:ZWaveDevice1
-					// like this: "2-20x,7-59x,2.7-78"
-					$.each(data.nodes,function( idx, node) {
-						// insert a link for each route
-						if (node.routes) {
-							// console.log("node name:{0} zwid:{1} routes:{2}".format(node.name, node.zwid,node.routes));
-							// var srcnode = _findNodeByZwID(0);
-							// var targetnode = _findNodeByZwID(1);
-							// data.links.push( {
-								// source: srcnode,
-								// target: targetnode,
-								// linkquality: 10
-							// });
-							$.each(node.routes, function( idx,route) {
-								var srcnode = node;
-								var splits = route.split("-");
-								var linkquality = splits[1];
-								if (splits[0]) {
-									$.each(splits[0].split("."),function(idx,pathnode) {
-										var targetnode = _findNodeByZwID(pathnode);
-										if (targetnode) {
-											// console.log("adding link {0}-{1}".format(srcnode.zwid,targetnode.zwid));
+			function _updateDataRoutes() {
+				// data.nodes = _flatten(data.root);
+				// enum devices and create a link per route  ManualRoute AutoRoute 
+				// urn:micasaverde-com:serviceId:ZWaveDevice1
+				// like this: "2-20x,7-59x,2.7-78"
+				$.each(data.nodes,function( idx, node) {
+					// insert a link for each route
+					if (node.routes) {
+						console.log("node name:{0} zwid:{1} routes:{2}".format(node.name, node.zwid,node.routes));
+						$.each(node.routes, function( idx,route) {
+							var srcnode = node;
+							var splits = route.split("-");
+							var linkquality = splits[1];
+							if (splits[0]) {
+								var path = splits[0].split(".");
+								var nroute = 1;
+								$.each(path,function(idx,pathnode) {
+									var targetnode = _findNodeByZwID(pathnode);
+									if (targetnode) {
+										console.log("adding link {0}-{1}".format(srcnode.zwid,targetnode.zwid));
+										// if ((nroute==1)) {
 											data.links.push( {
 												source: srcnode,
 												target: targetnode,
 												linkquality: parseInt(linkquality),
+												nroute: nroute,
 												broken: (linkquality.slice(-1)=="x")
 											});
 											srcnode = targetnode;
-										}
-									});
-								}
-							});
-						}
-					});
-					break;
-			}
-		};
-			
-		function _drawChart() {
+											nroute++;
+										// }
+									}
+								});
+							}
+						});
+					}
+				});
+			};
+				
 			$(".altui-children-d3chart").replaceWith("<svg class='altui-children-d3chart'></svg>");
 			var available_height = $(window).height() - $("#altui-pagemessage").outerHeight() - $("#altui-pagetitle").outerHeight() - $("#altui-zwavechart-order").outerHeight() - $("footer").outerHeight();
 			var margin = {top: 20, right: 10, bottom: 10, left: 20};
@@ -5573,29 +5570,136 @@ var UIManager  = ( function( window, undefined ) {
 					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 			//Set up the force layout
-			var data = _prepareData( $("#altui-parentchild-kind").val() );
+			var data = _prepareDataRoutes( );
 			var force = d3.layout.force()
+			force = force
+				.charge(function(d) { return (d.zwid==0) ? -400 : -200 } )
+				.gravity(0.015)
+				.linkDistance(function(d) { 
+					return  60+d.linkquality*15;
+					})
+				.linkStrength( function(d) { return (1/(1+d.linkquality/6)) } )
+				.size([width, height])
+				.on("tick", function () {
+					// avoid asynchronous tick when the user changed the page
+					// this crashed d3
+					if ($("#altui-pagetitle").html()==_T("Parent/Child Network")) 
+					{
+						d3.selectAll(".link")
+							.attr("x1", function(d) { return d.source.x; })
+							.attr("y1", function(d) { return d.source.y; })
+							.attr("x2", function(d) { return d.target.x; })
+							.attr("y2", function(d) { return d.target.y; });
+
+						d3.selectAll("circle")
+							.attr("cx", function (d) { return d.x; })
+							.attr("cy", function (d) { return d.y; });
+						d3.selectAll("text")
+							.attr("x", function (d) { return d.x; })
+							.attr("y", function (d) { return d.y; });
+					}
+				});
+			var drag = force.drag().on("dragstart", dragstart);			
+
+			function dragstart(d) {
+				// console.log('dragstart');
+				d3.event.sourceEvent.stopPropagation(); // silence other listeners
+				d3.select(this).classed("fixed", d.fixed = true);
+			};				
+			function sglclick(d) {
+				if (d3.event.defaultPrevented) return;
+				// console.log('click');
+				var selection = d3.select(this);
+				if (d3.event.shiftKey) {
+					d.fixed =  false;
+					selection.classed("fixed", false  );
+				}
+				else {
+				}
+				_updateChart(data);
+			};
+			function _updateChart(data) {			
+				_updateDataRoutes();
+				force
+					.nodes( data.nodes )
+					.links( data.links )
+					.start();
+
+				var link = svg.selectAll(".link");
+				var node = svg.selectAll(".node");
+				link = link.data( data.links , function(d) { return d.source.id+'-'+d.target.id; } );
+				node = node.data( data.nodes , function(d) { return d.id; } );
+
+				link.exit().transition().duration(500).style("opacity","0").remove();
+				link.enter()
+					.insert("line", ".node")		// so that node allways hide links
+					.attr("class", "link")
+					.style("stroke", function(d) { return (d.broken==true) ? "red": ((d.nroute>1)?"yellow":"") ; } )
+					.style("stroke-width", 1 )
+					.attr("x1", function(d) { return d.source.x; })
+					.attr("y1", function(d) { return d.source.y; })
+					.attr("x2", function(d) { return d.target.x; })
+					.attr("y2", function(d) { return d.target.y; });					
+
+				node.exit().transition().duration(1000).style("opacity","0").remove();				
+				node.classed("fixed", function(d) { 
+						return d.fixed })
+					.classed("closed", function(d) { 
+						return d._children!=null } );
+
+				var groups = node.enter().append("g")
+							.attr("class", "node")
+							.classed("fixed", function(d) { return d.fixed } )
+							.classed("closed", function(d) { return d._children!=null } )
+							// .on("dblclick", dblclick)
+							.on("click", sglclick )
+							.call( drag );
+					groups.append("circle")					
+						.attr("r", function(d) { 
+							return 8+ (d.children ? d.children.length/2 : 0);
+						} )
+						.style("fill", function (d) {
+							return color(d._children ? "#3182bd" : d.color);
+						});
+					groups.append("text")					
+						.attr("dx", 15)
+						.attr("dy", ".35em")
+						.text(function (d) { return d.name; });
+			};		
+	
+			_updateChart(data);
+		};
+		
+		function _drawChartParents() {
+			function _updateDataParents( ) {
+				data.nodes = _flatten(data.root);
+				data.links = d3.layout.tree().links(data.nodes);
+			};
+				
+			$(".altui-children-d3chart").replaceWith("<svg class='altui-children-d3chart'></svg>");
+			var available_height = $(window).height() - $("#altui-pagemessage").outerHeight() - $("#altui-pagetitle").outerHeight() - $("#altui-zwavechart-order").outerHeight() - $("footer").outerHeight();
+			var margin = {top: 20, right: 10, bottom: 10, left: 20};
+			width = $(".altui-children-d3chart-container").innerWidth() - margin.left - margin.right-30;
+			height = Math.max(300,Math.min(width,available_height - margin.top - margin.bottom));
 			
-			switch( $("#altui-parentchild-kind").val() ) 
-			{
-				case "parents":
-					force = force
+			//Set up the colour scale
+			var color = d3.scale.category20();
+
+			var svg = d3.select(".altui-children-d3chart")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+				// .style("margin-left", -margin.left + "px")
+				.append("g")
+					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+			//Set up the force layout
+			var data = _prepareDataParents( );
+			var force = d3.layout.force()
 						.charge(function(d) { return -120 - (d.children ? 2*d.children.length : 0) } )
 						.gravity(0.05)
-						.linkDistance(function(d) { return  45+(d.source.children ? 2*d.source.children.length:0 ) });
-					break;
-				case "routes":
-					force = force
-						.charge(function(d) { return (d.id==0) ? -500 : -50 } )
-						.gravity(0.02)
-						.linkDistance(function(d) { 
-							return  100+d.linkquality*9;
-							});
-					break;
-			};
-			force = force
-					.size([width, height])
-					.on("tick", function () {
+						.linkDistance(function(d) { return  45+(d.source.children ? 2*d.source.children.length:0 ) })
+						.size([width, height])
+						.on("tick", function () {
 						// avoid asynchronous tick when the user changed the page
 						// this crashed d3
 						if ($("#altui-pagetitle").html()==_T("Parent/Child Network")) 
@@ -5651,27 +5755,15 @@ var UIManager  = ( function( window, undefined ) {
 				d3.event.sourceEvent.stopPropagation(); // silence other listeners
 				d3.select(this).classed("fixed", d.fixed = true);
 			};				
-
 			function _updateChart(data) {			
-				_updateData($("#altui-parentchild-kind").val());
+				_updateDataParents();
 				force
 					.nodes( data.nodes )
 					.links( data.links )
 					.start();
 
-				var link = svg.selectAll(".link");
-				var node = svg.selectAll(".node");
-				switch( $("#altui-parentchild-kind").val() ) 
-				{
-					case "parents":
-						link = link.data( data.links , function(d) { return d.target.id; } );
-						node = node.data( data.nodes , function(d) { return d.id; } );
-						break;
-					case "routes":
-						link = link.data( data.links , function(d) { return d.source.id+'-'+d.target.id; } );
-						node = node.data( data.nodes , function(d) { return d.id; } );
-						break;
-				};
+				var link = svg.selectAll(".link").data( data.links , function(d) { return d.target.id; } );
+				var node = svg.selectAll(".node").data( data.nodes , function(d) { return d.id; } );
 
 				link.exit().transition().duration(500).style("opacity","0").remove();
 				link.enter()
@@ -5690,7 +5782,7 @@ var UIManager  = ( function( window, undefined ) {
 					.classed("closed", function(d) { 
 						return d._children!=null } );
 
-			var groups = node.enter().append("g")
+				var groups = node.enter().append("g")
 							.attr("class", "node")
 							.classed("fixed", function(d) { return d.fixed } )
 							.classed("closed", function(d) { return d._children!=null } )
@@ -5707,15 +5799,21 @@ var UIManager  = ( function( window, undefined ) {
 					groups.append("text")					
 						.attr("dx", 15)
 						.attr("dy", ".35em")
-						.text(function (d) { return d.name; });
-						
-				// node.selectAll("g.closed").append("text")					
-					// .attr("dx", -15)
-					// .attr("dy", ".35em")
-					// .text("+");	
+						.text(function (d) { return d.name; });	
 			};		
-	
 			_updateChart(data);
+		};
+		
+		function _drawChart() {
+			switch( $("#altui-parentchild-kind").val() ) 
+			{
+				case "parents":
+					_drawChartParents() 
+					break;
+				case "routes":
+					_drawChartRoutes();
+					break;
+			};
 		};
 		
 		// prepare and load D3 then draw the chart
