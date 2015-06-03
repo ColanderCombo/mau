@@ -5401,6 +5401,17 @@ var UIManager  = ( function( window, undefined ) {
 		var height = width = null;
 		var data = { root:[], nodes:[] , links:[] };
 		
+		function _findNodeByZwID(zwid) {
+			var found=null;
+			$.each(data.nodes,function( idx, node) {
+				if (node.zwid==zwid) {
+					found=node;
+					return false;
+				}
+			});
+			return found;
+		}
+
 		// Returns a list of all nodes under the root.
 		function _flatten(root) {
 			var nodes = [], i = 0;
@@ -5457,17 +5468,105 @@ var UIManager  = ( function( window, undefined ) {
 			return data;
 		};
 		
-		function _drawChartRoutes() {
-			function _findNodeByZwID(zwid) {
-				var found=null;
-				$.each(data.nodes,function( idx, node) {
-					if (node.zwid==zwid) {
-						found=node;
-						return false;
+		function _drawChartRoutes2() {
+			function _prepareDataRoutes2(  ) {
+				data = { root:[], nodes:[] , links:[] };
+				var color = {};
+				var nColor = 0;
+				var devices = VeraBox.getDevicesSync();
+
+				data.root={ id:0, zwid:0, name:"root", children:[] };
+				if (devices) {
+					var zwavenet = VeraBox.getDeviceByType("urn:schemas-micasaverde-com:device:ZWaveNetwork:1");
+					if (zwavenet) {
+						color[zwavenet.device_type]=nColor++;
+						data.nodes.push({ 
+							x:0,
+							y:0,
+							id:parseInt(zwavenet.id), 
+							zwid:0,
+							name:zwavenet.name, 
+							color:color[zwavenet.device_type],
+							group:0,
+							routes: []
+							});
+						var y=0;
+						$.each( devices.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function( idx,device ) {
+							var ManualRoute = VeraBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","ManualRoute");
+							var AutoRoute = VeraBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","AutoRoute");
+							if ( ManualRoute || AutoRoute)
+							{
+								var route = ( ManualRoute && (ManualRoute!="undefined")) ? ManualRoute : AutoRoute;
+								if (color[device.device_type]==undefined)
+									color[device.device_type]=nColor++;
+								// like this: "2-20x,7-59x,2.7-78"
+								var routes = route.split(",");
+								var firstnode = route[0].split("-")
+								var group = (firstnode[0]=="0") ? 1 : 2;
+								y += 20;
+								data.nodes.push({ 
+									x:group * width/4,
+									y:y,
+									id:parseInt(device.id), 
+									zwid:parseInt(device.altid),
+									name:device.name+':'+device.id+'#'+device.altid, 
+									color:color[device.device_type] ,
+									group: group,
+									routes: routes
+								});
+							}
+						});
 					}
+				}
+				return data;
+			};
+			function _updateDataRoutes2(data) {
+				// data.nodes = _flatten(data.root);
+				// enum devices and create a link per route  ManualRoute AutoRoute 
+				// urn:micasaverde-com:serviceId:ZWaveDevice1
+				// like this: "2-20x,7-59x,2.7-78"
+				$.each(data.nodes,function( idx, node) {
 				});
-				return found;
-			}
+			};
+			function _updateChartRoutes2(data) {		
+				_updateDataRoutes2(data);
+				var color = d3.scale.category20();
+				var svg = d3.select(".altui-children-d3chart")
+					.attr("width", width + margin.left + margin.right)
+					.attr("height", height + margin.top + margin.bottom)
+					// .style("margin-left", -margin.left + "px")
+					.append("g")
+						.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+				var node = svg.selectAll(".node").data( data.nodes , function(d) { return d.id; } );
+				node.exit().transition().duration(1000).style("opacity","0").remove();		
+				var groups = node.enter().append("g")
+					.attr("class", "node");
+				groups.append("circle")					
+					// .attr("cx", function (d) { return d.group * width/4; })
+					// .attr("cy", function (d) { y+=20; return y; })
+					.attr("r", 8 )
+					.style("fill", function (d) { return color(d.color); });
+				y=0;
+				groups.append("text")					
+					// .attr("x", function (d) { return d.group * width/4; })
+					// .attr("y", function (d) { y+=20; return y; })
+					.attr("dx", 15)
+					.attr("dy", ".35em")
+					.text(function (d) { return d.name; });
+			};		
+				
+			$(".altui-children-d3chart").replaceWith("<svg class='altui-children-d3chart'></svg>");
+			var available_height = $(window).height() - $("#altui-pagemessage").outerHeight() - $("#altui-pagetitle").outerHeight() - $("#altui-zwavechart-order").outerHeight() - $("footer").outerHeight();
+			var margin = {top: 20, right: 10, bottom: 10, left: 20};
+			width = $(".altui-children-d3chart-container").innerWidth() - margin.left - margin.right-30;
+			height = Math.max(300,Math.min(width,available_height - margin.top - margin.bottom));
+			
+			data = _prepareDataRoutes2( );
+			_updateChartRoutes2(data);
+		};
+
+		function _drawChartRoutes() {
 			function _prepareDataRoutes(  ) {
 				data = { root:[], nodes:[] , links:[] };
 				var color = {};
@@ -5514,7 +5613,7 @@ var UIManager  = ( function( window, undefined ) {
 				}
 				return data;
 			};
-			function _updateDataRoutes() {
+			function _updateDataRoutes(data) {
 				// data.nodes = _flatten(data.root);
 				// enum devices and create a link per route  ManualRoute AutoRoute 
 				// urn:micasaverde-com:serviceId:ZWaveDevice1
@@ -5570,7 +5669,7 @@ var UIManager  = ( function( window, undefined ) {
 					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 			//Set up the force layout
-			var data = _prepareDataRoutes( );
+			data = _prepareDataRoutes( );
 			var force = d3.layout.force()
 			force = force
 				.charge(function(d) { return (d.zwid==0) ? -400 : -200 } )
@@ -5619,7 +5718,7 @@ var UIManager  = ( function( window, undefined ) {
 				_updateChart(data);
 			};
 			function _updateChart(data) {			
-				_updateDataRoutes();
+				_updateDataRoutes(data);
 				force
 					.nodes( data.nodes )
 					.links( data.links )
@@ -5666,7 +5765,6 @@ var UIManager  = ( function( window, undefined ) {
 						.attr("dy", ".35em")
 						.text(function (d) { return d.name; });
 			};		
-	
 			_updateChart(data);
 		};
 		
@@ -5693,7 +5791,7 @@ var UIManager  = ( function( window, undefined ) {
 					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 			//Set up the force layout
-			var data = _prepareDataParents( );
+			data = _prepareDataParents( );
 			var force = d3.layout.force()
 						.charge(function(d) { return -120 - (d.children ? 2*d.children.length : 0) } )
 						.gravity(0.05)
@@ -5813,6 +5911,9 @@ var UIManager  = ( function( window, undefined ) {
 				case "routes":
 					_drawChartRoutes();
 					break;
+				case "routes2":
+					_drawChartRoutes2();
+					break;
 			};
 		};
 		
@@ -5826,6 +5927,7 @@ var UIManager  = ( function( window, undefined ) {
 				html += "<select id='altui-parentchild-kind' class='form-control'>";
 					html += "<option value='parents'>"+_T("Parent/Child")+"</option>";
 					html += "<option value='routes'>"+_T("ZWave Routes")+"</option>";
+					html += "<option value='routes2'>"+_T("ZWave Routes2")+"</option>";
 				html += "</select>";
 			html += "</div>";
 		html += "</form>";
