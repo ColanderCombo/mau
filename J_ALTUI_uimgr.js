@@ -3822,7 +3822,7 @@ var UIManager  = ( function( window, undefined ) {
 			{ id:17, title:_T('Localize'), onclick:'UIManager.pageLocalization()', parent:0 },
 			{ id:18, title:_T('Power'), onclick:'UIManager.pagePower()', parent:0 },
 			{ id:19, title:_T('Parent/Child'), onclick:'UIManager.pageChildren()', parent:0 },
-			{ id:20, title:_T('Route'), onclick:'UIManager.pageRoutes()', parent:0 },
+			{ id:20, title:_T('Quality'), onclick:'UIManager.pageQuality()', parent:0 },
 		];
 
 		function _parentsOf(child) {
@@ -5398,26 +5398,99 @@ var UIManager  = ( function( window, undefined ) {
 			.on( "resize", _drawzWavechart );
 	},
 	
-	pageRoutes: function()  {
+	_findNodeByZwID : function (data,zwid) {
+		var found=null;
+		$.each(data.nodes,function( idx, node) {
+			if (node.zwid==zwid) {
+				found=node;
+				return false;
+			}
+		});
+		return found;
+	},
+	
+	pageQuality: function()  {
+		var data = { nodes:[] , links:[] };
+		var linkcolor, color, svg;
 		var height = width = null;
 		var margin = {top: 20, right: 10, bottom: 10, left: 20};
-		var data = { root:[], nodes:[] , links:[] };
+		var ygap = 30;
+		var filtered = false;
+		
+		//http://stackoverflow.com/questions/25595387/d3-js-how-to-convert-edges-from-lines-to-curved-paths-in-a-network-visualizatio
+		function draw_curve(Ax, Ay, Bx, By, M) {
+
+			// side is either 1 or -1 depending on which side you want the curve to be on.
+			// Find midpoint J
+			var Jx = Ax + (Bx - Ax) / 2
+			var Jy = Ay + (By - Ay) / 2
+
+			// We need a and b to find theta, and we need to know the sign of each to make sure that the orientation is correct.
+			var a = Bx - Ax
+			var asign = (a < 0 ? -1 : 1)
+			var b = By - Ay
+			var bsign = (b < 0 ? -1 : 1)
+			var theta = Math.atan(b / a)
+
+			// Find the point that's perpendicular to J on side
+			var costheta = asign * Math.cos(theta)
+			var sintheta = asign * Math.sin(theta)
+
+			// Find c and d
+			var c = M * sintheta
+			var d = M * costheta
+
+			// Use c and d to find Kx and Ky
+			var Kx = Jx - c
+			var Ky = Jy + d
+
+			return "M" + Ax + "," + Ay +
+				   "Q" + Kx + "," + Ky +
+				   " " + Bx + "," + By
+		};
 		
 		function _drawChart() {
+			var data;
+			function _prepareDataLinks(data) {
+				data.links=[];
+				$.each(data.nodes, function(idx,node) {
+					var source = null;
+					$.each(node.routes, function(idx,route) {
+						source = node;
+						var split = route.split("-");
+						var routequality = parseInt(split[1]);
+						var nodes = split[0].split(".");
+						$.each(nodes, function(idx,zwid) {
+							var dest = UIManager._findNodeByZwID(data,zwid);
+							if (dest!=null) {
+								data.links.push( {
+									id:source.zwid+"-"+dest.zwid,
+									quality:routequality,
+									broken:(split[1].slice(-1)=="x"),
+									source: source,
+									target: dest
+								});
+								source = dest;	// skip to next segment
+							}
+						});
+					})
+				});
+				return (data);
+			};
 			function _prepareDataRoutes2(  ) {
-				var data = { nodes:[]  };
+				data = { nodes:[] , links:[] };
 				var color = {};
 				var nColor = 0;
 				var devices = VeraBox.getDevicesSync();
 
-				data.root={ id:0, zwid:0, name:"root", children:[] };
+				// data.root={ id:0, zwid:0, name:"root", children:[] };
 				if (devices) {
 					var zwavenet = VeraBox.getDeviceByType("urn:schemas-micasaverde-com:device:ZWaveNetwork:1");
 					if (zwavenet) {
 						color[zwavenet.device_type]=nColor++;
 						data.nodes.push({ 
-							// x:0,
-							// y:0,
+							x:0,
+							y:0,
 							id:parseInt(zwavenet.id), 
 							zwid:0,
 							name:zwavenet.name, 
@@ -5425,6 +5498,7 @@ var UIManager  = ( function( window, undefined ) {
 							group:0,
 							routes: []
 							});
+						var y=ygap;
 						$.each( devices.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function( idx,device ) {
 							var ManualRoute = VeraBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","ManualRoute");
 							var AutoRoute = VeraBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","AutoRoute");
@@ -5438,6 +5512,8 @@ var UIManager  = ( function( window, undefined ) {
 								var firstnode = route[0].split("-")
 								var group = (firstnode[0]=="0") ? 1 : 2;
 								data.nodes.push({ 
+									x: group * width/4,
+									y: y,
 									id:parseInt(device.id), 
 									zwid:parseInt(device.altid),
 									name:device.name+':'+device.id+'#'+device.altid, 
@@ -5445,48 +5521,124 @@ var UIManager  = ( function( window, undefined ) {
 									group: group,
 									routes: routes
 								});
+								y+=ygap;
 							}
 						});
 					}
+					data=_prepareDataLinks(data);
 				}
 				return data;
 			};			
-			function _updateChartRoutes2(data) {		
-				var color = d3.scale.category20();
-				var svg = d3.select(".altui-route-d3chart")
+			function sglclick(d) {
+				if (d3.event.defaultPrevented) return;
+				// console.log('click');
+				var selection = d3.select(this);
+				if (filtered) {
+					filtered = false;
+					data = _prepareDataRoutes2(  );
+				}
+				else {
+					filtered = true;
+					// remove from data all nodes and links for nodes not invovled in this routing
+					var authorized = [];
+					authorized.push( 0 );
+					authorized.push( selection.datum().zwid );
+					$.each(selection.datum().routes, function(idx,route) {
+						var split = route.split("-");
+						var nodes = split[0].split(".");
+						$.each(nodes, function(idx,zwid) {
+							authorized.push( parseInt(zwid) );
+						});
+					});
+					data.nodes=$.grep(data.nodes,function(node) {
+						return ( $.inArray(node.zwid , authorized) != -1 );
+					});
+					$.each(data.nodes, function(idx,node) {
+						node.y = idx*ygap; 
+					})
+				}
+				_prepareDataLinks(data);
+				_updateChartRoutes2(data);
+			};
+			function _createChartRoutes2(data) {		
+				linkcolor = d3.scale.quantize()
+					.domain( [d3.max(data.links, function(d) {return d.quality;} ),d3.min(data.links, function(d) {return d.quality;} )] )
+					.range(["red","orange","yellow","green"]);
+
+				color = d3.scale.category20();
+				height = data.nodes.length*ygap;
+				svg = d3.select(".altui-route-d3chart")
 					.attr("width", width + margin.left + margin.right)
 					.attr("height", height + margin.top + margin.bottom)
 					.append("g")
 						.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+			};
+			function _updateChartRoutes2(data) {		
+				var links = svg.selectAll(".link").data( data.links , function(d) { return d.id; } );
+				links.exit().transition().duration(1000).style("opacity","0").remove();	
+				links.enter()
+					.insert("svg:path", ".node")		// so that node allways hide links
+					.attr("class","link")
+					// .attr("d", function(d) {
+						// var M = (d.source.group != d.target.group) ? 0 : (60+Math.abs(d.target.y-d.source.y)/ygap*4);
+						// return draw_curve(d.source.x, d.source.y, d.target.x, d.target.y, M);
+					// })
+					.style("stroke-opacity", 0)
+					.style("stroke", function(d) { return d.broken ? "red" : linkcolor(d.quality);} );
 
-				var node = svg.selectAll(".node").data( data.nodes , function(d) { return d.id; } );
-				node.exit().transition().duration(1000).style("opacity","0").remove();		
-				var groups = node.enter().append("g")
-					.attr("class", "node");
-				var y=0;
+				var transition = links.transition().duration(1000)
+					.style("stroke-opacity", function(d) { return ((d.source.group != d.target.group) ? 1 : 0.5); })
+					.attr("d", function(d) {
+						var M = (d.source.group != d.target.group) ? 0 : (60+Math.abs(d.target.y-d.source.y)/ygap*4);
+						return draw_curve(d.source.x, d.source.y, d.target.x, d.target.y, M);
+					});
+
+				var nodes = svg.selectAll(".node").data( data.nodes , function(d) { return d.id; } );
+				nodes.exit().transition().duration(1000).style("opacity","0").remove();		
+
+				var groups = nodes.enter()
+				.append("g")
+				.attr("class", "node")
+				.on("click", sglclick );
+				
 				groups.append("circle")					
-					.attr("cx", function (d) { 
-						return d.group * width/4; })					
-					.attr("cy", function (d) { y+=20; return y; })
+					.attr("cx", function (d) { return d.x })					
+					.attr("cy", function (d) { return d.y })
 					.attr("r", 8 )
+					.style("opacity", 0)
 					.style("fill", function (d) { return color(d.color); });
-				y=0;
+					
 				groups.append("text")					
-					.attr("x", function (d) { 
-						return d.group * width/4; })
-					.attr("y", function (d) { y+=20; return y; })
+					.attr("x", function (d) { return d.x })					
+					.attr("y", function (d) { return d.y })
 					.attr("dx", 15)
 					.attr("dy", ".35em")
+					.style("opacity", 0)
 					.text(function (d) { return d.name; });
-			};		
+						
+				var transition = nodes.transition().duration(1000);
+				transition.select("circle")
+					.style("opacity", 1)
+					.attr("cx", function (d) { return d.x })					
+					.attr("cy", function (d) { return d.y });
+				transition.select("text")
+					.style("opacity", 1)
+					.attr("x", function (d) { return d.x })					
+					.attr("y", function (d) { return d.y });
+
+					};		
 			data = _prepareDataRoutes2();
-			_updateChartRoutes2(data)
+			_createChartRoutes2(data);
+			_updateChartRoutes2(data);
 		};
 		
-		UIManager.clearPage(_T('Route'),_T("Route Network"));
+		UIManager.clearPage(_T('Quality'),_T("Network Quality"));
 		$(".altui-mainpanel")
 			.append(
 				"<style>					\
+				.altui-route-d3chart-container {\
+					overflow: auto;		 \
+				}							\
 				.node {						\
 				}							\
 				.node circle {		\
@@ -5497,6 +5649,10 @@ var UIManager  = ( function( window, undefined ) {
 					fill: gray;				\
 					pointer-events: none;	\
 					font-size: 10px;		\
+				}							\
+				.link {						\
+					stroke-opacity: .8;		\
+					fill: none;				\
 				}							\
 				</style>" )
 			.append("<div class='altui-route-d3chart-container'><svg class='altui-route-d3chart'></svg></div>")
@@ -5510,17 +5666,6 @@ var UIManager  = ( function( window, undefined ) {
 		var height = width = null;
 		var data = { root:[], nodes:[] , links:[] };
 		
-		function _findNodeByZwID(zwid) {
-			var found=null;
-			$.each(data.nodes,function( idx, node) {
-				if (node.zwid==zwid) {
-					found=node;
-					return false;
-				}
-			});
-			return found;
-		}
-
 		// Returns a list of all nodes under the root.
 		function _flatten(root) {
 			var nodes = [], i = 0;
@@ -5641,7 +5786,7 @@ var UIManager  = ( function( window, undefined ) {
 								var path = splits[0].split(".");
 								var nroute = 1;
 								$.each(path,function(idx,pathnode) {
-									var targetnode = _findNodeByZwID(pathnode);
+									var targetnode = UIManager._findNodeByZwID(data,pathnode);
 									if (targetnode) {
 										console.log("adding link {0}-{1}".format(srcnode.zwid,targetnode.zwid));
 										// if ((nroute==1)) {
@@ -5971,7 +6116,7 @@ var UIManager  = ( function( window, undefined ) {
 				}							\
 				.link {						\
 					stroke: #999;			\
-					stroke-opacity: .6;		\
+					stroke-opacity: .8;		\
 				}							\
 				</style>" )
 			.append(html+"<div class='altui-children-d3chart-container'><svg class='altui-children-d3chart'></svg></div>")
@@ -6248,7 +6393,7 @@ $(document).ready(function() {
 		body+="			<li><a id='altui-zwavenetwork' href='#' >"+_T("zWave Network")+"</a></li>";
 		body+="			<li><a id='altui-energy' href='#' >"+_T("Power Chart")+"</a></li>";
 		body+="			<li><a id='altui-childrennetwork' href='#' >"+_T("Parent/Child Network")+"</a></li>";
-		body+="			<li><a id='altui-routes' href='#' >"+_T("Routes Network")+"</a></li>";
+		body+="			<li><a id='altui-quality' href='#' >"+_T("Network Quality")+"</a></li>";
 		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>Admin</li>";
 		body+="			<li><a id='altui-optimize' href='#'>"+_T("Optimizations")+"</a></li>";
@@ -6583,7 +6728,7 @@ $(document).ready(function() {
 		.on( "click", "#altui-luatest", UIManager.pageLuaTest )
 		.on( "click", "#altui-zwavenetwork", UIManager.pageZwave )		
 		.on( "click", "#altui-childrennetwork", UIManager.pageChildren )		
-		.on( "click", "#altui-routes", UIManager.pageRoutes )		
+		.on( "click", "#altui-quality", UIManager.pageQuality )		
 		.on( "click", "#altui-energy", UIManager.pagePower )	
 		.on( "click", "#altui-optimize", UIManager.pageOptimize )
 		.on( "click", "#altui-localize", UIManager.pageLocalization  )
