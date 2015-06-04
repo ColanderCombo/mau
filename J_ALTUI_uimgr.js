@@ -3821,7 +3821,8 @@ var UIManager  = ( function( window, undefined ) {
 			{ id:16, title:_T('ZWave'), onclick:'UIManager.pageZwave()', parent:0 },
 			{ id:17, title:_T('Localize'), onclick:'UIManager.pageLocalization()', parent:0 },
 			{ id:18, title:_T('Power'), onclick:'UIManager.pagePower()', parent:0 },
-			{ id:18, title:_T('Parent/Child'), onclick:'UIManager.pageChildren()', parent:0 },
+			{ id:19, title:_T('Parent/Child'), onclick:'UIManager.pageChildren()', parent:0 },
+			{ id:20, title:_T('Route'), onclick:'UIManager.pageRoutes()', parent:0 },
 		];
 
 		function _parentsOf(child) {
@@ -5397,6 +5398,114 @@ var UIManager  = ( function( window, undefined ) {
 			.on( "resize", _drawzWavechart );
 	},
 	
+	pageRoutes: function()  {
+		var height = width = null;
+		var margin = {top: 20, right: 10, bottom: 10, left: 20};
+		var data = { root:[], nodes:[] , links:[] };
+		
+		function _drawChart() {
+			function _prepareDataRoutes2(  ) {
+				var data = { nodes:[]  };
+				var color = {};
+				var nColor = 0;
+				var devices = VeraBox.getDevicesSync();
+
+				data.root={ id:0, zwid:0, name:"root", children:[] };
+				if (devices) {
+					var zwavenet = VeraBox.getDeviceByType("urn:schemas-micasaverde-com:device:ZWaveNetwork:1");
+					if (zwavenet) {
+						color[zwavenet.device_type]=nColor++;
+						data.nodes.push({ 
+							// x:0,
+							// y:0,
+							id:parseInt(zwavenet.id), 
+							zwid:0,
+							name:zwavenet.name, 
+							color:color[zwavenet.device_type],
+							group:0,
+							routes: []
+							});
+						$.each( devices.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function( idx,device ) {
+							var ManualRoute = VeraBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","ManualRoute");
+							var AutoRoute = VeraBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","AutoRoute");
+							if ( ManualRoute || AutoRoute)
+							{
+								var route = ( ManualRoute && (ManualRoute!="undefined")) ? ManualRoute : AutoRoute;
+								if (color[device.device_type]==undefined)
+									color[device.device_type]=nColor++;
+								// like this: "2-20x,7-59x,2.7-78"
+								var routes = route.split(",");
+								var firstnode = route[0].split("-")
+								var group = (firstnode[0]=="0") ? 1 : 2;
+								data.nodes.push({ 
+									id:parseInt(device.id), 
+									zwid:parseInt(device.altid),
+									name:device.name+':'+device.id+'#'+device.altid, 
+									color:color[device.device_type] ,
+									group: group,
+									routes: routes
+								});
+							}
+						});
+					}
+				}
+				return data;
+			};			
+			function _updateChartRoutes2(data) {		
+				var color = d3.scale.category20();
+				var svg = d3.select(".altui-route-d3chart")
+					.attr("width", width + margin.left + margin.right)
+					.attr("height", height + margin.top + margin.bottom)
+					.append("g")
+						.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+				var node = svg.selectAll(".node").data( data.nodes , function(d) { return d.id; } );
+				node.exit().transition().duration(1000).style("opacity","0").remove();		
+				var groups = node.enter().append("g")
+					.attr("class", "node");
+				var y=0;
+				groups.append("circle")					
+					.attr("cx", function (d) { 
+						return d.group * width/4; })					
+					.attr("cy", function (d) { y+=20; return y; })
+					.attr("r", 8 )
+					.style("fill", function (d) { return color(d.color); });
+				y=0;
+				groups.append("text")					
+					.attr("x", function (d) { 
+						return d.group * width/4; })
+					.attr("y", function (d) { y+=20; return y; })
+					.attr("dx", 15)
+					.attr("dy", ".35em")
+					.text(function (d) { return d.name; });
+			};		
+			data = _prepareDataRoutes2();
+			_updateChartRoutes2(data)
+		};
+		
+		UIManager.clearPage(_T('Route'),_T("Route Network"));
+		$(".altui-mainpanel")
+			.append(
+				"<style>					\
+				.node {						\
+				}							\
+				.node circle {		\
+					stroke: #fff;			\
+					stroke-width: 1.5px;	\
+				}							\
+				.node text {				\
+					fill: gray;				\
+					pointer-events: none;	\
+					font-size: 10px;		\
+				}							\
+				</style>" )
+			.append("<div class='altui-route-d3chart-container'><svg class='altui-route-d3chart'></svg></div>")
+		var available_height = $(window).height() - $("#altui-pagemessage").outerHeight() - $("#altui-pagetitle").outerHeight() - $("#altui-zwavechart-order").outerHeight() - $("footer").outerHeight();
+		width = $(".altui-route-d3chart-container").innerWidth() - margin.left - margin.right-30;
+		height = Math.max(300,Math.min(width,available_height - margin.top - margin.bottom));
+		UIManager.loadD3Script( _drawChart );
+	},
+	
 	pageChildren: function() {
 		var height = width = null;
 		var data = { root:[], nodes:[] , links:[] };
@@ -5468,104 +5577,6 @@ var UIManager  = ( function( window, undefined ) {
 			return data;
 		};
 		
-		function _drawChartRoutes2() {
-			function _prepareDataRoutes2(  ) {
-				data = { root:[], nodes:[] , links:[] };
-				var color = {};
-				var nColor = 0;
-				var devices = VeraBox.getDevicesSync();
-
-				data.root={ id:0, zwid:0, name:"root", children:[] };
-				if (devices) {
-					var zwavenet = VeraBox.getDeviceByType("urn:schemas-micasaverde-com:device:ZWaveNetwork:1");
-					if (zwavenet) {
-						color[zwavenet.device_type]=nColor++;
-						data.nodes.push({ 
-							x:0,
-							y:0,
-							id:parseInt(zwavenet.id), 
-							zwid:0,
-							name:zwavenet.name, 
-							color:color[zwavenet.device_type],
-							group:0,
-							routes: []
-							});
-						var y=0;
-						$.each( devices.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function( idx,device ) {
-							var ManualRoute = VeraBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","ManualRoute");
-							var AutoRoute = VeraBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","AutoRoute");
-							if ( ManualRoute || AutoRoute)
-							{
-								var route = ( ManualRoute && (ManualRoute!="undefined")) ? ManualRoute : AutoRoute;
-								if (color[device.device_type]==undefined)
-									color[device.device_type]=nColor++;
-								// like this: "2-20x,7-59x,2.7-78"
-								var routes = route.split(",");
-								var firstnode = route[0].split("-")
-								var group = (firstnode[0]=="0") ? 1 : 2;
-								y += 20;
-								data.nodes.push({ 
-									x:group * width/4,
-									y:y,
-									id:parseInt(device.id), 
-									zwid:parseInt(device.altid),
-									name:device.name+':'+device.id+'#'+device.altid, 
-									color:color[device.device_type] ,
-									group: group,
-									routes: routes
-								});
-							}
-						});
-					}
-				}
-				return data;
-			};
-			function _updateDataRoutes2(data) {
-				// data.nodes = _flatten(data.root);
-				// enum devices and create a link per route  ManualRoute AutoRoute 
-				// urn:micasaverde-com:serviceId:ZWaveDevice1
-				// like this: "2-20x,7-59x,2.7-78"
-				$.each(data.nodes,function( idx, node) {
-				});
-			};
-			function _updateChartRoutes2(data) {		
-				_updateDataRoutes2(data);
-				var color = d3.scale.category20();
-				var svg = d3.select(".altui-children-d3chart")
-					.attr("width", width + margin.left + margin.right)
-					.attr("height", height + margin.top + margin.bottom)
-					// .style("margin-left", -margin.left + "px")
-					.append("g")
-						.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-				var node = svg.selectAll(".node").data( data.nodes , function(d) { return d.id; } );
-				node.exit().transition().duration(1000).style("opacity","0").remove();		
-				var groups = node.enter().append("g")
-					.attr("class", "node");
-				groups.append("circle")					
-					// .attr("cx", function (d) { return d.group * width/4; })
-					// .attr("cy", function (d) { y+=20; return y; })
-					.attr("r", 8 )
-					.style("fill", function (d) { return color(d.color); });
-				y=0;
-				groups.append("text")					
-					// .attr("x", function (d) { return d.group * width/4; })
-					// .attr("y", function (d) { y+=20; return y; })
-					.attr("dx", 15)
-					.attr("dy", ".35em")
-					.text(function (d) { return d.name; });
-			};		
-				
-			$(".altui-children-d3chart").replaceWith("<svg class='altui-children-d3chart'></svg>");
-			var available_height = $(window).height() - $("#altui-pagemessage").outerHeight() - $("#altui-pagetitle").outerHeight() - $("#altui-zwavechart-order").outerHeight() - $("footer").outerHeight();
-			var margin = {top: 20, right: 10, bottom: 10, left: 20};
-			width = $(".altui-children-d3chart-container").innerWidth() - margin.left - margin.right-30;
-			height = Math.max(300,Math.min(width,available_height - margin.top - margin.bottom));
-			
-			data = _prepareDataRoutes2( );
-			_updateChartRoutes2(data);
-		};
-
 		function _drawChartRoutes() {
 			function _prepareDataRoutes(  ) {
 				data = { root:[], nodes:[] , links:[] };
@@ -5911,9 +5922,6 @@ var UIManager  = ( function( window, undefined ) {
 				case "routes":
 					_drawChartRoutes();
 					break;
-				case "routes2":
-					_drawChartRoutes2();
-					break;
 			};
 		};
 		
@@ -5927,7 +5935,6 @@ var UIManager  = ( function( window, undefined ) {
 				html += "<select id='altui-parentchild-kind' class='form-control'>";
 					html += "<option value='parents'>"+_T("Parent/Child")+"</option>";
 					html += "<option value='routes'>"+_T("ZWave Routes")+"</option>";
-					html += "<option value='routes2'>"+_T("ZWave Routes2")+"</option>";
 				html += "</select>";
 			html += "</div>";
 		html += "</form>";
@@ -6241,6 +6248,7 @@ $(document).ready(function() {
 		body+="			<li><a id='altui-zwavenetwork' href='#' >"+_T("zWave Network")+"</a></li>";
 		body+="			<li><a id='altui-energy' href='#' >"+_T("Power Chart")+"</a></li>";
 		body+="			<li><a id='altui-childrennetwork' href='#' >"+_T("Parent/Child Network")+"</a></li>";
+		body+="			<li><a id='altui-routes' href='#' >"+_T("Routes Network")+"</a></li>";
 		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>Admin</li>";
 		body+="			<li><a id='altui-optimize' href='#'>"+_T("Optimizations")+"</a></li>";
@@ -6575,6 +6583,7 @@ $(document).ready(function() {
 		.on( "click", "#altui-luatest", UIManager.pageLuaTest )
 		.on( "click", "#altui-zwavenetwork", UIManager.pageZwave )		
 		.on( "click", "#altui-childrennetwork", UIManager.pageChildren )		
+		.on( "click", "#altui-routes", UIManager.pageRoutes )		
 		.on( "click", "#altui-energy", UIManager.pagePower )	
 		.on( "click", "#altui-optimize", UIManager.pageOptimize )
 		.on( "click", "#altui-localize", UIManager.pageLocalization  )
