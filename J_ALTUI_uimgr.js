@@ -2473,19 +2473,25 @@ var UIManager  = ( function( window, undefined ) {
 			// };
 			
 		var device = VeraBox.getDeviceByID(id);
-		if (VeraBox.isRemoteAccess())
+		var directstreaming = VeraBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" );
+		if (VeraBox.isRemoteAccess() || isNullOrEmpty(directstreaming)   )
 		{
 			obj = $("<img></img>")
 				.attr('src',"data_request?id=request_image&res=low&cam="+device.id+"&t="+ new Date().getTime())
 				.css("max-width","100%")
 				.css("max-width","100%")
 				.css("width","100%")
-				.css("height","100%");
+				.css("height","100%")
+				.attr("data-camera",id);
 			var timeout = null;
-			function _resfreshIt() {
-				$("div#dialogModal img").attr('src',"data_request?id=request_image&res=low&cam="+device.id+"&t="+ new Date().getTime());
+			function _resfreshIt(id) {
+				var cam = $("img[data-camera='"+id+"']");
+				if ($(cam).length>=1) {
+					$(cam).attr('src',"data_request?id=request_image&res=low&cam="+device.id+"&t="+ new Date().getTime());
+					timeout = setTimeout(function() { _resfreshIt(id); } , 1500 );
+				}
 			};
-			timeout = setInterval(_resfreshIt, 1500 );
+			timeout = setTimeout(function() { _resfreshIt(id); } , 1500 );
 		}
 		else
 		{
@@ -2788,7 +2794,8 @@ var UIManager  = ( function( window, undefined ) {
 				case "image": {
 					//{"ControlGroup":"3","ControlType":"image","top":"0","left":"0","Display":{"url":"?id=request_image&cam=","Top":0,"Left":0,"Width":320,"Height":240}}
 					var container = $(domparent).parents(".altui-device-controlpanel-container").addClass("altui-norefresh");
-					if (VeraBox.isRemoteAccess()) {
+					var directstreaming = VeraBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" );
+					if (VeraBox.isRemoteAccess() || isNullOrEmpty(directstreaming)  ) {
 						var img = $("<img></img>")
 							.appendTo($(domparent))
 							.css({
@@ -2797,19 +2804,24 @@ var UIManager  = ( function( window, undefined ) {
 								position:'absolute'})
 							// .attr('src',control.Display.url+device.id+"'&t="+ new Date().getTime())
 							.attr('src',control.Display.url+device.id)
+							.attr('data-camera',device.id)
 							.height(280)
 							.width(370);
 							// .height(control.Display.Height)
 							// .width(control.Display.Width);
 						var timeout = null;
-						function _resfreshIt() {
-							img.attr('src',control.Display.url+device.id+"'&t="+ new Date().getTime());
+						function _refreshIt(id) {
+							var cam = $("img[data-camera='"+id+"']");
+							if ( $(cam).length>=1 ) {
+								img.attr('src',control.Display.url+device.id+"'&t="+ new Date().getTime());
+								setTimeout( function() { _refreshIt(id); }, 1500 );
+							}
 						};
-						timeout = setInterval(_resfreshIt, 1500 );
+						timeout = setTimeout( function() { _refreshIt(device.id); }, 1500 );
 					} else {
 						var streamurl = "url(http://{0}{1})".format(
 							device.ip,	//ip
-							VeraBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" )	//DirectStreamingURL
+							directstreaming	//DirectStreamingURL
 						);
 						var div = $("<div></div>")
 							.appendTo($(domparent))
