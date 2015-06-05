@@ -3814,7 +3814,7 @@ var UIManager  = ( function( window, undefined ) {
 	getDeviceTypesDB : function() {	return _devicetypesDB; },		// just a reader
 	
 	// breadcumb
-	breadCumb: function( title , param ) {
+	breadCrumb: function( title , param ) {
 		var tbl = [
 			{ id:0, title:_T('Home'), onclick:'UIManager.pageHome()', 		parent:-1},
 			{ id:1, title:_T('Rooms'), onclick:'UIManager.pageRooms()', 	parent:0 },
@@ -3866,7 +3866,7 @@ var UIManager  = ( function( window, undefined ) {
 	},
 	
 	// pages
-	clearPage : function(breadcumb,title)
+	clearPage : function(breadcrumb,title)
 	{
 		UIManager.stoprefreshModes();
 		PageMessage.clear();
@@ -3876,7 +3876,7 @@ var UIManager  = ( function( window, undefined ) {
 		$("#altui-device-name-filter").remove();
 		if (title) {
 			$("#altui-pagetitle").html( title );
-			$("#altui-toggle-messages").before ( UIManager.breadCumb( breadcumb ) );
+			$("#altui-toggle-messages").before ( UIManager.breadCrumb( breadcrumb ) );
 		}
 		else
 			$("#altui-pagetitle").empty();
@@ -6379,9 +6379,9 @@ $(document).ready(function() {
 		body+="	<div id='navbar' class='navbar-collapse collapse'>";
 		body+="	  <ul class='nav navbar-nav'>";
 		body+="		<li class='active'><div class='imgLogo'></div></li>";
-		body+="		<li><a id='menu_room' href='#'  >"+_T("Rooms")+"</a></li>";
 		body+="		<li><a id='menu_device' href='#'  >"+_T("Devices")+"</a></li>";
 		body+="		<li><a id='menu_scene' href='#'  >"+_T("Scenes")+"</a></li>";
+		body+="		<li><a id='menu_room' href='#'  >"+_T("Rooms")+"</a></li>";
 		body+="		<li><a id='menu_plugins' href='#'  >"+_T("Plugins")+"</a></li>";
 		body+="		<li class='dropdown'>";
 		body+="			<a href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-expanded='false'>"+_T("Custom Pages")+" <span class='caret'></span></a>";
@@ -6476,7 +6476,7 @@ $(document).ready(function() {
 		height:100%;\
 	}					\
 	#altui-toggle-messages { \
-		margin-bottom: 5px;				\
+		margin-bottom: 2px;				\
 	} \
 	div#altui-pagemessage-panel {	\
 		max-height:100px;	\
@@ -6659,6 +6659,9 @@ $(document).ready(function() {
 	}		\
 	.altui-leftnav {		\
 		width: 100%;		\
+	}		\
+	.altui-breadcrumb {		\
+		display: inline-block;		\
 	}		\
 	.on-off-device {		\
 	  width: 70px;		\
