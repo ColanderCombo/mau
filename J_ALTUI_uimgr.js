@@ -2567,6 +2567,10 @@ var UIManager  = ( function( window, undefined ) {
 			var paddingleft = parseInt($("#altui-device-controlpanel-"+devid).css("padding-left"));
 			var paddingtop = parseInt($("#altui-device-controlpanel-"+devid+" .panel-body ").css("padding-top"));
 			switch(control.ControlType) {
+				case "line_break": 
+				case "spacer": 
+					// no action to do for control panel, only for UI7 dashboard
+					break;
 				case "label": {
 					$( "<p>"+control.Label.text+"</p>" )
 						.appendTo( $(domparent) )
