@@ -1053,10 +1053,19 @@ var SceneEditor = function (scene) {
 	};
 		
 	function _displayGroup(group,idx) {
+		var hours = parseInt( group.delay / 3600 ) % 24;
+		var minutes = parseInt( group.delay / 60 ) % 60;
+		var seconds = group.delay % 60;
+		var result = "";
+		if (group.delay>=3600)
+			result += hours + "h ";
+		if (group.delay>=60)
+			result +=  minutes + "m ";
+		result += seconds +"s ";
 		var html="";
 		html += "<tr data-group-idx='"+idx+"'>";
 		html += "<td>";
-		html +="<h4>{0} sec</h4>".format(group.delay);
+		html +="<h4>{0}</h4>".format(result);
 		// html += "</td>";
 		// html +="<td>";
 		if (idx>0) {
