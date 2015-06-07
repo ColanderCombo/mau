@@ -84,6 +84,31 @@ if (typeof Number.prototype.toPaddedString != 'function') {
 	}
 };
 
+if (typeof String.prototype.toHHMMSS != 'function') {
+	String.prototype.toHHMMSS = function () {
+		var sec_num = parseInt(this, 10); // don't forget the second param
+		if ( isNaN(sec_num) )
+			sec_num=0;
+		var hours   = Math.floor(sec_num / 3600);
+		var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+		var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+		if (hours   < 10) {hours   = "0"+hours;}
+		if (minutes < 10) {minutes = "0"+minutes;}
+		if (seconds < 10) {seconds = "0"+seconds;}
+		var time    = hours+':'+minutes+':'+seconds;
+		return time;
+	}
+	String.prototype.fromHHMMSS = function () {
+		var hms = this;
+		var a = hms.split(':'); // split it at the colons
+
+		// minutes are worth 60 seconds. Hours are worth 60 minutes.
+		var seconds = (+a[0] || 0) * 60 * 60 + (+a[1] || 0) * 60 + (+a[2] || 0 ); 
+		return seconds;
+	}
+};
+
 if (typeof String.prototype.escapeQuotes != 'function') {
   // see below for better implementation!
   String.prototype.escapeQuotes = function (){
@@ -128,7 +153,7 @@ if (typeof String.prototype.htmlEncode == 'undefined') {
 	}
 };
 
-function _formatPad(d) {
+function _format2Digits(d) {
 	return ("0"+d).substr(-2);
 };	
 
@@ -136,11 +161,11 @@ function _toIso(date,sep) {
 	sep = sep || 'T';
 	var iso = "{0}-{1}-{2}{6}{3}:{4}:{5}".format(
 		date.getFullYear(),
-		_formatPad(date.getMonth()+1),
-		_formatPad(date.getDate()),
-		_formatPad(date.getHours()),
-		_formatPad(date.getMinutes()),
-		_formatPad(date.getSeconds()),
+		_format2Digits(date.getMonth()+1),
+		_format2Digits(date.getDate()),
+		_format2Digits(date.getHours()),
+		_format2Digits(date.getMinutes()),
+		_format2Digits(date.getSeconds()),
 		sep		);
 	return iso;
 };

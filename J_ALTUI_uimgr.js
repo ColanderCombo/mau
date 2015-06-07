@@ -363,6 +363,17 @@ var DialogManager = ( function() {
 		$(dialog).find(".row-fluid").append(propertyline);
 	};
 	
+	function _dlgAddTimer(dialog, name, value, htmloptions )
+	{
+		var optstr = _optionsToString(htmloptions);
+		var propertyline = "";
+		propertyline += "<div class='form-group'>";
+		propertyline += "	<label for='altui-widget-"+name+"' title='Date Time'>"+name+"</label>";
+		propertyline += "	<input id='altui-widget-"+name+"' class='form-control' type='time' value='"+value+"' placeholder='absolute time' "+optstr+"></input>";
+		propertyline += "</div>";
+		$(dialog).find(".row-fluid").append(propertyline);
+	};
+	
 	function _dlgAddDateTime(dialog, name, value )
 	{
 		var propertyline = "";
@@ -592,9 +603,10 @@ var DialogManager = ( function() {
 		dlgAddActions:_dlgAddActions,
 		dlgAddEvents:_dlgAddEvents,		
 		dlgAddDayOfWeek:_dlgAddDayOfWeek,
-		dlgAddTime: _dlgAddTime,
+		dlgAddTimer: _dlgAddTimer,
 		dlgAddTimeInterval: _dlgAddTimeInterval,
 		dlgAddDateTime:_dlgAddDateTime,
+		dlgAddTime:_dlgAddTime,
 		getDialogActionValue: _getDialogActionValue
 	};
 })();
@@ -1091,10 +1103,13 @@ var SceneEditor = function (scene) {
 
 	function _editGroup( idx,  group , _button ) {
 			var dialog = DialogManager.createPropertyDialog(_T('Scene Group'));
-			DialogManager.dlgAddLine(dialog, "Delay", _T("Delay"),group.delay ,"delay in seconds",{
-				type:'number',
-				min:1,
-				required:''
+			// DialogManager.dlgAddLine(dialog, "Delay", _T("Delay"),group.delay ,"delay in seconds",{
+				// type:'number',
+				// min:1,
+				// required:''
+			// });
+			DialogManager.dlgAddTimer(dialog, "Delay", group.delay.toString().toHHMMSS(), {
+				step: 1
 			});
 			$('div#dialogs')
 				.off('submit',"div#dialogModal form")
@@ -1102,7 +1117,7 @@ var SceneEditor = function (scene) {
 					{ scene: scene, group:group, button:_button },
 					function( event ) {
 						// save for real this time
-						var duration = $("#altui-widget-Delay").val();
+						var duration = $("#altui-widget-Delay").val().fromHHMMSS();
 						var bOK = true;
 						$.each(scene.groups, function(ifx,grp) {
 							if (grp.delay == duration)	// cannot have twice the same duration
