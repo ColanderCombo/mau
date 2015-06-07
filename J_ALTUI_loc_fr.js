@@ -161,5 +161,6 @@ Localization.init( {
   "Network Quality":"Qualité du Réseau",
   "Quality":"Qualité",
   "Show":"Voir",
-  "ZWave Routes":"Routes ZWave"
+  "ZWave Routes":"Routes ZWave",
+  "Scene Action Group":"Groupe d'Action"
 });

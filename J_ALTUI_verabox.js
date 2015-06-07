@@ -569,6 +569,19 @@ var VeraBox = ( function( window, undefined ) {
 		return _rooms;
 	};
 	
+	function _getRoomByID( roomid ) {
+		var room=null;
+		if ( _rooms ) {
+			$.each(_rooms, function( idx,r) {
+				if (r.id==roomid) {
+					room = r;
+					return false;
+				}
+			});
+		}
+		return room;
+	};
+	
 	function _sortByName(a,b)
 	{
 		if (a.name < b.name)
@@ -683,14 +696,17 @@ var VeraBox = ( function( window, undefined ) {
 		})
 		.fail(function(jqXHR, textStatus) {
 			PageMessage.message( _T("VERA did not respond")+": " + textStatus , "danger");
+			if ( $.isFunction( cbfunc ) )  {
+				cbfunc( null );			
+			}
 		})
 		.always(function() {
 		});
 	};
 
-	function _setHouseMode(newmode) {
+	function _setHouseMode(newmode,cbfunc) {
 		if ((newmode<=4) && (newmode>=1)) {
-			UPnPHelper.UPnPAction( 0, 'urn:micasaverde-com:serviceId:HomeAutomationGateway1', 'SetHouseMode', { Mode:newmode } );
+			UPnPHelper.UPnPAction( 0, 'urn:micasaverde-com:serviceId:HomeAutomationGateway1', 'SetHouseMode', { Mode:newmode },cbfunc );
 		}
 	};
 	
@@ -1457,6 +1473,7 @@ var VeraBox = ( function( window, undefined ) {
 	getLuaStartup 	: _getLuaStartup,
     getRooms		: _getRooms,		// in the future getRooms could cache the information and only call _getRooms when needed
     getRoomsSync	: function() { return _rooms; },
+	getRoomByID		: _getRoomByID,		// roomid
 	getDevices		: _getDevices,
     getDevicesSync	: function() { return _devices; },
 	getDeviceByType : _getDeviceByType,
@@ -1783,15 +1800,24 @@ function set_device_state (deviceId, serviceId, variable, value, dynamic) {
 	return true;
 };
 
-var set_panel_html_cb = null;
-function set_set_panel_html_callback(cb) {
-	if ($.isFunction(cb))
-		set_panel_html_cb =cb;
+var _JSAPI_ctx={};
+function set_JSAPI_context(ctx) {
+	_JSAPI_ctx = $.extend( {
+			set_panel_html_callback: null,
+			deviceid: 0
+		}, 
+		ctx
+	);
 };
 
+// function set_set_panel_html_callback(cb) {
+	// if ($.isFunction(cb))
+		// set_panel_html_cb =cb;
+// };
+
 function set_panel_html(html) {
-	if ($.isFunction(set_panel_html_cb))
-		(set_panel_html_cb)(html);
+	if ($.isFunction(_JSAPI_ctx.set_panel_html_callback))
+		(_JSAPI_ctx.set_panel_html_callback)(html);
 };
 
 function log_message(msg) {
@@ -1998,9 +2024,66 @@ var DEVICETYPE_VIRTUAL_DEVICE = "urn:schemas-micasaverde-com:device:VirtualDevic
 var DEVICETYPE_FLOOD_SENSOR = "urn:schemas-micasaverde-com:device:FloodSensor:1";
 
 var api = {
-	version: "UI5",
+	version: "UI7",
+	cloneObject: function (obj) {
+		return cloneObject(obj);
+	},
+	getCommandURL: function() {
+		return command_url;
+	},
+	getDataRequestURL: function() {
+		return data_request_url;
+	},
+	getCpanelContent: function() {
+		return "";
+	},
 	getListOfDevices: function () {
 		return jsonp.ud.devices;
+	},
+	getCpanelDeviceId: function () {
+		return _JSAPI_ctx.deviceid;
+	},
+	getCurrentHouseMode: function(onSuccess, onFailure, context) {
+		VeraBox.getHouseMode( function (mode) {
+			if (mode==null) {
+				if (onFailure)
+					(onFailure).call(context);
+			}else {
+				if (onSuccess)
+					(onSuccess).call(context,mode);
+			}
+		});
+	},
+	setCurrentHouseMode: function(modeValue, onSuccess, onFailure, context) {
+		VeraBox.setHouseMode(modeValue,function(mode) {
+			if (mode==null) {
+				if (onFailure)
+					(onFailure).call(context);
+			}else {
+				if (onSuccess)
+					(onSuccess).call(context,mode);
+			}
+		});
+	},
+	getDeviceIndex: function(deviceid) {
+		var index  = null;
+		$.each(jsonp.ud.devices, function(idx,elem) {
+			if (elem.id==deviceid) {
+				index = idx;
+				return false;
+			}
+		});
+		return index;
+	},
+	getDeviceObject: function(deviceid) {
+		var obj   = null;
+		$.each(jsonp.ud.devices, function(idx,elem) {
+			if (elem.id==deviceid) {
+				obj = elem;
+				return false;
+			}
+		});
+		return obj;
 	},
 	setCpanelContent: function (html) {
 		set_panel_html(html);
@@ -2008,11 +2091,36 @@ var api = {
 	getDeviceStateVariable: function (deviceId, service, variable, options) {
 		return get_device_state(deviceId, service, variable, (options.dynamic === true ? 1: 0));
 	},
+	getDeviceState: function (deviceId, service, variable, options) {
+		return this.getDeviceStateVariable(deviceId, service, variable, options);
+	},
+	getDeviceTemplate: function(deviceId) {
+		return false;
+	},
+	getDisplayedDeviceName: function(deviceId) {
+		var device = this.getDeviceObject(deviceId);
+		if (device)
+			return device.name;
+		return 'unnamed device';
+	},
+	getEventDefinition: function(deviceType) {
+		var _devicetypesDB = UIManager.getDeviceTypesDB();
+		var dt = _devicetypesDB[deviceType];
+		if  ((dt.ui_static_data == undefined) || (dt.ui_static_data.eventList2==undefined))
+			return [];
+		return dt.ui_static_data.eventList2;
+	},
 	setDeviceStateVariable: function (deviceId, service, variable, value, options) {
 		set_device_state(deviceId, service, variable, value, (options.dynamic === true ? 1: 0));
 	},
+	setDeviceState:function(deviceId, service, variable, value, options) {
+		return this.setDeviceStateVariable(deviceId, service, variable, value, options);
+	},
 	setDeviceStateVariablePersistent: function (deviceId, service, variable, value, options) {
-		set_device_state(deviceId, service, variable, value, 0);
+		set_device_state(deviceId, service, variable, value, -1);
+	},	
+	setDeviceStatePersistent:function(deviceId, service, variable, value, options) {
+		return this.setDeviceStateVariablePersistent(deviceId, service, variable, value, options);
 	},
 	performActionOnDevice: function (deviceId, service, action, options) {
 		var query = "id=lu_action&output_format=json&DeviceNum=" + deviceId + "&serviceId=" + service + "&action=" + action;
@@ -2039,5 +2147,74 @@ var api = {
 				}
 			}
 		});
-	}
+	},
+	performLuActionOnDevice: function (deviceId, service, action, options) {
+		return performActionOnDevice(deviceId, service, action, options);
+	},
+	getListOfSupportedEvents: function() {
+		return [];
+	},
+	getLuSdata: function(onSuccess, onFailure, context) {
+		var url = "data_request?id=sdata&output_format=json";
+		var jqxhr = $.ajax( {
+			url: url,
+			type: "GET",
+			dataType: "text",
+			cache: false
+		})
+		.done(function(data) {
+			var arr = JSON.parse(data);
+			if ( $.isFunction( onSuccess ) )  {
+				(onSuccess).call(context, arr);
+			}
+		})
+		.fail(function(jqXHR, textStatus) {
+			if ( $.isFunction( onFailure ) )  {
+				(onFailure).call(context, textStatus);
+			}
+		})
+		.always(function() {
+		});
+	},
+	getRoomObject: function(roomId) {
+		return VeraBox.getRoomByID(roomId);
+	},
+	getSceneDescription: function(sceneId, options) {
+		var scene = VeraBox.getSceneByID(sceneId);
+		return JSON.stringify(scene);
+	},
+	registerEventHandler: function(eventName, object, functionName) {
+	},
+	performActionOnDevice: function(deviceId, service, action, options) {
+		options = $.extend({ 
+			actionArguments:{},
+			onFailure:null,
+			onSuccess:null,
+			context:null
+		},options);
+		return UPnPHelper.UPnPAction( deviceId, service, action, options.actionArguments, function(data){
+			if (data==null) {
+				if (options.onFailure)
+					(options.onFailure).call(options.context,null);
+			}
+			else {
+				if (options.onSuccess)
+					(options.onSuccess).call(options.context,data);
+			}
+		});
+	},
+	performLuActionOnDevice: function(deviceId, service, action, options) {
+		return this.performActionOnDevice(deviceId, service, action, options);
+	},
+	runUpnpCode: function(code, options, onSuccess, onFailure, context) {
+		return UPnPHelper.UPnPRunLua(code, function(data) {
+			if (data==null) {
+				if (onFailure)
+					(onFailure).call(context,null);
+			} else {
+				if (onSuccess)
+					(onSuccess).call(context,data);
+			};
+		});
+	},
 };

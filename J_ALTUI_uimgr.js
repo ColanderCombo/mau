@@ -1102,7 +1102,7 @@ var SceneEditor = function (scene) {
 	};
 
 	function _editGroup( idx,  group , _button ) {
-			var dialog = DialogManager.createPropertyDialog(_T('Scene Group'));
+			var dialog = DialogManager.createPropertyDialog(_T('Scene Action Group'));
 			// DialogManager.dlgAddLine(dialog, "Delay", _T("Delay"),group.delay ,"delay in seconds",{
 				// type:'number',
 				// min:1,
@@ -2574,9 +2574,15 @@ var UIManager  = ( function( window, undefined ) {
 		if (script =="shared.js")
 			return;	// do not want UI5 tool pages !
 		var func = tab.Function;
-		set_set_panel_html_callback(function(html) {
-			$(domparent).html(html);
+		set_JSAPI_context( {
+			set_panel_html_callback: function(html) {
+				$(domparent).html(html);
+			},
+			deviceid: device.id
 		});
+		// set_set_panel_html_callback(function(html) {
+			// $(domparent).html(html);
+		// });
 		try {
 			var result = eval( func+"("+devid+")" );
 		}
@@ -3197,14 +3203,15 @@ var UIManager  = ( function( window, undefined ) {
 	function _refreshModes() {
 		// console.log("refresh");
 		_stoprefreshModes();
-		var mode = VeraBox.getHouseMode( function (mode) {
+		VeraBox.getHouseMode( function (mode) {
 			// console.log("mode="+mode);
-			$("div.housemode").removeClass("preset_selected").addClass("preset_unselected");
-			$("#altui-mode"+mode).removeClass("preset_unselected").addClass("preset_selected");
+			if (mode) {
+				$("div.housemode").removeClass("preset_selected").addClass("preset_unselected");
+				$("#altui-mode"+mode).removeClass("preset_unselected").addClass("preset_selected");
+			}
 			ALTUI_hometimer=setTimeout( _refreshModes, 10000 );		
 		});
 	};
-
 	
 	function _initUIEngine(css) {
 
