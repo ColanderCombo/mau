@@ -2250,108 +2250,116 @@ var UIManager  = ( function( window, undefined ) {
 //_devicetypesDB[ device.device_type ].ui_static_data.flashicon
 //_devicetypesDB[ device.device_type ].ui_static_data.default_icon
 	function _getDeviceIconPath(id, device) {
-		// var str = "binary_light_default.png";
-		var src = defaultIconSrc;
-		var dt = _devicetypesDB[ device.device_type ];
-		AltuiDebug.debug("Icon for device id:"+id+"  device.type:"+device.device_type);
-		if ((dt != undefined) && (dt.ui_static_data!=undefined))
-		{
-			//dt.ui_static_data.DisplayStatus
-			//dt.ui_static_data.state_icons
-			
-			// check if there are objects in dt.ui_static_data.state_icons
-			if (dt.ui_static_data.state_icons !=undefined)	//  some state icons found
-			{
-				var si = dt.ui_static_data.state_icons;
-				if (_hasObjectProperty(si))	// UI7 style
+		var icon='';
+		switch( device.device_type ) {
+			case 'urn:schemas-futzle-com:device:CountdownTimer:1': 
+				icon = 'https://apps.mios.com/plugins/icons/1588.png';
+				break;
+			default:
+				// var str = "binary_light_default.png";
+				var src = defaultIconSrc;
+				var dt = _devicetypesDB[ device.device_type ];
+				AltuiDebug.debug("Icon for device id:"+id+"  device.type:"+device.device_type);
+				if ((dt != undefined) && (dt.ui_static_data!=undefined))
 				{
-					// enumerate each object until a condition is met true
-					var bFound = false;
-					$.each( si , function(key,obj) {
-						if (_isObject(obj) && (obj.img!=undefined) ) {
-							// obj.conditions is an array
-							// obj.img s the icon
-							if (VeraBox.evaluateConditions(device.id, device.subcategory_num || -1, obj.conditions))
-							{
-								bFound = true;
-								str = obj.img;
-							}
-						}
-						return (bFound==false);
-					});
-					// in UI7 if icon path starts with .. it is relative to skins/default/img/devices/device_states/
-				}
-				else	// UI5 style
-					if (dt.ui_static_data.flashicon != undefined)
+					//dt.ui_static_data.DisplayStatus
+					//dt.ui_static_data.state_icons
+					
+					// check if there are objects in dt.ui_static_data.state_icons
+					if (dt.ui_static_data.state_icons !=undefined)	//  some state icons found
 					{
-						//The filename in flashicon undergoes a special transformation for variable icons. 
-						//The extension ".png" is changed to "_0.png", "_25.png", "_50.png", "_75.png" or "_100.png" 
-						//depending on the value of the service variable, linearly scaled from its range of 0:(MaxValue-MinValue) to 0:100. 
-						//Values round up; 1-25 produces the "_25" image; 26-50 produces the "_50" image, and so on. 
-						// For images which are not found (for instance, if the web server returns 404 Not Found) the default image is used.
-						
-						// mostlikely in UI5 icons are not located in devicestates folder, so let's fix it
-						var baseIconName = dt.ui_static_data.flashicon;
-						AltuiDebug.debug("UI5 style static baseIconName:"+baseIconName);
-						var dot = baseIconName.lastIndexOf('.');
-						if (dot >=0)
-							baseIconName=baseIconName.substr(0,dot);
-						if (baseIconName.substring(0,4)!="http")
+						var si = dt.ui_static_data.state_icons;
+						if (_hasObjectProperty(si))	// UI7 style
 						{
-							baseIconName = "../../../"+baseIconName;
+							// enumerate each object until a condition is met true
+							var bFound = false;
+							$.each( si , function(key,obj) {
+								if (_isObject(obj) && (obj.img!=undefined) ) {
+									// obj.conditions is an array
+									// obj.img s the icon
+									if (VeraBox.evaluateConditions(device.id, device.subcategory_num || -1, obj.conditions))
+									{
+										bFound = true;
+										str = obj.img;
+									}
+								}
+								return (bFound==false);
+							});
+							// in UI7 if icon path starts with .. it is relative to skins/default/img/devices/device_states/
 						}
-						AltuiDebug.debug("UI5 style static baseIconName modified :"+baseIconName);
-						var ds = dt.ui_static_data.DisplayStatus;
-						if ((ds.Service != undefined) && (ds.Variable != undefined))
-						{
-							var variable = VeraBox.getStatus( device.id, ds.Service, ds.Variable );
-							if (variable==null) 
-								variable=0;
-							var status = variable / (ds.MaxValue - ds.MinValue);
-							var val = Math.ceil( status * 4 );
-							str = baseIconName + "_" + (isNaN( val * 25 ) ? 0 : (val * 25)) + ".png";
-						}
-						else
-							str = baseIconName + ".png";
+						else	// UI5 style
+							if (dt.ui_static_data.flashicon != undefined)
+							{
+								//The filename in flashicon undergoes a special transformation for variable icons. 
+								//The extension ".png" is changed to "_0.png", "_25.png", "_50.png", "_75.png" or "_100.png" 
+								//depending on the value of the service variable, linearly scaled from its range of 0:(MaxValue-MinValue) to 0:100. 
+								//Values round up; 1-25 produces the "_25" image; 26-50 produces the "_50" image, and so on. 
+								// For images which are not found (for instance, if the web server returns 404 Not Found) the default image is used.
+								
+								// mostlikely in UI5 icons are not located in devicestates folder, so let's fix it
+								var baseIconName = dt.ui_static_data.flashicon;
+								AltuiDebug.debug("UI5 style static baseIconName:"+baseIconName);
+								var dot = baseIconName.lastIndexOf('.');
+								if (dot >=0)
+									baseIconName=baseIconName.substr(0,dot);
+								if (baseIconName.substring(0,4)!="http")
+								{
+									baseIconName = "../../../"+baseIconName;
+								}
+								AltuiDebug.debug("UI5 style static baseIconName modified :"+baseIconName);
+								var ds = dt.ui_static_data.DisplayStatus;
+								if ((ds.Service != undefined) && (ds.Variable != undefined))
+								{
+									var variable = VeraBox.getStatus( device.id, ds.Service, ds.Variable );
+									if (variable==null) 
+										variable=0;
+									var status = variable / (ds.MaxValue - ds.MinValue);
+									var val = Math.ceil( status * 4 );
+									str = baseIconName + "_" + (isNaN( val * 25 ) ? 0 : (val * 25)) + ".png";
+								}
+								else
+									str = baseIconName + ".png";
+							}
+							else
+								str = si[0];
+							AltuiDebug.debug("Icon for device id:"+id+"  str :"+str);
 					}
-					else
-						str = si[0];
-					AltuiDebug.debug("Icon for device id:"+id+"  str :"+str);
-			}
-			else {
-				// no state icons found
-				//str = (dt.ui_static_data.default_icon != undefined) ? dt.ui_static_data.default_icon : dt.ui_static_data.flashicon;
-				str = (dt.ui_static_data.flashicon != undefined) ? dt.ui_static_data.flashicon : dt.ui_static_data.default_icon;
-				AltuiDebug.debug("Icon for device id:"+id+"  string from json:"+str);
-				if (str == undefined) {
-					AltuiDebug.debug("Undefined icon in ui_static_data, device.type:"+device.device_type);
-					AltuiDebug.debug("dt.ui_static_data:"+JSON.stringify(dt.ui_static_data));
-					AltuiDebug.debug("Setting default icon");
-					str = "icons/generic_sensor.png";
+					else {
+						// no state icons found
+						//str = (dt.ui_static_data.default_icon != undefined) ? dt.ui_static_data.default_icon : dt.ui_static_data.flashicon;
+						str = (dt.ui_static_data.flashicon != undefined) ? dt.ui_static_data.flashicon : dt.ui_static_data.default_icon;
+						AltuiDebug.debug("Icon for device id:"+id+"  string from json:"+str);
+						if (str == undefined) {
+							AltuiDebug.debug("Undefined icon in ui_static_data, device.type:"+device.device_type);
+							AltuiDebug.debug("dt.ui_static_data:"+JSON.stringify(dt.ui_static_data));
+							AltuiDebug.debug("Setting default icon");
+							str = "icons/generic_sensor.png";
+						}
+						str = str.replace(".swf",".png");
+						if ( (str == "icons/generic_sensor.png") || (str == "icons/Light_Sensor.png"))
+							str = defaultIconSrc;
+						else if (str == "icons/Window_Covering.png")
+							str = (_ui7Check==true) ? "../../icons/Window_Covering.png" : "../../../icons/Window_Covering.png";
+						else if (str.substr(0,6) == "icons/")
+							str = "../../../"+str;
+						AltuiDebug.debug("Icon for device id:"+id+"  string after correction:"+str);
+					}	
 				}
-				str = str.replace(".swf",".png");
-				if ( (str == "icons/generic_sensor.png") || (str == "icons/Light_Sensor.png"))
+				else {
+					AltuiDebug.debug("Icon for device id:"+id+"  DeviceType unknown or not static data");
 					str = defaultIconSrc;
-				else if (str == "icons/Window_Covering.png")
-					str = (_ui7Check==true) ? "../../icons/Window_Covering.png" : "../../../icons/Window_Covering.png";
-				else if (str.substr(0,6) == "icons/")
-					str = "../../../"+str;
-				AltuiDebug.debug("Icon for device id:"+id+"  string after correction:"+str);
-			}	
-		}
-		else {
-			AltuiDebug.debug("Icon for device id:"+id+"  DeviceType unknown or not static data");
-			str = defaultIconSrc;
-		}
-		
-		//console.log("type:{0} icon:{1}".format(device.device_type,str));
-		if( str.substring(0,4)=="http") {
-			AltuiDebug.debug("Icon for device id:"+id+"  IconPath:"+str);
-			return str;
-		}
-		
-		var icon = (str.substring(0,14)=="data:image/png") ? str : ("//{0}/cmh/skins/default/img/devices/device_states/{1}".format(window.location.hostname, str));
-		AltuiDebug.debug("Icon for device id:"+id+"  IconPath:"+icon);
+				}
+				
+				//console.log("type:{0} icon:{1}".format(device.device_type,str));
+				if( str.substring(0,4)=="http") {
+					AltuiDebug.debug("Icon for device id:"+id+"  IconPath:"+str);
+					return str;
+				}
+				
+				icon = (str.substring(0,14)=="data:image/png") ? str : ("//{0}/cmh/skins/default/img/devices/device_states/{1}".format(window.location.hostname, str));
+				AltuiDebug.debug("Icon for device id:"+id+"  IconPath:"+icon);
+				break;
+		};
 		return icon;
 	};
 
@@ -3132,7 +3140,10 @@ var UIManager  = ( function( window, undefined ) {
 		// refresh rooms
 		// refresh devices
 		AltuiDebug.debug("_refreshUI( {0}, {1} )".format(bFull,bFirstTime));
-		$(".altui-device").each( function( index, element) {
+		
+		// $(".altui-device") which do not have a btngroup in open state
+		// to avoid a refresh to erase an opened popup menu
+		$(".altui-device:not(:has(div.btn-group.open))").each( function( index, element) {
 			var devid = $(element).prop("id");
 			var device = VeraBox.getDeviceByID( devid );
 			if ( (device!=null) && (bFull==true || device.dirty==true) ) {
@@ -4330,24 +4341,28 @@ var UIManager  = ( function( window, undefined ) {
 		_drawDevices(deviceFilter);
 
 		// deletegated event for title click / rename for device
-		$(".altui-mainpanel").off("click",".altui-camera-picture");
-		$(".altui-mainpanel").on("click",".altui-camera-picture", _onClickCamera );
+		$(".altui-mainpanel")
+			.off("click",".altui-camera-picture")
+			.on("click",".altui-camera-picture", _onClickCamera )
+			.off("click",".altui-device-title")
+			.on("click",".altui-device-title",function() { 
+				if ($(this).find("input.altui-device-title-input").length>=1)
+					return;
+				var text = $(this).text();
+				var devid = $(this).parents(".altui-device").prop('id');
+				$(this).html("<small><input id='"+devid+"' class='altui-device-title-input' value='"+text+"'></input></small>");
 
-		$(".altui-mainpanel").off("click",".altui-device-title");
-		$(".altui-mainpanel").on("click",".altui-device-title",function(){ 
-			if ($(this).find("input.altui-device-title-input").length>=1)
-				return;
-			var text = $(this).text();
-			var devid = $(this).parents(".altui-device").prop('id');
-			$(this).html("<small><input id='"+devid+"' class='altui-device-title-input' value='"+text+"'></input></small>");
-
-			$("input#"+devid+".altui-device-title-input").focusout(function(){ 
-				var newname = $(this).val();
-				$(this).parent().replaceWith("<small>"+newname+"</small>");
-				var devid = $(this).prop('id');
-				UPnPHelper.renameDevice(devid, newname);
+				$("input#"+devid+".altui-device-title-input").focusout(function(){ 
+					var newname = $(this).val();
+					$(this).parent().replaceWith("<small>"+newname+"</small>");
+					var devid = $(this).prop('id');
+					UPnPHelper.renameDevice(devid, newname);
+				});
 			});
-		});
+			// .off("click",".altui-device-command")
+			// .on("click",".altui-device-command",function() { 
+				// console.log("coucou");
+			// });
 		
 		// delegated event for device drop down menu-right
 		$(".altui-mainpanel").off("click",".altui-device-variables");

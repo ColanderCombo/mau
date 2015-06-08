@@ -22,7 +22,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	// return styles needed by this plugin module
 	function _getStyle() {
 		var style="";
-		style += ".altui-watts, .altui-volts, .altui-dimmable  {font-size: 16px;}";
+		style += ".altui-watts, .altui-volts, .altui-dimmable, .altui-countdown  {font-size: 16px;}";
 		style += ".altui-temperature, .altui-humidity, .altui-light  {font-size: 18px;}";
 		style += ".altui-motion {font-size: 22px;}";
 		style += ".altui-weather-text, .altui-lasttrip-text {font-size: 13px;}";
@@ -324,6 +324,14 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		return html;
 	};
 	
+	function _drawCountDown(devid, device) {
+		var html ="";
+		var remaining = parseInt(VeraBox.getStatus( devid, 'urn:futzle-com:serviceId:CountdownTimer1', 'Remaining' ));
+		var duration = parseInt(VeraBox.getStatus( devid, 'urn:futzle-com:serviceId:CountdownTimer1', 'Duration' ));
+		html+= "<div class='altui-countdown'>{0} / {1}</div>".format( remaining , duration );
+		return html;
+	};
+
 	function _drawVacation(devid, device) {
 		var html ="";
 		var status = parseInt( VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status') );
@@ -406,6 +414,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawWindowCover : _drawWindowCover,
 	drawPowerMeter  : _drawPowerMeter,
 	drawVacation    : _drawVacation,
+	drawCountDown    : _drawCountDown,
 	drawWeather     : _drawWeather,
 	drawWeatherIcon : _drawWeatherIcon,
 	drawInfoViewer  : _drawInfoViewer,

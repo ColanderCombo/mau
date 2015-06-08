@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.48"
+local version = "v0.49"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 -- local updateFrequencySec = 120	-- refreshes every x seconds
 -- local socket = require("socket")
@@ -781,6 +781,10 @@ local function getDefaultConfig()
 	tbl["urn:schemas-futzle-com:device:holidayvirtualswitch:1"]= {
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawVacation",
+	}
+	tbl["urn:schemas-futzle-com:device:CountdownTimer:1"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawCountDown",
 	}
 	tbl["urn:schemas-upnp-org:device:IPhoneLocator:1"]= {
 		["ScriptFile"]="J_ALTUI_iphone.js",
