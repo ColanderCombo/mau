@@ -3108,12 +3108,18 @@ var UIManager  = ( function( window, undefined ) {
 	function _refreshFooter() {
 		// refresh footer if needed
 		if ($("small#altui-footer span.bg-danger").length == 1) {
-			var info = VeraBox.getBoxInfo();
-			var infotbl=[];
-			for( var key in info) { infotbl.push( info[key] || "") };
-			$("small#altui-footer").html( "AltUI {0}, amg0, {1}".format(_version,infotbl.join(", ")));
-			$("small#altui-footer").append( "<p>$Revision$,$Date$</p>");
-			$("small#altui-footer").append( "<span>"+UIManager.getPayPalButtonHtml( false ) + "</span>");
+			var str = "$Revision$";
+			var re = /\$Revision:\s*(\d*).*\$/; 
+			var m;
+			if ((m = re.exec(str)) !== null) {
+				var jsrevision = m[1];
+				var info = VeraBox.getBoxInfo();
+				var infotbl=[];
+				for( var key in info) { infotbl.push( info[key] || "") };
+				$("small#altui-footer").html( "AltUI {0}.{1}, {2}".format(_version,jsrevision,infotbl.join(", ")));
+				$("small#altui-footer").append( "<p>amg0, $Date$</p>");
+				$("small#altui-footer").append( "<span>"+UIManager.getPayPalButtonHtml( false ) + "</span>");
+			}
 		}
 	};
 	
