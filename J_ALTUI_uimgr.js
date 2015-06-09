@@ -3116,8 +3116,7 @@ var UIManager  = ( function( window, undefined ) {
 				var info = VeraBox.getBoxInfo();
 				var infotbl=[];
 				for( var key in info) { infotbl.push( info[key] || "") };
-				$("small#altui-footer").html( "AltUI {0}.{1}, {2}".format(_version,jsrevision,infotbl.join(", ")));
-				$("small#altui-footer").append( "<p>amg0, $Date$</p>");
+				$("small#altui-footer").html( "<p>AltUI {0}.{1}, amg0,{2}</p>".format(_version,jsrevision,infotbl.join(", ")));
 				$("small#altui-footer").append( "<span>"+UIManager.getPayPalButtonHtml( false ) + "</span>");
 			}
 		}
