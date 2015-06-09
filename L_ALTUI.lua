@@ -472,16 +472,20 @@ local htmlLayout = [[
 		var g_CustomPages = @custompages@;
 		var g_CustomTheme = '@ThemeCSS@';
 	</script>
-    <script src="J_ALTUI_utils.js" ></script>
-    <script src="J_ALTUI_verabox.js" ></script>
-	<script src="J_ALTUI_uimgr.js" ></script>
+
 	@optional_scripts@
+	<script src="J_ALTUI_utils.js" ></script>
+	<script src="J_ALTUI_verabox.js" ></script>
+	<script src="J_ALTUI_uimgr.js" defer ></script>
 	<hr>
 	<footer><p class="text-center"><small id="altui-footer">AltUI, amg0, <span class="bg-danger">Waiting Initial Data</span></small></p><span id="debug"></span></footer>
 </body>
 </html>
 ]]
 
+
+
+	
 function findALTUIDevice()
 	debug("findALTUIDevice()")
 	for k,v in pairs(luup.devices) do
@@ -539,18 +543,20 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				local scripts = {}
 				for k,v in pairs(tbl) do	
 					if (v["ScriptFile"]  ~= nil) then
-						scripts[v["ScriptFile"]] = ""
+						-- scripts[v["ScriptFile"]] = ""
 					end
 				end
 				if ( (lul_parameters["lang"]~=nil) and (lul_parameters["lang"]~="en") ) then
 					scripts["J_ALTUI_loc_"..lul_parameters["lang"]..".js"] = ""
 				end
+				-- scripts["J_ALTUI_utils.js"]=""
+				-- scripts["J_ALTUI_verabox.js"]=""
 				for k,v in pairs(scripts) do
-					-- scripts[k] = getScriptContent(k)
+					scripts[k] = getScriptContent(k)
 					optional_scripts = optional_scripts  .. string.format(
-						"<script type='text/javascript' src='%s'>%s</script>",
+						"<script type='text/javascript' data-src='%s' >%s</script>",
 						k,
-						"" -- xml_encode(scripts[k])
+						scripts[k]  -- xml_encode(scripts[k])
 						)
 				end
 				-- debug( json.encode(scripts) )

@@ -1848,6 +1848,7 @@ var UIManager  = ( function( window, undefined ) {
 		var script = document.createElement('script');
 		script.type = 'text/javascript';
 		script.src = scriptLocationAndName;
+		script.setAttribute("data-src", scriptLocationAndName);
 
 		// once script is loaded, we can call style function in it
 		$(script).load( cbfunc );
@@ -1945,25 +1946,20 @@ var UIManager  = ( function( window, undefined ) {
 
 		$.each(_devicetypesDB, function(devtype,obj) {
 			if (obj!=null && obj.ScriptFile!=null) {
-				var len = $('script[src="'+obj.ScriptFile+'"]').length;
+				var len = $('script[data-src="'+obj.ScriptFile+'"]').length;
 				if (len==0) {
 					// not loaded yet
 					_loadScript(obj.ScriptFile, function() {						
 						// script has been loaded , check if style needs to be loaded and if so, load them
 						$.each(_devicetypesDB,function(idx,dt) {
-							if ( (dt.ScriptFile == scriptLocationAndName) && (dt.StyleFunc != undefined) ) {
+							if ( (dt.ScriptFile == obj.ScriptFile) && (dt.StyleFunc != undefined) ) {
 								_loadStyle(dt.StyleFunc);
 								return false;	// exit the loop
 							}
 						});				
 					});	// load script & styles once script is loaded
 				} 
-				else
-				{
-					// loaded
-					if (obj.StyleFunc!= undefined)
-						_loadStyle(obj.StyleFunc);	// just load styles
-				}
+				// else loaded
 			}
 		});
 	};

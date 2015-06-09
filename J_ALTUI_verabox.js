@@ -565,7 +565,8 @@ var VeraBox = ( function( window, undefined ) {
 	
 	// Get Rooms  , call a callback function asynchronously, or return array of rooms
 	function _getRooms( func , filterfunc) {
-		_asyncResponse( _rooms.sort(_sortByName), func , filterfunc)
+		if (_rooms)
+			_asyncResponse( _rooms.sort(_sortByName), func , filterfunc)
 		return _rooms;
 	};
 	
