@@ -1179,28 +1179,20 @@ var VeraBox = ( function( window, undefined ) {
 	};
 	
 	function _updateNeighbors(deviceid) {
-		deviceid = parseInt(deviceid);
-		if (isInteger(deviceid)) {
-			var url = "id=lu_action&action=UpdateNeighbors&Device="+deviceid; // deviceid==3,  altid=2
-			var jqxhr = $.ajax( {
-				url: url,
-				type: "POST",
-				dataType: "text"
-			})
-			  .done(function(data) {
-				if (data!=null) {
-					PageMessage.message(_T("Update Neighbors succeeded"));
-				}
-				else {
-					PageMessage.message(_T("Update Neighbors failed"));
-				}
-			  })
-			  .fail(function(jqXHR, textStatus) {
-					PageMessage.message(_T("Update Neighbors failed"));
-			  })
-			  .always(function() {
-			  });
-		}
+		var zwavenet = VeraBox.getDeviceByType("urn:schemas-micasaverde-com:device:ZWaveNetwork:1");
+		if (zwavenet==null)
+			return;
+		
+		var params={};
+		params[ "Device" ] = deviceid;
+		UPnPHelper.UPnPAction( zwavenet.id, "urn:micasaverde-com:serviceId:ZWaveNetwork1", "UpdateNeighbors", params, function(data) {
+			if (data!=null) {
+				PageMessage.message(_T("Update Neighbors succeeded"));
+			}
+			else {
+				PageMessage.message(_T("Update Neighbors failed"));
+			}
+		});
 	};
 	
 	function _deleteScene(id)
