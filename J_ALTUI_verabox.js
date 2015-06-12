@@ -1178,6 +1178,31 @@ var VeraBox = ( function( window, undefined ) {
 		}
 	};
 	
+	function _updateNeighbors(deviceid) {
+		deviceid = parseInt(deviceid);
+		if (isInteger(deviceid)) {
+			var url = "id=lu_action&action=UpdateNeighbors&Device="+deviceid; // deviceid==3,  altid=2
+			var jqxhr = $.ajax( {
+				url: url,
+				type: "POST",
+				dataType: "text"
+			})
+			  .done(function(data) {
+				if (data!=null) {
+					PageMessage.message(_T("Update Neighbors succeeded"));
+				}
+				else {
+					PageMessage.message(_T("Update Neighbors failed"));
+				}
+			  })
+			  .fail(function(jqXHR, textStatus) {
+					PageMessage.message(_T("Update Neighbors failed"));
+			  })
+			  .always(function() {
+			  });
+		}
+	};
+	
 	function _deleteScene(id)
 	{
 		if (confirm(_T("Are you sure you want to delete scene ({0})").format(id))) {
@@ -1498,6 +1523,7 @@ var VeraBox = ( function( window, undefined ) {
 	
 	createDevice	: _createDevice,
 	deleteDevice	: _deleteDevice,
+	updateNeighbors	: _updateNeighbors, // id=lu_action&action=UpdateNeighbors&Device=3&DeviceNum=1
 	createRoom		: _createRoom,
 	deleteRoom		: _deleteRoom,
 	runLua			: _runLua,

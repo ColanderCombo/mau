@@ -2133,7 +2133,8 @@ var UIManager  = ( function( window, undefined ) {
 			});
 			
 			// update modal with new text
-			$('div#deviceActionModal').replaceWith(deviceActionModalTemplate.format( lines.join(''), device.name, devid ));
+			var extrabuttons = buttonTemplate.format( devid, "altui-update-neighbors", _T("Update Neighbors"),"default");
+			$('div#deviceActionModal').replaceWith(deviceActionModalTemplate.format( lines.join(''), device.name, devid, extrabuttons ));
 			$('div#deviceActionModal button.altui-run-action').click( function() {
 				var service = $(this).data().service;	// better than this.dataset.service in case of old browsers
 				var deviceID = $(this).data().devid;
@@ -2151,6 +2152,10 @@ var UIManager  = ( function( window, undefined ) {
 				UPnPHelper.UPnPAction( deviceID, service, action, parameters, function(result) {
 					alert(result);
 				});
+			});
+			$('div#deviceActionModal button.altui-update-neighbors').click( function() {
+				var deviceID = $(this).prop('id');
+				VeraBox.updateNeighbors( deviceID );
 			});
 				
 			// show the modal
@@ -4329,7 +4334,7 @@ var UIManager  = ( function( window, undefined ) {
 		
 		// Dialogs
 		$("div#dialogs").append(deviceModalTemplate.format( '', '', 0 ));
-		$("div#dialogs").append(deviceActionModalTemplate.format( '', '', 0 ));
+		$("div#dialogs").append(deviceActionModalTemplate.format( '', '', 0, '' ));
 		$("div#dialogs").append( _createDeviceModalHtml() );
 		
 		// on the left, get the rooms
@@ -6366,6 +6371,7 @@ $(document).ready(function() {
 		deviceActionModalTemplate += "     </table>";
 		deviceActionModalTemplate += "      </div>";
 		deviceActionModalTemplate += "      <div class='modal-footer'>";
+		deviceActionModalTemplate += "        {3}";					// extra buttons
 		deviceActionModalTemplate += "        <button type='button' class='btn btn-primary' data-dismiss='modal'>"+_T("Close")+"</button>";
 		deviceActionModalTemplate += "      </div>";
 		deviceActionModalTemplate += "    </div><!-- /.modal-content -->";
