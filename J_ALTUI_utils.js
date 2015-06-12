@@ -12,6 +12,11 @@ function getQueryStringValue (key) {
   return unescape(window.location.search.replace(new RegExp("^(?:.*[&\\?]" + escape(key).replace(/[\.\+\*]/g, "\\$&") + "(?:\\=([^&]*))?)?.*$", "i"), "$1"));  
 } 
 	
+function isIE11() {
+	var ie11andabove = navigator.userAgent.indexOf('Trident') != -1 && navigator.userAgent.indexOf('MSIE') == -1 // IE11 or above Boolean
+	return ie11andabove;
+}
+
 var Localization = ( function (undefined) {
 	var _unknown_terms = {};
 	var _terms = {};

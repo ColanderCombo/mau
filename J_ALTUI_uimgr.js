@@ -16,7 +16,7 @@ var deviceActionModalTemplate = "";
 var defaultDialogModalTemplate = "";
 var wattTemplate = "<span class='altui-watts '>{0} <small>Watts</small></span>";
 // 0:modeid 1:modetext 2:modeclss for bitmap 3:preset_unselected or preset_selected
-var houseModeButtonTemplate = "  <button type='button' class='btn btn-default altui-housemode'><div>{1}</div><div id='altui-mode{0}' class='col-xs-3 {2} {3} housemode'></div></button>";							
+var houseModeButtonTemplate = "  <button type='button' class='btn btn-default altui-housemode'><div>{1}</div><div id='altui-mode{0}' class='{2} {3} housemode'></div></button>";							
 var leftNavButtonTemplate = "<button id='{0}' type='button' class='altui-leftbutton btn btn-default'>{1}</button>";
 var deleteGlyph = "<span class='glyphicon glyphicon-trash text-danger' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Delete'></span>";
 var glyphTemplate = "<span class='glyphicon glyphicon-{0} {2}' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='{1}' ></span>";
@@ -2502,7 +2502,7 @@ var UIManager  = ( function( window, undefined ) {
 			
 		var device = VeraBox.getDeviceByID(id);
 		var directstreaming = VeraBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" );
-		if (VeraBox.isRemoteAccess() || isNullOrEmpty(directstreaming)   )
+		if (VeraBox.isRemoteAccess() || isNullOrEmpty(directstreaming) || isIE11()  )
 		{
 			obj = $("<img></img>")
 				.attr('src',"data_request?id=request_image&res=low&cam="+device.id+"&t="+ new Date().getTime())
@@ -2833,7 +2833,7 @@ var UIManager  = ( function( window, undefined ) {
 					//{"ControlGroup":"3","ControlType":"image","top":"0","left":"0","Display":{"url":"?id=request_image&cam=","Top":0,"Left":0,"Width":320,"Height":240}}
 					var container = $(domparent).parents(".altui-device-controlpanel-container").addClass("altui-norefresh");
 					var directstreaming = VeraBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" );
-					if (VeraBox.isRemoteAccess() || isNullOrEmpty(directstreaming)  ) {
+					if (VeraBox.isRemoteAccess() || isNullOrEmpty(directstreaming) || isIE11() ) {
 						var img = $("<img></img>")
 							.appendTo($(domparent))
 							.css({
@@ -3226,7 +3226,6 @@ var UIManager  = ( function( window, undefined ) {
 	};
 	
 	function _initUIEngine(css) {
-
 		var head = document.getElementsByTagName('head')[0];
 		var style = document.createElement('style');
 		style.type = 'text/css';
@@ -6605,21 +6604,21 @@ $(document).ready(function() {
 		overflow: hidden;		\
 		height: 28px;			\
 	}		\
-	.altui-device-heading,.altui-scene-heading {	\
+	div.altui-device-heading, div.altui-scene-heading {	\
 		height:30px;\
 		padding-top: 5px;\
 		padding-right: 10px;\
 		padding-bottom: 5px;\
 		padding-left: 10px;\
 	}\
-	.altui-device-body {\
+	div.altui-device-body {\
 		height:52px;\
 		padding-top: 0px;\
 		padding-right: 5px;\
 		padding-bottom: 5px;\
 		padding-left: 5px;\
 	}\
-	.altui-scene-body {\
+	div.altui-scene-body {\
 		height:50px;\
 		padding-top: 5px;\
 		padding-right: 5px;\
@@ -6629,12 +6628,12 @@ $(document).ready(function() {
 	#altui-device-filter-form { \
 		margin-top:5px;			\
 	}\
-	.altui-battery { \
+	div.altui-battery { \
 		margin-top:2px;			\
 		margin-right:5px;		\
 		margin-bottom:0px;		\
 	}\
-	.altui-battery .progress-bar { \
+	div.altui-battery .progress-bar { \
 		color: black;			\
 	}\
 	.caret.caret-reversed {				\
@@ -6644,11 +6643,11 @@ $(document).ready(function() {
 	.form-inline > * {	\
 		margin:5px 3px;	\
 	}					\
-	.altui-scene-body button {\
+	div.altui-scene-body button {\
 		margin-left:1px;			\
 		margin-right:1px;			\
 	}\
-	.altui-plugin-icon { 			\
+	div.altui-plugin-icon { 			\
 		font-size: 1.5em;				\
 		height: 40px;				\
 	}								\
