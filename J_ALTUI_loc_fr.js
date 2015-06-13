@@ -162,5 +162,10 @@ Localization.init( {
   "Quality":"Qualité",
   "Show":"Voir",
   "ZWave Routes":"Routes ZWave",
-  "Scene Action Group":"Groupe d'Action"
+  "Scene Action Group":"Groupe d'Action",
+  "Pause Scene":"Pause Scene",
+  "Trigger Restriction":"Evènement Limité",
+  "Restrict trigger based on certain times":"Limite les Evènements à une certaine plage horaire",
+  "Start Time":"Début",
+  "Stop Time":"Fin"
 });
