@@ -206,12 +206,12 @@ var DialogManager = ( function() {
 		return $('div#dialogModal');
 	};
 	
-	function _dlgAddCheck(dialog,name, value)
+	function _dlgAddCheck(dialog, name, value, label)
 	{
 		var propertyline = "";
 		// propertyline += "<div class='checkbox'>";
 		propertyline +="<label class='checkbox-inline'>";
-		propertyline +=("  <input type='checkbox' id='altui-widget-"+name+"' " + ( (value==true) ? 'checked' : '') +" value='"+value+"' title='check to invert status value'>"+name);
+		propertyline +=("  <input type='checkbox' id='altui-widget-"+name+"' " + ( (value==true) ? 'checked' : '') +" value='"+value+"' title='check to invert status value'>"+(label ? label : name));
 		propertyline +="</label>";
 		// propertyline += "</div>";
 		$(dialog).find(".row-fluid").append(propertyline);
@@ -363,12 +363,12 @@ var DialogManager = ( function() {
 		$(dialog).find(".row-fluid").append(propertyline);
 	};
 	
-	function _dlgAddTimer(dialog, name, value, htmloptions )
+	function _dlgAddTimer(dialog, name, label, value, htmloptions )
 	{
 		var optstr = _optionsToString(htmloptions);
 		var propertyline = "";
 		propertyline += "<div class='form-group'>";
-		propertyline += "	<label for='altui-widget-"+name+"' title='Date Time'>"+name+"</label>";
+		propertyline += "	<label for='altui-widget-"+name+"' title='Date Time'>"+(label ? label : name)+"</label>";
 		propertyline += "	<input id='altui-widget-"+name+"' class='form-control' type='time' value='"+value+"' placeholder='absolute time' "+optstr+"></input>";
 		propertyline += "</div>";
 		$(dialog).find(".row-fluid").append(propertyline);
@@ -824,6 +824,70 @@ var SceneEditor = function (scene) {
 		return html;
 	};
 	
+	function _findTimerById( scene, timerid )
+	{
+		var timer = null;
+		if (scene.timers)
+			$.each(scene.timers, function( idx,_timer) {	
+				if (_timer.id == timerid) {
+					timer = _timer;
+					return false;
+				}
+			});
+		return timer;
+	};
+	
+	function _editTriggerRestrict( triggeridx, jqButton ) {
+		function _hideShowControls(  ) {
+			var bViewOthers = $("#altui-widget-RestrictTrigger").prop('checked');
+			$("#altui-widget-StartTime").closest(".form-group").toggle(bViewOthers);
+			$("#altui-widget-StopTime").closest(".form-group").toggle(bViewOthers);
+			$("#altui-widget-TimerDayOfWeek").closest(".form-group").toggle(bViewOthers);
+		};
+
+		var trigger = scene.triggers[ triggeridx ];
+		if (trigger.start_time)
+			trigger.start_time = trigger.start_time.fromHHMMSS().toString().toHHMMSS();
+		if (trigger.stop_time)
+			trigger.stop_time = trigger.stop_time.fromHHMMSS().toString().toHHMMSS();
+
+		var dialog = DialogManager.createPropertyDialog(_T('Trigger Restriction'));
+		DialogManager.dlgAddCheck(dialog,'RestrictTrigger',(trigger.days_of_week !=undefined),_T('Restrict trigger based on certain times'));
+		DialogManager.dlgAddDayOfWeek(dialog, "TimerDayOfWeek", _T("TimerDayOfWeek"), trigger.days_of_week || '' , _timerDOW);
+		DialogManager.dlgAddTimer(dialog, "StartTime", _T("Start Time"), trigger.start_time);
+		DialogManager.dlgAddTimer(dialog, "StopTime", _T("Stop Time"),trigger.stop_time);
+		$('div#dialogModal').modal();
+		_hideShowControls();
+		
+		$('div#dialogs')	
+			.off( 'change',"input#altui-widget-RestrictTrigger")
+			.on( 'change',"input#altui-widget-RestrictTrigger", function() {
+				_hideShowControls();
+			})
+			.off('submit',"div#dialogModal form")
+			.on( 'submit',"div#dialogModal form", function() {
+				if ($("#altui-widget-RestrictTrigger").prop('checked')==false) {
+					trigger.start_time=undefined;
+					trigger.stop_time=undefined;
+					trigger.days_of_week=undefined;
+				} else 
+				{
+					var tmp = $("#altui-widget-TimerDayOfWeek input:checked").map( function(idx,elem){ return $(elem).val() });
+					trigger.days_of_week = $.makeArray(tmp).join(",");
+					if (trigger.days_of_week =="") {
+						trigger.start_time=undefined;
+						trigger.stop_time=undefined;
+						trigger.days_of_week=undefined;
+					} else {
+						trigger.start_time  =$("#altui-widget-StartTime").val();
+						trigger.stop_time  =$("#altui-widget-StopTime").val();
+					}
+				}
+				$('div#dialogModal').modal('hide');
+				_showSaveNeeded();
+			});
+		};
+	
 	function _editTimer( timerid, jqButton )
 	{
 		var _timerUnits = [
@@ -849,18 +913,7 @@ var SceneEditor = function (scene) {
 			return str;
 		};
 		
-		function _findTimerById( scene, timerid )
-		{
-			var timer = null;
-			if (scene.timers)
-				$.each(scene.timers, function( idx,_timer) {	
-					if (_timer.id == timerid) {
-						timer = _timer;
-						return false;
-					}
-				});
-			return timer;
-		};
+
 		function _getNewTimerID()
 		{
 			var max = 0;
@@ -1123,7 +1176,7 @@ var SceneEditor = function (scene) {
 				// min:1,
 				// required:''
 			// });
-			DialogManager.dlgAddTimer(dialog, "Delay", group.delay.toString().toHHMMSS(), {
+			DialogManager.dlgAddTimer(dialog, "Delay", null, group.delay.toString().toHHMMSS(), {
 				step: 1
 			});
 			$('div#dialogs')
@@ -1285,6 +1338,8 @@ var SceneEditor = function (scene) {
 			})
 			.off("click",".altui-triggertimerestrict")
 			.on("click",".altui-triggertimerestrict",function() { 
+				var id = parseInt($(this).prop('id'));
+				_editTriggerRestrict( id , $(this) );
 			});
 		
 		$(".altui-toggle-json").click( function() {
