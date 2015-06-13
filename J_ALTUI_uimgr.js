@@ -716,7 +716,7 @@ var SceneEditor = function (scene) {
 		html +="</small></td>";		
 
 		html +="<td>";
-		html += smallbuttonTemplate.format( idx, 'altui-triggertimerestrict', "<span class='glyphicon glyphicon-time' aria-hidden='true'></span>",_displayTriggerRestrictions(trigger));
+		html += smallbuttonTemplate.format( idx, 'altui-triggertimerestrict', "<span class='glyphicon glyphicon-time "+(trigger.days_of_week ? 'text-warning' : '' ) +"' aria-hidden='true'></span>",_displayTriggerRestrictions(trigger));
 		html +="</td>";
 		
 		html +="<td>";
@@ -883,6 +883,7 @@ var SceneEditor = function (scene) {
 						trigger.stop_time  =$("#altui-widget-StopTime").val();
 					}
 				}
+				$(".altui-triggertimerestrict").find(".glyphicon").toggleClass("text-warning",(trigger.days_of_week!=undefined));
 				$('div#dialogModal').modal('hide');
 				_showSaveNeeded();
 			});
