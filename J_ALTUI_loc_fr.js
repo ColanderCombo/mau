@@ -52,7 +52,7 @@ Localization.init( {
   "Localization":"Localisation",
   "Misc":"Divers",
   "Create":"Créer",
-  "Runs in mode": "Exécute seulement en mode",
+  "Runs in all modes, or in selected mode": "Exécute dans tous les modes, ou seulement en mode(s)",
   "Run" : "Exécute",
   "OFF,ON":"OFF,ON",
   "Working":"Travail",

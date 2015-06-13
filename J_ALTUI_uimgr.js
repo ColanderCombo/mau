@@ -659,6 +659,17 @@ var SceneEditor = function (scene) {
 			});
 			return event;
 		};
+		function _displayTriggerRestrictions(trigger) {
+			var html ="";
+			if (trigger.days_of_week) {
+				var res = $.map( trigger.days_of_week.split(','), function (day) { return _timerDOW[parseInt(day)-1].text; });
+				html += res.join(',');
+			}
+			if (trigger.start_time && trigger.stop_time)
+				html += ("[{0}-{1}]".format(trigger.start_time,trigger.stop_time));
+			return html;
+		};
+		
 		var html="";
 		var deviceid = trigger.device;
 		var device = VeraBox.getDeviceByID(deviceid);
@@ -671,7 +682,7 @@ var SceneEditor = function (scene) {
 		html +="<td>";
 		html +="<b>{0}</b>".format(trigger.name);
 		html +="</td>";
-		
+
 		html +="<td>{0}</td><td>{1}</td>".format(
 			_displayDevice(deviceid),
 			event.label.text.replace("_DEVICE_NAME_","<b>"+device.name+"</b>"));
@@ -704,6 +715,10 @@ var SceneEditor = function (scene) {
 		});
 		html +="</small></td>";		
 
+		html +="<td>";
+		html += smallbuttonTemplate.format( idx, 'altui-triggertimerestrict', "<span class='glyphicon glyphicon-time' aria-hidden='true'></span>",_displayTriggerRestrictions(trigger));
+		html +="</td>";
+		
 		html +="<td>";
 		html += smallbuttonTemplate.format( idx, 'altui-luatrigger', "<span class='glyphicon glyphicon-flash' aria-hidden='true'>Lua</span>",trigger.lua);
 		html +="</td>";
@@ -1173,10 +1188,10 @@ var SceneEditor = function (scene) {
 		//scene options room, name, modes
 		var html = "<div class='form-group'><h3>Room : "+htmlRoomSelect+"</h3><label for='altui-scene-name-input'>Name :</Label>"+htmlRoomName;
 		if (UIManager.UI7Check()==true) {
-			if (scene.modeStatus==undefined)
-				scene.modeStatus="";
+			if (scene.modeStatus == undefined)
+				scene.modeStatus="0";
 			var modes = scene.modeStatus.split(',');
-			html += "<label for='altui-scene-mode-input'>"+_T("Runs in mode")+" :</Label>";
+			html += "<label for='altui-scene-mode-input'>"+_T("Runs in all modes, or in selected mode")+" :</Label>";
 			html += "<div class='btn-group'>";
 			$.each(_HouseModes, function(idx,mode) {
 				var select = ($.inArray( mode.id.toString(), modes) == -1) ? "preset_unselected" : "preset_selected";
@@ -1258,15 +1273,19 @@ var SceneEditor = function (scene) {
 		// actions
 		//
 		$(".altui-json-code").hide();
-		$(".altui-mainpanel").off("click",".altui-luatrigger");
-		$(".altui-mainpanel").on("click",".altui-luatrigger",function(){ 
-			var id = parseInt($(this).prop('id'));
-			LuaEditor.openDialog( scene.triggers[id].lua !=undefined ? scene.triggers[id].lua : "" , function(code){
-				scene.triggers[id].lua = code;
-				_showSaveNeeded();
-				PageMessage.message( "Event Lua code edited, remember to save your changes", "info");
+		$(".altui-mainpanel")
+			.off("click",".altui-luatrigger")
+			.on("click",".altui-luatrigger",function() { 
+				var id = parseInt($(this).prop('id'));
+				LuaEditor.openDialog( scene.triggers[id].lua !=undefined ? scene.triggers[id].lua : "" , function(code){
+					scene.triggers[id].lua = code;
+					_showSaveNeeded();
+					PageMessage.message( "Event Lua code edited, remember to save your changes", "info");
+					});
+			})
+			.off("click",".altui-triggertimerestrict")
+			.on("click",".altui-triggertimerestrict",function() { 
 			});
-		});
 		
 		$(".altui-toggle-json").click( function() {
 			var id = $(this).prop('id');
@@ -1284,9 +1303,13 @@ var SceneEditor = function (scene) {
 			// scene.paused = 0;		// UI7 seems to use this but could not find where in UI7.
 			if (UIManager.UI7Check()==true) {
 				var selectedmode = $(".altui-housemode div.preset_selected");
-				scene.modeStatus = $.map( selectedmode, function(elem,idx) {
-					return $(elem).prop('id').substring("altui-mode".length);
-				} ).join(",");
+				if (selectedmode.length>0) {
+					scene.modeStatus = $.map( selectedmode, function(elem,idx) {
+							return $(elem).prop('id').substring("altui-mode".length);
+						} ).join(",");
+				}
+				else
+					scene.modeStatus="0";
 			}
 			VeraBox.editScene(sceneid,scene);
 			_showSaveNeeded(true);
@@ -1399,6 +1422,7 @@ var SceneEditor = function (scene) {
 			.on("click",".altui-pausescene",function(){ 
 				scene.paused = (scene.paused==1) ? 0 : 1;
 				$(this).removeClass('paused activated').addClass( ((scene.paused>0) ? 'paused':'activated') );			
+				_showSaveNeeded();
 			});
 		
 		$("#altui-room-list").change( function() {
@@ -2471,7 +2495,7 @@ var UIManager  = ( function( window, undefined ) {
 		return deviceHtml;
 	};
 
-	function _sceneDraw(id,scene) {
+	function _sceneDraw(id,scene,norefresh) {
 		function _findSceneNextRun(scene) {
 			var nextrun=0;
 			if (scene.timers != undefined) {
@@ -2494,7 +2518,7 @@ var UIManager  = ( function( window, undefined ) {
 		var idDisplay = "<div class='pull-right text-muted'><small>#"+scene.id+" </small></div>";
 				
 		var scenecontainerTemplate = "";
-		scenecontainerTemplate	+=  "<div class='panel panel-default altui-scene' id='{0}'>"
+		scenecontainerTemplate	+=  "<div class='panel panel-default altui-scene "+((norefresh==true) ? 'altui-norefresh': '') +"' id='{0}'>"
 		scenecontainerTemplate	+=	"<div class='panel-heading altui-scene-heading'>"+pauseButtonHtml+delButtonHtml +idDisplay+"<span class='panel-title altui-scene-title' data-toggle='tooltip' data-placement='left' title='{2}'><small>{1}</small></span></div>";
 		scenecontainerTemplate	+=  "<div class='panel-body altui-scene-body'>{3} <small class='text-muted pull-right'>{4}</small><small style='clear: right;' class='text-info pull-right'>{5}</small></div>";
 		scenecontainerTemplate	+=  "</div>";
@@ -3188,7 +3212,7 @@ var UIManager  = ( function( window, undefined ) {
 		});
 		
 		// refresh scenes
-		$(".altui-scene").each( function(index,element) {
+		$(".altui-scene").not(".altui-norefresh").each( function(index,element) {
 			var sceneid = $(element).prop("id");
 			var scene = VeraBox.getSceneByID( sceneid );
 			// get HTML for scene and draw it
@@ -4503,7 +4527,7 @@ var UIManager  = ( function( window, undefined ) {
 
 		var editor = SceneEditor( scene );
 		var html = "<div class='col-xs-12'>" ;
-		html += UIManager.sceneDraw(sceneid, scene);	// draw scene
+		html += UIManager.sceneDraw(sceneid, scene, true);	// draw scene
 		html += editor.sceneEditDraw();					// draw editor
 		html += "</div>";
 		$(".altui-mainpanel").append(  html );
