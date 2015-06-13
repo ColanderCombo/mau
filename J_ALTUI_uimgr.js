@@ -42,7 +42,7 @@ var helpGlyph = "";
 var homeGlyph = "";
 var tagsGlyph = "";
 var smallbuttonTemplate = "<button id='{0}' type='button' class='{1} btn btn-default btn-sm' aria-label='tbd' title='{3}'>{2}</button>";
-var buttonTemplate 		= "<button id='{0}' type='button' class='{1} btn btn-{3}' aria-label='tbd'>{2}</button>";
+var buttonTemplate 		= "<button id='{0}' type='button' class='{1} btn btn-{3}' aria-label='tbd' >{2}</button>";
 var buttonDebugHtml = "<button type='button' class='btn btn-default' id='altui-debug-btn' >Debug<span class='caret'></span></button>";
 var cameraURI="data:image/png;base64,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";
 var defaultIconSrc="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAASJSURBVHja7Jp7aI5RHMff123CMOYyMmFY5LZYI5umFmHhD2pyyYzYkju5hCWX0jZKM9rEkCy5tJostxWRIteZe5FLyW2Y68z35Pfq9Os8z573eT3vu9fOr76d5zzn8jyf59x+57yvu6amxlWfrIGrnpkG1sAaWANrYA2sgTWwBnbKGnmT2e12/7MHb8vOaYhgEJQA9YN6Qj2g5lCoSFu4eNF1K3V5sx9o5M+vC0jxvCRoKjQOalmnW9gH0BYI5kKLoE5B06Vttug8KBMKqyX7S+g+9Ab6SGHwAAN2MIICqL9BlifQMegcdAHj9X1QtjBAxcy2BNoENWbJ1VARtAO6BMiaoO7SgG2C4AA0SZF8CFoDyMf/xRgGbCsExVA8S3oEzQJomUG5AQgSoSFQNNSZlqZ4q8uS34Hx0s0MYA+KSQsv/pHlD0eQQctTVFC1MDkQRQrYtQDdoOgFa6F0qGmwdun10Fh2Lx2wOxnseAS7ofZGDhP0DHoAVUJvnQB2e+OWcdcSEKMRnGTZlgN2K+sBWdACRZXfoBPQYeg8ytmC9IrBLjB5T+VQFynLXrz0TDZrC5gJrKrv0HYoG/lf+dpq/vKlMxnsbRqbcsuqYC9B0wH6MGi2h4CJRDCfjT+x9HyR7mUpYIXDkRAoWF9aeBXzovIAcUX6IBMVYzYTedZb+JghCCIo+gFl3gV00sILtcalGHchdPsr1B0v9lJaeiqgjlLRXKRnmED2QpAGjYH6iEdJyeJZp6FCEarcUW8Y7HTpKRKssD0eWLLVDPYqbQtVoGFQAX2gZVBfBuuiuoSDUgpdRv4Yf4/haSxewDyodLZZSMUH+a6AFXDCdUxVQBpZrJj0UHamX4DxoDb0UI/dAsw1KZ5KfrDH9iP9pqKe3mLdhSJtvLNY6vbYhfa2hRNZmRKWPoPFtxhMSkehcJb0ArpRi2THJA91DXR6lo5j8dMSSFeacDx2Ea17T1HHQpbPRSccscj/3KR3tUVwl7V0LjTMyRaOZnG5O49gacUGrbtUUe8KM1iyHKgduzcUdSY62cK9pOvXzPftx/JeUJRPUnRl8dEO03L3t8VRd7X0oUYpJkuPpdAxkSPAHaTrpyytG4uXK8onKO7FsAM74YWJQ4EqyWffZfJO8U526VA27mRrK13/NPCQult4xmyUrZLiG6GuJvmjnOzS8oa+QnG6USZ5XyprVkv9wiM7L3XlOOaz+8zgVWYzXxhp+Raq+GSSJjb/K9kEl2/BKfkRkEM8i3bfJC0NH61SioufYdawPJsVK0V5XQY+S742t32ALWU95jWC4+yIKFpRtszx/bAPVqaY3V+RM2Lm0rYkJ0NlhX4707J5eDCHLTPF1PJmNhJKVtwvQU8YW2d/LiXLJydiOMWTDWBqs0oLM3jAu7QYm78QTHb9+UXCromZOcXOzzYB+csDHRiMoMMBb004NMmoo8RfBwD/Cvo57XTWQZ8tFjsi3E6UPeW3My0njDYOU+hMS/jWEZL7egc6Q4cJqu2mcwfx/4Pp/2lpYA2sgTWwBtbAGlgDO2W/BRgADRV6RjlErQoAAAAASUVORK5CYII="
@@ -1279,7 +1279,9 @@ var SceneEditor = function (scene) {
 		.on("click",".altui-scene-editbutton",function(){ 
 			scene.lua = $("#altui-luascene").val();
 			scene.name = $("#altui-scene-name-input").val();
-			scene.paused = 0;		// UI7 seems to use this but could not find where in UI7.
+			if (scene.paused==undefined)
+				scene.paused=0;
+			// scene.paused = 0;		// UI7 seems to use this but could not find where in UI7.
 			if (UIManager.UI7Check()==true) {
 				var selectedmode = $(".altui-housemode div.preset_selected");
 				scene.modeStatus = $.map( selectedmode, function(elem,idx) {
@@ -1392,6 +1394,11 @@ var SceneEditor = function (scene) {
 			.off("click",".altui-addtrigger")
 			.on("click",".altui-addtrigger",function(){ 
 				_editTrigger( -1 , $(this) );
+			})
+			.off("click",".altui-pausescene")
+			.on("click",".altui-pausescene",function(){ 
+				scene.paused = (scene.paused==1) ? 0 : 1;
+				$(this).removeClass('paused activated').addClass( ((scene.paused>0) ? 'paused':'activated') );			
 			});
 		
 		$("#altui-room-list").change( function() {
@@ -2475,6 +2482,7 @@ var UIManager  = ( function( window, undefined ) {
 			return nextrun;
 		};
 		var delButtonHtml = buttonTemplate.format( scene.id, 'btn-xs altui-delscene pull-right', deleteGlyph,'default');
+		var pauseButtonHtml = glyphTemplate.format( "off", _T("Pause Scene") , 'altui-pausescene ' + ((scene.paused>0) ? 'paused':'activated'));
 		var label = ((scene.hidden==true) ? hiddenGlyph+' ' : '') + scene.name;
 
 		var lastrun = (scene.last_run != undefined) ? okGlyph+" "+_toIso(new Date(scene.last_run*1000)) : '';
@@ -2487,7 +2495,7 @@ var UIManager  = ( function( window, undefined ) {
 				
 		var scenecontainerTemplate = "";
 		scenecontainerTemplate	+=  "<div class='panel panel-default altui-scene' id='{0}'>"
-		scenecontainerTemplate	+=	"<div class='panel-heading altui-scene-heading'>"+delButtonHtml +idDisplay+"<span class='panel-title altui-scene-title' data-toggle='tooltip' data-placement='left' title='{2}'><small>{1}</small></span></div>";
+		scenecontainerTemplate	+=	"<div class='panel-heading altui-scene-heading'>"+pauseButtonHtml+delButtonHtml +idDisplay+"<span class='panel-title altui-scene-title' data-toggle='tooltip' data-placement='left' title='{2}'><small>{1}</small></span></div>";
 		scenecontainerTemplate	+=  "<div class='panel-body altui-scene-body'>{3} <small class='text-muted pull-right'>{4}</small><small style='clear: right;' class='text-info pull-right'>{5}</small></div>";
 		scenecontainerTemplate	+=  "</div>";
 
@@ -4421,6 +4429,13 @@ var UIManager  = ( function( window, undefined ) {
 				.on("click",".altui-delscene",function() {
 					var sceneid = $(this).prop("id");
 					VeraBox.deleteScene( sceneid );
+				})
+				.off("click",".altui-pausescene")
+				.on("click",".altui-pausescene",function() {
+					var sceneid = $(this).closest(".altui-scene").prop('id');
+					var scene = VeraBox.getSceneByID(sceneid);
+					scene.paused = (scene.paused==1) ? 0 : 1;
+					VeraBox.editScene( sceneid , scene);
 				})
 				.off("click",".altui-runscene")
 				.on("click",".altui-runscene",function() {
@@ -6741,6 +6756,15 @@ $(document).ready(function() {
 	  text-transform: uppercase;	\
 	  font-size: 12px;			\
 	}							\
+	.altui-pausescene {		\
+		padding-right: 5px;	\
+	}				\
+	.paused {		\
+	  color: red	\
+	}				\
+	.activated {	\
+	  color: green	\
+	}				\
 	.on-off-device.off {		\
 		background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEYAAAAoCAYAAABD0IyuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuNWWFMmUAAAKOSURBVGhD7ZhZb+MwDITz//9c8tJs49x3srmb800lvXGgdYcSbctoC2iADyIGrWtNJVp2wxgTAUAzEoMRgWYkBiMCzUgMRgSaoXg8HjRAwZ//SUCzCpfLhYZCgtf5bqBZhs1mQ0Mlwet+F9Asyu12oyGIGr1u1/R7PTMaDs1kPDbTycTMplMzn83MYj5PWS4WXvgfdTqd0muWAZpams2mCRhKKu5L3SQxg37fjEejNBiGg8nCQUG42G23fGk4BwloalmtVjSE136/N7xyhoNBpVVjs1ou+dJwHghoFkDUer1OcdUucRD2qqkaTAYJzeML0NTw3L+ipDDs2qXb9fql11TZThnalQNNJU5JYdi1TxyGtJ3QpLVoeg40fczpxnySwrBrnw6Hw2s7cTihthNDgnPLgKYPzSFOCsOufeInVB19hjlS6CQ4PwaaCrySwrBrjbI+EzqYv//uAc0tBZoKvJLCsGuN6gqGIaG5pUBTgVdSGHatEW+jLBgmBvOUvWJiMJZ+1VY6n880uCWFYdc+8VOprmB8Bz1o+pjRzfkkhWHXPh3onamuxzW/j5Hg/BhoKnFKCsOufeJD3a864DHH45EGWVIYdu3Sld6VXG/YaLJaNO9L0CyAKCkMu3aJg8j6SxYMhxIimOfJHc3nBTS1uN6ZpDDsWtJ+tzNJp1NLf9F+tIJmEUp8/Hbqfr+bzvt78A9VzPO7NJxHHmgWhftBCHEoSZK8Pm3mD3ZVtlGRUBholqHqZ84t3fifdjvdQvneUmW1cKM9f3zwn4D3LQHNMrRaLRp0h7+cGn1aHe23t/+2UNZb8qtFGwyvEE2TlYBmCLbU5HhrCIK/85OAZiQGIwLNSAxGBJqRGIyAaXwCmHJBNse7DisAAAAASUVORK5CYII=') no-repeat;		\
 	}		\
