@@ -1738,7 +1738,7 @@ var UIManager  = ( function( window, undefined ) {
 				widgetdisplay: function(widget,bEdit)	{ 
 					return "<p>{0}</p>".format( 
 						(widget.properties.deviceid!=0) 
-						? VeraBox.getStatus( widget.properties.deviceid, widget.properties.service, widget.properties.variable )
+						? (VeraBox.getStatus( widget.properties.deviceid, widget.properties.service, widget.properties.variable ) || '')
 						: 'not defined');
 				},
 				properties: {
@@ -1820,7 +1820,7 @@ var UIManager  = ( function( window, undefined ) {
 					if (widget.properties.deviceid>0)
 					{
 						status = VeraBox.getStatus(widget.properties.deviceid, widget.properties.service, widget.properties.variable);
-						if  ((status==undefined) || (status==false) || (status=='0') )
+						if  ((status==undefined) || (status==null) ||(status==false) || (status=='0') )
 							status = 0;
 						else if ((status=='true') || (status=='1') || (status>=1))
 							status = 1;
@@ -2594,44 +2594,47 @@ var UIManager  = ( function( window, undefined ) {
 			// };
 			
 		var device = VeraBox.getDeviceByID(id);
-		var directstreaming = VeraBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" );
-		if (VeraBox.isRemoteAccess() || isNullOrEmpty(directstreaming) || isIE11()  )
-		{
-			obj = $("<img></img>")
-				.attr('src',"data_request?id=request_image&res=low&cam="+device.id+"&t="+ new Date().getTime())
-				.css("max-width","100%")
-				.css("max-width","100%")
-				.css("width","100%")
-				.css("height","100%")
-				.attr("data-camera",id);
-			var timeout = null;
-			function _resfreshIt(id) {
-				var cam = $("img[data-camera='"+id+"']");
-				if ($(cam).length>=1) {
-					$(cam).attr('src',"data_request?id=request_image&res=low&cam="+device.id+"&t="+ new Date().getTime());
-					timeout = setTimeout(function() { _resfreshIt(id); } , 1500 );
-				}
-			};
-			timeout = setTimeout(function() { _resfreshIt(id); } , 1500 );
-		}
-		else
-		{
-			var streamurl = "url(http://{0}{1})".format(
-				device.ip,	//ip
-				VeraBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" )	//DirectStreamingURL
-			);
+		if (device) {
+			var directstreaming = VeraBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" );
+			if (VeraBox.isRemoteAccess() || isNullOrEmpty(directstreaming) || isIE11()  )
+			{
+				obj = $("<img></img>")
+					.attr('src',"data_request?id=request_image&res=low&cam="+device.id+"&t="+ new Date().getTime())
+					.css("max-width","100%")
+					.css("max-width","100%")
+					.css("width","100%")
+					.css("height","100%")
+					.attr("data-camera",id);
+				var timeout = null;
+				function _resfreshIt(id) {
+					var cam = $("img[data-camera='"+id+"']");
+					if ($(cam).length>=1) {
+						$(cam).attr('src',"data_request?id=request_image&res=low&cam="+device.id+"&t="+ new Date().getTime());
+						timeout = setTimeout(function() { _resfreshIt(id); } , 1500 );
+					}
+				};
+				timeout = setTimeout(function() { _resfreshIt(id); } , 1500 );
+			}
+			else
+			{
+				var streamurl = "url(http://{0}{1})".format(
+					device.ip,	//ip
+					VeraBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" )	//DirectStreamingURL
+				);
 
-			obj = $("<div ></div>") .css({
-							"background-image": streamurl,
-							"background-size": "contain",
-							"background-repeat": "no-repeat"
-						})
-				.css("max-width","100%")
-				.css("max-width","100%")
-				.css("width","100%")
-				.css("height","100%")
-				.height((size!=undefined) ? size.height : 300);
-		}
+				obj = $("<div ></div>") .css({
+								"background-image": streamurl,
+								"background-size": "contain",
+								"background-repeat": "no-repeat"
+							})
+					.css("max-width","100%")
+					.css("max-width","100%")
+					.css("width","100%")
+					.css("height","100%")
+					.height((size!=undefined) ? size.height : 300);
+			}
+		} else
+			obj = $("<div >"+_T("Unknown Device")+"</div>");
 		return obj.wrap( "<div></div>" ).parent().html();
 	};
 
@@ -3401,7 +3404,13 @@ var UIManager  = ( function( window, undefined ) {
 		oldobject.replaceWith(newobject);
 		newobject.draggable(_widgetOnCanvasDraggableOptions);
 	};
-	
+
+	function _showSavePageNeeded(bNeeded) {
+		$("#altui-page-action-save")
+			.toggleClass("btn-info",bNeeded)
+			.closest("li.dropdown").find("a.dropdown-toggle")
+				.toggleClass("btn-info",bNeeded);
+	};
 
 	function _onResizeImage(page, widgetid, position, size) {
 	};
@@ -3426,6 +3435,7 @@ var UIManager  = ( function( window, undefined ) {
 		$('div#dialogModal form').on( 'submit', function() {
 			real_widget.properties.url = $('#altui-widget-imgsource').val();
 			$('div#dialogModal').modal('hide');
+			_showSavePageNeeded(true);
 			$(".altui-custompage-canvas .altui-widget#"+real_widget.id).find("img").attr("src",real_widget.properties.url);
 		});
 		
@@ -3455,6 +3465,7 @@ var UIManager  = ( function( window, undefined ) {
 			real_widget.properties.service = selected.service;
 			real_widget.properties.variable = selected.variable;
 			$('div#dialogModal').modal('hide');
+			_showSavePageNeeded(true);
 			$(".altui-custompage-canvas .altui-widget#"+real_widget.id).find("p").text( VeraBox.getStatus( real_widget.properties.deviceid , real_widget.properties.service, real_widget.properties.variable ) );
 		});
 	};
@@ -3480,6 +3491,7 @@ var UIManager  = ( function( window, undefined ) {
 			$('div.altui-widget-label#'+widget.id).find("p").text(widget.properties.label);
 			$('div#dialogModal button.btn-primary').off('click');
 			$('div#dialogModal').modal('hide');
+			_showSavePageNeeded(true);
 		});
 		
 		$('div#dialogModal').modal();
@@ -3502,6 +3514,7 @@ var UIManager  = ( function( window, undefined ) {
 			$('div#dialogModal button.btn-primary').off('click');
 			real_widget.properties.sceneid = $('#altui-widget-sceneid').val();
 			$('div#dialogModal').modal('hide');
+			_showSavePageNeeded(true);
 			_replaceElementKeepAttributes( $(".altui-custompage-canvas .altui-widget#"+real_widget.id) , _getWidgetHtml(real_widget,true) );
 		});
 	};
@@ -3536,6 +3549,7 @@ var UIManager  = ( function( window, undefined ) {
 				real_widget.properties.params[name]=value;
 			});
 			$('div#dialogModal').modal('hide');
+			_showSavePageNeeded(true);
 			_replaceElementKeepAttributes( $(".altui-custompage-canvas .altui-widget#"+real_widget.id) , _getWidgetHtml(real_widget,true));
 		});	
 	};
@@ -3596,6 +3610,7 @@ var UIManager  = ( function( window, undefined ) {
 				real_widget.properties.action_off.params[name]=value;
 			});
 			$('div#dialogModal').modal('hide');
+			_showSavePageNeeded(true);
 			_replaceElementKeepAttributes( $(".altui-custompage-canvas .altui-widget#"+real_widget.id) , _getWidgetHtml(real_widget,true));
 		});	
 	};
@@ -3619,6 +3634,7 @@ var UIManager  = ( function( window, undefined ) {
 			real_widget.properties.deviceid = $("#altui-select-device").val();
 			$('div#dialogModal button.btn-primary').off('click');
 			$('div#dialogModal').modal('hide');
+			_showSavePageNeeded(true);
 			_replaceElementKeepAttributes( $(".altui-custompage-canvas .altui-widget#"+real_widget.id) , _getWidgetHtml(real_widget,true) );
 		});
 	};
@@ -3651,6 +3667,7 @@ var UIManager  = ( function( window, undefined ) {
 			real_widget.properties.deviceid = $("#altui-select-device").val();
 			$('div#dialogModal button.btn-primary').off('click');
 			$('div#dialogModal').modal('hide');
+			_showSavePageNeeded(true);
 			_replaceElementKeepAttributes( $(".altui-custompage-canvas .altui-widget#"+real_widget.id) , _getWidgetHtml(real_widget,true) );
 		});
 	};
@@ -3692,6 +3709,7 @@ var UIManager  = ( function( window, undefined ) {
 			var ticks = $("#altui-widget-Ticks").val();
 			real_widget.properties.majorTicks = ticks.split(',');
 			$('div#dialogModal').modal('hide');
+			_showSavePageNeeded(true);
 			
 			// refresh widget
 			var pagename = _getActivePageName();
@@ -3754,6 +3772,7 @@ var UIManager  = ( function( window, undefined ) {
 		$(selected).each( function(idx,elem) {
 			$(elem).css('top',min);
 		});
+		_showSavePageNeeded(true);
 	};
 	function onAlignHorizontal(selected)
 	{
@@ -3761,6 +3780,7 @@ var UIManager  = ( function( window, undefined ) {
 		$(selected).each( function(idx,elem) {
 			$(elem).css('top',max-$(elem).height()/2);
 		});
+		_showSavePageNeeded(true);
 	};
 	function onAlignBottom(selected)
 	{
@@ -3768,6 +3788,7 @@ var UIManager  = ( function( window, undefined ) {
 		$(selected).each( function(idx,elem) {
 			$(elem).css('top',max-$(elem).height());
 		});
+		_showSavePageNeeded(true);
 	};
 	function onAlignLeft(selected)
 	{
@@ -3775,6 +3796,7 @@ var UIManager  = ( function( window, undefined ) {
 		$(selected).each( function(idx,elem) {
 			$(elem).css('left',min);
 		});
+		_showSavePageNeeded(true);
 	};
 	function onAlignVertical(selected)
 	{
@@ -3782,6 +3804,7 @@ var UIManager  = ( function( window, undefined ) {
 		$(selected).each( function(idx,elem) {
 			$(elem).css('left',max-$(elem).width()/2);
 		});
+		_showSavePageNeeded(true);
 	};
 	function onAlignRight(selected)
 	{
@@ -3789,6 +3812,7 @@ var UIManager  = ( function( window, undefined ) {
 		$(selected).each( function(idx,elem) {
 			$(elem).css('left',max-$(elem).width());
 		});
+		_showSavePageNeeded(true);
 	};
 
 	
@@ -4870,6 +4894,7 @@ var UIManager  = ( function( window, undefined ) {
 							var widgetid = $(ui.helper).prop('id');
 							(tool.onWidgetResize)(page,widgetid,ui.position,ui.size);
 							PageManager.updateChildrenInPage( page, widgetid, ui.position, ui.size );
+							_showSavePageNeeded(true);
 						}
 					});
 				}
@@ -4902,12 +4927,14 @@ var UIManager  = ( function( window, undefined ) {
 						}
 						else
 							PageManager.updateChildrenInPage( page, widgetid, position );
-						
+						_showSavePageNeeded(true);
+
 						// save also all selected items which moved as well as part of the drag and drop
 						var selected = $(".altui-custompage-canvas").children(".ui-selected").not("#"+ui.helper.prop('id'));
 						$.each(selected, function (idx,elem) {
 							widgetid = $(elem).prop('id');
 							PageManager.updateChildrenInPage( page, widgetid, $(elem).position() , $(elem).size() );
+							_showSavePageNeeded(true);
 						});
 					}
 					else	
@@ -4919,6 +4946,8 @@ var UIManager  = ( function( window, undefined ) {
 						};
 						// adding from the toolbox
 						widgetid = PageManager.insertChildrenInPage( page, tool, position);
+						_showSavePageNeeded(true);
+
 						var widget=PageManager.getWidgetByID( page, widgetid );
 						var html = _getWidgetHtml( widget , true);		// edit mode
 						var obj = $(html)
@@ -4932,6 +4961,7 @@ var UIManager  = ( function( window, undefined ) {
 								stop: function( event, ui ) {
 									(tool.onWidgetResize)(page,widgetid,ui.position,ui.size);
 									PageManager.updateChildrenInPage( page, widgetid, ui.position, ui.size );
+									_showSavePageNeeded(true);
 								}
 							});
 						}
@@ -4972,6 +5002,7 @@ var UIManager  = ( function( window, undefined ) {
 							$(elem).remove();
 						});
 						PageManager.removeChildrenInPage( page, dropped.prop('id') );
+						_showSavePageNeeded(true);
 						ui.draggable.remove();
 					}
 					// var type = ui.helper.data( "type" );	// data-type attr
@@ -5002,6 +5033,7 @@ var UIManager  = ( function( window, undefined ) {
 					$.each(selected, function (idx,elem) {
 						widgetid = $(elem).prop('id');
 						PageManager.updateChildrenInPage( page, widgetid, $(elem).position() , $(elem).size() );
+						_showSavePageNeeded(true);
 					});
 				}
 			})
@@ -5043,6 +5075,7 @@ var UIManager  = ( function( window, undefined ) {
 		$(".altui-mainpanel").on("click","#altui-page-action-save",function(){ 
 			// find active page
 			PageManager.savePages( );
+			_showSavePageNeeded(false);
 		});
 		
 		$(".altui-mainpanel").off("click","#altui-page-action-properties"); 

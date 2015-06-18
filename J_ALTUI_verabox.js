@@ -1125,7 +1125,7 @@ var VeraBox = ( function( window, undefined ) {
 
 	function _runScene(id)
 	{
-		if (id>0) {
+		if ( (id>0) && (VeraBox.getSceneByID(id) != null) ) {			
 			var url = "data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="+id;
 			var jqxhr = $.ajax( {
 				url: url,
