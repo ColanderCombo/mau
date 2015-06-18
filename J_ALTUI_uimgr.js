@@ -2983,6 +2983,9 @@ var UIManager  = ( function( window, undefined ) {
 
 		$(domparent).css({position: 'relative'});
 		if (tab.TabType=="flash") {
+			// if (device.device_type.startsWith("urn:schemas-upnp-org:device:HVAC_Z") ) {
+				// tab = JSON.parse('{"Label":{"lang_tag":"ui7_tabname_control","text":"Control"},"Position":"0","TabType":"flash","top_navigation_tab":1,"ControlGroup":[{"id":"7","scenegroup":"7"},{"id":"6","scenegroup":"6"}],"SceneGroup":[{"id":"7","top":"0.5","left":"0","x":"2","y":"0.5"},{"id":"6","top":"1.5","left":"0","x":"2","y":"1.5"}],"Control":[{"ControlGroup":"6","ControlType":"button","Label":{"lang_tag":"ui7_cmd_thermostat_set_mode_off","text":"Off"},"Display":{"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Variable":"ModeStatus","Value":"Off","Width":10},"Command":{"HumanFriendlyText":{"lang_tag":"ui7_cmd_thermostat_set_mode_off","text":"Off"},"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Action":"SetModeTarget","Parameters":[{"Name":"NewModeTarget","Value":"Off"}]},"ControlCode":"thermostat_mode_off"},{"ControlGroup":"6","ControlType":"button","Label":{"lang_tag":"ui7_cmd_thermostat_set_mode_auto","text":"Auto"},"Display":{"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Variable":"ModeStatus","Value":"AutoChangeOver","Width":10},"Command":{"HumanFriendlyText":{"lang_tag":"ui7_cmd_thermostat_set_mode_auto","text":"Auto"},"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Action":"SetModeTarget","Parameters":[{"Name":"NewModeTarget","Value":"AutoChangeOver"}]},"ControlCode":"thermostat_mode_auto"},{"ControlGroup":"6","ControlType":"button","Label":{"lang_tag":"ui7_cmd_thermostat_set_mode_cool_on","text":"Cool"},"Display":{"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Variable":"ModeStatus","Value":"CoolOn","Width":10},"Command":{"HumanFriendlyText":{"lang_tag":"ui7_cmd_thermostat_set_mode_cool_on","text":"Cool"},"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Action":"SetModeTarget","Parameters":[{"Name":"NewModeTarget","Value":"CoolOn"}]},"ControlCode":"thermostat_mode_cool"},{"ControlGroup":"6","ControlType":"button","Label":{"lang_tag":"ui7_cmd_thermostat_set_mode_heat_on","text":"Heat"},"Display":{"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Variable":"ModeStatus","Value":"HeatOn","Width":10},"Command":{"HumanFriendlyText":{"lang_tag":"ui7_cmd_thermostat_set_mode_heat_on","text":"Heat"},"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Action":"SetModeTarget","Parameters":[{"Name":"NewModeTarget","Value":"HeatOn"}]},"ControlCode":"thermostat_mode_heat"},{"ControlGroup":"7","ControlType":"slider","top":"0","left":"0","ControlPair":"1","Style":"numeric","LabelMin":{"lang_tag":"ui7_hvac_zonethermostat_heatpoint_label_min","text":"Cold"},"LabelMax":{"lang_tag":"ui7_hvac_zonethermostat_heatpoint_label_max","text":"Hot"},"LabelSymbol":{"lang_tag":"ui7_hvac_zonethermostat_heatpoint_label_symbol","text":"?"},"ShowButtons":"1","Display":{"Service":"urn:upnp-org:serviceId:TemperatureSetpoint1","Variable":"CurrentSetpoint","MinValue":"0","MaxValue":"100","Top":50,"Left":50,"Width":100,"Height":20,"ID":"NewCurrentSetpoint"},"Command":{"HumanFriendlyText":{"lang_tag":"ui7_cmd_thermostat_set_setpoint","text":"Set temperature"},"Sufix":"?_TEMPERATURE_FORMAT_","Description":{"lang_tag":"ui7_cmd_thermostat_setpoint_description","text":"Enter a value between 0 and 100"},"Service":"urn:upnp-org:serviceId:TemperatureSetpoint1","Action":"SetCurrentSetpoint","Parameters":[{"Name":"NewCurrentSetpoint","ID":"NewCurrentSetpoint"}]},"ControlCode":"heating_setpoint"}]}');
+			// }
 			$.each( tab.Control, function (idx,control) {
 				_displayControl( domparent, device, control, idx );
 			});
@@ -4700,8 +4703,25 @@ var UIManager  = ( function( window, undefined ) {
 			$.each( $.grep(devices,function(d){ return d.id_parent==0  && d.plugin==undefined}) , function(i,d) {
 				manual_plugins[d.device_file] = {
 					devtype : d.device_type,
-					files   : [ {SourceName:d.device_file}, {SourceName:d.device_json}, {SourceName:d.impl_file}]
+					files   : []
 				};
+				$.each( [d.device_file,d.device_json,d.impl_file], function(i,filename) {
+					if (filename && filename !="")
+						manual_plugins[d.device_file].files.push( {SourceName:filename} );
+				});
+				if (!d.device_json) {
+					// try to get it from the .xml file
+					FileDB.getFileContent(d.device_file , function( str ) {
+						var re = /<staticJson>(.*)<\/staticJson>/; 
+						var m; 
+						if ((m = re.exec(str)) !== null) {
+							if (m.index === re.lastIndex) {
+								re.lastIndex++;
+							}
+							manual_plugins[d.device_file].files.push( {SourceName:m[1]} );
+						}
+					});
+				}
 			});
 
 			// for each, create a virtual plugin structure so we can display
