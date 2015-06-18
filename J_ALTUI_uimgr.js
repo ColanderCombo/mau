@@ -3997,7 +3997,8 @@ var UIManager  = ( function( window, undefined ) {
 			{ id:17, title:_T('Localize'), onclick:'UIManager.pageLocalization()', parent:0 },
 			{ id:18, title:_T('Power'), onclick:'UIManager.pagePower()', parent:0 },
 			{ id:19, title:_T('Parent/Child'), onclick:'UIManager.pageChildren()', parent:0 },
-			{ id:20, title:_T('Quality'), onclick:'UIManager.pageQuality()', parent:0 },
+			{ id:20, title:_T('zWaveRoutes'), onclick:'UIManager.pageRoutes()', parent:0 },
+			{ id:21, title:_T('Quality'), onclick:'UIManager.pageQuality()', parent:0 },
 		];
 
 		function _parentsOf(child) {
@@ -5916,209 +5917,7 @@ var UIManager  = ( function( window, undefined ) {
 			}
 			return data;
 		};
-		
-		function _drawChartRoutes() {
-			function _prepareDataRoutes(  ) {
-				data = { root:[], nodes:[] , links:[] };
-				var color = {};
-				var nColor = 0;
-				var devices = VeraBox.getDevicesSync();
-
-				data.root={ id:0, zwid:0, name:"root", children:[] };
-				if (devices) {
-					var zwavenet = VeraBox.getDeviceByType("urn:schemas-micasaverde-com:device:ZWaveNetwork:1");
-					if (zwavenet) {
-						color[zwavenet.device_type]=nColor++;
-						data.nodes.push({ 
-							x:width/2,
-							y:height/2,
-							id:parseInt(zwavenet.id), 
-							zwid:0,
-							name:zwavenet.name, 
-							color:color[zwavenet.device_type] ,
-							id_parent:null,
-							routes: []
-							});
-						$.each( devices.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function( idx,device ) {
-							var ManualRoute = VeraBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","ManualRoute");
-							var AutoRoute = VeraBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","AutoRoute");
-							if ( ManualRoute || AutoRoute)
-							{
-								var route = ( ManualRoute && (ManualRoute!="undefined")) ? ManualRoute : AutoRoute;
-								if (color[device.device_type]==undefined)
-									color[device.device_type]=nColor++;
-								data.nodes.push({ 
-									x:Math.random()*width,
-									y:Math.random()*height,
-									id:parseInt(device.id), 
-									zwid:parseInt(device.altid),
-									name:device.name+':'+device.id+'#'+device.altid, 
-									children: [],
-									color:color[device.device_type] ,
-									id_parent:device.id_parent || 0,
-									routes: route.split(",")
-								});
-							}
-						});
-					}
-				}
-				return data;
-			};
-			function _updateDataRoutes(data) {
-				// data.nodes = _flatten(data.root);
-				// enum devices and create a link per route  ManualRoute AutoRoute 
-				// urn:micasaverde-com:serviceId:ZWaveDevice1
-				// like this: "2-20x,7-59x,2.7-78"
-				$.each(data.nodes,function( idx, node) {
-					// insert a link for each route
-					if (node.routes) {
-						console.log("node name:{0} zwid:{1} routes:{2}".format(node.name, node.zwid,node.routes));
-						$.each(node.routes, function( idx,route) {
-							var srcnode = node;
-							var splits = route.split("-");
-							var linkquality = splits[1];
-							if (splits[0]) {
-								var path = splits[0].split(".");
-								var nroute = 1;
-								$.each(path,function(idx,pathnode) {
-									var targetnode = UIManager._findNodeByZwID(data,pathnode);
-									if (targetnode) {
-										console.log("adding link {0}-{1}".format(srcnode.zwid,targetnode.zwid));
-										// if ((nroute==1)) {
-											data.links.push( {
-												source: srcnode,
-												target: targetnode,
-												linkquality: parseInt(linkquality),
-												nroute: nroute,
-												broken: (linkquality.slice(-1)=="x")
-											});
-											srcnode = targetnode;
-											nroute++;
-										// }
-									}
-								});
-							}
-						});
-					}
-				});
-			};
 				
-			$(".altui-children-d3chart").replaceWith("<svg class='altui-children-d3chart'></svg>");
-			var available_height = $(window).height() - $("#altui-pagemessage").outerHeight() - $("#altui-pagetitle").outerHeight() - $("#altui-zwavechart-order").outerHeight() - $("footer").outerHeight();
-			var margin = {top: 20, right: 10, bottom: 10, left: 20};
-			width = $(".altui-children-d3chart-container").innerWidth() - margin.left - margin.right-30;
-			height = Math.max(300,Math.min(width,available_height - margin.top - margin.bottom));
-			
-			//Set up the colour scale
-			var color = d3.scale.category20();
-
-			var svg = d3.select(".altui-children-d3chart")
-				.attr("width", width + margin.left + margin.right)
-				.attr("height", height + margin.top + margin.bottom)
-				// .style("margin-left", -margin.left + "px")
-				.append("g")
-					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-			//Set up the force layout
-			data = _prepareDataRoutes( );
-			var force = d3.layout.force()
-			force = force
-				.charge(function(d) { return (d.zwid==0) ? -400 : -200 } )
-				.gravity(0.015)
-				.linkDistance(function(d) { 
-					return  60+d.linkquality*15;
-					})
-				.linkStrength( function(d) { return (1/(1+d.linkquality/6)) } )
-				.size([width, height])
-				.on("tick", function () {
-					// avoid asynchronous tick when the user changed the page
-					// this crashed d3
-					if ($("#altui-pagetitle").html()==_T("Parent/Child Network")) 
-					{
-						d3.selectAll(".link")
-							.attr("x1", function(d) { return d.source.x; })
-							.attr("y1", function(d) { return d.source.y; })
-							.attr("x2", function(d) { return d.target.x; })
-							.attr("y2", function(d) { return d.target.y; });
-
-						d3.selectAll("circle")
-							.attr("cx", function (d) { return d.x; })
-							.attr("cy", function (d) { return d.y; });
-						d3.selectAll("text")
-							.attr("x", function (d) { return d.x; })
-							.attr("y", function (d) { return d.y; });
-					}
-				});
-			var drag = force.drag().on("dragstart", dragstart);			
-
-			function dragstart(d) {
-				// console.log('dragstart');
-				d3.event.sourceEvent.stopPropagation(); // silence other listeners
-				d3.select(this).classed("fixed", d.fixed = true);
-			};				
-			function sglclick(d) {
-				if (d3.event.defaultPrevented) return;
-				// console.log('click');
-				var selection = d3.select(this);
-				if (d3.event.shiftKey) {
-					d.fixed =  false;
-					selection.classed("fixed", false  );
-				}
-				else {
-				}
-				_updateChart(data);
-			};
-			function _updateChart(data) {			
-				_updateDataRoutes(data);
-				force
-					.nodes( data.nodes )
-					.links( data.links )
-					.start();
-
-				var link = svg.selectAll(".link");
-				var node = svg.selectAll(".node");
-				link = link.data( data.links , function(d) { return d.source.id+'-'+d.target.id; } );
-				node = node.data( data.nodes , function(d) { return d.id; } );
-
-				link.exit().transition().duration(500).style("opacity","0").remove();
-				link.enter()
-					.insert("line", ".node")		// so that node allways hide links
-					.attr("class", "link")
-					.style("stroke", function(d) { return (d.broken==true) ? "red": ((d.nroute>1)?"yellow":"") ; } )
-					.style("stroke-width", 1 )
-					.attr("x1", function(d) { return d.source.x; })
-					.attr("y1", function(d) { return d.source.y; })
-					.attr("x2", function(d) { return d.target.x; })
-					.attr("y2", function(d) { return d.target.y; });					
-
-				node.exit().transition().duration(1000).style("opacity","0").remove();				
-				node.classed("fixed", function(d) { 
-						return d.fixed })
-					.classed("closed", function(d) { 
-						return d._children!=null } );
-
-				var groups = node.enter().append("g")
-							.attr("class", "node")
-							.classed("fixed", function(d) { return d.fixed } )
-							.classed("closed", function(d) { return d._children!=null } )
-							// .on("dblclick", dblclick)
-							.on("click", sglclick )
-							.call( drag );
-					groups.append("circle")					
-						.attr("r", function(d) { 
-							return 8+ (d.children ? d.children.length/2 : 0);
-						} )
-						.style("fill", function (d) {
-							return color(d._children ? "#3182bd" : d.color);
-						});
-					groups.append("text")					
-						.attr("dx", 15)
-						.attr("dy", ".35em")
-						.text(function (d) { return d.name; });
-			};		
-			_updateChart(data);
-		};
-		
 		function _drawChartParents() {
 			function _updateDataParents( ) {
 				data.nodes = _flatten(data.root);
@@ -6253,31 +6052,11 @@ var UIManager  = ( function( window, undefined ) {
 			_updateChart(data);
 		};
 		
-		function _drawChart() {
-			switch( $("#altui-parentchild-kind").val() ) 
-			{
-				case "parents":
-					_drawChartParents() 
-					break;
-				case "routes":
-					_drawChartRoutes();
-					break;
-			};
-		};
 		
 		// prepare and load D3 then draw the chart
 		UIManager.clearPage(_T('Parent/Child'),_T("Parent/Child Network"));
 		PageMessage.message(_T("Drag and Drop to fix the position of a node. Simple Click to open or collapse a parent node, Shift Click to free a fixed node"),"info");
 		var html="";
-		html += "<form class='form-inline'>";
-			html += "<div class='form-group'>";
-				html += "<label class='control-label ' for='altui-parentchild-kind' >"+_T("Show")+":</label>";
-				html += "<select id='altui-parentchild-kind' class='form-control'>";
-					html += "<option value='parents'>"+_T("Parent/Child")+"</option>";
-					html += "<option value='routes'>"+_T("ZWave Routes")+"</option>";
-				html += "</select>";
-			html += "</div>";
-		html += "</form>";
 		$(".altui-mainpanel")
 			.append(
 				"<style>					\
@@ -6315,8 +6094,291 @@ var UIManager  = ( function( window, undefined ) {
 				}							\
 				</style>" )
 			.append(html+"<div class='altui-children-d3chart-container'><svg class='altui-children-d3chart'></svg></div>")
-		UIManager.loadD3Script( _drawChart );
-		$("#altui-parentchild-kind").change( _drawChart );
+		UIManager.loadD3Script( _drawChartParents );
+	},
+	
+	pageRoutes: function() {
+		var height = width = null;
+		var data = { root:[], nodes:[] , links:[] };
+		
+		// Returns a list of all nodes under the root.
+		function _flatten(root) {
+			var nodes = [], i = 0;
+			function recurse(node) {
+				if (node.children) node.children.forEach(recurse);
+				// if (!node.id) node.id = ++i;
+				nodes.push(node);
+			}
+			recurse(root);
+			return nodes;
+		};
+		
+		function _findNode( root, id ) {
+			var found=null;
+			if (root.id == id )
+				return root;
+			if (root.children)
+				$.each( root.children, function (i,n) {
+					found = _findNode( n, id );
+					return ( found==null );
+				});				
+			return found;
+		};
+		
+		function _addNode( node ) {
+			var parent = _findNode( data.root, node.id_parent );
+			if (parent==null){	
+				PageMessage.message("Error building node hierarchy","warning");
+				return;
+			}
+			parent.children.push( node );
+		};
+				
+		function _drawChartRoutes() {
+			function _prepareDataRoutes(  ) {
+				data = { root:[], nodes:[] , links:[] };
+				var color = {};
+				var nColor = 0;
+				var devices = VeraBox.getDevicesSync();
+
+				data.root={ id:0, zwid:0, name:"root", children:[] };
+				if (devices) {
+					var zwavenet = VeraBox.getDeviceByType("urn:schemas-micasaverde-com:device:ZWaveNetwork:1");
+					if (zwavenet) {
+						color[zwavenet.device_type]=nColor++;
+						data.nodes.push({ 
+							x:width/2,
+							y:height/2,
+							id:parseInt(zwavenet.id), 
+							zwid:0,
+							name:zwavenet.name, 
+							color:color[zwavenet.device_type] ,
+							id_parent:null,
+							routes: []
+							});
+						$.each( devices.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function( idx,device ) {
+							var ManualRoute = VeraBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","ManualRoute");
+							var AutoRoute = VeraBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","AutoRoute");
+							if ( ManualRoute || AutoRoute)
+							{
+								var route = ( ManualRoute && (ManualRoute!="undefined")) ? ManualRoute : AutoRoute;
+								if (color[device.device_type]==undefined)
+									color[device.device_type]=nColor++;
+								data.nodes.push({ 
+									x:Math.random()*width,
+									y:Math.random()*height,
+									id:parseInt(device.id), 
+									zwid:parseInt(device.altid),
+									name:device.name+':'+device.id+'#'+device.altid, 
+									children: [],
+									color:color[device.device_type] ,
+									id_parent:device.id_parent || 0,
+									routes: route.split(",")
+								});
+							}
+						});
+					}
+				}
+				return data;
+			};
+			function _updateDataRoutes(data) {
+				// data.nodes = _flatten(data.root);
+				// enum devices and create a link per route  ManualRoute AutoRoute 
+				// urn:micasaverde-com:serviceId:ZWaveDevice1
+				// like this: "2-20x,7-59x,2.7-78"
+				$.each(data.nodes,function( idx, node) {
+					// insert a link for each route
+					if (node.routes) {
+						// console.log("node name:{0} zwid:{1} routes:{2}".format(node.name, node.zwid,node.routes));
+						$.each(node.routes, function( idx,route) {
+							var srcnode = node;
+							var splits = route.split("-");
+							var linkquality = splits[1];
+							if (splits[0]) {
+								var path = splits[0].split(".");
+								var nroute = 1;
+								$.each(path,function(idx,pathnode) {
+									var targetnode = UIManager._findNodeByZwID(data,pathnode);
+									if (targetnode) {
+										// console.log("adding link {0}-{1}".format(srcnode.zwid,targetnode.zwid));
+										// if ((nroute==1)) {
+											data.links.push( {
+												source: srcnode,
+												target: targetnode,
+												linkquality: parseInt(linkquality),
+												nroute: nroute,
+												broken: (linkquality.slice(-1)=="x")
+											});
+											srcnode = targetnode;
+											nroute++;
+										// }
+									}
+								});
+							}
+						});
+					}
+				});
+			};
+				
+			$(".altui-children-d3chart").replaceWith("<svg class='altui-children-d3chart'></svg>");
+			var available_height = $(window).height() - $("#altui-pagemessage").outerHeight() - $("#altui-pagetitle").outerHeight() - $("#altui-zwavechart-order").outerHeight() - $("footer").outerHeight();
+			var margin = {top: 20, right: 10, bottom: 10, left: 20};
+			width = $(".altui-children-d3chart-container").innerWidth() - margin.left - margin.right-30;
+			height = Math.max(300,Math.min(width,available_height - margin.top - margin.bottom));
+			
+			//Set up the colour scale
+			var color = d3.scale.category20();
+			var linkscale = d3.scale.sqrt().domain([0, 500]).range([80, Math.min(width,height)]);
+
+			var svg = d3.select(".altui-children-d3chart")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+				// .style("margin-left", -margin.left + "px")
+				.append("g")
+					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+			//Set up the force layout
+			data = _prepareDataRoutes( );
+			var force = d3.layout.force()
+			force = force
+				.charge(function(d) { return (d.zwid==0) ? -300 : -100 } )
+				.gravity(0.015)
+				.linkDistance(function(d) { 
+					var dist = linkscale( d.linkquality );
+					return  dist; /*   60+d.linkquality*15; */
+					})
+				.linkStrength( function(d) { 
+					return 1/(1+d.linkquality/10); 
+					})
+				.size([width, height])
+				.on("tick", function () {
+					// avoid asynchronous tick when the user changed the page
+					// this crashed d3
+						d3.selectAll(".link")
+							.attr("x1", function(d) { return d.source.x; })
+							.attr("y1", function(d) { return d.source.y; })
+							.attr("x2", function(d) { return d.target.x; })
+							.attr("y2", function(d) { return d.target.y; });
+
+						d3.selectAll("circle")
+							.attr("cx", function (d) { return d.x; })
+							.attr("cy", function (d) { return d.y; });
+						d3.selectAll("text")
+							.attr("x", function (d) { return d.x; })
+							.attr("y", function (d) { return d.y; });
+				});
+			var drag = force.drag().on("dragstart", dragstart);			
+
+			function dragstart(d) {
+				// console.log('dragstart');
+				d3.event.sourceEvent.stopPropagation(); // silence other listeners
+				d3.select(this).classed("fixed", d.fixed = true);
+			};				
+			function sglclick(d) {
+				if (d3.event.defaultPrevented) return;
+				// console.log('click');
+				var selection = d3.select(this);
+				if (d3.event.shiftKey) {
+					d.fixed =  false;
+					selection.classed("fixed", false  );
+				}
+				else {
+				}
+				_updateChart(data);
+			};
+			function _updateChart(data) {			
+				_updateDataRoutes(data);
+				force
+					.nodes( data.nodes )
+					.links( data.links )
+					.start();
+
+				var link = svg.selectAll(".link");
+				var node = svg.selectAll(".node");
+				link = link.data( data.links , function(d) { return d.source.id+'-'+d.target.id; } );
+				node = node.data( data.nodes , function(d) { return d.id; } );
+
+				link.exit().transition().duration(500).style("opacity","0").remove();
+				link.enter()
+					.insert("line", ".node")		// so that node allways hide links
+					.attr("class", "link")
+					.style("stroke", function(d) { return (d.broken==true) ? "red": ((d.nroute>1)?"yellow":"") ; } )
+					.style("stroke-width", 1 )
+					.attr("x1", function(d) { return d.source.x; })
+					.attr("y1", function(d) { return d.source.y; })
+					.attr("x2", function(d) { return d.target.x; })
+					.attr("y2", function(d) { return d.target.y; });					
+
+				node.exit().transition().duration(1000).style("opacity","0").remove();				
+				node.classed("fixed", function(d) { 
+						return d.fixed })
+					.classed("closed", function(d) { 
+						return d._children!=null } );
+
+				var groups = node.enter().append("g")
+							.attr("class", "node")
+							.classed("fixed", function(d) { return d.fixed } )
+							.classed("closed", function(d) { return d._children!=null } )
+							// .on("dblclick", dblclick)
+							.on("click", sglclick )
+							.call( drag );
+					groups.append("circle")					
+						.attr("r", function(d) { 
+							return 6+ 2*d.routes.length;
+						} )
+						.style("fill", function (d) {
+							return color(d._children ? "#3182bd" : d.color);
+						});
+					groups.append("text")					
+						.attr("dx", 15)
+						.attr("dy", ".35em")
+						.text(function (d) { return d.name; });
+			};		
+			_updateChart(data);
+		};
+		
+		// prepare and load D3 then draw the chart
+		UIManager.clearPage(_T('zWaveRoutes'),_T("zWave Routes"));
+		PageMessage.message(_T("Drag and Drop to fix the position of a node. Simple Click to open or collapse a parent node, Shift Click to free a fixed node"),"info");
+		var html="";
+		$(".altui-mainpanel")
+			.append(
+				"<style>					\
+				.node {						\
+					cursor: move;			\
+				}							\
+				.node circle {		\
+					stroke: #fff;			\
+					stroke-width: 1.5px;	\
+				}							\
+				.node.fixed circle {		\
+					stroke: #f00;			\
+					stroke-width: 1.5px;	\
+				}							\
+				.node.closed circle {		\
+					stroke: white;		\
+					fill: white !important;			\
+				}							\
+				.node.closed.fixed circle {		\
+					stroke: #f00;		\
+					fill: white !important;			\
+				}							\
+				.node text.plussign {				\
+					font-size: 18px;		\
+					text-anchor: middle;	\
+				}							\
+				.node text {				\
+					fill: gray;				\
+					pointer-events: none;	\
+					font-size: 10px;		\
+				}							\
+				.link {						\
+					stroke: #999;			\
+					stroke-opacity: .8;		\
+				}							\
+				</style>" )
+			.append(html+"<div class='altui-children-d3chart-container'><svg class='altui-children-d3chart'></svg></div>")
+		UIManager.loadD3Script( _drawChartRoutes );
 	},
 	
 	drawHouseMode: function ()
@@ -6586,9 +6648,10 @@ $(document).ready(function() {
 		body+="			<li><a id='altui-luatest' href='#' >"+_T("Lua Test Code")+"</a></li>";
 		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>Graphic</li>";
-		body+="			<li><a id='altui-zwavenetwork' href='#' >"+_T("zWave Network")+"</a></li>";
 		body+="			<li><a id='altui-energy' href='#' >"+_T("Power Chart")+"</a></li>";
 		body+="			<li><a id='altui-childrennetwork' href='#' >"+_T("Parent/Child Network")+"</a></li>";
+		body+="			<li><a id='altui-zwavenetwork' href='#' >"+_T("zWave Network")+"</a></li>";
+		body+="			<li><a id='altui-zwaveroutes' href='#' >"+_T("zWave Routes")+"</a></li>";
 		body+="			<li><a id='altui-quality' href='#' >"+_T("Network Quality")+"</a></li>";
 		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>Admin</li>";
@@ -6936,6 +6999,7 @@ $(document).ready(function() {
 		.on( "click", "#altui-luatest", UIManager.pageLuaTest )
 		.on( "click", "#altui-zwavenetwork", UIManager.pageZwave )		
 		.on( "click", "#altui-childrennetwork", UIManager.pageChildren )		
+		.on( "click", "#altui-zwaveroutes", UIManager.pageRoutes )		
 		.on( "click", "#altui-quality", UIManager.pageQuality )		
 		.on( "click", "#altui-energy", UIManager.pagePower )	
 		.on( "click", "#altui-optimize", UIManager.pageOptimize )
