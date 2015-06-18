@@ -687,12 +687,12 @@ var SceneEditor = function (scene) {
 			_displayDevice(deviceid),
 			event.label.text.replace("_DEVICE_NAME_","<b>"+device.name+"</b>"));
 		html +="<td><small>";
-		$.each(trigger.arguments, function( idx,argument) {
-			var id = argument.id;
-			var eventargtemplate = null;
-			// html +="<li>";
-			if (event.argumentList) 
-			{
+		if (true) {
+		// if (trigger.arguments && event.argumentList)  {
+			$.each(trigger.arguments, function( idx,argument) {
+				var id = argument.id;
+				var eventargtemplate = null;
+				// html +="<li>";
 				$.each(event.argumentList, function(idx,eventarg) {
 					if (eventarg.id==id)
 					{
@@ -703,16 +703,15 @@ var SceneEditor = function (scene) {
 						return false;	// we had a match
 					}				
 				});
-			} else
-			{
-				var lines = [];
+			});
+		} else {
+			var lines = [];
+			if (event.serviceStateTable)
 				$.each(event.serviceStateTable, function(key,serviceState){
 					lines.push("{0} {1} {2}".format( key, serviceState.comparisson, serviceState.value));					
 				});
-				html += lines.join(" AND ");
-			}
-			// html +="</li>";
-		});
+			html += lines.join(" AND ");
+		}
 		html +="</small></td>";		
 
 		html +="<td>";
@@ -1270,7 +1269,10 @@ var SceneEditor = function (scene) {
 			html +="</table>";
 		}
 		catch(err) {
-			html +="error happened during decoding";
+			html +="</tbody>";
+			html +="</table>";
+			html +="<span class='text-danger'>error happened during decoding triggers, probable duplicate ID or invalid format</span>";
+			PageMessage.message( _T("error happened during decoding triggers, probable duplicate ID or invalid format"), "danger");
 		}
 		
 		html += "<h3>"+_T("Timers")+" <span id='timer' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+"</h3>";	
@@ -1288,7 +1290,10 @@ var SceneEditor = function (scene) {
 			html +="</table>";
 		}
 		catch(err) {
-			html +="error happened during decoding";
+			html +="</tbody>";
+			html +="</table>";
+			html +="<span class='text-danger'>error happened during decoding timers, probable duplicate ID or invalid format</span>";
+			PageMessage.message( _T("error happened during decoding timers, probable duplicate ID or invalid format"), "danger");
 		}
 
 		html += "<h3>"+_T("Actions")+" <span id='group' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+"</h3>";	
@@ -1307,7 +1312,10 @@ var SceneEditor = function (scene) {
 			html +="</table>";
 		}
 		catch(err) {
-			html +="error happened during decoding";
+			html +="</tbody>";
+			html +="</table>";
+			html +="<span class='text-danger'>error happened during decoding actions, probable duplicate ID or invalid format</span>";
+			PageMessage.message( _T("error happened during decoding actions, probable duplicate ID or invalid format"), "danger");
 		}
 
 		var lua = (scene.lua!=undefined) ? scene.lua : "";
