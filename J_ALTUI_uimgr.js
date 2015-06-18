@@ -2703,6 +2703,8 @@ var UIManager  = ( function( window, undefined ) {
 	};
 	
 	function  _deviceDrawControlPanelTab(devid, device, tab, domparent ) {
+		var pos_left= 0, pos_right= 0, pos_top = 0;
+		
 		function _displayControl( domparent, device, control, idx) {
 			var paddingleft = parseInt($("#altui-device-controlpanel-"+devid).css("padding-left"));
 			var paddingtop = parseInt($("#altui-device-controlpanel-"+devid+" .panel-body ").css("padding-top"));
@@ -2787,22 +2789,38 @@ var UIManager  = ( function( window, undefined ) {
 				case "button": {
 					if (control.Display) 
 					{
-						control.Display.Width = control.Display.Width || 10;
 						var bActif = false;
 						if (control.Display.Service && control.Display.Variable) {
 							var valueToMatch = control.Display.Value || 1 ;
 							var valueNow = VeraBox.getStatus( devid, control.Display.Service, control.Display.Variable )
 							bActif = (valueToMatch==valueNow);
 						}
-						$( "<button type='button' class='btn btn-{1} altui-controlpanel-button'>{0}</button>".format(control.Label.text, bActif ? 'primary' : 'default'))
-							.appendTo( $(domparent) )
-							.css({
-								top: paddingtop + (control.Display.Top || 0), 
-								left: paddingleft  + (control.Display.Left || 0), 
-								"min-width": control.Display.Width+"px",	// forcing bootstrap
-								"max-width": control.Display.Width+"px",	// forcing bootstrap
-								position:'absolute'
-								})
+						var button = $( "<button type='button' class='btn btn-{1} altui-controlpanel-button'>{0}</button>".format(control.Label.text, bActif ? 'primary' : 'default'))
+							.appendTo( $(domparent) );
+						
+						control.Display.Width = Math.max( control.Display.Width || 10 , $(button).outerWidth() );
+						if (control.Display.Top && control.Display.Left) {
+							button.css({
+									top: paddingtop + (control.Display.Top || 0), 
+									left: paddingleft  + (control.Display.Left || 0), 
+									"min-width": control.Display.Width+"px",	// forcing bootstrap
+									"max-width": control.Display.Width+"px",	// forcing bootstrap
+									position:'absolute'
+									});
+						}
+						else {
+							button.css({
+									"min-width": control.Display.Width+"px",	// forcing bootstrap
+									"max-width": control.Display.Width+"px",	// forcing bootstrap
+									"margin-top": "5px",	
+									"margin-left": "10px",	
+									"margin-right": "10px",	
+									"margin-bottom": "5px",	
+									})
+									
+									.addClass('pull-left');
+						}
+						button
 							.width(control.Display.Width)
 							.height(control.Display.Height)
 							.click( function() {
@@ -2827,7 +2845,7 @@ var UIManager  = ( function( window, undefined ) {
 					var uniqid = devid+"-"+idx;
 					var symbol = control.LabelSymbol ? control.LabelSymbol.text : '';
 					$("<div id='altui-slider-horizontal-value-"+uniqid+"' class=''></div>")
-						.text( val+symbol )
+						.html( val+symbol )
 						.appendTo( $(domparent) )
 						.css({
 							top: control.Display.Top, 
@@ -2851,7 +2869,7 @@ var UIManager  = ( function( window, undefined ) {
 						  max: parseInt(control.Display.MaxValue || 100),
 						  value: val ,
 						  slide: function( event, ui ) {
-							$("#altui-slider-horizontal-value-"+uniqid).text(ui.value+symbol);
+							$("#altui-slider-horizontal-value-"+uniqid).html(ui.value+symbol);
 						  },
 						  change: function( event, ui ) {
 							var params={};
@@ -2984,7 +3002,6 @@ var UIManager  = ( function( window, undefined ) {
 					break;
 				};
 				default: {
-					//$(domparent).append("<pre>"+JSON.stringify(control)+"</pre>");
 					if (AltuiDebug.IsDebug())
 						$(domparent).append("<pre>Unknown control type:"+control.ControlType+". See Debug</pre>");
 				};
@@ -2994,8 +3011,8 @@ var UIManager  = ( function( window, undefined ) {
 		$(domparent).css({position: 'relative'});
 		if (tab.TabType=="flash") {
 			// if (device.device_type.startsWith("urn:schemas-upnp-org:device:HVAC_Z") ) {
-				// tab = JSON.parse('{"Label":{"lang_tag":"ui7_tabname_control","text":"Control"},"Position":"0","TabType":"flash","top_navigation_tab":1,"ControlGroup":[{"id":"7","scenegroup":"7"},{"id":"6","scenegroup":"6"}],"SceneGroup":[{"id":"7","top":"0.5","left":"0","x":"2","y":"0.5"},{"id":"6","top":"1.5","left":"0","x":"2","y":"1.5"}],"Control":[{"ControlGroup":"6","ControlType":"button","Label":{"lang_tag":"ui7_cmd_thermostat_set_mode_off","text":"Off"},"Display":{"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Variable":"ModeStatus","Value":"Off","Width":10},"Command":{"HumanFriendlyText":{"lang_tag":"ui7_cmd_thermostat_set_mode_off","text":"Off"},"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Action":"SetModeTarget","Parameters":[{"Name":"NewModeTarget","Value":"Off"}]},"ControlCode":"thermostat_mode_off"},{"ControlGroup":"6","ControlType":"button","Label":{"lang_tag":"ui7_cmd_thermostat_set_mode_auto","text":"Auto"},"Display":{"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Variable":"ModeStatus","Value":"AutoChangeOver","Width":10},"Command":{"HumanFriendlyText":{"lang_tag":"ui7_cmd_thermostat_set_mode_auto","text":"Auto"},"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Action":"SetModeTarget","Parameters":[{"Name":"NewModeTarget","Value":"AutoChangeOver"}]},"ControlCode":"thermostat_mode_auto"},{"ControlGroup":"6","ControlType":"button","Label":{"lang_tag":"ui7_cmd_thermostat_set_mode_cool_on","text":"Cool"},"Display":{"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Variable":"ModeStatus","Value":"CoolOn","Width":10},"Command":{"HumanFriendlyText":{"lang_tag":"ui7_cmd_thermostat_set_mode_cool_on","text":"Cool"},"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Action":"SetModeTarget","Parameters":[{"Name":"NewModeTarget","Value":"CoolOn"}]},"ControlCode":"thermostat_mode_cool"},{"ControlGroup":"6","ControlType":"button","Label":{"lang_tag":"ui7_cmd_thermostat_set_mode_heat_on","text":"Heat"},"Display":{"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Variable":"ModeStatus","Value":"HeatOn","Width":10},"Command":{"HumanFriendlyText":{"lang_tag":"ui7_cmd_thermostat_set_mode_heat_on","text":"Heat"},"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Action":"SetModeTarget","Parameters":[{"Name":"NewModeTarget","Value":"HeatOn"}]},"ControlCode":"thermostat_mode_heat"},{"ControlGroup":"7","ControlType":"slider","top":"0","left":"0","ControlPair":"1","Style":"numeric","LabelMin":{"lang_tag":"ui7_hvac_zonethermostat_heatpoint_label_min","text":"Cold"},"LabelMax":{"lang_tag":"ui7_hvac_zonethermostat_heatpoint_label_max","text":"Hot"},"LabelSymbol":{"lang_tag":"ui7_hvac_zonethermostat_heatpoint_label_symbol","text":"?"},"ShowButtons":"1","Display":{"Service":"urn:upnp-org:serviceId:TemperatureSetpoint1","Variable":"CurrentSetpoint","MinValue":"0","MaxValue":"100","Top":50,"Left":50,"Width":100,"Height":20,"ID":"NewCurrentSetpoint"},"Command":{"HumanFriendlyText":{"lang_tag":"ui7_cmd_thermostat_set_setpoint","text":"Set temperature"},"Sufix":"?_TEMPERATURE_FORMAT_","Description":{"lang_tag":"ui7_cmd_thermostat_setpoint_description","text":"Enter a value between 0 and 100"},"Service":"urn:upnp-org:serviceId:TemperatureSetpoint1","Action":"SetCurrentSetpoint","Parameters":[{"Name":"NewCurrentSetpoint","ID":"NewCurrentSetpoint"}]},"ControlCode":"heating_setpoint"}]}');
-			// }
+				// tab = JSON.parse('{"Label":{"lang_tag":"ui7_tabname_control","text":"Control"},"Position":"0","TabType":"flash","top_navigation_tab":1,"ControlGroup":[{"id":"7","scenegroup":"7"},{"id":"6","scenegroup":"6"}],"SceneGroup":[{"id":"7","top":"0.5","left":"0","x":"2","y":"0.5"},{"id":"6","top":"1.5","left":"0","x":"2","y":"1.5"}],"Control":[{"ControlGroup":"6","ControlType":"button","Label":{"lang_tag":"ui7_cmd_thermostat_set_mode_off","text":"Off"},"Display":{"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Variable":"ModeStatus","Value":"Off"},"Command":{"HumanFriendlyText":{"lang_tag":"ui7_cmd_thermostat_set_mode_off","text":"Off"},"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Action":"SetModeTarget","Parameters":[{"Name":"NewModeTarget","Value":"Off"}]},"ControlCode":"thermostat_mode_off"},{"ControlGroup":"6","ControlType":"button","Label":{"lang_tag":"ui7_cmd_thermostat_set_mode_auto","text":"Auto"},"Display":{"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Variable":"ModeStatus","Value":"AutoChangeOver"},"Command":{"HumanFriendlyText":{"lang_tag":"ui7_cmd_thermostat_set_mode_auto","text":"Auto"},"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Action":"SetModeTarget","Parameters":[{"Name":"NewModeTarget","Value":"AutoChangeOver"}]},"ControlCode":"thermostat_mode_auto"},{"ControlGroup":"6","ControlType":"button","Label":{"lang_tag":"ui7_cmd_thermostat_set_mode_cool_on","text":"Cool"},"Display":{"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Variable":"ModeStatus","Value":"CoolOn"},"Command":{"HumanFriendlyText":{"lang_tag":"ui7_cmd_thermostat_set_mode_cool_on","text":"Cool"},"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Action":"SetModeTarget","Parameters":[{"Name":"NewModeTarget","Value":"CoolOn"}]},"ControlCode":"thermostat_mode_cool"},{"ControlGroup":"6","ControlType":"button","Label":{"lang_tag":"ui7_cmd_thermostat_set_mode_heat_on","text":"Heat"},"Display":{"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Variable":"ModeStatus","Value":"HeatOn"},"Command":{"HumanFriendlyText":{"lang_tag":"ui7_cmd_thermostat_set_mode_heat_on","text":"Heat"},"Service":"urn:upnp-org:serviceId:HVAC_UserOperatingMode1","Action":"SetModeTarget","Parameters":[{"Name":"NewModeTarget","Value":"HeatOn"}]},"ControlCode":"thermostat_mode_heat"},{"ControlGroup":"7","ControlType":"slider","top":"0","left":"0","ControlPair":"1","Style":"numeric","LabelMin":{"lang_tag":"ui7_hvac_zonethermostat_heatpoint_label_min","text":"Cold"},"LabelMax":{"lang_tag":"ui7_hvac_zonethermostat_heatpoint_label_max","text":"Hot"},"LabelSymbol":{"lang_tag":"ui7_hvac_zonethermostat_heatpoint_label_symbol","text":"&deg;"},"ShowButtons":"1","Display":{"Service":"urn:upnp-org:serviceId:TemperatureSetpoint1","Variable":"CurrentSetpoint","MinValue":"0","MaxValue":"100","Top":50,"Left":50,"Width":100,"Height":20,"ID":"NewCurrentSetpoint"},"Command":{"HumanFriendlyText":{"lang_tag":"ui7_cmd_thermostat_set_setpoint","text":"Set temperature"},"Sufix":"&deg;_TEMPERATURE_FORMAT_","Description":{"lang_tag":"ui7_cmd_thermostat_setpoint_description","text":"Enter a value between 0 and 100"},"Service":"urn:upnp-org:serviceId:TemperatureSetpoint1","Action":"SetCurrentSetpoint","Parameters":[{"Name":"NewCurrentSetpoint","ID":"NewCurrentSetpoint"}]},"ControlCode":"heating_setpoint"}]}');
+				// }
 			$.each( tab.Control, function (idx,control) {
 				_displayControl( domparent, device, control, idx );
 			});
