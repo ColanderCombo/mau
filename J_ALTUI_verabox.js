@@ -1459,6 +1459,18 @@ var VeraBox = ( function( window, undefined ) {
 		return [];
 	};
 	
+	function _isDeviceZwave(id) {
+		var device = VeraBox.getDeviceByID(id);
+		if (device && device.id_parent) {
+			var parent = VeraBox.getDeviceByID( device.id_parent );
+			if (parent) {
+				if (parent.device_type == "urn:schemas-micasaverde-com:device:ZWaveNetwork:1")
+					return true;
+			}
+		}
+		return false;
+	};
+	
 	function _resetPollCounters() {
 		VeraBox.getDevices( 
 			function(luaid,device) {
@@ -1501,6 +1513,7 @@ var VeraBox = ( function( window, undefined ) {
 	getDeviceStaticUI : _getDeviceStaticUI,
 	getDeviceActions: _getDeviceActions,
 	getDeviceEvents : _getDeviceEvents,
+	isDeviceZwave	: _isDeviceZwave,
 	getScenes		: _getScenes,
 	getSceneByID 	: _getSceneByID,
 	getNewSceneID	: _getNewSceneID,

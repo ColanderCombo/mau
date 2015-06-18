@@ -2220,7 +2220,7 @@ var UIManager  = ( function( window, undefined ) {
 			});
 			
 			// update modal with new text
-			var extrabuttons = buttonTemplate.format( devid, "altui-update-neighbors", _T("Update Neighbors"),"default");
+			var extrabuttons = VeraBox.isDeviceZwave(devid) ? buttonTemplate.format( devid, "altui-update-neighbors", _T("Update Neighbors"),"default") : "";
 			$('div#deviceActionModal').replaceWith(deviceActionModalTemplate.format( lines.join(''), device.name, devid, extrabuttons ));
 			$('div#deviceActionModal button.altui-run-action').click( function() {
 				var service = $(this).data().service;	// better than this.dataset.service in case of old browsers
