@@ -687,8 +687,7 @@ var SceneEditor = function (scene) {
 			_displayDevice(deviceid),
 			event.label.text.replace("_DEVICE_NAME_","<b>"+device.name+"</b>"));
 		html +="<td><small>";
-		if (true) {
-		// if (trigger.arguments && event.argumentList)  {
+		if (trigger.arguments && event.argumentList)  {
 			$.each(trigger.arguments, function( idx,argument) {
 				var id = argument.id;
 				var eventargtemplate = null;
