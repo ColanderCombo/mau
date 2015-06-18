@@ -170,5 +170,9 @@ Localization.init( {
 	"Stop Time":"Stop Time",
 	"zWave Routes":"zWave Routes",
 	"zWaveRoutes":"zWaveRoutes",
-	"error happened during decoding triggers, probable duplicate ID or invalid format":"error happened during decoding triggers, probable duplicate ID or invalid format"
+	"error happened during decoding triggers, probable duplicate ID or invalid format":"error happened during decoding triggers, probable duplicate ID or invalid format",
+	"TblDevices":"TblDevices",
+	"Table Devices":"Table Devices",
+	"Update Neighbors":"Update Neighbors",
+	"Update Neighbors succeeded":"Update Neighbors succeeded"
 	});

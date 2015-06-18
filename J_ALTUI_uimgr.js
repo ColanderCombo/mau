@@ -5148,6 +5148,7 @@ var UIManager  = ( function( window, undefined ) {
 			["Touch Punch","http://touchpunch.furf.com/","jQuery UI fix for touch screen devices"],
 			["Bootstrap Validator","https://github.com/1000hz/bootstrap-validator","Form validator in Bootstrap 3 style"],
 			["D3js","http://d3js.org/","D3 Data Driven Documents & Les Miserables tutorial"],
+			["Bootgrid","http://www.jquery-bootgrid.com/","Jquery Bootstrap Grid"],
 			["amg0","http://forum.micasaverde.com/","reachable as amg0 on this forum "]
 		];
 		var html = "<dl>";
@@ -6470,7 +6471,7 @@ var UIManager  = ( function( window, undefined ) {
 				var viscols = [ 'id','name','manufacturer'];
 				var obj = devices[0];
 				$.each( Object.keys(obj), function (idx,key) {
-					if ( !$.isArray(obj[key]) && !$.isPlainObject(obj[key]) ) {
+					if ( !$.isArray(obj[key]) && !$.isPlainObject(obj[key]) && (key!='dirty') ) {
 						if (key=='id')
 							cols.push( { name:key, visible: $.inArray(key,viscols), type:'numeric', identifier:true, width:50 } );
 						else
@@ -6498,7 +6499,7 @@ var UIManager  = ( function( window, undefined ) {
 				$.each(devices, function(idx, device) {
 					html+="    <tr>";
 					$.each(cols, function(i,col) {
-						html += "<td>{0}</td>".format(device[col.name]);
+						html += "<td>{0}</td>".format( _enhanceValue(device[col.name] || '') );
 					});
 					html+="    </tr>";
 				});
