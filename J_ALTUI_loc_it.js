@@ -167,5 +167,8 @@ Localization.init( {
 	"Trigger Restriction":"Trigger Restriction",
 	"Restrict trigger based on certain times":"Restrict trigger based on certain times",
 	"Start Time":"Start Time",
-	"Stop Time":"Stop Time"
+	"Stop Time":"Stop Time",
+	"zWave Routes":"zWave Routes",
+	"zWaveRoutes":"zWaveRoutes",
+	"error happened during decoding triggers, probable duplicate ID or invalid format":"error happened during decoding triggers, probable duplicate ID or invalid format"
 	});

@@ -1269,10 +1269,11 @@ var SceneEditor = function (scene) {
 			html +="</table>";
 		}
 		catch(err) {
+			var str = _T("error happened during decoding triggers, probable duplicate ID or invalid format");
 			html +="</tbody>";
 			html +="</table>";
-			html +="<span class='text-danger'>error happened during decoding triggers, probable duplicate ID or invalid format</span>";
-			PageMessage.message( _T("error happened during decoding triggers, probable duplicate ID or invalid format"), "danger");
+			html +="<span class='text-danger'>"+str+"</span>";
+			PageMessage.message( str, "danger");
 		}
 		
 		html += "<h3>"+_T("Timers")+" <span id='timer' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+"</h3>";	
@@ -1290,10 +1291,11 @@ var SceneEditor = function (scene) {
 			html +="</table>";
 		}
 		catch(err) {
+			var str = _T("error happened during decoding timers, probable duplicate ID or invalid format");
 			html +="</tbody>";
 			html +="</table>";
-			html +="<span class='text-danger'>error happened during decoding timers, probable duplicate ID or invalid format</span>";
-			PageMessage.message( _T("error happened during decoding timers, probable duplicate ID or invalid format"), "danger");
+			html +="<span class='text-danger'>"+str+"</span>";
+			PageMessage.message( str, "danger");
 		}
 
 		html += "<h3>"+_T("Actions")+" <span id='group' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+"</h3>";	
@@ -1312,10 +1314,11 @@ var SceneEditor = function (scene) {
 			html +="</table>";
 		}
 		catch(err) {
+			var str = _T("error happened during decoding actions, probable duplicate ID or invalid format");
 			html +="</tbody>";
 			html +="</table>";
-			html +="<span class='text-danger'>error happened during decoding actions, probable duplicate ID or invalid format</span>";
-			PageMessage.message( _T("error happened during decoding actions, probable duplicate ID or invalid format"), "danger");
+			html +="<span class='text-danger'>"+str+"</span>";
+			PageMessage.message( str, "danger");
 		}
 
 		var lua = (scene.lua!=undefined) ? scene.lua : "";

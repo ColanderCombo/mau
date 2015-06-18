@@ -167,5 +167,8 @@ Localization.init( {
   "Trigger Restriction":"Evènement Limité",
   "Restrict trigger based on certain times":"Limite les Evènements à une certaine plage horaire",
   "Start Time":"Début",
-  "Stop Time":"Fin"
+  "Stop Time":"Fin",
+  "zWave Routes":"Routes zWave ",
+  "zWaveRoutes":"zWaveRoutes",
+  "error happened during decoding triggers, probable duplicate ID or invalid format":"une erreur est intervenue pendant l'affichage des Evenements, probablement un ID en double ou un format invalide"
 });
