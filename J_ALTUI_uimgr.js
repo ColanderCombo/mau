@@ -4012,6 +4012,7 @@ var UIManager  = ( function( window, undefined ) {
 			{ id:19, title:_T('Parent/Child'), onclick:'UIManager.pageChildren()', parent:0 },
 			{ id:20, title:_T('zWaveRoutes'), onclick:'UIManager.pageRoutes()', parent:0 },
 			{ id:21, title:_T('Quality'), onclick:'UIManager.pageQuality()', parent:0 },
+			{ id:22, title:_T('TblDevices'), onclick:'UIManager.pageTblDevices()', parent:0 },
 		];
 
 		function _parentsOf(child) {
@@ -6454,6 +6455,51 @@ var UIManager  = ( function( window, undefined ) {
 		Localization.dump();
 	},
 	
+	pageTblDevices : function() {
+		UIManager.clearPage(_T('TblDevices'),_T("Table Devices"));
+		var cols = [ 
+			{ name:'name', type:'' },
+			{ name:'id' , type:'numeric' },
+			{ name:'altid' , type:'' }
+		];
+		
+		var html = "";
+		html += "";
+		html+="<div class='col-xs-12'>";
+		html+="<table id='altui-grid' class='table table-condensed table-hover table-striped'>";
+		html+="    <thead>";
+		html+="    <tr>";
+		$.each(cols, function(idx,col) {
+			html += "<th data-column-id='{0}' data-type='{1}'>{0}</th>".format(col.name, col.type);
+		});
+		html+="    </tr>";
+		html+="    </thead>";
+		html+="    <tbody>";
+		html+="    </tbody>";
+		html+="</table>";
+		html+="</div>";
+		$(".altui-mainpanel").append( html );
+		VeraBox.getDevices( 
+			function(idx,device) {
+				var html="";
+				$.each(cols, function(i,col) {
+					html += "<td>{0}</td>".format(device[col.name]);
+				});
+				$("#altui-grid tbody").append("<tr>"+html+"</tr>");
+			},
+			
+			function(device) { 
+				return true; 
+			},
+			
+			function () {
+				// all devices are enumarated
+				$("#altui-grid").bootgrid({
+				});
+			}
+		);
+	},
+	
 	pageOptimize: function() {
 		UIManager.clearPage(_T('Optimize'),_T("Optimizations"));
 
@@ -6683,6 +6729,9 @@ $(document).ready(function() {
 		body+="			<li><a id='altui-zwavenetwork' href='#' >"+_T("zWave Network")+"</a></li>";
 		body+="			<li><a id='altui-zwaveroutes' href='#' >"+_T("zWave Routes")+"</a></li>";
 		body+="			<li><a id='altui-quality' href='#' >"+_T("Network Quality")+"</a></li>";
+		body+="			<li class='divider'></li>";
+		body+="			<li class='dropdown-header'>Tables</li>";
+		body+="			<li><a id='altui-tbl-device' href='#' >"+_T("Devices")+"</a></li>";
 		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>Admin</li>";
 		body+="			<li><a id='altui-optimize' href='#'>"+_T("Optimizations")+"</a></li>";
@@ -7032,6 +7081,7 @@ $(document).ready(function() {
 		.on( "click", "#altui-zwaveroutes", UIManager.pageRoutes )		
 		.on( "click", "#altui-quality", UIManager.pageQuality )		
 		.on( "click", "#altui-energy", UIManager.pagePower )	
+		.on( "click", "#altui-tbl-device", UIManager.pageTblDevices )
 		.on( "click", "#altui-optimize", UIManager.pageOptimize )
 		.on( "click", "#altui-localize", UIManager.pageLocalization  )
 		.on( "click", "#altui-debug-btn", function() {

@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.49"
+local version = "v0.50"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 -- local updateFrequencySec = 120	-- refreshes every x seconds
 -- local socket = require("socket")
@@ -443,6 +443,8 @@ local htmlLayout = [[
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css">
 	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-bootgrid/1.2.0/jquery.bootgrid.min.css">
+
 	@style@
     <title>VERA AltUI</title>
 </head>
@@ -456,6 +458,7 @@ local htmlLayout = [[
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-bootgrid/1.2.0/jquery.bootgrid.min.js"></script> 	
 	
     <!-- http://192.168.1.5/port_3480/J_ALTUI_utils.js?_=1421533594990 -->
 	<script src="J_ALTUI_jquery.ui.touch-punch.min.js"></script>
@@ -845,7 +848,11 @@ function startupDeferred(lul_device)
 	local config = getSetVariableIfEmpty(service, "PluginConfig", lul_device, default)
 	
 	-- NOTHING to start 
-	luup.set_failure(false,lul_device)	-- should be 0 in UI7
+	if( luup.version_branch == 1 and luup.version_major == 7) then
+		luup.set_failure(0,lul_device)	-- should be 0 in UI7
+	else
+		luup.set_failure(false,lul_device)	-- should be 0 in UI7
+	end
 	log("startup completed")
 end
 		
