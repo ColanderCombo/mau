@@ -6584,7 +6584,8 @@ var UIManager  = ( function( window, undefined ) {
 				html+="</div>";
 				$(".altui-mainpanel").append( html );
 				$("#altui-grid").bootgrid({
-					caseSensitive: false
+					caseSensitive: false,
+					statusMapping: {}
 				}).on("loaded.rs.jquery.bootgrid", function (e)
 				{
 					var settings = $("#altui-grid").bootgrid("getColumnSettings");
