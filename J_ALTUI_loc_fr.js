@@ -174,5 +174,7 @@ Localization.init( {
 	"TblDevices":"TblDevices",
 	"Table Devices":"Table Périphériques",
 	"Update Neighbors":"Mise a jour des Voisins",
-	"Update Neighbors succeeded":"Mise a jour des Voisins réussie"
+	"Update Neighbors succeeded":"Mise a jour des Voisins réussie",
+	"Copy to clipboard":"Copier dans le clipboard",
+	"Data copied in clipboard":"Données copiées dans le clipboard"
 });

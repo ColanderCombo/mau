@@ -174,5 +174,7 @@ Localization.init( {
 	"TblDevices":"TblDevices",
 	"Table Devices":"Table Devices",
 	"Update Neighbors":"Update Neighbors",
-	"Update Neighbors succeeded":"Update Neighbors succeeded"
+	"Update Neighbors succeeded":"Update Neighbors succeeded",
+	"Copy to clipboard":"Copy to clipboard",
+	"Data copied in clipboard":"Data copied in clipboard"
 	});

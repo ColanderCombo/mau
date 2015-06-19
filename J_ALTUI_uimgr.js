@@ -5257,7 +5257,7 @@ var UIManager  = ( function( window, undefined ) {
 		$(".altui-mainpanel").append(html);
 		$("#altui-luaform-button").click( function() {
 			var txt = $("textarea#altui-editor-text").val();
-			onClickCB(txt);
+			onClickCB(txt,$(this));
 		});
 	},
 	
@@ -6534,19 +6534,28 @@ var UIManager  = ( function( window, undefined ) {
 			},
 			
 			function (devices) {	// all devices are enumarated
-				var cols = [ ];
-				var viscols = [ 'id','name','manufacturer'];
+
+				var viscols = MyLocalStorage.getSettings("BootgridVisibleCols") || [];
+				if (viscols.length==0)
+					viscols = [ 'id','name','manufacturer'];
+				
+				var cols = [ 
+					{ name:'id', visible: $.inArray('id',viscols)!=-1, type:'numeric', identifier:true, width:50 },
+					{ name:'altid', visible: $.inArray('altid',viscols)!=-1, type:'string', identifier:true, width:50 },
+					{ name:'id_parent', visible: $.inArray('altid',viscols)!=-1, type:'numeric', identifier:true, width:80 },
+					{ name:'manufacturer', visible: $.inArray('manufacturer',viscols)!=-1, type:'string', identifier:true, width:120 },
+					{ name:'model', visible: $.inArray('model',viscols)!=-1, type:'string', identifier:true, width:150 },
+					{ name:'name', visible: $.inArray('altid',viscols)!=-1, type:'string', identifier:true, width:150 }
+				];				
+				
 				var obj = devices[0];
 				$.each( Object.keys(obj), function (idx,key) {
 					if ( !$.isArray(obj[key]) && !$.isPlainObject(obj[key]) && (key!='dirty') ) {
-						if (key=='id')
-							cols.push( { name:key, visible: $.inArray(key,viscols), type:'numeric', identifier:true, width:50 } );
-						else
-							cols.push( { name:key, visible: $.inArray(key,viscols) } );
+						if ($.inArray(key, $.map(cols,function(o) { return o.name } ))==-1)
+							cols.push( { name:key, visible: ($.inArray(key,viscols)!=-1) } );
 					}
 				});
 				var html = "";
-				html += "";
 				html+="<div class='col-xs-12'>";
 				html+="<table id='altui-grid' class='table table-condensed table-hover table-striped'>";
 				html+="    <thead>";
@@ -6557,7 +6566,7 @@ var UIManager  = ( function( window, undefined ) {
 						col.type,
 						col.identifier ? "data-identifier='true'" : "",
 						col.width ? "data-width='{0}'".format(col.width) : "",
-						"data-visible='{0}'".format(col.visible!=-1)
+						"data-visible='{0}'".format(col.visible)
 						);
 				});
 				html+="    </tr>";
@@ -6579,8 +6588,27 @@ var UIManager  = ( function( window, undefined ) {
 				}).on("loaded.rs.jquery.bootgrid", function (e)
 				{
 					var settings = $("#altui-grid").bootgrid("getColumnSettings");
+					viscols = $.map($.grep(settings, function (obj) { return obj.visible == true }),function(obj){ return obj.id;});
+					MyLocalStorage.setSettings("BootgridVisibleCols",viscols);
 					/* your code goes here */
 				});	
+				
+				// Add CSV export button
+				var glyph = glyphTemplate.format('save',_T("Copy to clipboard"), '');
+				var csvButtonHtml = buttonTemplate.format( 'altui-grid-btn', 'altui-tbl2csv', glyph,'default');
+				$(".actions.btn-group").append(csvButtonHtml);
+				$("#altui-grid-btn").click( function() {
+					$('#altui-grid').table2CSV({
+						delivery : function(data) {
+							UIManager.pageEditorForm("CSV text",data,_T("Copy to clipboard"),function(text,that) {
+								$(that).prev(".form-group").find("#altui-editor-text").select();
+								document.execCommand('copy');
+								$(that).parents("form").remove();
+								PageMessage.message( _T("Data copied in clipboard"), "info");
+							});
+						}
+					});
+				});
 			}
 		);
 	},
