@@ -909,17 +909,18 @@ var VeraBox = ( function( window, undefined ) {
 				{
 					$.each(data.devices, function( idx, device) {
 						userdata_device_idx = _findDeviceIdxByID(device.id);
-						_user_data.devices[userdata_device_idx].status = device.status;
-						_user_data.devices[userdata_device_idx].Jobs = device.Jobs;
-						_user_data.devices[userdata_device_idx].dirty = true;
+						var device = _user_data.devices[userdata_device_idx];
+						device.status = device.status;
+						device.Jobs = device.Jobs;
+						device.dirty = true;
 
 						if (device.states !=null) {
 							$.each(device.states, function( idx, state) {
-								$.each( _user_data.devices[userdata_device_idx].states , function( idx, userdata_state)
+								$.each( device.states , function( idx, userdata_state)
 								{
 									if ((userdata_state.service == state.service) && (userdata_state.variable == state.variable))
 									{
-										_user_data.devices[userdata_device_idx].states[idx].value = state.value;
+										device.states[idx].value = state.value;
 										return false; // break from the $.each()
 									}
 								});
@@ -1002,6 +1003,7 @@ var VeraBox = ( function( window, undefined ) {
 				if (device!=null) {	
 					device.dirty=true; 
 				}
+				// device.favorite=false;
 			});		
 		}
 	};

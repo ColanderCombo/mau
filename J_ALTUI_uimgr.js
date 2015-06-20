@@ -51,6 +51,8 @@ var plusGlyph="<span class='glyphicon glyphicon-plus' aria-hidden='true' data-to
 var saveGlyph="<span class='glyphicon glyphicon-save' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Save'></span>";
 var labelGlyph="<span class='glyphicon glyphicon-font' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Label'></span>";
 var searchGlyph = "";
+var staremtpyGlyph = "";
+var starGlyph = "";
 var loadGlyph = "";
 var infoGlyph = "";
 var picGlyph = "";
@@ -2319,14 +2321,17 @@ var UIManager  = ( function( window, undefined ) {
 		}
 	};
 
-	function _enhanceDeviceTitle(device,title) {
-		if (device.hidden==true) {
-			title = hiddenGlyph+' '+title;
-		}
-		if (device.invisible==true) {
-			title = invisibleGlyph+' '+title;
-		}
-		return title;
+	function _enhancedDeviceTitle(device) {
+		var glyphs=[];
+		glyphs.push((device.favorite==true) ? starGlyph : staremtpyGlyph);
+
+		if (device.hidden==true) 
+			glyphs.push(hiddenGlyph);
+		if (device.invisible==true) 
+			glyphs.push(invisibleGlyph);
+		
+		var template="{0} <small class='altui-device-title-name'>{1}</small>";
+		return template.format(glyphs.join(' '), device.name);
 	}
 	
 	function _defaultDeviceDrawWatts( devid, device ) {
@@ -2545,7 +2550,7 @@ var UIManager  = ( function( window, undefined ) {
 		dropdownTemplate += "<div class='pull-right text-muted'><small>#"+device.id+" </small></div>";
 
 		var devicecontainerTemplate	= "<div class='panel panel-{4} altui-device ' id='{0}'>"
-		devicecontainerTemplate	+=		"<div class='panel-heading altui-device-heading'>"+dropdownTemplate+batteryHtml+"<div class='panel-title altui-device-title' data-toggle='tooltip' data-placement='left' title='{2}'><small>{1}</small></div></div>";
+		devicecontainerTemplate	+=		"<div class='panel-heading altui-device-heading'>"+dropdownTemplate+batteryHtml+"<div class='panel-title altui-device-title' data-toggle='tooltip' data-placement='left' title='{2}'>{1}</div></div>";
 		devicecontainerTemplate	+=  	"<div class='panel-body altui-device-body'>";
 		devicecontainerTemplate	+= 	  	iconHtml;
 		devicecontainerTemplate	+= 	  	"{3}";
@@ -2576,7 +2581,12 @@ var UIManager  = ( function( window, undefined ) {
 				devicebodyHtml+= _defaultDeviceDraw(id, device);
 			}
 			// $("div.altui-device#"+id+" div.panel-body" ).append(deviceHtml);
-			deviceHtml = devicecontainerTemplate.format(id,_enhanceDeviceTitle(device,device.name),tooltip,devicebodyHtml,UIManager.jobStatusToColor(device.status));
+			deviceHtml = devicecontainerTemplate.format(
+				id,
+				_enhancedDeviceTitle(device),
+				tooltip,
+				devicebodyHtml,
+				UIManager.jobStatusToColor(device.status));
 			device.dirty=false;
 		}
 		return deviceHtml;
@@ -4291,7 +4301,13 @@ var UIManager  = ( function( window, undefined ) {
 			category		: 0,
 			filtername		: MyLocalStorage.getSettings("DeviceFilterName") || ""
 		};
-
+		
+		// var _favoriteDevices = $.map( 
+			// $.grep(MyLocalStorage.getSettings("DeviceFilterName") || [], function(o) {return o.type=='device'}),
+			// function(o) {
+				// return o.deviceid
+			// });
+		
 		// filter function
 		function deviceFilter(device) {
 			var batteryLevel = VeraBox.getDeviceBatteryLevel(device);
@@ -4543,25 +4559,29 @@ var UIManager  = ( function( window, undefined ) {
 		$(".altui-mainpanel")
 			.off("click",".altui-camera-picture")
 			.on("click",".altui-camera-picture", _onClickCamera )
-			.off("click",".altui-device-title")
-			.on("click",".altui-device-title",function() { 
+			.off("click",".altui-device-title-name")
+			.on("click",".altui-device-title-name",function() { 
 				if ($(this).find("input.altui-device-title-input").length>=1)
 					return;
 				var text = $(this).text();
 				var devid = $(this).parents(".altui-device").prop('id');
-				$(this).html("<small><input id='"+devid+"' class='altui-device-title-input' value='"+text+"'></input></small>");
+				$(this).html("<input id='"+devid+"' class='altui-device-title-input' value='"+text+"'></input>");
 
-				$("input#"+devid+".altui-device-title-input").focusout(function(){ 
+				$("input#"+devid+".altui-device-title-input").focusout({devid:devid},function(event){ 
 					var newname = $(this).val();
-					$(this).parent().replaceWith("<small>"+newname+"</small>");
-					var devid = $(this).prop('id');
 					UPnPHelper.renameDevice(devid, newname);
+					var device = VeraBox.getDeviceByID(event.data.devid);
+					device.name = newname;
+					$(this).parent().text(device.name);
 				});
+			})
+			.off("click",".altui-favorite")
+			.on("click",".altui-favorite",function(event) { 
+				var devid = $(this).parents(".altui-device").prop('id');
+				var device = VeraBox.getDeviceByID(devid);
+				device.favorite = !device.favorite;
+				$(this).parents(".altui-device-title").html(_enhancedDeviceTitle(device));
 			});
-			// .off("click",".altui-device-command")
-			// .on("click",".altui-device-command",function() { 
-				// console.log("coucou");
-			// });
 		
 		// delegated event for device drop down menu-right
 		$(".altui-mainpanel").off("click",".altui-device-variables");
@@ -6782,6 +6802,8 @@ $(document).ready(function() {
 		defaultDialogModalTemplate += "</div><!-- /.modal -->";
 
 	//"<span class='glyphicon glyphicon-search' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Search'></span>"
+		staremtpyGlyph =glyphTemplate.format( "star-empty", _T("Favorite"), "altui-favorite text-muted" );
+		starGlyph = glyphTemplate.format( "star", _T("Favorite"), "altui-favorite text-warning" );
 		searchGlyph=glyphTemplate.format( "search", _T("Search"), "" );
 		removeGlyph=glyphTemplate.format( "remove", _T("Remove"), "" );
 		loadGlyph = glyphTemplate.format( "open", _T("Load") , "");
