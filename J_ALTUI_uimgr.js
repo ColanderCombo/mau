@@ -4296,17 +4296,12 @@ var UIManager  = ( function( window, undefined ) {
 		var _deviceDisplayFilter = {
 			filterformvisible 	: false,
 			room			: -1,
+			favorites		: (MyLocalStorage.getSettings("ShowFavoriteDevice")==true),
 			invisible 		: (MyLocalStorage.getSettings("ShowInvisibleDevice")==true),
-			batterydevice	: false,
+			batterydevice	: (MyLocalStorage.getSettings("ShowBatteryDevice")==true),
 			category		: 0,
 			filtername		: MyLocalStorage.getSettings("DeviceFilterName") || ""
 		};
-		
-		// var _favoriteDevices = $.map( 
-			// $.grep(MyLocalStorage.getSettings("DeviceFilterName") || [], function(o) {return o.type=='device'}),
-			// function(o) {
-				// return o.deviceid
-			// });
 		
 		// filter function
 		function deviceFilter(device) {
@@ -4315,6 +4310,7 @@ var UIManager  = ( function( window, undefined ) {
 			return ( (_deviceDisplayFilter.room == -1) || (device!=null && device.room == _deviceDisplayFilter.room) ) 
 				&& ( (_deviceDisplayFilter.invisible == true) || (device.invisible != "1") )	
 				&& ( (_deviceDisplayFilter.category == 0) || (device.category_num == _deviceDisplayFilter.category) ) 
+				&& ( (_deviceDisplayFilter.favorites == false) || (device.favorite == true) ) 
 				&& ( (_deviceDisplayFilter.filtername.length==0) || (device.name.search( regexp )!=-1) ) 
 				&& ( (batteryLevel != null) || (false == _deviceDisplayFilter.batterydevice));
 		}
@@ -4376,6 +4372,14 @@ var UIManager  = ( function( window, undefined ) {
 			filterHtml+="<div class='panel panel-default' id='altui-device-filter-form'>";
 			filterHtml+="  <div class='panel-body bg-info'>";
 				filterHtml+="<form class='form-inline'>";
+					filterHtml+="<div class='form-group'>";
+						filterHtml+="<div class='checkbox'>";
+						filterHtml+="  <label>";
+						filterHtml+="    <input type='checkbox' value='' id='altui-show-favorites'>";
+						filterHtml+="    Favorites";
+						filterHtml+="  </label>";
+						filterHtml+="</div>";
+					filterHtml+="</div>";
 					filterHtml+="<div class='form-group'>";
 						filterHtml+="<div class='checkbox'>";
 						filterHtml+="  <label>";
@@ -4483,6 +4487,7 @@ var UIManager  = ( function( window, undefined ) {
 					$("#altui-show-battery").prop('checked',_deviceDisplayFilter.batterydevice);
 					$("#altui-show-battery").click( function() {
 						_deviceDisplayFilter.batterydevice = $(this).prop('checked');
+						MyLocalStorage.setSettings("ShowBatteryDevice",_deviceDisplayFilter.batterydevice);
 						_drawDevices(deviceFilter);
 					});
 
@@ -4490,6 +4495,13 @@ var UIManager  = ( function( window, undefined ) {
 					$("#altui-show-invisible").click( function() {
 						_deviceDisplayFilter.invisible = $(this).prop('checked');
 						MyLocalStorage.setSettings("ShowInvisibleDevice",_deviceDisplayFilter.invisible);
+						_drawDevices(deviceFilter);
+					});
+
+					$("#altui-show-favorites").prop('checked',_deviceDisplayFilter.favorites);
+					$("#altui-show-favorites").click( function() {
+						_deviceDisplayFilter.favorites = $(this).prop('checked');
+						MyLocalStorage.setSettings("ShowFavoriteDevice",_deviceDisplayFilter.favorites);
 						_drawDevices(deviceFilter);
 					});
 
