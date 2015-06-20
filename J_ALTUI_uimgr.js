@@ -4581,6 +4581,7 @@ var UIManager  = ( function( window, undefined ) {
 				var device = VeraBox.getDeviceByID(devid);
 				device.favorite = !device.favorite;
 				$(this).parents(".altui-device-title").html(_enhancedDeviceTitle(device));
+				Favorites.set('device', devid, device.favorite);
 			});
 		
 		// delegated event for device drop down menu-right

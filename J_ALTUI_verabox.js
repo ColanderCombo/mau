@@ -1003,7 +1003,7 @@ var VeraBox = ( function( window, undefined ) {
 				if (device!=null) {	
 					device.dirty=true; 
 				}
-				// device.favorite=false;
+				device.favorite=Favorites.get('device',device.id);
 			});		
 		}
 	};

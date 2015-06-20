@@ -228,7 +228,7 @@ function formatAjaxErrorMessage(jqXHR, exception) {
 };
 	
 var MyLocalStorage = ( function (undefined) {
-		_set=  function(key, item) {
+		function _set(key, item) {
 			if (key==undefined)
 				return null;
 			
@@ -236,20 +236,20 @@ var MyLocalStorage = ( function (undefined) {
 			return item;
 		};
 		
-		_get= function(key) {
+		function _get(key) {
 			if (key==undefined)
 				return null;
 			var json = localStorage.getItem( key );
 			return json != undefined ? JSON.parse(json) : null;
 		};
 		
-		_clear= function(key) {
+		function _clear(key) {
 			if (key==undefined)
 				return null;
 			localStorage.removeItem(key);
 		};
 		
-		_setSettings=function(key, val) {
+		function _setSettings(key, val) {
 			var settings = _get("ALTUI_Settings");
 			if (settings==null) {
 				settings = {};
@@ -258,7 +258,7 @@ var MyLocalStorage = ( function (undefined) {
 			return _set("ALTUI_Settings",settings);
 		};
 		
-		_getSettings=function(key) {
+		function _getSettings(key) {
 			var settings = _get("ALTUI_Settings");
 			return (settings) ? settings[key] : null;
 		};
@@ -269,6 +269,29 @@ var MyLocalStorage = ( function (undefined) {
 		setSettings: _setSettings,
 		getSettings: _getSettings,
 		clear: _clear,
+	}
+})( );
+
+var Favorites = ( function (undefined) {
+	var _favorites = $.extend( {'device':{}, 'scene':{} }, MyLocalStorage.getSettings("Favorites") );
+	MyLocalStorage.setSettings("Favorites",_favorites);
+	
+	function _set(type, id, bFavorite) {
+		_favorites[type][id]=bFavorite;
+		MyLocalStorage.setSettings("Favorites",_favorites);
+	};		
+	function _get(type, id) {
+		return _favorites[type][id] || false;
+	};
+	
+	function _save() {
+		MyLocalStorage.setSettings("Favorites",_favorites);
+	};
+	
+	return {
+		set: _set,
+		get: _get,
+		save: _save
 	}
 })( );
 	
