@@ -1361,7 +1361,7 @@ var SceneEditor = function (scene) {
 		//
 		$(".altui-json-code").hide();
 		$(".altui-mainpanel")
-			.off("click",".altui-luatrigger")
+			// .off("click",".altui-luatrigger")
 			.on("click",".altui-luatrigger",function() { 
 				var id = parseInt($(this).prop('id'));
 				LuaEditor.openDialog( scene.triggers[id].lua !=undefined ? scene.triggers[id].lua : "" , function(code){
@@ -1370,7 +1370,7 @@ var SceneEditor = function (scene) {
 					PageMessage.message( "Event Lua code edited, remember to save your changes", "info");
 					});
 			})
-			.off("click",".altui-triggertimerestrict")
+			// .off("click",".altui-triggertimerestrict")
 			.on("click",".altui-triggertimerestrict",function() { 
 				var id = parseInt($(this).prop('id'));
 				_editTriggerRestrict( id , $(this) );
@@ -1383,7 +1383,7 @@ var SceneEditor = function (scene) {
 		});
 		
 		$(".altui-mainpanel")
-		.off("click",".altui-scene-editbutton")
+		// .off("click",".altui-scene-editbutton")
 		.on("click",".altui-scene-editbutton",function(){ 
 			scene.lua = $("#altui-luascene").val();
 			scene.name = $("#altui-scene-name-input").val();
@@ -1404,7 +1404,7 @@ var SceneEditor = function (scene) {
 			_showSaveNeeded(true);
 		});
 
-		$(".altui-mainpanel").off("click",".altui-deltrigger");
+		// $(".altui-mainpanel").off("click",".altui-deltrigger");
 		$(".altui-mainpanel").on("click",".altui-deltrigger",function(){ 
 			scene.triggers.splice( $(this).prop('id') , 1 );
 			$(this).parents("tr").remove();
@@ -1414,7 +1414,7 @@ var SceneEditor = function (scene) {
 		});
 		
 		$(".altui-mainpanel")
-			.off("click",".altui-housemode")
+			// .off("click",".altui-housemode")
 			.on("click",".altui-housemode",function(){ 
 				var div = $(this).find("div.housemode");
 				if (div.hasClass("preset_selected"))
@@ -1423,7 +1423,7 @@ var SceneEditor = function (scene) {
 					div.removeClass("preset_unselected").addClass("preset_selected");
 				_showSaveNeeded();
 			})
-			.off("click",".altui-deltimer")
+			// .off("click",".altui-deltimer")
 			.on("click",".altui-deltimer",function(){ 
 				var id = parseInt($(this).prop('id'));
 				$.each(scene.timers , function (idx,timer) {
@@ -1442,16 +1442,16 @@ var SceneEditor = function (scene) {
 				PageMessage.message( "Timer deleted, remember to save your changes", "info");
 				// VeraBox.setScene(sceneid,scene);
 			})
-			.off("click",".altui-edittimer")
+			// .off("click",".altui-edittimer")
 			.on("click",".altui-edittimer",function(){ 
 				var id = parseInt($(this).prop('id'));
 				_editTimer( id , $(this) );
 			})
-			.off("click",".altui-addtimer")
+			// .off("click",".altui-addtimer")
 			.on("click",".altui-addtimer",function(){ 
 				_editTimer( -1 , $(this) );
 			})
-			.off("click",".altui-delaction")
+			// .off("click",".altui-delaction")
 			.on("click",".altui-delaction",function(){ 
 				// groupid . actionid
 				var ids = $(this).prop('id').split('.');
@@ -1462,14 +1462,14 @@ var SceneEditor = function (scene) {
 				PageMessage.message( "Action deleted, remember to save your changes", "info");
 				// VeraBox.setScene(sceneid,scene);
 			})
-			.off("click",".altui-editaction")
+			// .off("click",".altui-editaction")
 			.on("click",".altui-editaction",function(){ 
 				var ids = $(this).prop('id').split('.');
 				var group = scene.groups[ ids[0] ];
 				var action = group.actions[ ids[1] ];
 				_editAction(scene,action,ids[1],ids[0],$(this));
 			})
-			.off("click",".altui-addaction")
+			// .off("click",".altui-addaction")
 			.on("click",".altui-addaction",function(){ 
 				var newaction = {
 					device:'',
@@ -1480,7 +1480,7 @@ var SceneEditor = function (scene) {
 				var idg = $(this).parents("table[data-group-idx]").data("group-idx");
 				_editAction(scene,newaction,-1,idg,$(this));
 			})
-			.off("click",".altui-delgroup")
+			// .off("click",".altui-delgroup")
 			.on("click",".altui-delgroup",function(){ 
 				var id = parseInt($(this).prop('id'));
 				$(this).parents("tr").remove();
@@ -1488,26 +1488,26 @@ var SceneEditor = function (scene) {
 				_showSaveNeeded();
 				PageMessage.message( "Group of actions deleted, remember to save your changes", "info");
 			})
-			.off("click",".altui-editgroup")
+			// .off("click",".altui-editgroup")
 			.on("click",".altui-editgroup",function(){ 
 				var groupidx = parseInt($(this).prop('id'));
 				_editGroup( groupidx, scene.groups[ groupidx ] , $(this) );
 			})
-			.off("click",".altui-addgroup")
+			// .off("click",".altui-addgroup")
 			.on("click",".altui-addgroup",function(){ 
 				var group = {"delay":'',"actions":[]};
 				_editGroup( -1 , group , $(this) );
 			})
-			.off("click",".altui-edittrigger")
+			// .off("click",".altui-edittrigger")
 			.on("click",".altui-edittrigger",function(){ 
 				var triggeridx = $(this).parents("tr[data-trigger-idx]").data("trigger-idx");
 				_editTrigger( triggeridx , $(this) );
 			})
-			.off("click",".altui-addtrigger")
+			// .off("click",".altui-addtrigger")
 			.on("click",".altui-addtrigger",function(){ 
 				_editTrigger( -1 , $(this) );
 			})
-			.off("click",".altui-pausescene")
+			// .off("click",".altui-pausescene")
 			.on("click",".altui-pausescene",function(){ 
 				scene.paused = (scene.paused==1) ? 0 : 1;
 				$(this).removeClass('paused activated').addClass( ((scene.paused>0) ? 'paused':'activated') );			
@@ -2604,6 +2604,7 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		var delButtonHtml = buttonTemplate.format( scene.id, 'btn-xs altui-delscene pull-right', deleteGlyph,'default');
 		var pauseButtonHtml = glyphTemplate.format( "off", _T("Pause Scene") , 'altui-pausescene ' + ((scene.paused>0) ? 'paused':'activated'));
+		var favoriteHtml = (scene.favorite==true) ? starGlyph : staremtpyGlyph;
 		var label = ((scene.hidden==true) ? hiddenGlyph+' ' : '') + scene.name;
 
 		var lastrun = (scene.last_run != undefined) ? okGlyph+" "+_toIso(new Date(scene.last_run*1000)) : '';
@@ -2616,7 +2617,7 @@ var UIManager  = ( function( window, undefined ) {
 				
 		var scenecontainerTemplate = "";
 		scenecontainerTemplate	+=  "<div class='panel panel-default altui-scene "+((norefresh==true) ? 'altui-norefresh': '') +"' id='{0}'>"
-		scenecontainerTemplate	+=	"<div class='panel-heading altui-scene-heading'>"+pauseButtonHtml+delButtonHtml +idDisplay+"<span class='panel-title altui-scene-title' data-toggle='tooltip' data-placement='left' title='{2}'><small>{1}</small></span></div>";
+		scenecontainerTemplate	+=	"<div class='panel-heading altui-scene-heading'>"+pauseButtonHtml+favoriteHtml+delButtonHtml +idDisplay+" <span class='panel-title altui-scene-title' data-toggle='tooltip' data-placement='left' title='{2}'><small>{1}</small></span></div>";
 		scenecontainerTemplate	+=  "<div class='panel-body altui-scene-body'>{3} <small class='text-muted pull-right'>{4}</small><small style='clear: right;' class='text-info pull-right'>{5}</small></div>";
 		scenecontainerTemplate	+=  "</div>";
 
@@ -4135,7 +4136,7 @@ var UIManager  = ( function( window, undefined ) {
 		}
 		else
 			$("#altui-pagetitle").empty();
-		$(".altui-mainpanel").empty();
+		$(".altui-mainpanel").empty().off();
 		$(".altui-leftnav").empty();
 		$(".altui-device-toolbar").remove();
 		$("#dialogs").empty();
@@ -4217,7 +4218,7 @@ var UIManager  = ( function( window, undefined ) {
 			});
 		});
 		
-		$(".altui-mainpanel").off("click","button#altui-create-room");
+		// $(".altui-mainpanel").off("click","button#altui-create-room");
 		$(".altui-mainpanel").on("click","button#altui-create-room",function() 
 		{
 			VeraBox.createRoom( $("#altui-create-room-name").val() );
@@ -4569,9 +4570,9 @@ var UIManager  = ( function( window, undefined ) {
 
 		// deletegated event for title click / rename for device
 		$(".altui-mainpanel")
-			.off("click",".altui-camera-picture")
+			// .off("click",".altui-camera-picture")
 			.on("click",".altui-camera-picture", _onClickCamera )
-			.off("click",".altui-device-title-name")
+			// .off("click",".altui-device-title-name")
 			.on("click",".altui-device-title-name",function() { 
 				if ($(this).find("input.altui-device-title-input").length>=1)
 					return;
@@ -4587,7 +4588,7 @@ var UIManager  = ( function( window, undefined ) {
 					$(this).parent().text(device.name);
 				});
 			})
-			.off("click",".altui-favorite")
+			// .off("click",".altui-favorite")
 			.on("click",".altui-favorite",function(event) { 
 				var devid = $(this).parents(".altui-device").prop('id');
 				var device = VeraBox.getDeviceByID(devid);
@@ -4597,27 +4598,27 @@ var UIManager  = ( function( window, undefined ) {
 			});
 		
 		// delegated event for device drop down menu-right
-		$(".altui-mainpanel").off("click",".altui-device-variables");
+		// $(".altui-mainpanel").off("click",".altui-device-variables");
 		$(".altui-mainpanel").on("click",".altui-device-variables",function(){ 
 			var id = $(this).prop('id');
 			UIManager.deviceDrawVariables(id);
 		});
 
-		$(".altui-mainpanel").off("click",".altui-device-actions");
+		// $(".altui-mainpanel").off("click",".altui-device-actions");
 		$(".altui-mainpanel").on("click",".altui-device-actions",function(){ 
 			var id = $(this).prop('id');
 			UIManager.deviceDrawActions(id);
 		});
 
 		$(".altui-mainpanel")
-			.off("click",".altui-device-controlpanelitem")
+			// .off("click",".altui-device-controlpanelitem")
 			.on("click",".altui-device-controlpanelitem",function(){ 
 				var id = $(this).parents(".altui-device").prop('id');
 				UIManager.pageControlPanel(id);
 			});
 			
 		$(".altui-mainpanel")
-			.off("click",".altui-device-icon")
+			// .off("click",".altui-device-icon")
 			.on("click",".altui-device-icon",function(){ 
 				var id = $(this).parents(".altui-device").prop('id');
 				UIManager.pageControlPanel(id);
@@ -4644,25 +4645,25 @@ var UIManager  = ( function( window, undefined ) {
 		
 		function afterSceneListDraw() {
 			$(".altui-mainpanel")
-				.off("click",".altui-delscene")
+				// .off("click",".altui-delscene")
 				.on("click",".altui-delscene",function() {
 					var sceneid = $(this).prop("id");
 					VeraBox.deleteScene( sceneid );
 				})
-				.off("click",".altui-pausescene")
+				// .off("click",".altui-pausescene")
 				.on("click",".altui-pausescene",function() {
 					var sceneid = $(this).closest(".altui-scene").prop('id');
 					var scene = VeraBox.getSceneByID(sceneid);
 					scene.paused = (scene.paused==1) ? 0 : 1;
 					VeraBox.editScene( sceneid , scene);
 				})
-				.off("click",".altui-runscene")
+				// .off("click",".altui-runscene")
 				.on("click",".altui-runscene",function() {
 					var sceneid = $(this).prop("id");
 					$(this).removeClass("btn-primary").addClass("btn-success");
 					VeraBox.runScene( sceneid );
 				})
-				.off("click",".altui-editscene")
+				// .off("click",".altui-editscene")
 				.on("click",".altui-editscene",function() {
 					var sceneid = $(this).prop("id");
 					UIManager.pageSceneEdit( sceneid );
@@ -5171,7 +5172,7 @@ var UIManager  = ( function( window, undefined ) {
 			})
 		});
 			
-		$(".altui-mainpanel").off("click",".altui-widget"); 
+		// $(".altui-mainpanel").off("click",".altui-widget"); 
 		$(".altui-mainpanel").on("click",".altui-widget",function(event){ 
 			if (event.ctrlKey == false ) {
 				$(".altui-widget").removeClass("ui-selected");
@@ -5189,28 +5190,28 @@ var UIManager  = ( function( window, undefined ) {
 				$(this).toggleClass("ui-selected");
 		});
 
-		$(".altui-mainpanel").off("click","#altui-page-action-delete"); 
+		// $(".altui-mainpanel").off("click","#altui-page-action-delete"); 
 		$(".altui-mainpanel").on("click","#altui-page-action-delete",function(){ 
 			// find active page
 			PageManager.deletePage( _getActivePageName() );
 			_displayPages();
 		});
 		
-		$(".altui-mainpanel").off("click","#altui-page-action-new"); 
+		// $(".altui-mainpanel").off("click","#altui-page-action-new"); 
 		$(".altui-mainpanel").on("click","#altui-page-action-new",function(){ 
 			// find active page
 			var name = PageManager.addPage( );
 			_displayPages();
 		});
 		
-		$(".altui-mainpanel").off("click","#altui-page-action-save"); 
+		// $(".altui-mainpanel").off("click","#altui-page-action-save"); 
 		$(".altui-mainpanel").on("click","#altui-page-action-save",function(){ 
 			// find active page
 			PageManager.savePages( );
 			_showSavePageNeeded(false);
 		});
 		
-		$(".altui-mainpanel").off("click","#altui-page-action-properties"); 
+		// $(".altui-mainpanel").off("click","#altui-page-action-properties"); 
 		$(".altui-mainpanel").on("click","#altui-page-action-properties",function(){ 
 			// find active page
 			_pagePageProperty( _getActivePageName() );
