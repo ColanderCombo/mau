@@ -41,6 +41,7 @@ var UPnPHelper = (function(window,undefined) {
 	}
 	
 	function _buildAttributeSetUrl( deviceID, attribute, value) {
+		// TODO: investigate if we can use : http://192.168.1.16/port_3480/data_request?id=lu_variableset&DeviceNum=58&Variable=onDashboard&Value=0
 		var urlHead ="data_request?id=lr_ALTUI_Handler&command=set_attribute&devid="+deviceID+"&attr="+encodeURIComponent(attribute)+"&value="+encodeURIComponent(value);
 		return urlHead;
 	}
