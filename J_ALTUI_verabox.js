@@ -970,9 +970,11 @@ var VeraBox = ( function( window, undefined ) {
 			jsonp.ud.rooms=[];
 			jsonp.ud.static_data=data.static_data;
 			$.each(data.devices, function(idx,device) {
+				device.favorite=Favorites.get('device',device.id);
 				jsonp.ud.devices.push(device);
 			});
 			$.each(data.scenes, function(idx,scene) {
+				scene.favorite=Favorites.get('scene',scene.id);
 				jsonp.ud.scenes.push(scene);
 			});
 			$.each(data.rooms, function(idx,room) {
@@ -1003,7 +1005,6 @@ var VeraBox = ( function( window, undefined ) {
 				if (device!=null) {	
 					device.dirty=true; 
 				}
-				device.favorite=Favorites.get('device',device.id);
 			});		
 		}
 	};
