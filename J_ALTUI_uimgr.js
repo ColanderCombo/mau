@@ -4167,6 +4167,7 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		$("body").off("click",".altui-leftbutton");
 		$(".altui-leftnav").append( leftNavButtonTemplate.format( -1, _T("All")) );
+		$(".altui-leftnav").append( leftNavButtonTemplate.format( -2, starGlyph+' '+_T("Favorites")) );
 		$(".altui-leftnav").append( leftNavButtonTemplate.format( 0, _T("No Room")) );
 		// install a click handler on button
 		if ($.isFunction( clickFunction ))  {
@@ -4309,10 +4310,10 @@ var UIManager  = ( function( window, undefined ) {
 		function deviceFilter(device) {
 			var batteryLevel = VeraBox.getDeviceBatteryLevel(device);
 			var regexp = new RegExp(RegExp.escape(_deviceDisplayFilter.filtername),"i")
-			return ( (_deviceDisplayFilter.room == -1) || (device!=null && device.room == _deviceDisplayFilter.room) ) 
+			return ( (_deviceDisplayFilter.room <0) || (device!=null && device.room == _deviceDisplayFilter.room) ) 
 				&& ( (_deviceDisplayFilter.invisible == true) || (device.invisible != "1") )	
 				&& ( (_deviceDisplayFilter.category == 0) || (device.category_num == _deviceDisplayFilter.category) ) 
-				&& ( (_deviceDisplayFilter.favorites == false) || (device.favorite == true) ) 
+				&& ( ((_deviceDisplayFilter.favorites == false) && (_deviceDisplayFilter.room!=-2) ) || (device.favorite == true) ) 
 				&& ( (_deviceDisplayFilter.filtername.length==0) || (device.name.search( regexp )!=-1) ) 
 				&& ( (batteryLevel != null) || (false == _deviceDisplayFilter.batterydevice));
 		}
@@ -4630,7 +4631,8 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		function _onClickRoomButton(roomid) {
 			function _sceneInThisRoom(scene) {
-				return (roomid==-1) || (scene!=null && scene.room==roomid);
+				return ( (roomid<0) || (scene!=null && scene.room==roomid) ) 
+						&& ( (roomid!=-2) || (scene.favorite==true) );
 			}
 			_drawScenes( _sceneInThisRoom );
 		};
