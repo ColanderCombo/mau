@@ -2140,13 +2140,14 @@ var UIManager  = ( function( window, undefined ) {
 	function _enhanceValue(value) 
 	{
 		//try to guess what is the value
+		var valuetype = $.type(value);
 		if ($.isNumeric(value)) {
 			if ( value>=1035615941 && value <= 4035615941) {
 				var date = new Date(value*1000);
 				return date.toLocaleString();
 			}
 			return value;
-		} else if ( (value.indexOf("http") === 0) || (value.indexOf("https") === 0) || (value.indexOf("ftp") === 0) ) {
+		} else if ( (valuetype==='string') && ( (value.indexOf("http") === 0) || (value.indexOf("https") === 0) || (value.indexOf("ftp") === 0) ) ) {
 			return "<a href='{0}'>{0}</a>".format(value);
 		}
 		return value.toString().htmlEncode();
@@ -2592,7 +2593,7 @@ var UIManager  = ( function( window, undefined ) {
 		return deviceHtml;
 	};
 
-	function _sceneDraw(id,scene,norefresh) {
+	function _sceneDraw(scene,norefresh) {
 		function _findSceneNextRun(scene) {
 			var nextrun=0;
 			if (scene.timers != undefined) {
@@ -3366,7 +3367,7 @@ var UIManager  = ( function( window, undefined ) {
 			var sceneid = $(element).prop("id");
 			var scene = VeraBox.getSceneByID( sceneid );
 			// get HTML for scene and draw it
-			var html = _sceneDraw(sceneid, scene);
+			var html = _sceneDraw( scene);
 			$(element).replaceWith(  html );
 		});
 		
@@ -4635,7 +4636,7 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		
 		function sceneDraw(idx, scene) {
-			var html = UIManager.sceneDraw(scene.id, scene);
+			var html = UIManager.sceneDraw(scene);
 			var scenecontainerTemplate="<div class=' col-sm-6  col-lg-4 '>";
 			scenecontainerTemplate	+= 	html;
 			scenecontainerTemplate	+= 	"</div>";		
@@ -4667,8 +4668,15 @@ var UIManager  = ( function( window, undefined ) {
 				.on("click",".altui-editscene",function() {
 					var sceneid = $(this).prop("id");
 					UIManager.pageSceneEdit( sceneid );
+				})
+				.on("click",".altui-favorite",function(event) { 
+					var sceneid = $(this).closest(".altui-scene").prop('id');
+					var scene = VeraBox.getSceneByID(sceneid);
+					scene.favorite = !scene.favorite;
+					Favorites.set('scene', sceneid, scene.favorite );
+					$(this).replaceWith( (scene.favorite==true) ? starGlyph : staremtpyGlyph );
 				});
-	
+			
 			$("#altui-device-room-filter a").click( function() {
 				$(this).closest(".dropdown-menu").find("li.active").removeClass("active");
 				$(this).parent().addClass("active");
@@ -4723,7 +4731,7 @@ var UIManager  = ( function( window, undefined ) {
 
 		var editor = SceneEditor( scene );
 		var html = "<div class='col-xs-12'>" ;
-		html += UIManager.sceneDraw(sceneid, scene, true);	// draw scene
+		html += UIManager.sceneDraw( scene, true);	// draw scene
 		html += editor.sceneEditDraw();					// draw editor
 		html += "</div>";
 		$(".altui-mainpanel").append(  html );
