@@ -102,12 +102,12 @@ var UPnPHelper = (function(window,undefined) {
 		})
 		.done(function(data, textStatus, jqXHR) {
 			if ($.isFunction( cbfunc )) {
-				cbfunc(data);
+				cbfunc(data,jqXHR);
 			}
 		})
 		.fail(function(jqXHR, textStatus, errorThrown) {
 			if ($.isFunction( cbfunc )) {
-				cbfunc(null);
+				cbfunc(null,jqXHR);
 			}
 			else
 				PageMessage.message( formatAjaxErrorMessage(jqXHR, textStatus), "warning" ) ;				
@@ -2158,35 +2158,6 @@ var api = {
 	setDeviceStatePersistent:function(deviceId, service, variable, value, options) {
 		return this.setDeviceStateVariablePersistent(deviceId, service, variable, value, options);
 	},
-	performActionOnDevice: function (deviceId, service, action, options) {
-		var query = "id=lu_action&output_format=json&DeviceNum=" + deviceId + "&serviceId=" + service + "&action=" + action;
-		$.each(options.actionArguments, function (key, value) {
-			query += "&" + key + "=" + value;
-		});
-		
-		$.ajax({
-			url: data_request_url + query,
-			success: function (data, textStatus, jqXHR) {
-				if (typeof(options.onSuccess) == 'function') {
-					options.onSuccess({
-						responseText: jqXHR.responseText,
-						status: jqXHR.status
-					});
-				}
-			},
-			error: function (jqXHR, textStatus, errorThrown) {
-				if (typeof(options.onFailure) != 'undefined') {
-					options.onFailure({
-						responseText: jqXHR.responseText,
-						status: jqXHR.status
-					});
-				}
-			}
-		});
-	},
-	performLuActionOnDevice: function (deviceId, service, action, options) {
-		return performActionOnDevice(deviceId, service, action, options);
-	},
 	getListOfSupportedEvents: function() {
 		return [];
 	},
@@ -2228,14 +2199,20 @@ var api = {
 			onSuccess:null,
 			context:null
 		},options);
-		return UPnPHelper.UPnPAction( deviceId, service, action, options.actionArguments, function(data){
+		return UPnPHelper.UPnPAction( deviceId, service, action, options.actionArguments, function(data,jqXHR){
 			if (data==null) {
 				if (options.onFailure)
-					(options.onFailure).call(options.context,null);
+					(options.onFailure).call(options.context,{
+						responseText: jqXHR.responseText,
+						status: jqXHR.status
+					});
 			}
 			else {
 				if (options.onSuccess)
-					(options.onSuccess).call(options.context,data);
+					(options.onSuccess).call(options.context,{
+						responseText: jqXHR.responseText,
+						status: jqXHR.status
+					});
 			}
 		});
 	},
