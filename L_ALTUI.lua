@@ -442,7 +442,7 @@ local htmlLayout = [[
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css">
-	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-bootgrid/1.2.0/jquery.bootgrid.min.css">
 
 	@style@
@@ -456,7 +456,7 @@ local htmlLayout = [[
     <!-- Placed at the end of the document so the pages load faster -->
 	<!-- Latest compiled and minified JavaScript -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script> 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-bootgrid/1.2.0/jquery.bootgrid.min.js"></script> 	
 	
@@ -474,7 +474,10 @@ local htmlLayout = [[
 	<script type='text/javascript' >
 		google.setOnLoadCallback(drawVisualization);
 		function drawVisualization() {
+		if (AltuiDebug)
 			AltuiDebug.debug('google loaded');
+		else 
+			console.log('google loaded');
 		};
 		var g_DeviceTypes =  JSON.parse('@devicetypes@');
 		var g_CustomPages = @custompages@;
@@ -505,6 +508,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 	log('ALTUI_Handler: parameters is: '..json.encode(lul_parameters))
 	log('ALTUI_Handler: outputformat is: '..json.encode(lul_outputformat))
 	local lul_html = "";	-- empty return by default
+	local mime_type = "";
 	debug("hostname="..hostname)
 	if (hostname=="") then
 		hostname = getIP()
@@ -580,7 +584,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				variables["ThemeCSS"] = luup.variable_get(service, "ThemeCSS", deviceID) or ""
 				-- " becomes \x22
 				variables["optional_scripts"] = optional_scripts
-				return htmlLayout:template(variables)
+				return htmlLayout:template(variables),"text/html"
 			end,
 		["save_data"] = 
 			function(params)
@@ -591,14 +595,14 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				if (lul_parameters["data"]=="") then
 					debug(string.format("ALTUI_Handler: save_data( ) - Empty data",name,npage))
 					luup.variable_set(service, variablename, "", deviceID)
-					return "ok"
+					return "ok", "text/plain"
 				else
 					debug(string.format("ALTUI_Handler: save_data( ) - Not Empty data",name,npage))
 					local data = url_decode( lul_parameters["data"] )
 					debug(string.format("ALTUI_Handler: save_data( ) - url decoded",name,npage))
 					luup.variable_set(service, variablename, data, deviceID)
 					debug(string.format("ALTUI_Handler: save_data( ) - returns:%s",data))
-					return data
+					return data, "text/plain"
 				end
 			end,
 		["clear_data"] = 
@@ -614,15 +618,15 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 					variablename = "Data_"..name.."_"..npage
 					var = luup.variable_get(service, variablename,  deviceID)
 				end
-				return "ok"
+				return "ok", "text/plain"
 			end,
 		["rooms"] = 
 			function(params)
-				return json.encode( luup.rooms )
+				return json.encode( luup.rooms ) , "application/json"
 			end,
 		["devices"] = 
 			function(params)
-				return json.encode( luup.devices )
+				return json.encode( luup.devices ) , "application/json"
 			end,
 		["image"] = 
 			function(params)
@@ -658,7 +662,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				-- encode in B64
 				local b64 = mime.b64(content)
 				debug(string.format("b64 %s",b64))
-				return string.format("data:image/%s;base64,%s",extension,b64)
+				return string.format("data:image/%s;base64,%s",extension,b64) , "image/"..extension
 				--return "data:image/gif;base64,R0lGODlhEAAOALMAAOazToeHh0tLS/7LZv/0jvb29t/f3//Ub//ge8WSLf/rhf/3kdbW1mxsbP//mf///yH5BAAAAAAALAAAAAAQAA4AAARe8L1Ekyky67QZ1hLnjM5UUde0ECwLJoExKcppV0aCcGCmTIHEIUEqjgaORCMxIC6e0CcguWw6aFjsVMkkIr7g77ZKPJjPZqIyd7sJAgVGoEGv2xsBxqNgYPj/gAwXEQA7"
 			end,
 		["devicetypes"] = 
@@ -671,7 +675,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 					["PluginVersion"] = luup.variable_get(service, "Version", deviceID) or "",
 					["RemoteAccess"] = luup.variable_get(service, "RemoteAccess", deviceID) or ""
 				}
-				return json.encode(tbl)
+				return json.encode(tbl), "application/json"
 			end,
 		-- ["set_attribute"] = 
 			-- function(params)
@@ -683,17 +687,17 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 			-- end,
 		["scenes"] = 
 			function(params)
-				return json.encode( luup.scenes )
+				return json.encode( luup.scenes ), "application/json"
 			end,
 		["default"] = 
 			function(params)	
-				return "not successful"
+				return "not successful", "text/plain"
 			end
 	}
 	-- actual call
-	lul_html = switch(command,action)(lul_parameters) or ""
-	debug(string.format("lul_html:%s",lul_html))
-	return lul_html,"text/html"
+	lul_html , mime_type = switch(command,action)(lul_parameters)
+	debug(string.format("lul_html:%s",lul_html or ""))
+	return (lul_html or "") , mime_type
 end
 
 
