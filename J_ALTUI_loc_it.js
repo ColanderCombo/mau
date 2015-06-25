@@ -59,7 +59,7 @@ Localization.init( {
 	"Holiday":"Vacanze",
 	"Wind":"Vento",
 	"Are you sure you want to delete scene ({0})":"xxx",
-	"VERA did not respond":"VERA did not respond",
+	"VERA is busy, be patient. (returned {0})":"VERA is busy, be patient. (returned {0})",
 	"Submit":"Submit",
 	"Save Changes":"Save Changes",
 	"Trigger":"Trigger",
@@ -176,5 +176,7 @@ Localization.init( {
 	"Update Neighbors":"Update Neighbors",
 	"Update Neighbors succeeded":"Update Neighbors succeeded",
 	"Copy to clipboard":"Copy to clipboard",
-	"Data copied in clipboard":"Data copied in clipboard"
+	"Data copied in clipboard":"Data copied in clipboard",
+	"Code execution succeeded":"Code execution succeeded",
+	"Code execution failed":"Code execution failed"
 	});

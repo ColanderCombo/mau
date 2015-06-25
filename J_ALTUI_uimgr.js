@@ -5337,9 +5337,9 @@ var UIManager  = ( function( window, undefined ) {
 		UIManager.pageEditorForm("Lua Test Code","return true",_T("Submit"),function(lua) {
 			VeraBox.runLua(lua, function(result) {
 				if ( result == "Passed")
-					PageMessage.message( "Test code succeeded", "success");
+					PageMessage.message( _T("Code execution succeeded"), "success");
 				else
-					PageMessage.message( "Test code failed", "danger");
+					PageMessage.message( _T("Code execution failed"), "danger");
 			});
 		});
 	},
@@ -6047,7 +6047,7 @@ var UIManager  = ( function( window, undefined ) {
 		function _addNode( node ) {
 			var parent = _findNode( data.root, node.id_parent );
 			if (parent==null){	
-				PageMessage.message("Error building node hierarchy","warning");
+				PageMessage.message("Error building node hierarchy","danger");
 				return;
 			}
 			parent.children.push( node );

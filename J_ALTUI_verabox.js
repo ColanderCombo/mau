@@ -551,7 +551,7 @@ var VeraBox = ( function( window, undefined ) {
 			}
 		})
 		.fail(function(jqXHR, textStatus) {
-			PageMessage.message( _T("VERA did not respond")+": " + textStatus , "danger");
+			PageMessage.message( _T("VERA is busy, be patient. (returned {0})").format(textStatus) , "warning");
 		})
 		.always(function() {
 		});
@@ -650,7 +650,7 @@ var VeraBox = ( function( window, undefined ) {
 			})
 			.fail(function(jqXHR, textStatus) {
 				_categories = null;
-				PageMessage.message( _T("VERA did not respond")+": " + textStatus , "danger");
+				PageMessage.message( _T("VERA is busy, be patient. (returned {0})").format(textStatus) , "warning");
 			})
 			.always(function() {
 			});
@@ -697,7 +697,7 @@ var VeraBox = ( function( window, undefined ) {
 			}
 		})
 		.fail(function(jqXHR, textStatus) {
-			PageMessage.message( _T("VERA did not respond")+": " + textStatus , "danger");
+			PageMessage.message( _T("VERA is busy, be patient. (returned {0})").format(textStatus) , "warning");
 			if ( $.isFunction( cbfunc ) )  {
 				cbfunc( null );			
 			}
@@ -946,7 +946,7 @@ var VeraBox = ( function( window, undefined ) {
 		})
 		.fail(function(jqXHR, textStatus) {
 			setTimeout( _refreshEngine, 1000 );
-			PageMessage.message( _T("VERA did not respond")+": " + textStatus , "danger");
+			PageMessage.message( _T("VERA is busy, be patient. (returned {0})").format(textStatus) , "warning");
 		})
 		.always(function() {
 		});
@@ -1141,7 +1141,7 @@ var VeraBox = ( function( window, undefined ) {
 				PageMessage.message(_T("Ran Scene #{0} successfully").format(id), "success");
 			})
 			.fail(function(jqXHR, textStatus) {
-				PageMessage.message( _T("VERA did not respond")+": " + textStatus , "danger");
+				PageMessage.message( _T("VERA is busy, be patient. (returned {0})").format(textStatus) , "warning");
 			})
 			.always(function() {
 			});

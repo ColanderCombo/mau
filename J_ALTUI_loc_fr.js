@@ -59,7 +59,7 @@ Localization.init( {
 	"Holiday":"Vacances",
 	"Wind":"Vent",
 	"Are you sure you want to delete scene ({0})":"confirmez vous la destruction de la scene ({0})",
-	"VERA did not respond":"VERA ne répond pas",
+	"VERA is busy, be patient. (returned {0})":"VERA est occupée, soyez patient. (retour {0})",
 	"Submit":"Confirmer",
 	"Save Changes":"Sauvegarder",
 	"Trigger":"Evènement",
@@ -176,5 +176,7 @@ Localization.init( {
 	"Update Neighbors":"Mise a jour des Voisins",
 	"Update Neighbors succeeded":"Mise a jour des Voisins réussie",
 	"Copy to clipboard":"Copier dans le clipboard",
-	"Data copied in clipboard":"Données copiées dans le clipboard"
+	"Data copied in clipboard":"Données copiées dans le clipboard",
+	"Code execution succeeded":"Execution réussie",
+	"Code execution failed":"Execution avec erreur"
 });
