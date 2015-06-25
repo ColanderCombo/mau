@@ -233,7 +233,7 @@ var DialogManager = ( function() {
 		defaultSpinDialogModalTemplate += "  </div><!-- /.modal-dialog -->";
 		defaultSpinDialogModalTemplate += "</div><!-- /.modal -->";
 		$('div#dialogModal')
-			.replaceWith(defaultSpinDialogModalTemplate.format( "<div class='big-spinner'></div>") );
+			.replaceWith(defaultSpinDialogModalTemplate.format( "<div class='big-spinner' style='height:70px;'></div>") );
 		return $('div#dialogModal');
 	};
 	
