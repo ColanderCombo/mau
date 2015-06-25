@@ -2381,7 +2381,7 @@ var UIManager  = ( function( window, undefined ) {
 				icon = 'https://apps.mios.com/plugins/icons/1588.png';
 				break;
 			default:
-				// var str = "binary_light_default.png";
+				var str = "";
 				var src = defaultIconSrc;
 				var dt = _devicetypesDB[ device.device_type ];
 				AltuiDebug.debug("Icon for device id:"+id+"  device.type:"+device.device_type);
@@ -2394,7 +2394,7 @@ var UIManager  = ( function( window, undefined ) {
 					if (dt.ui_static_data.state_icons !=undefined)	//  some state icons found
 					{
 						var si = dt.ui_static_data.state_icons;
-						if (_hasObjectProperty(si))	// UI7 style
+						if (_hasObjectProperty(si) == true )	// UI7 style
 						{
 							// enumerate each object until a condition is met true
 							var bFound = false;
@@ -2446,7 +2446,7 @@ var UIManager  = ( function( window, undefined ) {
 									str = baseIconName + ".png";
 							}
 							else
-								str = si[0];
+								str = si[0] || defaultIconSrc;	// incase si is an empty [}
 							AltuiDebug.debug("Icon for device id:"+id+"  str :"+str);
 					}
 					else {
