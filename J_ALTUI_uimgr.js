@@ -3423,14 +3423,16 @@ var UIManager  = ( function( window, undefined ) {
 	function _refreshModes() {
 		// console.log("refresh");
 		_stoprefreshModes();
-		VeraBox.getHouseMode( function (mode) {
-			// console.log("mode="+mode);
-			if (mode) {
-				$("div.housemode").removeClass("preset_selected").addClass("preset_unselected");
-				$("#altui-mode"+mode).removeClass("preset_unselected").addClass("preset_selected");
-			}
-			ALTUI_hometimer=setTimeout( _refreshModes, 10000 );		
-		});
+		if (UIManager.UI7Check()==true) {
+			VeraBox.getHouseMode( function (mode) {
+				// console.log("mode="+mode);
+				if (mode) {
+					$("div.housemode").removeClass("preset_selected").addClass("preset_unselected");
+					$("#altui-mode"+mode).removeClass("preset_unselected").addClass("preset_selected");
+				}
+				ALTUI_hometimer=setTimeout( _refreshModes, 10000 );		
+			});
+		};
 	};
 	
 	function _initUIEngine(css) {

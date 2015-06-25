@@ -894,10 +894,11 @@ var VeraBox = ( function( window, undefined ) {
 	
 	function _refreshEngine() {
 		var url = "data_request?id=lu_status2&output_format=json&DataVersion="+_status_data_DataVersion;
-		url += "&Timeout=60&MinimumDelay=1000";
+		url += "&Timeout=60&MinimumDelay=1500";
 		AltuiDebug.debug("_refreshEngine() : url="+url);
 		$.ajax({
 			url:url,
+			dataType:'text'
 		})
 		.done(function(data) {
 			if ((data) && (data != "NO_CHANGES") && (data != "Exiting") )
@@ -1043,6 +1044,7 @@ var VeraBox = ( function( window, undefined ) {
 		AltuiDebug.debug("_initDataEngine() : url="+url);
 		$.ajax({
 			url:url,
+			dataType: "text",
 		})
 		.done(function(data) {
 			_dataEngine = null;
