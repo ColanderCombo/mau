@@ -1905,6 +1905,17 @@ function get_new_timer_id(timersArray){
     return maxID+1;
 }
 
+var _spinDialog = null;
+function show_loading() {
+	_spinDialog = DialogManager.createSpinningDialog();
+	_spinDialog.modal('show');
+};
+
+function hide_loading() {
+	_spinDialog.modal('hide');
+};
+
+
 //
 // PLEG uses this from cpanel
 //
