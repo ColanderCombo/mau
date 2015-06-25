@@ -836,7 +836,7 @@ function startupDeferred(lul_device)
 	
 	if (debugmode=="1") then
 		DEBUG_MODE = true
-		UserMessage("Enabling debug mode as Debug variable is set to 1 for device:"..lul_device,TASK_BUSY)
+		UserMessage("Enabling debug mode for device:"..lul_device,TASK_BUSY)
 	end
 	
 	local major,minor = 0,0
@@ -850,7 +850,7 @@ function startupDeferred(lul_device)
 	-- init the configuration table with a valid default
 	local tbl = getDefaultConfig()
 	local default = json.encode( tbl )
-	local config = getSetVariableIfEmpty(service, "PluginConfig", lul_device, default)
+	setVariableIfChanged(service, "PluginConfig", default, lul_device)
 	
 	-- NOTHING to start 
 	if( luup.version_branch == 1 and luup.version_major == 7) then
