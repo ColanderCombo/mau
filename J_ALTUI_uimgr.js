@@ -3133,6 +3133,22 @@ var UIManager  = ( function( window, undefined ) {
 	};
 
 
+	function _deviceDrawDeviceUsedIn(devid, device, container ) {
+		var usedin_objects = VeraBox.getDeviceDependants(device);
+		var html ="";
+		html +="<div class='row'>";
+		html += "<div id='altui-device-usedin-"+devid+"' class='col-xs-12 altui-device-usedin'>"
+		html += "<ul>";
+		$.each(usedin_objects, function(idx,obj) {
+			html += "<li>{0} '{2}' in scene #{1} '{3}'</li>".format(obj.type, obj.scene, obj.trigger ? obj.trigger.name : obj.action.action ,obj.name);
+		});
+		html += "</ul>";
+		// html +=  "<span><pre>{0}</pre></span>".format( JSON.stringify(usedin_objects) );
+		html += "</div>";
+		html += "</div>";	// row
+		$(container).append( html );
+	};
+	
 	function _deviceDrawControlPanelAttributes(devid, device, container ) {
 		// Draw hidding attribute panel
 		var html ="";
@@ -3255,7 +3271,8 @@ var UIManager  = ( function( window, undefined ) {
 				});
 			};
 			if (_toLoad==0) {
-				_deviceDrawControlPanelAttributes(devid, device, container ) 							// row for attributes
+				_deviceDrawControlPanelAttributes(devid, device, container ); 				// row for attributes
+				_deviceDrawDeviceUsedIn(devid, device, container );							// row for device 'used in' info
 				_deviceDrawWireFrame(devid,device,container);
 				$(container).append( "<div class='row'><div class='altui-debug-div'></div></div>" );	// Draw hidden debug panel
 
@@ -3271,6 +3288,7 @@ var UIManager  = ( function( window, undefined ) {
 
 				if (bAsync) {
 					$("#altui-device-attributes-"+devid).toggle(false);		// hide them by default;
+					$("#altui-device-usedin-"+devid).toggle(false);		// hide them by default;
 					$(".altui-debug-div").toggle(false);					// hide
 				}
 
@@ -4286,6 +4304,7 @@ var UIManager  = ( function( window, undefined ) {
 		html += "<button type='button' class='btn btn-default' id='altui-toggle-attributes' >"+_T("Attributes")+"<span class='caret'></span></button>";
 		html += "<button type='button' class='btn btn-default altui-device-variables' id='"+devid+"'>"+_T("Variables")+"</button>";
 		html += "<button type='button' class='btn btn-default altui-device-actions' id='"+devid+"' >"+_T("Actions")+"</button>";
+		html += "<button type='button' class='btn btn-default' id='altui-device-usedin' >"+_T("Used in")+"<span class='caret'></span></button>";
 		if (AltuiDebug.IsDebug())
 			html +=  buttonDebugHtml;
 		html += "</div>";
@@ -4302,6 +4321,7 @@ var UIManager  = ( function( window, undefined ) {
 		// Manage interactions
 		//
 		$("#altui-device-attributes-"+devid).toggle(false);			// hide them by default;
+		$("#altui-device-usedin-"+devid).toggle(false);			// hide them by default;
 		$(".altui-debug-div").toggle(false);						// hide
 		$(".altui-deldevice").click( function() {
 			var id = $(this).prop('id');
@@ -4311,6 +4331,11 @@ var UIManager  = ( function( window, undefined ) {
 		$("#altui-toggle-attributes").click( function() {
 			$("#altui-device-attributes-"+devid).toggle();		// toogle attribute box
 			$("#altui-toggle-attributes span.caret").toggleClass( "caret-reversed" );
+		});
+		
+		$("#altui-device-usedin").click( function() {
+			$("#altui-device-usedin-"+devid).toggle();		// toogle attribute box
+			$("#altui-device-usedin span.caret").toggleClass( "caret-reversed" );
 		});
 		
 		// register a handler on tab changes to update height of domparent ( usefulk when child are in absolute positioning )

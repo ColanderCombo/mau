@@ -1453,6 +1453,28 @@ var VeraBox = ( function( window, undefined ) {
 		}
 	};
 	
+	function _getDeviceDependants(device) {
+		var usedin_objects =[];
+		var scenes = VeraBox.getScenesSync();
+		$.each(scenes,function( idx,scene) {
+			if (scene.triggers)
+				$.each(scene.triggers, function(idx,trigger) {
+					if (trigger.device == device.id) {
+						usedin_objects.push({type:'trigger', scene:scene.id, name:scene.name, trigger:trigger});
+					}
+				});
+			if (scene.groups)
+				$.each(scene.groups, function(idx,group) {
+					$.each(group.actions, function(idx,action) {
+						if (action.device==device.id) {
+							usedin_objects.push({type:'action', scene:scene.id, name:scene.name, action:action});
+						}
+					});
+				});
+		});
+		return usedin_objects;
+	};
+	
 	function _getDeviceEvents(device) {
 		if (device) {
 			var _devicetypesDB = UIManager.getDeviceTypesDB();
@@ -1518,8 +1540,10 @@ var VeraBox = ( function( window, undefined ) {
 	getDeviceStaticUI : _getDeviceStaticUI,
 	getDeviceActions: _getDeviceActions,
 	getDeviceEvents : _getDeviceEvents,
+	getDeviceDependants : _getDeviceDependants,
 	isDeviceZwave	: _isDeviceZwave,
 	getScenes		: _getScenes,
+	getScenesSync	: function() { return _scenes; },
 	getSceneByID 	: _getSceneByID,
 	getNewSceneID	: _getNewSceneID,
 	getPlugins		: _getPlugins,
