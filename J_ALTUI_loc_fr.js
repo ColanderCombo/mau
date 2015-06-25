@@ -178,5 +178,8 @@ Localization.init( {
 	"Copy to clipboard":"Copier dans le clipboard",
 	"Data copied in clipboard":"Données copiées dans le clipboard",
 	"Code execution succeeded":"Execution réussie",
-	"Code execution failed":"Execution avec erreur"
+	"Code execution failed":"Execution avec erreur",
+	"Reboot request succeeded":"Reboot request succeeded",
+	"Reboot request failed":"Reboot request failed",
+	
 });

@@ -150,6 +150,14 @@ var LuaEditor = (function () {
 })();
 
 var DialogManager = ( function() {
+	function _registerDialog( name, htmlDialog ) {
+		// $("div#dialogs").append(deviceModalTemplate.format( '', '', 0 ));
+		var dialog = $("div#dialogs div#"+name);
+		if (dialog.length ==0) 
+			$("div#dialogs").append(htmlDialog);
+		else
+			$(dialog).replaceWith(htmlDialog);
+	};
 	
 	function _getActionParameterHtml( id, device, actionname, actiondescriptor, cbfunc )
 	{
@@ -635,6 +643,7 @@ var DialogManager = ( function() {
 		});
 	};
 	return {
+		registerDialog : _registerDialog,		// name, html
 		createSpinningDialog: _createSpinningDialog,
 		createPropertyDialog:_createPropertyDialog,
 		dlgAddCheck:_dlgAddCheck,
@@ -2222,7 +2231,7 @@ var UIManager  = ( function( window, undefined ) {
 			});
 
 			// update modal with new text
-			$('div#deviceModal').replaceWith(deviceModalTemplate.format( lines.join(''), device.name, devid ));
+			DialogManager.registerDialog('deviceModal',deviceModalTemplate.format( lines.join(''), device.name, devid ));
 			$(".altui-variable-value").click( _clickOnValue );
 			// show the modal
 			$('#deviceModal').modal();
@@ -2275,7 +2284,8 @@ var UIManager  = ( function( window, undefined ) {
 			
 			// update modal with new text
 			var extrabuttons = VeraBox.isDeviceZwave(devid) ? buttonTemplate.format( devid, "altui-update-neighbors", _T("Update Neighbors"),"default") : "";
-			$('div#deviceActionModal').replaceWith(deviceActionModalTemplate.format( lines.join(''), device.name, devid, extrabuttons ));
+			DialogManager.registerDialog('deviceActionModal',deviceActionModalTemplate.format( lines.join(''), device.name, devid, extrabuttons ));
+
 			$('div#deviceActionModal button.altui-run-action').click( function() {
 				var service = $(this).data().service;	// better than this.dataset.service in case of old browsers
 				var deviceID = $(this).data().devid;
@@ -4162,7 +4172,9 @@ var UIManager  = ( function( window, undefined ) {
 		$(".altui-mainpanel").empty().off();
 		$(".altui-leftnav").empty();
 		$(".altui-device-toolbar").remove();
-		$("#dialogs").empty().append(defaultDialogModalTemplate.format( 'vide', 'vide'));
+		$("#dialogs").empty();
+		// DialogManager.registerDialog('dialogModal',defaultDialogModalTemplate.format( 'vide', 'vide'));
+		// DialogManager.registerDialog('deviceModal',deviceModalTemplate.format( '', '', 0 ));
 		$(".altui-scripts").remove();
 		$("body").append("<div class='altui-scripts'></div>");
 	},
@@ -4269,6 +4281,8 @@ var UIManager  = ( function( window, undefined ) {
 		htmlRoomSelect 	  += "</select>";
 		var html = "<div class='form-inline'><h3>Room : "+htmlRoomSelect;
 		html += "<button type='button' class='btn btn-default' id='altui-toggle-attributes' >"+_T("Attributes")+"<span class='caret'></span></button>";
+		html += "<button type='button' class='btn btn-default altui-device-variables' id='"+devid+"'>"+_T("Variables")+"</button>";
+		html += "<button type='button' class='btn btn-default altui-device-actions' id='"+devid+"' >"+_T("Actions")+"</button>";
 		if (AltuiDebug.IsDebug())
 			html +=  buttonDebugHtml;
 		html += "</h3></div>";
@@ -4579,9 +4593,10 @@ var UIManager  = ( function( window, undefined ) {
 		$("#altui-pagetitle").css("display","inline").after("<div class='altui-device-toolbar'></div>");
 		
 		// Dialogs
-		$("div#dialogs").append(deviceModalTemplate.format( '', '', 0 ));
-		$("div#dialogs").append(deviceActionModalTemplate.format( '', '', 0, '' ));
-		$("div#dialogs").append( _deviceCreateModalHtml() );
+		// DialogManager.registerDialog('deviceModal',deviceModalTemplate.format( '', '', 0 ));
+		// $("div#dialogs").append(deviceModalTemplate.format( '', '', 0 ));
+		// $("div#dialogs").append(deviceActionModalTemplate.format( '', '', 0, '' ));
+		DialogManager.registerDialog('deviceCreateModal', _deviceCreateModalHtml() );
 		
 		// on the left, get the rooms
 		$(".altui-leftnav").empty();
@@ -4619,19 +4634,6 @@ var UIManager  = ( function( window, undefined ) {
 				$(this).parents(".altui-device-title").html(_enhancedDeviceTitle(device));
 				Favorites.set('device', devid, device.favorite);
 			});
-		
-		// delegated event for device drop down menu-right
-		// $(".altui-mainpanel").off("click",".altui-device-variables");
-		$(".altui-mainpanel").on("click",".altui-device-variables",function(){ 
-			var id = $(this).prop('id');
-			UIManager.deviceDrawVariables(id);
-		});
-
-		// $(".altui-mainpanel").off("click",".altui-device-actions");
-		$(".altui-mainpanel").on("click",".altui-device-actions",function(){ 
-			var id = $(this).prop('id');
-			UIManager.deviceDrawActions(id);
-		});
 
 		$(".altui-mainpanel")
 			// .off("click",".altui-device-controlpanelitem")
@@ -5552,7 +5554,8 @@ var UIManager  = ( function( window, undefined ) {
 		};
 
 		UIManager.clearPage(_T('ZWave'),_T("zWave Network"));
-		$("div#dialogs").append(deviceModalTemplate.format( '', '', 0 ));
+		// $("div#dialogs").append(deviceModalTemplate.format( '', '', 0 ));
+		DialogManager.registerDialog('deviceModal',deviceModalTemplate.format( '', '', 0 ));
 		var html = "";
 		html += "<form class='form-inline'>";
 			html += "<div class='form-group'>";
@@ -7269,7 +7272,19 @@ $(document).ready(function() {
 		.on( "click", "#altui-debug-btn", function() {
 			$(".altui-debug-div").toggle();
 			$("#altui-debug-btn span.caret").toggleClass( "caret-reversed" );
+		})
+		.on("click",".altui-device-variables",function(){ 
+			var id = $(this).prop('id');
+			UIManager.deviceDrawVariables(id);
+		})
+		.on("click",".altui-device-actions",function(){ 
+			var id = $(this).prop('id');
+			UIManager.deviceDrawActions(id);
 		});
+		
+	// Dialogs
+	// DialogManager.registerDialog('deviceModal',deviceModalTemplate.format( '', '', 0 ));
+
 	AltuiDebug.debug("init done");
 });
 

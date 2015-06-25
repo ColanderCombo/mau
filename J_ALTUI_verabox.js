@@ -501,9 +501,9 @@ var VeraBox = ( function( window, undefined ) {
 	{
 		VeraBox.runLua("os.execute('reboot')", function(result) {
 			if ( result == "Passed")
-				PageMessage.message( "Test code succeeded", "success");
+				PageMessage.message( "Reboot request succeeded", "success");
 			else
-				PageMessage.message( "Test code failed", "danger");
+				PageMessage.message( "Reboot request failed", "danger");
 		});
 	};
 	function _reloadEngine()
