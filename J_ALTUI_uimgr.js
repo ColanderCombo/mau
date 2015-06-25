@@ -4821,7 +4821,7 @@ var UIManager  = ( function( window, undefined ) {
 		function _getFileButton(plugin) {
 			var html = "";
 			html +="<div class='btn-group'>";
-			html +="  <button id='{0}' type='button' class='btn btn-default dropdown-toggle altui-plugin-files' data-toggle='dropdown' aria-expanded='false'>".format(plugin.id);
+			html +="  <button id='{0}' type='button' class='btn btn-default btn-sm dropdown-toggle altui-plugin-files' data-toggle='dropdown' aria-expanded='false'>".format(plugin.id);
 			html +=  (_T("Files")+" <span class='caret'></span>");
 			html +="  </button>";
 			html +="  <ul class='dropdown-menu' role='menu'>";
@@ -6894,9 +6894,9 @@ var styles ="					\
 		margin-left:1px;			\
 		margin-right:1px;			\
 	}\
-	div.altui-plugin-icon { 			\
-		font-size: 1.5em;				\
-		height: 40px;				\
+	img.altui-plugin-icon { 			\
+		font-size: 1.5em;			\
+		height: 35px;				\
 	}								\
 	textarea#altui-editor-text ,textarea#altui-luascene{		\
 		font-size: 0.9em;			\
@@ -6977,10 +6977,9 @@ var styles ="					\
 	}							\
 	.altui-button-stateLabel {	\
 	  color: #918f8f;			\
-	  margin-top: -3px;			\
 	  text-align: center;		\
 	  text-transform: uppercase;	\
-	  font-size: 12px;			\
+	  font-size: 11px;			\
 	}							\
 	.altui-pausescene {		\
 		padding-right: 5px;	\
