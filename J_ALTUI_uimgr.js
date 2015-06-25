@@ -4152,7 +4152,7 @@ var UIManager  = ( function( window, undefined ) {
 		$(".navbar-collapse").collapse('hide');
 		$(".altui-breadcrumb").remove();
 		$(".altui-pagefilter").remove();
-		$("#altui-device-name-filter").remove();
+		// $("#altui-device-name-filter").remove();
 		if (title) {
 			$("#altui-pagetitle").html( title );
 			$("#altui-toggle-messages").before ( UIManager.breadCrumb( breadcrumb ) );
@@ -4395,7 +4395,7 @@ var UIManager  = ( function( window, undefined ) {
 			// filterHtml+="<div class='btn-group'>";
 			filterHtml+="<div class='altui-pagefilter'>";
 			filterHtml+="<div class='panel panel-default' id='altui-device-filter-form'>";
-			filterHtml+="  <div class='panel-body bg-info'>";
+			filterHtml+="  <div class='panel-body'>";
 				filterHtml+="<form class='form-inline'>";
 					filterHtml+="<div class='form-group'>";
 						filterHtml+="<div class='checkbox'>";
@@ -4422,14 +4422,15 @@ var UIManager  = ( function( window, undefined ) {
 						filterHtml+="</div>";
 					filterHtml+="</div>";
 				filterHtml+="</form>";
+
+				filterHtml+="<div id='altui-device-name-filter' class='input-group'>";
+				filterHtml+="<span class='input-group-addon' id='altui-device-search-btn'>"+searchGlyph+"</span>";
+				filterHtml+="<span class='input-group-addon' id='altui-device-remove-btn'>"+removeGlyph+"</span>";
+				filterHtml+="<input type='text' class='form-control' placeholder='Device Name' aria-describedby='sizing-addon2'>";
+				filterHtml+="</div>";
+
 			filterHtml+="  </div>";
 			filterHtml+="</div>";
-			filterHtml+="</div>";
-
-			filterHtml+="<div id='altui-device-name-filter' class='input-group'>";
-			filterHtml+="<span class='input-group-addon' id='altui-device-search-btn'>"+searchGlyph+"</span>";
-			filterHtml+="<span class='input-group-addon' id='altui-device-remove-btn'>"+removeGlyph+"</span>";
-			filterHtml+="<input type='text' class='form-control' placeholder='Device Name' aria-describedby='sizing-addon2'>";
 			filterHtml+="</div>";
 			
 			var toolbarHtml="";
@@ -4747,9 +4748,6 @@ var UIManager  = ( function( window, undefined ) {
 
 		// clear page
 		UIManager.clearPage(_T('Scene Edit'),sceneid!=undefined ? "Edit Scene #"+scene.id : "Create Scene");
-
-		// register dialog
-		$("div#dialogs").append(defaultDialogModalTemplate.format( 'vide', 'vide'));
 
 		var editor = SceneEditor( scene );
 		var html = "<div class='col-xs-12'>" ;
@@ -5140,9 +5138,6 @@ var UIManager  = ( function( window, undefined ) {
 		// draw page & toolbox
 		UIManager.clearPage(_T('Edit Pages'),_T("Custom Pages Editor"));
 		PageMessage.message(_T("Drag and Drop to add/move/delete controls. use Ctrl+Click or lasso to select multiple controls"),"info");
-
-		// register dialog
-		$("div#dialogs").append(defaultDialogModalTemplate.format( 'vide', 'vide'));
 
 		// Get and draw the HTML areas
 		var toolboxHtml = _createToolboxHtml();
@@ -7060,6 +7055,10 @@ $(document).ready(function() {
 		overflow: hidden;		\
 		height: 28px;			\
 	}		\
+	.altui-mainpanel , .altui-device-toolbar{		\
+		margin-top: 2px;			\
+		margin-bottom: 2px;			\
+	}		\
 	div.altui-device-heading, div.altui-scene-heading {	\
 		height:30px;\
 		padding-top: 5px;\
@@ -7094,7 +7093,7 @@ $(document).ready(function() {
 	}\
 	.caret.caret-reversed {				\
 		border-top-width: 0;			\
-		border-bottom: 4px solid #000000;	\
+		border-bottom: 4px solid ;	\
 	}			\
 	.form-inline > * {	\
 		margin:5px 3px;	\
