@@ -3225,14 +3225,24 @@ var UIManager  = ( function( window, undefined ) {
 				return lines.join('')+html;
 			};
 			function _deviceDrawWireFrame(devid,device,container) {
+				var rooms = VeraBox.getRoomsSync();
+				var htmlRoomSelect = "<select id='altui-room-list' class='form-control input-sm'>";
+				if (rooms)
+						htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format("No Room",0,'');
+						$.each(rooms, function(idx,room) {
+							var selected = (room.id.toString() == device.room);
+							htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format(room.name,room.id,selected ? 'selected' : '');
+						});
+				htmlRoomSelect 	  += "</select>";
+		
 				var htmlDeleteButton= buttonTemplate.format( devid, 'btn-xs altui-deldevice pull-right', deleteGlyph,'default');;
 				html ="";
 				html+="<div class='row'>";
 					html +="<div id='altui-device-controlpanel-"+devid+"' class='col-xs-12 altui-device-controlpanel' data-devid='"+devid+"'>";
 					html +="	<div class='panel panel-default'>";
-					html +="		<div class='panel-heading'>";
+					html +="		<div class='panel-heading form-inline'>";
 					html += htmlDeleteButton;
-					html +="			<h1 class='panel-title'>{0} {1} {2} (#{3})</h1>";
+					html +="			<h1 class='panel-title'>{0} {1} {2} (#{3}) "+htmlRoomSelect+"</h1>";
 					html +="		</div>";
 					html +="		<div class='panel-body'>";
 					html +="		</div>";
@@ -3240,6 +3250,9 @@ var UIManager  = ( function( window, undefined ) {
 					html +="</div>";
 				html += "</div>";	// row
 				$(container).append( html.format(device.manufacturer || '', device.model || '', device.name || '', device.id) );	
+				$("#altui-room-list").change( function() {
+					UPnPHelper.renameDevice(devid, device.name, $(this).val() );
+				});
 			};
 			if (_toLoad==0) {
 				_deviceDrawControlPanelAttributes(devid, device, container ) 							// row for attributes
@@ -4268,23 +4281,14 @@ var UIManager  = ( function( window, undefined ) {
 		var category = VeraBox.getCategoryTitle( device.category_num );
 
 		UIManager.clearPage(_T('Control Panel'),"{0} <small>{1} <small>#{2}</small></small>".format( device.name , category ,devid));
-
-		// Draw toolbar : room selection and attribute show toggle button
-		var htmlRoomSelect = "<select id='altui-room-list' class='form-control '>";
-		if (rooms)
-				htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format("No Room",0,'');
-				$.each(rooms, function(idx,room) {
-					var selected = (room.id.toString() == device.room);
-					htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format(room.name,room.id,selected ? 'selected' : '');
-				});
-		htmlRoomSelect 	  += "</select>";
-		var html = "<div class='form-inline'><h3>Room : "+htmlRoomSelect;
+		
+		var html = "<div class='form-inline col-xs-12'>";
 		html += "<button type='button' class='btn btn-default' id='altui-toggle-attributes' >"+_T("Attributes")+"<span class='caret'></span></button>";
 		html += "<button type='button' class='btn btn-default altui-device-variables' id='"+devid+"'>"+_T("Variables")+"</button>";
 		html += "<button type='button' class='btn btn-default altui-device-actions' id='"+devid+"' >"+_T("Actions")+"</button>";
 		if (AltuiDebug.IsDebug())
 			html +=  buttonDebugHtml;
-		html += "</h3></div>";
+		html += "</div>";
 		$(".altui-mainpanel").append( html );
 
 		//
@@ -4303,10 +4307,7 @@ var UIManager  = ( function( window, undefined ) {
 			var id = $(this).prop('id');
 			VeraBox.deleteDevice(id);
 		});
-		
-		$("#altui-room-list").change( function() {
-			UPnPHelper.renameDevice(devid, device.name, $(this).val() );
-		});
+
 		$("#altui-toggle-attributes").click( function() {
 			$("#altui-device-attributes-"+devid).toggle();		// toogle attribute box
 			$("#altui-toggle-attributes span.caret").toggleClass( "caret-reversed" );
@@ -4588,7 +4589,7 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		
 		// Page Preparation
-		UIManager.clearPage(_T('Devices'),"Devices");
+		UIManager.clearPage(_T('Devices'),_T("Devices"));
 		$("#altui-pagetitle").css("display","inline").after("<div class='altui-device-toolbar'></div>");
 		
 		// Dialogs
