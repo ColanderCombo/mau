@@ -181,5 +181,8 @@ Localization.init( {
 	"Code execution failed":"Execution avec erreur",
 	"Reboot request succeeded":"Reboot request succeeded",
 	"Reboot request failed":"Reboot request failed",
-	
+	"Favorite":"Favori",
+	"Favorites":"Favoris",
+	"Variables":"Variables",
+	"Used in":"Utilisation"
 });
