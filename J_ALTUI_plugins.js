@@ -139,6 +139,19 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		return html;
 	}
 	
+	function _drawHeater(devid, device) {
+		var html = "";
+		var ws = VeraBox.getWeatherSettings();
+		if (ws.tempFormat==undefined)
+			ws.tempFormat="";
+		
+		var status = VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:TemperatureSensor1', 'CurrentTemperature' ); 
+		if (status!=null) {
+			html += ("<span class='altui-temperature' >"+status+"&deg;"+ws.tempFormat+"</span>");
+		}
+		return html;
+	}
+
 	// return the html string inside the .panel-body of the .altui-device#id panel
 	function _drawHumidity(devid, device) {
 		var html = "";
@@ -402,6 +415,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawBinaryLight : _drawBinaryLight,
 	drawBinLightControlPanel : _drawBinLightControlPanel,
 	drawTempSensor : _drawTempSensor,
+	drawHeater	   : _drawHeater,
 	drawCamera     : _drawCamera,
 	onSliderChange : _onSliderChange,
 	drawDoorSensor : _drawDoorSensor,
