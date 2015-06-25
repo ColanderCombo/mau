@@ -79,7 +79,7 @@ LATEST VERSION : [glow=red,2,300]V 0.52.273 June 25st 2015[/glow] :
 INSTALL
 [list]
 [li]official version : by the store or the UI7 "Apps' menu[/li]
-[li]latest version : install by opening this link in your browser  [url=http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=27826]http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=27826[/url]
+[li]latest version : install by opening this link in your browser  [url=http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=27831]http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=27831[/url]
 ignore error messages displayed by this page and wait until your unit reloads...[/li]
 [/list]
 

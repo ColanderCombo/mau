@@ -157,6 +157,7 @@ var DialogManager = ( function() {
 			$("div#dialogs").append(htmlDialog);
 		else
 			$(dialog).replaceWith(htmlDialog);
+		return  $("div#dialogs div#"+name);
 	};
 	
 	function _getActionParameterHtml( id, device, actionname, actiondescriptor, cbfunc )
@@ -240,20 +241,17 @@ var DialogManager = ( function() {
 		defaultSpinDialogModalTemplate += "    </div><!-- /.modal-content -->";
 		defaultSpinDialogModalTemplate += "  </div><!-- /.modal-dialog -->";
 		defaultSpinDialogModalTemplate += "</div><!-- /.modal -->";
-		$('div#dialogModal')
-			.replaceWith(defaultSpinDialogModalTemplate.format( "<div class='big-spinner' style='height:70px;'></div>") );
-		return $('div#dialogModal');
+		return DialogManager.registerDialog('dialogModal',defaultSpinDialogModalTemplate.format( "<div class='big-spinner' style='height:70px;'></div>"));
 	};
 	
 	function _createPropertyDialog(title)
 	{
-		$('div#dialogModal')
-			.replaceWith(defaultDialogModalTemplate.format( 
-				title, 			// title
-				""
-				// "<form data-toggle='validator'></form>"	// body
-				));
-		return $('div#dialogModal');
+		return DialogManager.registerDialog('dialogModal',
+					defaultDialogModalTemplate.format( 
+							title, 			// title
+							""
+							// "<form data-toggle='validator'></form>"	// body
+							));
 	};
 	
 	function _dlgAddCheck(dialog, name, value, label)
