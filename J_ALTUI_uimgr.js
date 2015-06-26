@@ -2131,11 +2131,13 @@ var UIManager  = ( function( window, undefined ) {
 			_devicetypesDB[devtype].Dfilename = Dfilename;
 			
 			// get it into the cache ( or get it from the cache )
-			FileDB.getFileContent(Dfilename , function( xmlstr ) {
+			FileDB.getFileContent(Dfilename , function( xmlstr , jqXHR ) {
 				try {
-					var doc = $.parseXML( xmlstr );
+					var doc = jqXHR ? ((jqXHR.responseXML != undefined) ? jqXHR.responseXML : $.parseXML( xmlstr )) : $.parseXML( xmlstr );
+					
 					var xml = $( doc );
-					_devicetypesDB[devtype].Ifilename= xml.find("implementationFile").text();
+					var imp = xml.find("implementationFile");
+					_devicetypesDB[devtype].Ifilename= imp.text();
 					_devicetypesDB[devtype].Services = [];
 					var serviceIDs = xml.find("serviceId");
 					var Sfilenames = xml.find("SCPDURL");
@@ -2152,7 +2154,7 @@ var UIManager  = ( function( window, undefined ) {
 					console.log("error in xml parsing, Dfile:"+Dfilename);
 					console.log("xmlstr"+xmlstr);
 				}
-			});
+			}  );
 		}
 	};
 

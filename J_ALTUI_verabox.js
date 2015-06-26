@@ -94,12 +94,18 @@ var UPnPHelper = (function(window,undefined) {
 		return url;
 	}
 	
-	function _exec(url,cbfunc) {
-		var jqxhr = $.ajax( {
+	function _exec(url,cbfunc,mimetype) {
+		var options = {
 			url: url,
-			type: "GET",
-			dataType: "text"
-		})
+			type: "GET"
+		};
+		if (mimetype != undefined)
+			options.beforeSend = function(xhr) { xhr.overrideMimeType(mimetype); }
+		else {
+			options.dataType = "text";
+			options.beforeSend = function(xhr) { xhr.overrideMimeType("text/plain"); }
+		}
+		var jqxhr = $.ajax( options )
 		.done(function(data, textStatus, jqXHR) {
 			if ($.isFunction( cbfunc )) {
 				cbfunc(data,jqXHR);
@@ -146,7 +152,18 @@ var UPnPHelper = (function(window,undefined) {
 	
 	function _UPnPGetFile( devicefile, cbfunc )
 	{
-		_exec( _buildUPnPGetFileUrl( devicefile), cbfunc );
+		var mimetype ;
+		var lastfour = devicefile.slice(-4);
+		if (lastfour==".xml")
+			mimetype = "text/xml";
+		
+		_exec( _buildUPnPGetFileUrl( devicefile), function(data,jqXHR) {
+			if (jqXHR.responseXML) {
+				// data = new XMLSerializer().serializeToString(jqXHR.responseXML);
+				data = jqXHR.responseText;
+			}
+			(cbfunc)(data,jqXHR);
+		}, mimetype);	
 	};
 	
 	function _UPnPDeletePlugin( pluginid, cbfunc )
@@ -898,7 +915,8 @@ var VeraBox = ( function( window, undefined ) {
 		AltuiDebug.debug("_refreshEngine() : url="+url);
 		$.ajax({
 			url:url,
-			dataType:'text'
+			// dataType:'text json'
+			beforeSend: function(xhr) { xhr.overrideMimeType('text/plain'); }
 		})
 		.done(function(data) {
 			if ((data) && (data != "NO_CHANGES") && (data != "Exiting") )
@@ -1044,7 +1062,8 @@ var VeraBox = ( function( window, undefined ) {
 		AltuiDebug.debug("_initDataEngine() : url="+url);
 		$.ajax({
 			url:url,
-			dataType: "text",
+			// dataType: "text json",
+			beforeSend: function(xhr) { xhr.overrideMimeType('text/plain'); }
 		})
 		.done(function(data) {
 			_dataEngine = null;
@@ -1821,12 +1840,12 @@ var FileDB = ( function (window, undefined) {
 			}
 		else {
 			_dbFile[name]="pending";
-			//console.log("getting file "+name);
+			// console.log("getting file "+name);
 			AltuiDebug.debug("_getFileContent( {0} ) ==> asking content to Vera".format(name));
-			UPnPHelper.UPnPGetFile( name, function(data) {
+			UPnPHelper.UPnPGetFile( name, function(data,jqXHR) {
 				AltuiDebug.debug("_getFileContent( {0} ) ==> returning async content from Vera".format(name));
 				_dbFile[name] = data;
-				cbfunc(data);
+				cbfunc(data,jqXHR);
 			});
 		}
 		return 0;
