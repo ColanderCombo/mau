@@ -1831,7 +1831,7 @@ var UIManager  = ( function( window, undefined ) {
 				no_refresh:true,
 				html: _toolHtml(picGlyph,_T("Image")),
 				property: _onPropertyImage, 
-				onWidgetResize: _onResizeImage,
+				onWidgetResize: _onResizeStub,
 				widgetdisplay: function(widget,bEdit)	{ 
 					return "<img src='{0}' style='max-height:100%; max-width:100%;'></img>".format( widget.properties.url);
 				},
@@ -1855,7 +1855,7 @@ var UIManager  = ( function( window, undefined ) {
 				no_refresh:true,
 				html: _toolHtml(runGlyph,_T("Scene")),
 				property: _onPropertyRunscene, 
-				onWidgetResize: _onResizeButton,
+				onWidgetResize: _onResizeStub,
 				widgetdisplay: function(widget,bEdit)	{ 
 				return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='VeraBox.runScene({0})' style='{5}'>{4}{2}</button>".format(
 						widget.properties.sceneid,
@@ -1876,7 +1876,7 @@ var UIManager  = ( function( window, undefined ) {
 				no_refresh:true,
 				html: _toolHtml(runGlyph,_T("Action")),
 				property: _onPropertyUpnpAction, 
-				onWidgetResize: _onResizeButton,
+				onWidgetResize: _onResizeStub,
 				widgetdisplay: function(widget,bEdit)	{ 
 					return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='UPnPHelper.UPnPAction( {0}, \"{4}\", \"{5}\", {6} )' style='{8}' >{7}{2}</button>".format(
 						widget.properties.deviceid,
@@ -1955,7 +1955,7 @@ var UIManager  = ( function( window, undefined ) {
 				cls:'altui-widget-camera', 
 				no_refresh:true,
 				html: _toolHtml(cameraGlyph,_T("Camera")),
-				onWidgetResize: _onResizeCamera,
+				onWidgetResize: _onResizeStub,
 				aspectRatio: true,
 				property: _onPropertyCamera, 
 				widgetdisplay: function(widget,bEdit)	{ 
@@ -1969,6 +1969,7 @@ var UIManager  = ( function( window, undefined ) {
 				cls:'altui-widget-gauge', 
 				html: _toolHtml(scaleGlyph,_T("Gauge")),
 				property: _onPropertyGauge, 
+				onWidgetResize: _onResizeGauge,
 				widgetdisplay: function(widget,bEdit)	{ 
 					return "<div class='altui-gauge-div' id='altui-gauge-{0}'></div>".format(widget.id);
 				},
@@ -3593,9 +3594,6 @@ var UIManager  = ( function( window, undefined ) {
 			.closest("li.dropdown").find("a.dropdown-toggle")
 				.toggleClass("btn-info",bNeeded);
 	};
-
-	function _onResizeImage(page, widgetid, position, size) {
-	};
 	
 	function _onPropertyImage(real_widget) {
 		// clone for temporary storage
@@ -3826,13 +3824,14 @@ var UIManager  = ( function( window, undefined ) {
 			_replaceElementKeepAttributes( $(".altui-custompage-canvas .altui-widget#"+real_widget.id) , _getWidgetHtml(real_widget,true) );
 		});
 	};
-	
-	function _onResizeCamera(page, widgetid, position, size)
+
+	function _onResizeStub(page, widgetid, position, size)
 	{
 	};
 	
-	function _onResizeButton(page, widgetid, position, size)
+	function _onResizeGauge(page, widgetid, position, size)
 	{
+		_onDisplayGauge(page,widgetid,true);
 	};
 	
 	function _onPropertyCamera(real_widget)
@@ -3922,9 +3921,10 @@ var UIManager  = ( function( window, undefined ) {
 			widget.properties.max = value;
 		if (value < widget.properties.min)
 			widget.properties.min = value;
-		
+		widget.size = $.extend({ width:120, height:120},widget.size);
 		var options = {
-		  width: 400, height: 120,
+		  width: widget.size.width,
+		  height: widget.size.height,
 		  minorTicks: 5,
 		  min: widget.properties.min,
 		  max: widget.properties.max
@@ -5127,8 +5127,8 @@ var UIManager  = ( function( window, undefined ) {
 							var pagename = _getActivePageName();
 							var page = PageManager.getPageFromName( pagename );
 							var widgetid = $(ui.helper).prop('id');
-							(tool.onWidgetResize)(page,widgetid,ui.position,ui.size);
 							PageManager.updateChildrenInPage( page, widgetid, ui.position, ui.size );
+							(tool.onWidgetResize)(page,widgetid,ui.position,ui.size);
 							_showSavePageNeeded(true);
 						}
 					});
