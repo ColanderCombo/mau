@@ -1855,13 +1855,15 @@ var UIManager  = ( function( window, undefined ) {
 				no_refresh:true,
 				html: _toolHtml(runGlyph,_T("Scene")),
 				property: _onPropertyRunscene, 
+				onWidgetResize: _onResizeButton,
 				widgetdisplay: function(widget,bEdit)	{ 
-				return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='VeraBox.runScene({0})' >{4}{2}</button>".format(
+				return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='VeraBox.runScene({0})' style='{5}'>{4}{2}</button>".format(
 						widget.properties.sceneid,
 						'altui-widget-runscene-button',
-						runGlyph,
+						runGlyph.replace('glyphicon','pull-right glyphicon'),
 						(bEdit==true)?'disabled':'',
-						widget.properties.label
+						widget.properties.label,
+						"height: 100%; width: 100%;"
 						);
 				},
 				properties: {
@@ -1874,16 +1876,18 @@ var UIManager  = ( function( window, undefined ) {
 				no_refresh:true,
 				html: _toolHtml(runGlyph,_T("Action")),
 				property: _onPropertyUpnpAction, 
+				onWidgetResize: _onResizeButton,
 				widgetdisplay: function(widget,bEdit)	{ 
-					return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='UPnPHelper.UPnPAction( {0}, \"{4}\", \"{5}\", {6} )' >{7}{2}</button>".format(
+					return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='UPnPHelper.UPnPAction( {0}, \"{4}\", \"{5}\", {6} )' style='{8}' >{7}{2}</button>".format(
 						widget.properties.deviceid,
 						'altui-widget-upnpaction-button',
-						runGlyph,
+						runGlyph.replace('glyphicon','pull-right glyphicon'),
 						(bEdit==true)?'disabled':'',
 						widget.properties.service,
 						widget.properties.action,
 						JSON.stringify(widget.properties.params),
-						widget.properties.label
+						widget.properties.label,
+						"height: 100%; width: 100%;"
 						);
 				},
 				properties: {	//( deviceID, service, action, params, cbfunc )
@@ -3824,6 +3828,10 @@ var UIManager  = ( function( window, undefined ) {
 	};
 	
 	function _onResizeCamera(page, widgetid, position, size)
+	{
+	};
+	
+	function _onResizeButton(page, widgetid, position, size)
 	{
 	};
 	
