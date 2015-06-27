@@ -296,6 +296,21 @@ var DialogManager = ( function() {
 		return tbl.join(' ');
 	};
 	
+	function _dlgAddColorPicker(dialog, name, label, help, value, options)
+	{
+		var optstr = _optionsToString(options);
+		value = (value==undefined) ? '' : value ;
+		var propertyline = "";
+		propertyline += "<div class='form-group'>";
+		propertyline += "	<label for='altui-widget-"+name+"' title='"+(help || '')+"'>"+label+"</label>";
+		if (help)
+			propertyline += "	<span title='"+(help || '')+"'>"+helpGlyph+"</span>";
+		propertyline += "<input id='altui-widget-"+name+"' type='color' name='{0}' value='{1}' {2}></input>"
+			.format(name,value,optstr);
+		propertyline += "</div>";
+		$(dialog).find(".row-fluid").append(propertyline);
+	};
+
 	function _dlgAddLine(dialog, name, label, value,help, options)
 	{
 		var optstr = _optionsToString(options);
@@ -645,6 +660,7 @@ var DialogManager = ( function() {
 		createSpinningDialog: _createSpinningDialog,
 		createPropertyDialog:_createPropertyDialog,
 		dlgAddCheck:_dlgAddCheck,
+		dlgAddColorPicker : _dlgAddColorPicker,	//(dialog, name, label, help, value, options)
 		dlgAddLine:_dlgAddLine,
 		dlgAddSelect: _dlgAddSelect,
 		dlgAddVariables:_dlgAddVariables,
@@ -1786,9 +1802,10 @@ var UIManager  = ( function( window, undefined ) {
 				no_refresh:true,
 				html: _toolHtml(labelGlyph,_T("Label")),
 				property: _onPropertyLabel, 
-				widgetdisplay: function(widget,bEdit)	{ return "<p>{0}</p>".format(widget.properties.label); },
+				widgetdisplay: function(widget,bEdit)	{ return "<p style='color:{1};'>{0}</p>".format(widget.properties.label,widget.properties.color); },
 				properties: {
-					label:'Default Label'
+					label:'Default Label',
+					color:$(".altui-mainpanel").css("color")
 				} 
 			},
 			{ 	id:20, 
@@ -3635,22 +3652,21 @@ var UIManager  = ( function( window, undefined ) {
 		propertyline += "      		<label for='altui-widget-labeltext'>Label</label>";
 		propertyline += "      		<input id='altui-widget-labeltext' class='form-control' value='{0}' placeholder='enter label here'></input>";
 		propertyline += "      	</div>";
-
-		$('div#dialogModal')
-			.replaceWith(defaultDialogModalTemplate.format( 
-				'Label Properties',													// title
-				"<form>"+propertyline.format( widget.properties.label )+"</form>"	// body
-				));
+		
+		var dialog = DialogManager.createPropertyDialog('Label Properties');
+		DialogManager.dlgAddLine(dialog, "Label", _T("Button Label"), widget.properties.label, "");
+		DialogManager.dlgAddColorPicker(dialog, "Color", _T("Color"), "", widget.properties.color);
 
 		// buttons
 		$('div#dialogs')
 		.off('submit',"div#dialogModal form")
 		.on( 'submit',"div#dialogModal form", function() {
-			widget.properties.label = $('#altui-widget-labeltext').val();
-			$('div.altui-widget-label#'+widget.id).find("p").text(widget.properties.label);
+			widget.properties.label = $('#altui-widget-Label').val();
+			widget.properties.color = $('#altui-widget-Color').val();
 			$('div#dialogModal button.btn-primary').off('click');
 			$('div#dialogModal').modal('hide');
 			_showSavePageNeeded(true);
+			_replaceElementKeepAttributes( $(".altui-custompage-canvas .altui-widget#"+widget.id) , _getWidgetHtml(widget,true) );
 		});
 		
 		$('div#dialogModal').modal();
