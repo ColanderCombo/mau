@@ -3340,7 +3340,7 @@ var UIManager  = ( function( window, undefined ) {
 								}
 							});
 							data = _fixScriptPostLoad( scriptname , data, ui7style );
-							var code = "//@ sourceURL="+scriptname+"\n"+data;
+							var code = "//# sourceURL="+scriptname+"\n"+data;
 							$('script[data-src="'+scriptname+'"]').text(code);
 							_defereddisplay(true);
 						})
@@ -3422,7 +3422,7 @@ var UIManager  = ( function( window, undefined ) {
 			var activeTabIdx = _getActiveDeviceTabIdx();
 			_setActiveDeviceTabIdx(activeTabIdx);
 		});
-		
+
 		// refresh scenes
 		$(".altui-scene").not(".altui-norefresh").each( function(index,element) {
 			var sceneid = $(element).prop("id");
@@ -4337,6 +4337,16 @@ var UIManager  = ( function( window, undefined ) {
 			$("#altui-device-usedin-"+devid).toggle();		// toogle attribute box
 			$("#altui-device-usedin span.caret").toggleClass( "caret-reversed" );
 		});
+		
+		// resgister a handler on tab click to force a disaply & reload of JS tab , even if already loaded
+		$(container).off('click','.altui-device-controlpanel ul#altui-devtab-tabs a')
+					.on('click','.altui-device-controlpanel ul#altui-devtab-tabs a',  function(e) {
+						// remove the no refresh class so we force a full redisplay of the 
+						// tab with the latest var values
+						var targettab = $(e.target).attr("href").slice("#altui-devtab-content-".length);
+						var domparent  =  $('div#altui-devtab-content-'+targettab);
+						$(domparent).toggleClass('altui-norefresh',false);
+					});
 		
 		// register a handler on tab changes to update height of domparent ( usefulk when child are in absolute positioning )
 		$(container).off('shown.bs.tab', 'a[data-toggle="tab"]');
