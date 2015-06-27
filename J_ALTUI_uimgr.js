@@ -5123,6 +5123,7 @@ var UIManager  = ( function( window, undefined ) {
 					$(".altui-custompage-canvas ."+tool.cls).resizable({
 						aspectRatio: tool.aspectRatio || false,	// no aspect ratio by default
 						containment: "parent",
+						grid: [ 5,5 ],
 						stop: function( event, ui ) {
 							var pagename = _getActivePageName();
 							var page = PageManager.getPageFromName( pagename );
@@ -5192,6 +5193,7 @@ var UIManager  = ( function( window, undefined ) {
 						{	
 							obj.resizable({
 								aspectRatio: tool.aspectRatio ||false,	// no aspect ratio by default
+								grid: [ 5,5 ],
 								containment: "parent",
 								stop: function( event, ui ) {
 									(tool.onWidgetResize)(page,widgetid,ui.position,ui.size);
