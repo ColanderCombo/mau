@@ -99,8 +99,10 @@ var UPnPHelper = (function(window,undefined) {
 			url: url,
 			type: "GET"
 		};
-		if (mimetype != undefined)
-			options.beforeSend = function(xhr) { xhr.overrideMimeType(mimetype); }
+		if (mimetype != undefined) {
+			// options.dataType = "xml text";		NOTHING works in FF
+			options.beforeSend = function(xhr) { xhr.overrideMimeType(mimetype); };
+		}
 		else {
 			options.dataType = "text";
 			options.beforeSend = function(xhr) { xhr.overrideMimeType("text/plain"); }
@@ -159,8 +161,8 @@ var UPnPHelper = (function(window,undefined) {
 		
 		_exec( _buildUPnPGetFileUrl( devicefile), function(data,jqXHR) {
 			if (jqXHR.responseXML) {
-				// data = new XMLSerializer().serializeToString(jqXHR.responseXML);
-				data = jqXHR.responseText;
+				data = new XMLSerializer().serializeToString(jqXHR.responseXML);
+				jqXHR.responseText=data;
 			}
 			(cbfunc)(data,jqXHR);
 		}, mimetype);	

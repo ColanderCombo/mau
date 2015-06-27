@@ -1837,15 +1837,17 @@ var UIManager  = ( function( window, undefined ) {
 				html: _toolHtml(runGlyph,_T("Scene")),
 				property: _onPropertyRunscene, 
 				widgetdisplay: function(widget,bEdit)	{ 
-					return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='VeraBox.runScene({0})' >{2}</button>".format(
+				return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='VeraBox.runScene({0})' >{4}{2}</button>".format(
 						widget.properties.sceneid,
 						'altui-widget-runscene-button',
 						runGlyph,
-						(bEdit==true)?'disabled':''
+						(bEdit==true)?'disabled':'',
+						widget.properties.label
 						);
 				},
 				properties: {
-					sceneid:0
+					sceneid:0,
+					label:''
 				} 
 			},
 			{ 	id:60, 
@@ -1854,18 +1856,20 @@ var UIManager  = ( function( window, undefined ) {
 				html: _toolHtml(runGlyph,_T("Action")),
 				property: _onPropertyUpnpAction, 
 				widgetdisplay: function(widget,bEdit)	{ 
-					return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='UPnPHelper.UPnPAction( {0}, \"{4}\", \"{5}\", {6} )' >{2}</button>".format(
+					return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='UPnPHelper.UPnPAction( {0}, \"{4}\", \"{5}\", {6} )' >{7}{2}</button>".format(
 						widget.properties.deviceid,
 						'altui-widget-upnpaction-button',
 						runGlyph,
 						(bEdit==true)?'disabled':'',
 						widget.properties.service,
 						widget.properties.action,
-						JSON.stringify(widget.properties.params)
+						JSON.stringify(widget.properties.params),
+						widget.properties.label
 						);
 				},
 				properties: {	//( deviceID, service, action, params, cbfunc )
 					deviceid:0,
+					label:'',
 					service:'',
 					action:'',
 					params:{}
@@ -3658,6 +3662,7 @@ var UIManager  = ( function( window, undefined ) {
 		var widget = $.extend( true, {}, real_widget );
 		var dialog = DialogManager.createPropertyDialog('Run Scene Properties');
 		DialogManager.dlgAddScenes( dialog , widget, function() {
+			DialogManager.dlgAddLine(dialog, "Label", _T("Button Label"), widget.properties.label, "");
 			// run the show
 			$('div#dialogModal').modal();
 		});
@@ -3668,6 +3673,7 @@ var UIManager  = ( function( window, undefined ) {
 		.on( 'submit',"div#dialogModal form", function() {
 			$('div#dialogModal button.btn-primary').off('click');
 			real_widget.properties.sceneid = $('#altui-widget-sceneid').val();
+			real_widget.properties.label = $("#altui-widget-Label").val();
 			$('div#dialogModal').modal('hide');
 			_showSavePageNeeded(true);
 			_replaceElementKeepAttributes( $(".altui-custompage-canvas .altui-widget#"+real_widget.id) , _getWidgetHtml(real_widget,true) );
@@ -3681,6 +3687,7 @@ var UIManager  = ( function( window, undefined ) {
 		var dialog = DialogManager.createPropertyDialog('UPnP Action Properties');
 		DialogManager.dlgAddDevices( dialog , widget.properties.deviceid, function() {
 			DialogManager.dlgAddActions("altui-widget-action",dialog, widget, widget.properties, _T('Action'), function() {
+				DialogManager.dlgAddLine(dialog, "Label", _T("Button Label"), widget.properties.label, "");
 				// run the show
 				$('div#dialogModal').modal();
 			});
@@ -3694,6 +3701,7 @@ var UIManager  = ( function( window, undefined ) {
 			real_widget.properties.deviceid = widget.properties.deviceid;
 			real_widget.properties.service = widget.properties.service;
 			real_widget.properties.action = widget.properties.action;
+			real_widget.properties.label = $("#altui-widget-Label").val();
 
 			// read params
 			real_widget.properties.params={};
