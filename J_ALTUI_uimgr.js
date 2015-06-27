@@ -1813,15 +1813,17 @@ var UIManager  = ( function( window, undefined ) {
 				html: _toolHtml(infoGlyph,_T("Variable")),
 				property: _onPropertyVariable, 
 				widgetdisplay: function(widget,bEdit)	{ 
-					return "<p>{0}</p>".format( 
+					return "<p style='color:{1};'>{0}</p>".format( 
 						(widget.properties.deviceid!=0) 
-						? (VeraBox.getStatus( widget.properties.deviceid, widget.properties.service, widget.properties.variable ) || '')
-						: 'not defined');
+							? (VeraBox.getStatus( widget.properties.deviceid, widget.properties.service, widget.properties.variable ) || '')
+							: 'not defined',
+						widget.properties.color);
 				},
 				properties: {
 					deviceid:0,
 					service:'',
-					variable:''
+					variable:'',
+					color:$(".altui-mainpanel").css("color")
 				} 
 			},
 			{ 	id:30, 
@@ -3625,6 +3627,7 @@ var UIManager  = ( function( window, undefined ) {
 		var dialog = DialogManager.createPropertyDialog(_T('Device Variable Properties'));
 		DialogManager.dlgAddDevices( dialog , widget.properties.deviceid, function() {
 			DialogManager.dlgAddVariables(dialog, widget, function() {
+				DialogManager.dlgAddColorPicker(dialog, "Color", _T("Color"), "", widget.properties.color);
 				// run the show
 				$('div#dialogModal').modal();
 			});
@@ -3636,13 +3639,15 @@ var UIManager  = ( function( window, undefined ) {
 		.on( 'submit',"div#dialogModal form", function() {
 			// save for real this time
 			real_widget.properties.deviceid = widget.properties.deviceid;
+			real_widget.properties.color = $('#altui-widget-Color').val();
 			var states = VeraBox.getStates( widget.properties.deviceid );
 			var selected = states[ $("#altui-select-variable").val() ];
 			real_widget.properties.service = selected.service;
 			real_widget.properties.variable = selected.variable;
 			$('div#dialogModal').modal('hide');
 			_showSavePageNeeded(true);
-			$(".altui-custompage-canvas .altui-widget#"+real_widget.id).find("p").text( VeraBox.getStatus( real_widget.properties.deviceid , real_widget.properties.service, real_widget.properties.variable ) );
+			_replaceElementKeepAttributes( $(".altui-custompage-canvas .altui-widget#"+real_widget.id) , _getWidgetHtml(real_widget,true) );
+			// $(".altui-custompage-canvas .altui-widget#"+real_widget.id).find("p").text( VeraBox.getStatus( real_widget.properties.deviceid , real_widget.properties.service, real_widget.properties.variable ) );
 		});
 	};
 
