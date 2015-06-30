@@ -6636,7 +6636,7 @@ var UIManager  = ( function( window, undefined ) {
 			html += "<p>No Housemode feature on UI5</p>";
 		}		
 		html +="	</div>";
-		html +="	<br><p>"+_T("This plugin is a work in progress, it will continuously evolves over time.");
+		html +="	<br><p>"+_T("This plugin is a work in progress, it will continuously evolve over time.");
 		html +=	_T("You may check out the evolutions on the Micasaverde <a href='http://forum.micasaverde.com/index.php/topic,30310.msg216129.html#msg216129'>Forum</a>")+"</p>";
 		html +="</div>";
 		$(".altui-mainpanel").append( html );
