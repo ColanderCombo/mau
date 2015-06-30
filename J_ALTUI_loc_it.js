@@ -126,7 +126,7 @@ Localization.init( {
 	"Remove":"xxx",
 	"No Match":"xxx",
 	"Reboot Vera":"xxx",
-	"This plugin is a work in progress, it will continuously evolves over time.":"This plugin is a work in progress, it will continuously evolves over time.",
+	"This plugin is a work in progress, it will continuously evolve over time.":"This plugin is a work in progress, it will continuously evolve over time.",
 	"You may check out the evolutions on the Micasaverde <a href='http://forum.micasaverde.com/index.php/topic,30310.msg216129.html#msg216129'>Forum</a>":"You may check out the evolutions on the Micasaverde <a href='http://forum.micasaverde.com/index.php/topic,30310.msg216129.html#msg216129'>Forum</a>",
 	"All":"xxx",
 	"No Room":"xxx",

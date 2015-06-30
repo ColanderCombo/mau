@@ -5121,6 +5121,11 @@ var UIManager  = ( function( window, undefined ) {
 				if ($.isFunction( tool.onWidgetResize) ) {
 				// if (tool.resizable==true) {
 					$(".altui-custompage-canvas ."+tool.cls).resizable({
+						// helper: "ui-resizable-helper",
+						// start: function( event, ui ) {
+							// $(ui.helper).height(ui.originalSize.height);
+							// $(ui.helper).width(ui.originalSize.width);
+						// },
 						aspectRatio: tool.aspectRatio || false,	// no aspect ratio by default
 						containment: "parent",
 						grid: [ 5,5 ],
@@ -5192,6 +5197,11 @@ var UIManager  = ( function( window, undefined ) {
 						if ($.isFunction( tool.onWidgetResize) ) 
 						{	
 							obj.resizable({
+								// helper: "ui-resizable-helper",
+								// start: function( event, ui ) {
+									// $(ui.helper).height(ui.originalSize.height);
+									// $(ui.helper).width(ui.originalSize.width);
+								// },
 								aspectRatio: tool.aspectRatio ||false,	// no aspect ratio by default
 								grid: [ 5,5 ],
 								containment: "parent",
@@ -6811,6 +6821,7 @@ var UIManager  = ( function( window, undefined ) {
 })( window );
 
 var styles ="					\
+	.ui-resizable-helper { border: 2px dotted #00F; }	\
 	.solid-border {	\
 		border:1px solid;: 0px;\
 	}					\
