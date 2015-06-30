@@ -6675,10 +6675,10 @@ var UIManager  = ( function( window, undefined ) {
 				var cols = [ 
 					{ name:'id', visible: $.inArray('id',viscols)!=-1, type:'numeric', identifier:true, width:50 },
 					{ name:'altid', visible: $.inArray('altid',viscols)!=-1, type:'string', identifier:true, width:50 },
-					{ name:'id_parent', visible: $.inArray('altid',viscols)!=-1, type:'numeric', identifier:true, width:80 },
+					{ name:'id_parent', visible: $.inArray('id_parent',viscols)!=-1, type:'numeric', identifier:true, width:80 },
 					{ name:'manufacturer', visible: $.inArray('manufacturer',viscols)!=-1, type:'string', identifier:true, width:120 },
 					{ name:'model', visible: $.inArray('model',viscols)!=-1, type:'string', identifier:true, width:150 },
-					{ name:'name', visible: $.inArray('altid',viscols)!=-1, type:'string', identifier:true, width:150 }
+					{ name:'name', visible: $.inArray('name',viscols)!=-1, type:'string', identifier:true, width:150 }
 				];				
 				
 				var obj = devices[0];
