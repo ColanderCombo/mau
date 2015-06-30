@@ -2676,7 +2676,7 @@ var UIManager  = ( function( window, undefined ) {
 				
 		var scenecontainerTemplate = "";
 		scenecontainerTemplate	+=  "<div class='panel panel-default altui-scene "+((norefresh==true) ? 'altui-norefresh': '') +"' id='{0}'>"
-		scenecontainerTemplate	+=	"<div class='panel-heading altui-scene-heading'>"+pauseButtonHtml+favoriteHtml+delButtonHtml +idDisplay+" <span class='panel-title altui-scene-title' data-toggle='tooltip' data-placement='left' title='{2}'><small>{1}</small></span></div>";
+		scenecontainerTemplate	+=	"<div class='panel-heading altui-scene-heading'>"+delButtonHtml +idDisplay+" <span class='panel-title altui-scene-title' data-toggle='tooltip' data-placement='left' title='{2}'>"+pauseButtonHtml+favoriteHtml+"<small>{1}</small></span></div>";
 		scenecontainerTemplate	+=  "<div class='panel-body altui-scene-body'>{3} <small class='text-muted pull-right'>{4}</small><small style='clear: right;' class='text-info pull-right'>{5}</small></div>";
 		scenecontainerTemplate	+=  "</div>";
 
@@ -7047,7 +7047,10 @@ var styles ="					\
 	  font-size: 11px;			\
 	}							\
 	.altui-pausescene {		\
-		padding-right: 5px;	\
+		padding-right: 3px;	\
+	}				\
+	.altui-favorite  {		\
+		padding-right: 3px;	\
 	}				\
 	.paused {		\
 	  color: red	\
