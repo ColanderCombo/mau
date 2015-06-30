@@ -6875,6 +6875,9 @@ var styles ="					\
 		outline-color: green;		\
 		outline-width: 2px;		\
 	}							\
+	div.altui-gauge-div table { \
+	  background-color: transparent;	\
+	}							\
 	.altui-widget-delete {		\
 		margin-top: -1px;		\
 		font-size:16px;			\
