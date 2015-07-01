@@ -6,13 +6,13 @@ Key features:
 - fully featured for room devices scenes plugins
 - scene editor
 - user definable custom synotpic panel pages
-- extensibility with javascript plugin files for dashboard & control panels
-- responsive design / multiple devices
+- extensibile design with javascript modules for plugins dashboard & control panels
+- responsive design / all form factors supported 
 - local and remote access via UI7 MMS authentication servers
 - D3JS animated graphs for device parent child , zWave neighbors, routes & quality
 - Plugin management ( install,  updates, deletes )
 - compatibility with most 3rd party plugins
-- display of plugin dynamic custom icons, even in remote mode
+- display of plugin dynamic custom icons, even in remote access mode
 - localized ( french, english ) , open to other languages as well
 
 Features:
@@ -25,7 +25,7 @@ Features:
 [li]Extensible architecture ( device dashboard & panel can be extended by a custom JS module ). authors welcome to contact me on how to do this[/li]
 [li]works on UI5 and UI7 boxes[/li]
 [li]Room: List, Create, Rename[/li]
-[li]Scene: List, Execution, Create, Edit ( triggers, timers, actions, event lua code, housemode selection )[/li]
+[li]Scene: List, Execution, Create, Edit ( triggers, timers, actions, event lua code, time restriction, housemode selection )[/li]
 [li]Device: List, responsive design page, "as you type" Filter by name/category/room[/li]
 [li]Device: small dashboard panels to fit many device on one screen. Dynamic icons as defined by the plugin author in the JSON file[/li]
 [li]Device Variables: List & Edit [/li]
@@ -33,7 +33,7 @@ Features:
 [li]Device Control panel: per the static JSON file of the author. Display "flash" and "javascript" tab. In addition it can be customized via a ALTUI plugin.[/li]
 [li]Device Attributes: List / Edit[/li]
 [li]Camera: live video feed in local mode, images in remote mode[/li]
-[li]Custom pages: Use mode (kiosk) and Edit. User can create its own set of custom pages by drag and drop of widgets like device icon, web images, device action button, device variable/labels, camera picture or google gauge. Alignment tools to create nice looking panel, customizable background by css3 ( images, gradiant... ), persistent storage of the pages on the VERA box by the LUA plugin [/li]
+[li]Custom pages: Use mode (kiosk) and Edit. User can create its own set of custom pages by drag and drop of widgets like device icon, web images, device action button, device variable/labels, camera picture or google gage. Alignment tools to create nice looking panel, customizable background by css3 ( images, gradiant... ), persistent storage of the pages on the VERA box by the LUA plugin [/li]
 [li]Lua test code editor / Lua startup code editor[/li]
 [li]Plugins : List of installed, direct button to reach the store, update from store, uninstall, to reach help page from the author, direct button to view content/download plugin files [/li]
 [li]Instantenous Power Consumption Graph[/li]
@@ -46,7 +46,7 @@ OFFICIAL VERSION : V 0.50.242  in Mios store
 [li][url=http://apps.mios.com/plugin.php?id=8246]http://apps.mios.com/plugin.php?id=8246[/url][/li]
 [/list]
 
-LATEST VERSION : [glow=red,2,300]V 0.52.273 June 25st 2015[/glow] : 
+LATEST VERSION : [glow=red,2,300]V 0.52.293 July 1st 2015[/glow] : 
 [list]
 [li]Favorite device / scene feature[/li]
 [li]Table of devices with selectable and sortable columns[/li]
@@ -79,7 +79,7 @@ LATEST VERSION : [glow=red,2,300]V 0.52.273 June 25st 2015[/glow] :
 INSTALL
 [list]
 [li]official version : by the store or the UI7 "Apps' menu[/li]
-[li]latest version : install by opening this link in your browser  [url=http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=27831]http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=27831[/url]
+[li]latest version : install by opening this link in your browser  [url=http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=27890]http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=27890[/url]
 ignore error messages displayed by this page and wait until your unit reloads...[/li]
 [/list]
 
@@ -87,6 +87,7 @@ ignore error messages displayed by this page and wait until your unit reloads...
 ACCESS
 [list]
 [li]UI5 & UI7 local access: http://<yourip>/port_3480/data_request?id=lr_ALTUI_Handler&command=home#[/li]
+[li]optional parameter:  lang=ll for language ( fr,en,it ) , home=xx where xx is one of pageHome, pageUsePages, pageDevices, pageScenes to force a start page[/li]
 [li]UI7 remote access: https://vera-ui.strongcubedfitness.com/Veralogin.php [/li]
 [li]UI5 remote access : method explained here => http://forum.micasaverde.com/index.php/topic,30310.msg225132.html#msg225132
 [/li]
