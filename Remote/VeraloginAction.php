@@ -152,6 +152,8 @@
 					$mms = new VeraTokens();
 					$user = $_REQUEST["altui-login-name"];
 					$pwd = $_REQUEST["altui-login-pwd"];
+					$lang = $_REQUEST["lang"];
+					$home = $_REQUEST["home"];
 					$AuthTokens = $mms->getAuthToken( $user, $pwd );
 					if ($AuthTokens==NULL)
 					{
@@ -272,6 +274,8 @@
 			var relay = deviceTable[id].RelayInfo["Server_Relay"];
 			var PK_Device = deviceTable[id].PK_Device;
 			var url  = "https://"+relay+"/relay/relay/relay/device/"+PK_Device+"/port_3480/;" //<Request>;
+			var lang = '<?php echo $lang ?>';
+			var home = '<?php echo $home ?>';
 			
 			//http://192.168.1.16/port_3480/data_request?id=lr_ALTUI_Handler&command=home#
 			//https:<//<ServerRelay>/relay/relay/relay/device/<PK_Device>/port_3480/<Request>
@@ -284,8 +288,8 @@
 			
 			// option b)
 			// https://vera-us-oem-relay11.mios.com/relay/relay/relay/device/CONTROLER_SN/session/SESSION_TOKEN/port_3480/data_request?id=lr_ALTUI_Handler&command=home
-			var url = "https://{0}/relay/relay/relay/device/{1}/session/{2}/port_3480/data_request?id=lr_ALTUI_Handler&command=home"
-						.format( relay, PK_Device, deviceTable[id].RelayInfo["ServerRelayToken"] );
+			var url = "https://{0}/relay/relay/relay/device/{1}/session/{2}/port_3480/data_request?id=lr_ALTUI_Handler&command=home&lang={3}&home={4}"
+						.format( relay, PK_Device, deviceTable[id].RelayInfo["ServerRelayToken"],lang,home );
 			window.open(url,'_self');
 		});
 	});

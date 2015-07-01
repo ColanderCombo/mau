@@ -43,6 +43,8 @@
 				<div class="altui-mainpanel row">
 					<div class="col-xs-12">
 						<form id ="altui-login-form" class="form-inline" action="VeraloginAction.php" method="post">
+							<input id="lang" type="hidden" name="lang" value="" />
+							<input id="home" type="hidden" name="home" value="" />
 						  <div class="form-group">
 							<label class="sr-only" for="altui-login-name">Email address</label>
 							<input type="text" class="form-control" id="altui-login-name" name="altui-login-name" placeholder="Enter login">
@@ -82,8 +84,15 @@
 
 	<script type='text/javascript'>
 
+	function getQueryStringValue (key) {  
+	  return unescape(window.location.search.replace(new RegExp("^(?:.*[&\\?]" + escape(key).replace(/[\.\+\*]/g, "\\$&") + "(?:\\=([^&]*))?)?.*$", "i"), "$1"));  
+	}
+	
 	$(document).ready(function() {
 
+		$("#lang").val( getQueryStringValue("lang") || window.navigator.userLanguage || window.navigator.language );
+		$("#home").val( getQueryStringValue("home") || 'pageHome');
+		
 		// collapse on click on small screens
 		$(".navbar-nav a").on("click",function() {
 			//	$(".navbar-toggle").click();
