@@ -147,9 +147,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		
 		var status = VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:TemperatureSensor1', 'CurrentTemperature' ); 
 		var newsetpoint = VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Heat', 'CurrentSetpoint' ); 
-		if (status!=null) {
-			html += ("<span class='altui-temperature' >"+status+"&deg;"+ws.tempFormat+"</span>");
-		}
+		html += ("<span class='altui-temperature' >"+((status!=null) ? (status+"&deg;"+ws.tempFormat) : "--") +"</span>");
 		if (newsetpoint!=null) {
 			html += ("<span class='altui-temperature altui-red' > / "+newsetpoint+"&deg;"+ws.tempFormat+"</span>");
 		}

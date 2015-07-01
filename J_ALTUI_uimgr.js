@@ -7378,4 +7378,3 @@ $(document).ready(function() {
 		});
 	AltuiDebug.debug("init done");
 });
-
