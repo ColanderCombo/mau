@@ -368,7 +368,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	function _drawWeatherIcon(devid, device) {
 		var html ="";
 		var conditionGroup = VeraBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'ConditionGroup');
-		var newsrc = "http://icons.wxug.com/i/c/i/"+conditionGroup+".gif";
+		var newsrc = (conditionGroup!=null) ? "http://icons.wxug.com/i/c/i/"+conditionGroup+".gif" : defaultIconSrc;
 		return "<img class='altui-device-icon pull-left img-rounded' src='"+newsrc+"' alt='"+conditionGroup+"' onerror='UIManager.onDeviceIconError("+device.id+")' ></img>";
 	};
 
