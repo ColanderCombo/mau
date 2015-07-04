@@ -2372,19 +2372,20 @@ var UIManager  = ( function( window, undefined ) {
 		return code;
 	};
 	
-	function _initDB(devicetypes) {
+	function _initDB(devicetypes,cbfunc) {		
 		$.extend(true,_devicetypesDB,devicetypes);
 		// foreach load the module if needed
 		// AltuiDebug.SetDebug( _devicetypesDB["info"].debug ) ;
 		_ui7Check = (_devicetypesDB["info"].ui7Check == "true" );
 		_version = _devicetypesDB["info"].PluginVersion;
 		_remoteAccessUrl =_devicetypesDB["info"].RemoteAccess;
-
+		var _toload=0;
 		$.each(_devicetypesDB, function(devtype,obj) {
 			if (obj!=null && obj.ScriptFile!=null) {
 				var len = $('script[data-src="'+obj.ScriptFile+'"]').length;
 				if (len==0) {
 					// not loaded yet
+					_toload++;
 					_loadScript(obj.ScriptFile, function() {						
 						// script has been loaded , check if style needs to be loaded and if so, load them
 						$.each(_devicetypesDB,function(idx,dt) {
@@ -2393,11 +2394,21 @@ var UIManager  = ( function( window, undefined ) {
 								return false;	// exit the loop
 							}
 						});				
+						_toload--;
 					});	// load script & styles once script is loaded
 				} 
 				// else loaded
 			}
 		});
+		if ($.isFunction(cbfunc)) {
+			function notifyTermination() {
+				if (_toload==0)
+					(cbfunc)();
+				else
+					setTimeout( notifyTermination, 500 );
+			};
+			notifyTermination();
+		}
 	};
 	
 	function _addDeviceType(devtype, obj) {
@@ -3773,14 +3784,11 @@ var UIManager  = ( function( window, undefined ) {
 		head.appendChild(style);	
 	};
 	
-	function _initEngine(styles, devicetypes, themecss) {
-		_initDB(devicetypes);
+	function _initEngine(styles, devicetypes, themecss,cbfunc) {
 		_initUIEngine(styles);
 		if (themecss && (themecss.trim()!="") )
 			$("title").after("<link rel='stylesheet' href='"+themecss+"'>");
-		// $("body").append("<link rel='stylesheet' href='//docs.google.com/uc?authuser=0&id=0B6TVdm2A9rnNNS1mSUZ5TmhPczA&export=download'>");
-		// $("body").append("<link rel='stylesheet' href='//docs.google.com/uc?authuser=0&id=0B6TVdm2A9rnNLWlIeEZDN1ZGU0k&export=download'>");
-		// UIManager.drawHouseMode();
+		_initDB(devicetypes,cbfunc);
 	};
 
 	function _initCustomPages( custompages ) {
@@ -7077,18 +7085,18 @@ var UIManager  = ( function( window, undefined ) {
 	
 	run: function() {
 		var homepage = getQueryStringValue("home") || 'pageHome';
-		try {
+		// try {
 			window["UIManager"][homepage]();	// call function by its name
-		}
-		catch (err) {
-			PageMessage.message("Exception occurred in "+homepage,"warning");
-			AltuiDebug.debug("Exception occurred in "+homepage);
-			AltuiDebug.debug("name: "+err.name);
-			AltuiDebug.debug("message: "+err.message);
-			console.log("Exception occurred in "+homepage);
-			console.log("name: "+err.name);// affiche 'Error'
-			console.log("message: "+err.message); // affiche 'mon message' ou un message d'erreur JavaScript
-		}
+		// }
+		// catch (err) {
+			// PageMessage.message("Exception occurred in "+homepage,"warning");
+			// AltuiDebug.debug("Exception occurred in "+homepage);
+			// AltuiDebug.debug("name: "+err.name);
+			// AltuiDebug.debug("message: "+err.message);
+			// console.log("Exception occurred in "+homepage);
+			// console.log("name: "+err.name);// affiche 'Error'
+			// console.log("message: "+err.message); // affiche 'mon message' ou un message d'erreur JavaScript
+		// }
 	}
   };	// end of return
 })( window );
@@ -7288,20 +7296,20 @@ $(document).ready(function() {
 		$("body").prepend(body);
 		PageMessage.init();
 		
-		EventBus.publishEvent("on_ui_initFinished");
+		UIManager.initEngine(styles.format(window.location.hostname), g_DeviceTypes, g_CustomTheme, function() {
+			EventBus.publishEvent("on_ui_initFinished");
+		});
+		UIManager.initCustomPages(g_CustomPages);	
 	};
 	
 	AltuiDebug.SetDebug( g_DeviceTypes.info["debug"] ) ;
 	AltuiDebug.debug("starting engines");
 	AltuiDebug.debug("Configuration: "+JSON.stringify(g_DeviceTypes));
 	AltuiDebug.debug("Custom Pages: "+JSON.stringify(g_CustomPages));
+	VeraBox.initEngine();		
 	
 	var language = getQueryStringValue("lang") || window.navigator.userLanguage || window.navigator.language;
 	AltuiDebug.debug("language:"+language);
-	
-	VeraBox.initEngine();		
-	UIManager.initEngine(styles.format(window.location.hostname), g_DeviceTypes, g_CustomTheme);
-	UIManager.initCustomPages(g_CustomPages);
 		
 	EventBus.registerEventHandler("on_ui_initFinished",UIManager,"run");
 
