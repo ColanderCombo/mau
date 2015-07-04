@@ -3686,6 +3686,16 @@ var UIManager  = ( function( window, undefined ) {
 		return toolbarHtml;
 	};
 		
+	function _refreshUIPerDevice(device) {
+		// refresh device panels
+		$(".altui-device-controlpanel[data-devid='"+device.id+"']").not(".altui-norefresh").each( function(index,element) {			
+			// force a refresh/drawing if needed.
+			// the event handler for the tab SHOW event will take care of the display of the tab
+			var activeTabIdx = _getActiveDeviceTabIdx();
+			_setActiveDeviceTabIdx(activeTabIdx);
+		});
+	};
+	
 	function _refreshUI( bFull, bFirstTime ) {
 		// refresh rooms
 		// refresh devices
@@ -3713,14 +3723,6 @@ var UIManager  = ( function( window, undefined ) {
 					PageMessage.clearJobMessage( device );
 				}
 			}
-		});
-
-		// refresh device panels
-		$(".altui-device-controlpanel").not(".altui-norefresh").each( function(index,element) {			
-			// force a refresh/drawing if needed.
-			// the event handler for the tab SHOW event will take care of the display of the tab
-			var activeTabIdx = _getActiveDeviceTabIdx();
-			_setActiveDeviceTabIdx(activeTabIdx);
 		});
 
 		// refresh scenes
@@ -4430,7 +4432,8 @@ var UIManager  = ( function( window, undefined ) {
 	cameraDraw			: _cameraDraw,
 	sceneDraw			: _sceneDraw,
 	refreshUI 			: _refreshUI,					// 
-
+	refreshUIPerDevice	: _refreshUIPerDevice,
+	
 	//static info per device type
 	addDeviceType : _addDeviceType,									// update devitetype plugin function calls ( from LUA )
 	updateDeviceTypeUIDB : _updateDeviceTypeUIDB,					// update devicetype UI static infos ( from user_data )
@@ -7312,7 +7315,8 @@ $(document).ready(function() {
 	AltuiDebug.debug("language:"+language);
 		
 	EventBus.registerEventHandler("on_ui_initFinished",UIManager,"run");
-
+	EventBus.registerEventHandler("on_ui_deviceStatusChanged",UIManager,"refreshUIPerDevice");
+	
 	// if lang is on the url, the js is already loaded by the LUA module. 
 	if ( (language.substring(0, 2) != 'en') && (getQueryStringValue("lang")=="") ){
 	// if (false) {

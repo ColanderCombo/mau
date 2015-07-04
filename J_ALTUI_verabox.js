@@ -614,7 +614,7 @@ var VeraBox = ( function( window, undefined ) {
 
 	// Get Rooms  , call a callback function asynchronously, or return array of rooms
 	function _getScenes( func , filterfunc, endfunc ) {
-		if (_scenes)
+		if (_scenes != null )
 			_asyncResponse( _scenes.sort(_sortByName), func , filterfunc, endfunc);
 		return _scenes;
 	};
@@ -637,16 +637,8 @@ var VeraBox = ( function( window, undefined ) {
 	};
 	
 	function _getDevices( func , filterfunc, endfunc ) {
-		//no data yet, fetch it, otherwise just process the async response
-		// if (_devices==null) {
-			// var url = "data_request?id=lr_ALTUI_Handler&command=devices";
-			// _getData( url, func, _setDevices, filterfunc, endfunc );
-
-		// } else {
-			// _asyncResponse( _devices, func, filterfunc, endfunc );
-		// }
 		if (_devices !=null)
-			_asyncResponse( _devices.sort(_sortByName), func, filterfunc, endfunc );
+			_asyncResponse( _devices.sort(_sortByName), func, filterfunc, endfunc )
 		return _devices;
 	};
 	function _getCategories( cbfunc, filterfunc, endfunc )
@@ -951,10 +943,10 @@ var VeraBox = ( function( window, undefined ) {
 					});
 				}
 				UIManager.refreshUI( false , false );	// partial and not first time
+				EventBus.publishEvent("on_startup_luStatusLoaded",data);
 				
 				// if user_data has changed, reload it
 				if (_user_data_DataVersion != data.UserData_DataVersion) {
-					//console.log( "{0}:Full Refresh".format(Date.now()));
 					_initDataEngine();
 				}
 				else {
@@ -977,6 +969,7 @@ var VeraBox = ( function( window, undefined ) {
 	function _loadUserData(data) {
 		if ((data) && (data != "NO_CHANGES") && (data != "Exiting") )
 		{
+			var bFirst = (_user_data_DataVersion==1);
 			if ($.isPlainObject( data )==false)
 				data = JSON.parse(data);
 			$.extend(_user_data, data);
@@ -1018,10 +1011,11 @@ var VeraBox = ( function( window, undefined ) {
 					UIManager.updateDeviceTypeUPnpDB( dt, device.device_file);	// pass device file so UPNP data can be read
 				if (device!=null) {	
 					device.dirty=true; 
+					EventBus.publishEvent("on_ui_deviceStatusChanged",device);
 				}
-				EventBus.publishEvent("on_ui_deviceStatusChanged",device);
 			});		
-			
+			if (bFirst)
+				EventBus.publishEvent("on_ui_userDataFirstLoaded");
 			EventBus.publishEvent("on_ui_userDataLoaded");
 		}
 	};

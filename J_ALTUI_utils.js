@@ -298,8 +298,9 @@ var Favorites = ( function (undefined) {
 var EventBus = ( function (undefined) {
 	var _subscriptions = {
 		"on_ui_deviceStatusChanged" : [],	// table of { func, object }
-		// "on_ui_userDataFirstLoaded" : [],
+		"on_ui_userDataFirstLoaded" : [],
 		"on_ui_userDataLoaded" : [],
+		"on_startup_luStatusLoaded" : [],
 		"on_ui_initFinished": [],
 	};
 	function _registerEventHandler(eventname, object, funcname ) {
