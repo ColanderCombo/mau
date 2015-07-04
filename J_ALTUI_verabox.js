@@ -946,6 +946,7 @@ var VeraBox = ( function( window, undefined ) {
 									}
 								});
 							});
+							EventBus.publishEvent("on_ui_deviceStatusChanged",device);
 						}
 					});
 				}
@@ -1007,14 +1008,6 @@ var VeraBox = ( function( window, undefined ) {
 				var dt = ui_static_data.device_type == undefined ? ui_static_data.DeviceType : ui_static_data.device_type;
 				if (dt!=undefined) {
 					UIManager.updateDeviceTypeUIDB( dt, ui_static_data);				
-					// var nflash=0; njs=0;
-					// $.each(ui_static_data.Tabs, function(idx,tab) {
-						// if (tab.TabType=="flash")
-							// nflash++;
-						// else
-							// njs++;
-					// });
-					// console.log("device {0} nflash:{1} njs:{2}".format(dt,nflash,njs));
 				}
 			});
 			
@@ -1026,7 +1019,10 @@ var VeraBox = ( function( window, undefined ) {
 				if (device!=null) {	
 					device.dirty=true; 
 				}
+				EventBus.publishEvent("on_ui_deviceStatusChanged",device);
 			});		
+			
+			EventBus.publishEvent("on_ui_userDataLoaded");
 		}
 	};
 
@@ -2248,6 +2244,7 @@ var api = {
 		return JSON.stringify(scene);
 	},
 	registerEventHandler: function(eventName, object, functionName) {
+		EventBus.registerEventHandler(eventName, object, functionName );
 	},
 	performActionOnDevice: function(deviceId, service, action, options) {
 		options = $.extend({ 

@@ -294,6 +294,49 @@ var Favorites = ( function (undefined) {
 		save: _save
 	}
 })( );
+
+var EventBus = ( function (undefined) {
+	var _subscriptions = {
+		"on_ui_deviceStatusChanged" : [],	// table of { func, object }
+		// "on_ui_userDataFirstLoaded" : [],
+		"on_ui_userDataLoaded" : [],
+		"on_ui_initFinished": [],
+	};
+	function _registerEventHandler(eventname, object, funcname ) {
+		if (_subscriptions[eventname] == undefined)
+			_subscriptions[eventname] = [];
+		var bFound = false;
+		$.each(_subscriptions[eventname], function (idx,sub) {
+			if ((sub.object==object) && (sub.funcname==funcname)) {
+				bFound = true;
+				return false;
+			}
+		});
+		if (bFound==false)
+			_subscriptions[eventname].push( {object: object , funcname: funcname} );
+	};
+	function _publishEvent(eventname/*, args */) {
+		if (_subscriptions[eventname]) {
+			var theArgs = [].slice.call(arguments, 1);	// remove first argument
+			$.each(_subscriptions[eventname], function (idx,sub) {
+				var func = sub.object[sub.funcname];
+				func.apply( sub.object , theArgs );
+			});
+		}
+	};
+	return {
+		registerEventHandler : _registerEventHandler,	//(eventname, object, funcname ) 
+		publishEvent : _publishEvent,	//(eventname, args)
+		getEventSupported : function() {
+			return Object.keys(_subscriptions);
+		},
+	}
+})();
+// function myFunc(device) {
+	// console.log("Device {0} state changed".format(device.id));
+// }
+//on_ui_initFinished
+// EventBus.registerEventHandler("on_ui_deviceStatusChanged",window,"myFunc");
 	
 function _sortByVariableName(a,b)
 {

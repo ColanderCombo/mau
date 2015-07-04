@@ -4725,6 +4725,7 @@ var UIManager  = ( function( window, undefined ) {
 		}
 		
 		function endDrawDevice() {
+			_drawDeviceToolbar();
 			UIManager.refreshUI(true,false);
 		};
 		
@@ -4936,7 +4937,7 @@ var UIManager  = ( function( window, undefined ) {
 		UIManager.leftnavRooms( function() {
 			_onClickRoomButton( $(this).prop('id') ); 
 		});
-		_drawDeviceToolbar();
+
 		_drawDevices(deviceFilter);
 
 		// deletegated event for title click / rename for device
@@ -4966,16 +4967,12 @@ var UIManager  = ( function( window, undefined ) {
 				device.favorite = !device.favorite;
 				$(this).parents(".altui-device-title").html(_enhancedDeviceTitle(device));
 				Favorites.set('device', devid, device.favorite);
-			});
-
-		$(".altui-mainpanel")
+			})
 			// .off("click",".altui-device-controlpanelitem")
 			.on("click",".altui-device-controlpanelitem",function(){ 
 				var id = $(this).parents(".altui-device").prop('id');
 				UIManager.pageControlPanel(id);
-			});
-			
-		$(".altui-mainpanel")
+			})
 			// .off("click",".altui-device-icon")
 			.on("click",".altui-device-icon",function(){ 
 				var id = $(this).parents(".altui-device").prop('id');
@@ -7084,12 +7081,13 @@ var UIManager  = ( function( window, undefined ) {
 			window["UIManager"][homepage]();	// call function by its name
 		}
 		catch (err) {
+			PageMessage.message("Exception occurred in "+homepage,"warning");
 			AltuiDebug.debug("Exception occurred in "+homepage);
 			AltuiDebug.debug("name: "+err.name);
 			AltuiDebug.debug("message: "+err.message);
 			console.log("Exception occurred in "+homepage);
-			console.log(err.name);// affiche 'Error'
-			console.log(err.message); // affiche 'mon message' ou un message d'erreur JavaScript
+			console.log("name: "+err.name);// affiche 'Error'
+			console.log("message: "+err.message); // affiche 'mon message' ou un message d'erreur JavaScript
 		}
 	}
   };	// end of return
@@ -7289,6 +7287,8 @@ $(document).ready(function() {
 		body+="</div> <!-- /container -->";
 		$("body").prepend(body);
 		PageMessage.init();
+		
+		EventBus.publishEvent("on_ui_initFinished");
 	};
 	
 	AltuiDebug.SetDebug( g_DeviceTypes.info["debug"] ) ;
@@ -7298,6 +7298,13 @@ $(document).ready(function() {
 	
 	var language = getQueryStringValue("lang") || window.navigator.userLanguage || window.navigator.language;
 	AltuiDebug.debug("language:"+language);
+	
+	VeraBox.initEngine();		
+	UIManager.initEngine(styles.format(window.location.hostname), g_DeviceTypes, g_CustomTheme);
+	UIManager.initCustomPages(g_CustomPages);
+		
+	EventBus.registerEventHandler("on_ui_initFinished",UIManager,"run");
+
 	// if lang is on the url, the js is already loaded by the LUA module. 
 	if ( (language.substring(0, 2) != 'en') && (getQueryStringValue("lang")=="") ){
 	// if (false) {
@@ -7310,17 +7317,12 @@ $(document).ready(function() {
 		// once script is loaded, we can call style function in it
 		$(script).load(  function() {
 			_initLocalizedGlobals();
-			UIManager.run();
 		} );
 		head.appendChild(script);
 	} else {
 		AltuiDebug.debug("Locale file not needed");
 		_initLocalizedGlobals();
-		UIManager.run();
 	}
-	VeraBox.initEngine();		
-	UIManager.initEngine(styles.format(window.location.hostname), g_DeviceTypes, g_CustomTheme);
-	UIManager.initCustomPages(g_CustomPages);
 
 	$(window).on('resize', function () {
 	  /*if (window.innerWidth > tabletSize) */
