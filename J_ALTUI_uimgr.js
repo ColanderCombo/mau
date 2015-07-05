@@ -7325,7 +7325,7 @@ $(document).ready(function() {
 		body+="			<li class='dropdown-header'>Lua</li>";
 		body+="			<li><a id='altui-luastart' href='#' >"+_T("Lua Startup Code")+"</a></li>";
 		body+="			<li><a id='altui-luatest' href='#' >"+_T("Lua Test Code")+"</a></li>";
-		body+="			<li><a id='altui-oscommand' href='#' >"+_T("Os Command")+"</a></li>";
+		body+="			<li><a id='altui-oscommand' href='#' >"+_T("OS Command")+"</a></li>";
 		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>Graphic</li>";
 		body+="			<li><a id='altui-energy' href='#' >"+_T("Power Chart")+"</a></li>";

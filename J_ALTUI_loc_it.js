@@ -184,5 +184,14 @@ Localization.init( {
 	"Favorite":"Favorite",
 	"Favorites":"Favorites",
 	"Variables":"Variables",
-	"Used in":"Used in"
+	"Used in":"Used in",
+	"OsCommand":"OsCommand",
+	"Disk Usage":"Disk Usage",
+	"Free Space":"Free Space",
+	"Plugin Files":"Plugin Files",
+	"Log Sizes":"Log Sizes",
+	"OS Command":"OS Command",
+	"Frequent Commands":"Frequent Commands",
+	"Output":"Output",
+	"Os Command execution succeeded":"Os Command execution succeeded"
 	});
