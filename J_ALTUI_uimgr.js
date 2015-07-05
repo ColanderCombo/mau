@@ -5696,7 +5696,7 @@ var UIManager  = ( function( window, undefined ) {
 		html+="<div class='col-xs-12'><form>";
 		html+="  <div class='form-group'>";
 		html+="    <label for='oscommand'>"+_T("OS Command")+"</label>";
-		html+="    <input type='text' class='form-control' id='oscommand' placeholder='Type your OS command'>";
+		html+="    <input type='text' class='form-control' id='oscommand' placeholder='Type your OS command like: df '>";
 		html+="  </div>";
 		html+="</form>";
 		html+="<button type='button' id='altui-oscommand-button' class='btn btn-default'>"+_T("Run")+"</button>";
