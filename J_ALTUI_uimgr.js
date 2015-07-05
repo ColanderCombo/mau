@@ -5699,11 +5699,13 @@ var UIManager  = ( function( window, undefined ) {
 		html+="    <input type='text' class='form-control' id='oscommand' placeholder='Type your OS command'>";
 		html+="  </div>";
 		html+="</form>";
+		html+="<button type='button' id='altui-oscommand-button' class='btn btn-default'>"+_T("Run")+"</button>";
+		html+="<hr>";
 		html+="<pre id='altui-oscommand-result' class='pre-scrollable'></pre>";
 		html+="</div>";
 		$(".altui-mainpanel").append( html );
-		$("#oscommand").focusout( function() {
-			var oscmd = $(this).val();
+		$("#altui-oscommand-button").click( function() {
+			var oscmd = $("#oscommand").val();
 			show_loading();
 			VeraBox.osCommand(oscmd,function(res) {
 				hide_loading();
@@ -5711,6 +5713,32 @@ var UIManager  = ( function( window, undefined ) {
 			});
 		});
 	},
+	// pageOsCommand: function ()
+	// {
+		// UIManager.clearPage(_T('OsCommand'),_T("OS Command"));
+		// $(".altui-mainpanel").append("<p>Enter a Vera OS ( Unix ) command, the stdout will be returned and displayed below.</p>");
+		
+		// var html = "";
+		// html+="<div class='col-xs-12'><form >";
+		// html+="  <div class='form-group'>";
+		// html+="    <label for='oscommand'>"+_T("OS Command")+"</label>";
+		// html+="    <input type='text' class='form-control' id='altui-oscommand' placeholder='Type your OS command'>";
+		// html+="  </div>";
+		// html+="<button type='button' id='altui-oscommand-button' class='btn btn-default'>"+_T("Run")+"</button>";
+		// html+="</form>";
+		// html+="<label for='altui-oscommand-result'>"+_T("Results")+"</label>";
+		// html+="<pre id='altui-oscommand-result' class='pre-scrollable'></pre>";
+		// html+="</div>";
+		// $(".altui-mainpanel").append( html );
+		// $("#altui-oscommand-button").click( function() {
+			// var oscmd = $("#altui-oscommand").val();
+			// show_loading();
+			// VeraBox.osCommand(oscmd,function(res) {
+				// hide_loading();
+				// $('#altui-oscommand-result').html(res);
+			// });
+		// });
+	// },
 	
 	pageLuaStart: function ()
 	{
