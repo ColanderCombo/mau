@@ -5702,9 +5702,10 @@ var UIManager  = ( function( window, undefined ) {
 		var html = "";
 		html+="<div class='col-xs-12'><form>";
 		html+="  <div class='form-group'>";
-		html+="  	<div class='btn-group'>";
+		html+="    <label for='altui-btngroup'>"+_T("Frequent Commands")+"</label>";
+		html+="  	<div class='btn-group' id='altui-btngroup'>";
 		$.each(commands, function(idx,obj) {
-			html += "<button type='button' class='btn btn-default' onclick='$(\"#oscommand\").val(\"{1}\");return false;'>{0}</button>".format(obj.label,obj.command);
+			html += "<button type='button' class='btn btn-default' onclick='$(\"#oscommand\").val(\"{1}\");$(\"#altui-oscommand-button\").click();return false;'>{0}</button>".format(obj.label,obj.command);
 		});
 		html+="  	</div>";
 		html+="  </div>";
@@ -5715,6 +5716,7 @@ var UIManager  = ( function( window, undefined ) {
 		html+="</form>";
 		html+="<button type='button' id='altui-oscommand-button' class='btn btn-default'>"+_T("Run")+"</button>";
 		html+="<hr>";
+		html+="<h3>"+_T("Output")+"</h3>";
 		html+="<pre id='altui-oscommand-result' class='pre-scrollable'></pre>";
 		html+="</div>";
 		$(".altui-mainpanel").append( html );
@@ -5723,7 +5725,7 @@ var UIManager  = ( function( window, undefined ) {
 			show_loading();
 			VeraBox.osCommand(oscmd,function(res) {
 				hide_loading();
-				$('#altui-oscommand-result').html(res);
+				$('#altui-oscommand-result').html( (res.success==true) ? res.result : _T("failed to execute"));
 			});
 		});
 	},

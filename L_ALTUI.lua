@@ -619,11 +619,16 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 			end,
 		["oscommand"] = 
 			function(params)
-				local command = lul_parameters["oscommand"]
-				local handle = io.popen(command)
-				local result = handle:read("*a")
-				handle:close()
-				return json.encode( result ) , "application/json"
+				-- local command = lul_parameters["oscommand"]
+				-- local handle = io.popen(command)
+				-- local result = handle:read("*a")
+				-- handle:close()
+				local command = lul_parameters["oscommand"] .. '> /tmp/oscommand.log'
+				local response = os.execute(command)
+				local file = io.open('/tmp/oscommand.log','r')
+				local result = file:read("*a")
+				file:close()
+				return json.encode( {success=(response==0 or response==true), result=result} ) , "application/json"
 			end,
 		["rooms"] = 
 			function(params)

@@ -1167,12 +1167,16 @@ var VeraBox = ( function( window, undefined ) {
 			dataType: "text"
 		})
 		.done(function(data, textStatus, jqXHR) {
-			PageMessage.message(_T("Os Command execution succeeded"), "success");
+			var result = JSON.parse(data);
+			if (result.success==true)
+				PageMessage.message(_T("Os Command execution succeeded"), "success");
+			else
+				PageMessage.message( _T("Os Command execution on vera failed.") , "danger");
 			if ($.isFunction( cbfunc )) 
-				cbfunc(JSON.parse(data),jqXHR);
+				cbfunc(result,jqXHR);
 		})
 		.fail(function(jqXHR, textStatus) {
-			PageMessage.message( _T("Os Command execution failed. (returned {0})").format(textStatus) , "danger");
+			PageMessage.message( _T("Os Command execution request failed. (returned {0})").format(textStatus) , "danger");
 			if ($.isFunction( cbfunc )) 
 				cbfunc(null,jqXHR);
 		})
