@@ -5689,11 +5689,25 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pageOsCommand: function ()
 	{
+		var commands = [
+			{label:_T("Disk Usage"), command:'du' },
+			{label:_T("Free Space"), command:'df -h' },
+			{label:_T("Plugin Files"), command:'ls -l /etc/cmh-ludl' },
+			{label:_T("Log Sizes"), command:'ls -l /var/log/cmh' },
+		];
+		
 		UIManager.clearPage(_T('OsCommand'),_T("OS Command"));
 		$(".altui-mainpanel").append("<p>Enter a Vera OS ( Unix ) command, the stdout will be returned and displayed below.</p>");
 		
 		var html = "";
 		html+="<div class='col-xs-12'><form>";
+		html+="  <div class='form-group'>";
+		html+="  	<div class='btn-group'>";
+		$.each(commands, function(idx,obj) {
+			html += "<button type='button' class='btn btn-default' onclick='$(\"#oscommand\").val(\"{1}\");return false;'>{0}</button>".format(obj.label,obj.command);
+		});
+		html+="  	</div>";
+		html+="  </div>";
 		html+="  <div class='form-group'>";
 		html+="    <label for='oscommand'>"+_T("OS Command")+"</label>";
 		html+="    <input type='text' class='form-control' id='oscommand' placeholder='Type your OS command like: df '>";
