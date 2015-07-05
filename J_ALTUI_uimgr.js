@@ -5704,7 +5704,9 @@ var UIManager  = ( function( window, undefined ) {
 		$(".altui-mainpanel").append( html );
 		$("#oscommand").focusout( function() {
 			var oscmd = $(this).val();
+			show_loading();
 			VeraBox.osCommand(oscmd,function(res) {
+				hide_loading();
 				$('#altui-oscommand-result').html(res);
 			});
 		});
