@@ -4464,6 +4464,7 @@ var UIManager  = ( function( window, undefined ) {
 			{ id:20, title:_T('zWaveRoutes'), onclick:'UIManager.pageRoutes()', parent:0 },
 			{ id:21, title:_T('Quality'), onclick:'UIManager.pageQuality()', parent:0 },
 			{ id:22, title:_T('TblDevices'), onclick:'UIManager.pageTblDevices()', parent:0 },
+			{ id:23, title:_T('OsCommand'), onclick:'UIManager.pageOsCommand()', parent:0 },
 		];
 
 		function _parentsOf(child) {
@@ -5682,6 +5683,29 @@ var UIManager  = ( function( window, undefined ) {
 					PageMessage.message( _T("Code execution succeeded"), "success");
 				else
 					PageMessage.message( _T("Code execution failed"), "danger");
+			});
+		});
+	},
+	
+	pageOsCommand: function ()
+	{
+		UIManager.clearPage(_T('OsCommand'),_T("OS Command"));
+		$(".altui-mainpanel").append("<p>Enter a Vera OS ( Unix ) command, the stdout will be returned and displayed below.</p>");
+		
+		var html = "";
+		html+="<div class='col-xs-12'><form>";
+		html+="  <div class='form-group'>";
+		html+="    <label for='oscommand'>"+_T("OS Command")+"</label>";
+		html+="    <input type='text' class='form-control' id='oscommand' placeholder='Type your OS command'>";
+		html+="  </div>";
+		html+="</form>";
+		html+="<pre id='altui-oscommand-result' class='pre-scrollable'></pre>";
+		html+="</div>";
+		$(".altui-mainpanel").append( html );
+		$("#oscommand").focusout( function() {
+			var oscmd = $(this).val();
+			VeraBox.osCommand(oscmd,function(res) {
+				$('#altui-oscommand-result').html(res);
 			});
 		});
 	},
@@ -7255,6 +7279,7 @@ $(document).ready(function() {
 		body+="			<li class='dropdown-header'>Lua</li>";
 		body+="			<li><a id='altui-luastart' href='#' >"+_T("Lua Startup Code")+"</a></li>";
 		body+="			<li><a id='altui-luatest' href='#' >"+_T("Lua Test Code")+"</a></li>";
+		body+="			<li><a id='altui-oscommand' href='#' >"+_T("Os Command")+"</a></li>";
 		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>Graphic</li>";
 		body+="			<li><a id='altui-energy' href='#' >"+_T("Power Chart")+"</a></li>";
@@ -7368,6 +7393,7 @@ $(document).ready(function() {
 		.on( "click", "#altui-reboot", VeraBox.reboot )
 		.on( "click", "#altui-remoteaccess", UIManager.pageRemoteAccess )
 		.on( "click", "#altui-credits", UIManager.pageCredits )
+		.on( "click", "#altui-oscommand", UIManager.pageOsCommand )
 		.on( "click", "#altui-luastart", UIManager.pageLuaStart )
 		.on( "click", "#altui-luatest", UIManager.pageLuaTest )
 		.on( "click", "#altui-zwavenetwork", UIManager.pageZwave )		

@@ -1159,6 +1159,27 @@ var VeraBox = ( function( window, undefined ) {
 		}
 	};
 
+	function _osCommand(cmd,cbfunc) {
+		var url = "data_request?id=lr_ALTUI_Handler&command=oscommand&oscommand={0}".format(cmd);
+		var jqxhr = $.ajax( {
+			url: url,
+			type: "GET",
+			dataType: "text"
+		})
+		.done(function(data, textStatus, jqXHR) {
+			PageMessage.message(_T("Os Command execution succeeded"), "success");
+			if ($.isFunction( cbfunc )) 
+				cbfunc(JSON.parse(data),jqXHR);
+		})
+		.fail(function(jqXHR, textStatus) {
+			PageMessage.message( _T("Os Command execution failed. (returned {0})").format(textStatus) , "danger");
+			if ($.isFunction( cbfunc )) 
+				cbfunc(null,jqXHR);
+		})
+		.always(function() {
+		});
+	};
+	
 	function _runLua(code, cbfunc) {
 		UPnPHelper.UPnPRunLua(code, function(result) {
 			var res = "Fail";
@@ -1571,7 +1592,6 @@ var VeraBox = ( function( window, undefined ) {
 	updateNeighbors	: _updateNeighbors, // id=lu_action&action=UpdateNeighbors&Device=3&DeviceNum=1
 	createRoom		: _createRoom,
 	deleteRoom		: _deleteRoom,
-	runLua			: _runLua,
 	runScene		: _runScene,
 	editScene		: _editScene,			//(sceneid,scene);
 	deleteScene		: _deleteScene,
@@ -1585,10 +1605,14 @@ var VeraBox = ( function( window, undefined ) {
 	isRemoteAccess	: function() 	{ 	return window.location.origin.indexOf("mios.com")!=-1; /*return true;*/ },
 
 	// energy
-	getPower	: _getPower,
+	getPower		: _getPower,
 	
 	// stats
 	resetPollCounters : _resetPollCounters,
+	
+	// oscommand http://192.168.1.16/port_3480/data_request?id=lr_ALTUI_Handler&command=oscommand&oscommand=df
+	osCommand 		: _osCommand,	//(cmd,cbfunc)		
+	runLua			: _runLua,
 	
 	// caching user data changes and saving them at user request
 	updateChangeCache :_updateChangeCache,
