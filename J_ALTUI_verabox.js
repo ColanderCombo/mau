@@ -454,7 +454,8 @@ var UPnPHelper = (function(window,undefined) {
 			_UPnPAction( deviceID, 'urn:upnp-org:serviceId:SwitchPower1', 'SetTarget', {'newTargetValue':onoff} );
 		},
 		setArm			: function ( deviceID, armed) {
-			_UPnPSet( deviceID, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Armed', armed );
+			_UPnPAction( deviceID, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'SetArmed', {'newArmedValue':armed} );
+			// _UPnPSet( deviceID, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Armed', armed );
 		},
 		setDoorLock			: function ( deviceID, armed) {
 			_UPnPAction( deviceID, 'urn:micasaverde-com:serviceId:DoorLock1', 'SetTarget', {'newTargetValue':armed} );

@@ -5168,7 +5168,7 @@ var UIManager  = ( function( window, undefined ) {
 			var infobutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-info-sign',  glyphTemplate.format("info-sign","Information",""), "Info");
 			var updatebutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-update',  glyphTemplate.format("retweet","Update Now",""), "Update");
 			var deletebutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-uninstall',  glyphTemplate.format("remove","Uninstall",""), "Uninstall");
-			var inputbox = "<input class='form-control input-sm altui-plugin-version' id='altui-plugin-version-{0}'></input>".format( plugin.id);
+			var inputbox = "<input class='form-control input-sm altui-plugin-version' id='altui-plugin-version-{0}' title='{1}'></input>".format( plugin.id,_T("Version number or empty for latest official version"));
 
 			var pluginTxt = pluginTemplate.format(
 				plugin.Title,
