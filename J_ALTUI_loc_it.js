@@ -196,5 +196,7 @@ Localization.init( {
 	"Os Command execution succeeded":"Os Command execution succeeded",
 	"Version number or empty for latest official version":"Version number or empty for latest official version",
 	"Update Plugin succeeded, be patient Luup will reload":"Update Plugin succeeded, be patient Luup will reload",
-	"Enter a Vera OS ( Unix ) command, the stdout will be returned and displayed below":"Enter a Vera OS ( Unix ) command, the stdout will be returned and displayed below"
+	"Enter a Vera OS ( Unix ) command, the stdout will be returned and displayed below":"Enter a Vera OS ( Unix ) command, the stdout will be returned and displayed below",
+	"Os Command execution on vera failed.":"Os Command execution on vera failed.",
+	"failed to execute":"failed to execute"
 	});
