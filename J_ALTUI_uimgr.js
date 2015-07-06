@@ -3751,9 +3751,6 @@ var UIManager  = ( function( window, undefined ) {
 			});
 			_updateDynamicDisplayTools( false );
 		}
-	
-		if (bFirstTime==false)
-			_refreshFooter();
 	};
 	
 	var ALTUI_hometimer=null;
@@ -7170,6 +7167,7 @@ var UIManager  = ( function( window, undefined ) {
 		}
 		if ( (bEngineReady==true) && (bUIReady==true) ) {
 			bUIReady=false;
+			_refreshFooter();
 			UIManager.run();
 		}
 	},
