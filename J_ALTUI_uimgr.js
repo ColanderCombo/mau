@@ -7400,8 +7400,8 @@ $(document).ready(function() {
 	AltuiDebug.debug("Configuration: "+JSON.stringify(g_DeviceTypes));
 	AltuiDebug.debug("Custom Pages: "+JSON.stringify(g_CustomPages));
 
-	EventBus.registerEventHandler("on_ui_initFinished",UIManager,"signal");
-	EventBus.registerEventHandler("on_ui_userDataLoaded",UIManager,"signal");
+	EventBus.registerEventHandler("on_ui_initFinished",UIManager,UIManager.signal);
+	EventBus.registerEventHandler("on_ui_userDataLoaded",UIManager,UIManager.signal);
 	EventBus.registerEventHandler("on_ui_deviceStatusChanged",UIManager,"refreshUIPerDevice");
 	VeraBox.initEngine();		
 

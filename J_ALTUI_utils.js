@@ -318,11 +318,16 @@ var EventBus = ( function (undefined) {
 	};
 	function _publishEvent(eventname/*, args */) {
 		if (_subscriptions[eventname]) {
-			var theArgs = [].slice.call(arguments, 1);	// remove first argument
+			// var theArgs = [].slice.call(arguments, 1);	// remove first argument
+			var theArgs = arguments;
 			$.each(_subscriptions[eventname], function (idx,sub) {
-				var func = sub.object[sub.funcname];
-				theArgs.unshift(eventname);
-				func.apply( sub.object , theArgs );
+				if ($.isFunction(sub.funcname)) {
+					(sub.funcname).apply(sub.object,theArgs);
+				} else {
+					// theArgs.unshift(eventname);
+					var func = sub.object[sub.funcname];
+					func.apply( sub.object , theArgs );
+				}
 			});
 		}
 	};

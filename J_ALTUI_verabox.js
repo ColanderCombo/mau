@@ -2266,7 +2266,14 @@ var api = {
 		return JSON.stringify(scene);
 	},
 	registerEventHandler: function(eventName, object, functionName) {
-		EventBus.registerEventHandler(eventName, object, functionName );
+		EventBus.registerEventHandler(eventName, window, function( /*args*/ ) {
+			//in API7 the parameters to the callback do not include the eventname
+			//while in ALTUI the first parameter is the eventname. so here we have to remove it
+			var theArgs = arguments;
+			theArgs = [].slice.call(theArgs, 1);	// remove first argument which is eventname
+			var func = object[functionName];
+			func.apply( object , theArgs );
+		});
 	},
 	performActionOnDevice: function(deviceId, service, action, options) {
 		options = $.extend({ 
