@@ -2714,7 +2714,7 @@ var UIManager  = ( function( window, undefined ) {
 		var icon='';
 		switch( device.device_type ) {
 			case 'urn:schemas-futzle-com:device:CountdownTimer:1': 
-				icon = 'https://apps.mios.com/plugins/icons/1588.png';
+				icon = '//apps.mios.com/plugins/icons/1588.png';
 				break;
 			default:
 				var str = "";
@@ -5162,7 +5162,7 @@ var UIManager  = ( function( window, undefined ) {
 		
 		var pluginTemplate = "<tr><td>{6}</td><td>{0}</td><td>{1}.{2}</td><td>{7}</td><td>{3} {4}</td><td>{5}</td><td>{8}</td></tr>";
 		function drawPlugin(idx, plugin) {
-			var iconTemplate = "<img class='altui-plugin-icon' src='https://apps.mios.com/{0}'></img>";
+			var iconTemplate = "<img class='altui-plugin-icon' src='//apps.mios.com/{0}'></img>";
 			var filebutton = _getFileButton(plugin);
 			var helpbutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-question-sign',  glyphTemplate.format("question-sign","Help",""), "Help");
 			var infobutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-info-sign',  glyphTemplate.format("info-sign","Information",""), "Info");
@@ -5233,7 +5233,7 @@ var UIManager  = ( function( window, undefined ) {
 					"",
 					"",
 					"",
-					"<img class='altui-plugin-icon' src='https://apps.mios.com/images/plugin.png'></img>",
+					"<img class='altui-plugin-icon' src='//apps.mios.com/images/plugin.png'></img>",
 					_getFileButton(plugin),
 					""
 					);
@@ -5264,13 +5264,13 @@ var UIManager  = ( function( window, undefined ) {
 					var val = $("#altui-plugin-version-"+id).val();
 					if ($.isNumeric(val)==true) {
 						UPnPHelper.UPnPUpdatePluginVersion(id,val,function(result) {
-							PageMessage.message( _T("Update Plugin succeeded, please reload Luup"), "success");
+							PageMessage.message( _T("Update Plugin succeeded, be patient Luup will reload"), "success");
 							alert(result);
 						});
 					}
 					else
 						UPnPHelper.UPnPUpdatePlugin(id,function(result) {
-							PageMessage.message( _T("Update Plugin succeeded, please reload Luup"), "success");
+							PageMessage.message( _T("Update Plugin succeeded, be patient Luup will reload"), "success");
 							alert(result);
 						});
 				}

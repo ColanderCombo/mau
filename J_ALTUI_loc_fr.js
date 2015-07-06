@@ -193,5 +193,7 @@ Localization.init( {
 	"OS Command":"Commande OS",
 	"Frequent Commands":"Commandes Fréquentes",
 	"Output":"Sortie",
-	"Os Command execution succeeded":"L'éxécution de la commande Os a réussie"	
+	"Os Command execution succeeded":"L'éxécution de la commande Os a réussie",
+	"Version number or empty for latest official version":"Version number or empty for latest official version",
+	"Update Plugin succeeded, be patient Luup will reload":"Update Plugin succeeded, be patient Luup will reload"
 });
