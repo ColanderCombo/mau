@@ -3686,7 +3686,7 @@ var UIManager  = ( function( window, undefined ) {
 		return toolbarHtml;
 	};
 		
-	function _refreshUIPerDevice(device) {
+	function _refreshUIPerDevice(eventname,device) {
 		// refresh device panels
 		$(".altui-device-controlpanel[data-devid='"+device.id+"']").not(".altui-norefresh").each( function(index,element) {			
 			// force a refresh/drawing if needed.
@@ -4400,6 +4400,9 @@ var UIManager  = ( function( window, undefined ) {
 		});	
 	};
 	
+	var bUIReady = false;
+	var bEngineReady = false;
+
 	// explicitly return public methods when this object is instantiated
   return {
 	//---------------------------------------------------------
@@ -7156,7 +7159,22 @@ var UIManager  = ( function( window, undefined ) {
 		});
 	},
 	
-	run: function() {
+	signal: function( eventname ) {
+		switch (eventname) {
+			case 'on_ui_initFinished':
+				bUIReady =true;
+				break;
+			case 'on_ui_userDataLoaded':
+				bEngineReady=true;
+				break;
+		}
+		if ( (bEngineReady==true) && (bUIReady==true) ) {
+			bUIReady=false;
+			UIManager.run();
+		}
+	},
+	
+	run: function( eventname ) {
 		var homepage = getQueryStringValue("home") || 'pageHome';
 		// try {
 			window["UIManager"][homepage]();	// call function by its name
@@ -7176,6 +7194,7 @@ var UIManager  = ( function( window, undefined ) {
 
 	
 $(document).ready(function() {
+
 	function _initLocalizedGlobals() {
 		// console.log("_initLocalizedGlobals()");
 		_HouseModes = [
@@ -7371,23 +7390,25 @@ $(document).ready(function() {
 		PageMessage.init();
 		
 		UIManager.initEngine(styles.format(window.location.hostname), g_DeviceTypes, g_CustomTheme, function() {
+			UIManager.initCustomPages(g_CustomPages);	
 			EventBus.publishEvent("on_ui_initFinished");
 		});
-		UIManager.initCustomPages(g_CustomPages);	
 	};
 	
 	AltuiDebug.SetDebug( g_DeviceTypes.info["debug"] ) ;
 	AltuiDebug.debug("starting engines");
 	AltuiDebug.debug("Configuration: "+JSON.stringify(g_DeviceTypes));
 	AltuiDebug.debug("Custom Pages: "+JSON.stringify(g_CustomPages));
+
+	EventBus.registerEventHandler("on_ui_initFinished",UIManager,"signal");
+	EventBus.registerEventHandler("on_ui_userDataLoaded",UIManager,"signal");
+	EventBus.registerEventHandler("on_ui_deviceStatusChanged",UIManager,"refreshUIPerDevice");
 	VeraBox.initEngine();		
-	
+
 	var language = getQueryStringValue("lang") || window.navigator.userLanguage || window.navigator.language;
 	AltuiDebug.debug("language:"+language);
 		
-	EventBus.registerEventHandler("on_ui_initFinished",UIManager,"run");
-	EventBus.registerEventHandler("on_ui_deviceStatusChanged",UIManager,"refreshUIPerDevice");
-	
+
 	// if lang is on the url, the js is already loaded by the LUA module. 
 	if ( (language.substring(0, 2) != 'en') && (getQueryStringValue("lang")=="") ){
 	// if (false) {

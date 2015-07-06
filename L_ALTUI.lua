@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.53"
+local version = "v0.54"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 -- local updateFrequencySec = 120	-- refreshes every x seconds
 -- local socket = require("socket")
@@ -467,8 +467,8 @@ local htmlLayout = [[
 	</script>
 	
 
-	@optional_scripts@
 	<script src="J_ALTUI_utils.js" ></script>
+	@optional_scripts@
 	<script src="J_ALTUI_verabox.js" ></script>
 	<script type='text/javascript' >
 		google.setOnLoadCallback(drawVisualization);

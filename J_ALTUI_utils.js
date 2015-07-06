@@ -321,6 +321,7 @@ var EventBus = ( function (undefined) {
 			var theArgs = [].slice.call(arguments, 1);	// remove first argument
 			$.each(_subscriptions[eventname], function (idx,sub) {
 				var func = sub.object[sub.funcname];
+				theArgs.unshift(eventname);
 				func.apply( sub.object , theArgs );
 			});
 		}
