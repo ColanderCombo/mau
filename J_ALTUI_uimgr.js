@@ -323,6 +323,12 @@ var styles ="					\
 	#altui-grid {		\
 		font-size: 12px;	\
 	}				\
+	.altui-plugin-version {		\
+		display: inline;	\
+		width: 44px; \
+		padding-left: 3px;	\
+		padding-right: 3px;	\
+	}				\
 	.altui-device-icon {			\
 		margin-left: 0px;	\
 		margin-right: 0px;	\
@@ -5162,6 +5168,7 @@ var UIManager  = ( function( window, undefined ) {
 			var infobutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-info-sign',  glyphTemplate.format("info-sign","Information",""), "Info");
 			var updatebutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-update',  glyphTemplate.format("retweet","Update Now",""), "Update");
 			var deletebutton = smallbuttonTemplate.format( plugin.id, 'altui-plugin-icon altui-plugin-uninstall',  glyphTemplate.format("remove","Uninstall",""), "Uninstall");
+			var inputbox = "<input class='form-control input-sm altui-plugin-version' id='altui-plugin-version-{0}'></input>".format( plugin.id);
 
 			var pluginTxt = pluginTemplate.format(
 				plugin.Title,
@@ -5169,7 +5176,7 @@ var UIManager  = ( function( window, undefined ) {
 				plugin.VersionMinor,
 				helpbutton,
 				infobutton,
-				updatebutton,
+				inputbox+updatebutton,
 				iconTemplate.format(plugin.Icon),
 				filebutton,
 				deletebutton
@@ -5254,9 +5261,18 @@ var UIManager  = ( function( window, undefined ) {
 				var id = $(this).prop("id");
 				if (id!=undefined && confirm("are you sure you want to update plugin "+id))
 				{
-					UPnPHelper.UPnPUpdatePlugin(id,function(result) {
-						alert(result);
-					});
+					var val = $("#altui-plugin-version-"+id).val();
+					if ($.isNumeric(val)==true) {
+						UPnPHelper.UPnPUpdatePluginVersion(id,val,function(result) {
+							PageMessage.message( _T("Update Plugin succeeded, please reload Luup"), "success");
+							alert(result);
+						});
+					}
+					else
+						UPnPHelper.UPnPUpdatePlugin(id,function(result) {
+							PageMessage.message( _T("Update Plugin succeeded, please reload Luup"), "success");
+							alert(result);
+						});
 				}
 			});
 			$(".altui-plugin-uninstall").click(function() {

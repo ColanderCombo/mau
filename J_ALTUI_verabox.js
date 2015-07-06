@@ -67,6 +67,11 @@ var UPnPHelper = (function(window,undefined) {
 		var urlHead = window.location.pathname.replace("data_request","luvd/")+file;
 		return urlHead;
 	}
+	function _buildUPnPUpdatePluginVersion( pluginid ,version )
+	{
+		var urlHead = _getUrlHead()+'?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum={0}&Version={1}'.format(pluginid ,version);
+		return urlHead;
+	}		
 	function _buildUPnPUpdatePlugin( pluginid )
 	{
 		var urlHead = _getUrlHead()+'?id=update_plugin&Plugin='+pluginid;
@@ -209,6 +214,11 @@ var UPnPHelper = (function(window,undefined) {
 		});
 	};
 
+	function _UPnPUpdatePluginVersion( pluginid, version, cbfunc )
+	{
+		_exec( _buildUPnPUpdatePluginVersion( pluginid,version), cbfunc );
+	};
+	
 	function _UPnPUpdatePlugin( pluginid, cbfunc )
 	{
 		_exec( _buildUPnPUpdatePlugin( pluginid), cbfunc );
@@ -431,6 +441,7 @@ var UPnPHelper = (function(window,undefined) {
 		UPnPSet			: _UPnPSet,		// ( deviceID, service, varName, varValue )
 		UPnPAction		: _UPnPAction,	// ( deviceID, service, action, params, cbfunc )
 		UPnPGetFile		: _UPnPGetFile,
+		UPnPUpdatePluginVersion : _UPnPUpdatePluginVersion,
 		UPnPUpdatePlugin: _UPnPUpdatePlugin,
 		UPnPDeletePlugin: _UPnPDeletePlugin,
 		UPnPRunLua 		: _UPnPRunLua,
