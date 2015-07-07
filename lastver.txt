@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("330,auto update;nicer confirm dialog box,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=27921")
+UIManager.checkAltuiUpdate("330,auto update;nicer confirm dialog box,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=27956")
