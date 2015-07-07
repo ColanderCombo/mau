@@ -3667,10 +3667,15 @@ var UIManager  = ( function( window, undefined ) {
 			var newfeatures = elems[1];
 			if (newrev > jsrevision) {
 				var url = elem[2];
-				$.get(url)
-				.done( function() {
-					PageMessage.message(_T("Upgrade Request succeeded, a Luup reload will happen"),"success");
-				})
+				if (confirm(_T("a newer version is available, do you want to upgrade"))) {	
+					$.get(url)
+					.done( function() {
+						PageMessage.message(_T("Upgrade Request succeeded, a Luup reload will happen"),"success");
+					})
+					.failure(function() {
+						PageMessage.message(_T("Upgrade Request failed"),"warning");
+					});
+				}
 			}
 		}
 	};
@@ -3688,7 +3693,7 @@ var UIManager  = ( function( window, undefined ) {
 				$("small#altui-footer").html( "<p>AltUI {0}.{1}, amg0,{2}</p>".format(_version,jsrevision,infotbl.join(", ")));
 				$("small#altui-footer").append( "<span>"+UIManager.getPayPalButtonHtml( false ) + "</span>");
 				
-				// JSPON call that will trigger a response with a call to _checkAltuiUpdate
+				// JSONP call that will trigger a response with a call to _checkAltuiUpdate(data)
 				var url = "http://code.mios.com/svn_public/mios_alternate_ui/lastver.txt";
 				$.ajax({
 				  url: url,
