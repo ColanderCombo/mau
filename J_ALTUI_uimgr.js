@@ -3666,7 +3666,7 @@ var UIManager  = ( function( window, undefined ) {
 			var newrev = parseInt(elems[0]);
 			var newfeatures = elems[1];
 			if (newrev > jsrevision) {
-				var url = elem[2];
+				var url = elems[2];
 				if (confirm(_T("a newer version is available, do you want to upgrade"))) {	
 					$.get(url)
 					.done( function() {
