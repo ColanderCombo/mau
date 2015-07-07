@@ -52,6 +52,7 @@ var plusGlyph="<span class='glyphicon glyphicon-plus' aria-hidden='true' data-to
 var saveGlyph="<span class='glyphicon glyphicon-save' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Save'></span>";
 var labelGlyph="<span class='glyphicon glyphicon-font' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Label'></span>";
 var searchGlyph = "";
+var questionGlyph = "";
 var staremtpyGlyph = "";
 var starGlyph = "";
 var loadGlyph = "";
@@ -73,6 +74,11 @@ var defaultIconSrc="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAA
 
 var styles ="					\
 	.ui-resizable-helper { border: 2px dotted #00F; }	\
+	.altui-warningicon {	\
+		font-size: 25px;\
+		padding-left: 5px;		\
+		padding-right: 5px;		\
+	}					\
 	.solid-border {	\
 		border:1px solid;: 0px;\
 	}					\
@@ -515,9 +521,10 @@ var DialogManager = ( function() {
 	
 	function _confirmDialog(message,cbfunc) {
 		var result = false;
+		var warningpic = "<div class='altui-warningicon pull-left'>{0}</div>".format(questionGlyph);
 		var dialog = DialogManager.registerDialog('dialogModal',
 						defaultDialogModalTemplate.format( 
-								_T("Are you Sure ?"), 			// title
+								warningpic+_T("Are you Sure ?"), 			// title
 								message,						// body
 								_T("Yes")						// prim button
 								));
@@ -7363,6 +7370,7 @@ $(document).ready(function() {
 	//"<span class='glyphicon glyphicon-search' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Search'></span>"
 		staremtpyGlyph =glyphTemplate.format( "star-empty", _T("Favorite"), "altui-favorite text-muted" );
 		starGlyph = glyphTemplate.format( "star", _T("Favorite"), "altui-favorite text-warning" );
+		questionGlyph=glyphTemplate.format( "question-sign", _T("Question"), "text-warning" );
 		searchGlyph=glyphTemplate.format( "search", _T("Search"), "" );
 		removeGlyph=glyphTemplate.format( "remove", _T("Remove"), "" );
 		loadGlyph = glyphTemplate.format( "open", _T("Load") , "");
