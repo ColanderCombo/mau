@@ -3715,7 +3715,11 @@ var UIManager  = ( function( window, undefined ) {
 				var url = UPnPHelper.getUrlHead()+elems[2];
 				DialogManager.confirmDialog(_T("a newer version #{0} of ALTUI is available, do you want to upgrade ?").format(newrev),function(result) {
 					if (result==true) {
-						$.get(url)
+						$.ajax({
+							url:url,
+							method:"GET",
+							cache: false
+						})
 						.always( function() {
 							PageMessage.message(_T("Upgrade Request succeeded, a Luup reload will happen"),"success");
 						});
@@ -3747,6 +3751,7 @@ var UIManager  = ( function( window, undefined ) {
 				$.ajax({
 				  url: url,
 				  dataType: "jsonp",
+				  cache:false,
 				  success: function (data) {
 				  }
 				});
