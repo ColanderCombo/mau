@@ -46,8 +46,9 @@ OFFICIAL VERSION : V 0.50.242  in Mios store
 [li][url=http://apps.mios.com/plugin.php?id=8246]http://apps.mios.com/plugin.php?id=8246[/url][/li]
 [/list]
 
-LATEST VERSION : [glow=red,2,300]V 0.54.313 July 6th 2015[/glow] : 
+LATEST VERSION : [glow=red,2,300]V 0.54.330 July 7th 2015[/glow] : 
 [list]
+[li]Autodetection of new version & updates[/li]
 [li]Favorite device / scene feature[/li]
 [li]Table of devices with selectable and sortable columns[/li]
 [li]Trigger timerange restriction ( new feature of latest UI7, now in AltUI too )[/li]
@@ -79,7 +80,7 @@ LATEST VERSION : [glow=red,2,300]V 0.54.313 July 6th 2015[/glow] :
 INSTALL
 [list]
 [li]official version : by the store or the UI7 "Apps' menu[/li]
-[li]latest version : install by opening this link in your browser  [url=http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=27921]http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=27921[/url]
+[li]latest version : install by opening this link in your browser  [url=http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=27956]http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=27956[/url]
 ignore error messages displayed by this page and wait until your unit reloads...[/li]
 [/list]
 
