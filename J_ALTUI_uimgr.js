@@ -3703,10 +3703,10 @@ var UIManager  = ( function( window, undefined ) {
 			var jsrevision = parseInt(m[1]);
 			var elems = data.split(",");
 			var newrev = parseInt(elems[0]);
-			var newfeatures = elems[1];
+			var newfeatures = elems[1].split(';');
 			if (newrev > jsrevision) {
 				var url = UPnPHelper.getUrlHead()+elems[2];
-				DialogManager.confirmDialog(_T("a newer version #{0} of ALTUI is available, do you want to upgrade").format(newrev),function(result) {
+				DialogManager.confirmDialog(_T("a newer version #{0} of ALTUI is available, do you want to upgrade ?").format(newrev),function(result) {
 					if (result==true) {
 						$.get(url)
 						.always( function() {
@@ -3714,6 +3714,10 @@ var UIManager  = ( function( window, undefined ) {
 						});
 					}
 				});
+				var html ="<ul>";
+				html += $.map(newfeatures,function(e) { return "<li>"+e+"</li>"} ).join('');
+				html +="</ul>"
+				$("div#dialogModal .row-fluid").append(html);
 			}
 		}
 	};
@@ -5339,13 +5343,13 @@ var UIManager  = ( function( window, undefined ) {
 						if ($.isNumeric(val)==true) {
 							UPnPHelper.UPnPUpdatePluginVersion(id,val,function(result) {
 								PageMessage.message( _T("Update Plugin succeeded, be patient Luup will reload"), "success");
-								alert(result);
+								// alert(result);
 							});
 						}
 						else
 							UPnPHelper.UPnPUpdatePlugin(id,function(result) {
 								PageMessage.message( _T("Update Plugin succeeded, be patient Luup will reload"), "success");
-								alert(result);
+								// alert(result);
 							});
 					}
 				});
@@ -5353,7 +5357,7 @@ var UIManager  = ( function( window, undefined ) {
 			$(".altui-plugin-uninstall").click(function() {
 				var id = $(this).prop("id");
 				if (id==undefined)	return;
-				DialogManager.confirmDialog(_T("are you sure you want to uninstall this plugin #{0} and all its created devices").format(id),function(result) {
+				DialogManager.confirmDialog(_T("Are you sure you want to uninstall this plugin #{0} and all its created devices").format(id),function(result) {
 					if (result==true) {
 						UPnPHelper.UPnPDeletePlugin(id,function(result) {
 							alert(result);

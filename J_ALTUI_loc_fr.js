@@ -198,5 +198,11 @@ Localization.init( {
 	"Update Plugin succeeded, be patient Luup will reload":"La mise a jour est demandée, Patience, Luup va redémarrer",
 	"Enter a Vera OS ( Unix ) command, the stdout will be returned and displayed below":"Tapez une commande Vera OS (Unix), la sortie stdout sera affichée ci dessous",
 	"Os Command execution on vera failed.":"L'exécution de la commande OS a échoué.",
-	"failed to execute":"Échec d'exécution"
+	"failed to execute":"Échec d'exécution",
+	"Are you Sure ?":"Êtes vous certain ?",
+	"Yes":"Oui",
+	"Are you sure you want to delete device ({0})":"Voulez vous vraiment détruire le périphérique ({0})",
+	"Are you sure you want to delete room":"Voulez vous vraiment détruire la pièce",
+	"Are you sure you want to uninstall this plugin #{0} and all its created devices":"Voulez vous vraiment désinstaller ce plugin #{0} et tous les périphériques qu'il a créé"
+	"a newer version #{0} of ALTUI is available, do you want to upgrade ?":"une nouvelle version #{0} de ALTUI est disponible, voulez vous mettre a jour ?"
 });
