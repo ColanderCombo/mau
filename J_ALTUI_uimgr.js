@@ -3654,7 +3654,31 @@ var UIManager  = ( function( window, undefined ) {
 				})
 			}
 		}
-	}
+	};
+	
+	function _myJsonPCallback(data) {
+		console.log(data)
+		alert(data);
+	};
+	
+	function _checkAltuiUpdate(jsrevision) {
+		var url = "http://code.mios.com/svn_public/mios_alternate_ui/lastver.txt";
+		$.ajax({
+		  url: url,
+		  dataType: "jsonp",
+		  success: function (data) {
+		  }
+		});
+		//
+		// $.get(url)
+		// .done( function(data) {
+			// alert(data);
+			// var tokens=data.split(",");
+			// if (parseInt(jsrevision) < parseInt(tokens[0])) {
+				// pageMessage.message(_T("A newer version is available, you can click here to upgrade"),"info");
+			// }
+		// });
+	};
 	
 	function _refreshFooter() {
 		// refresh footer if needed
@@ -3669,6 +3693,7 @@ var UIManager  = ( function( window, undefined ) {
 				for( var key in info) { infotbl.push( info[key] || "") };
 				$("small#altui-footer").html( "<p>AltUI {0}.{1}, amg0,{2}</p>".format(_version,jsrevision,infotbl.join(", ")));
 				$("small#altui-footer").append( "<span>"+UIManager.getPayPalButtonHtml( false ) + "</span>");
+				_checkAltuiUpdate(jsrevision);
 			}
 		}
 	};
@@ -4419,6 +4444,7 @@ var UIManager  = ( function( window, undefined ) {
 	clearScripts	: _clearScripts,
 	
 	// UI helpers
+	myJsonPCallback		: _myJsonPCallback,
 	UI7Check			: function() { return _ui7Check; },
 	RemoteAccessUrl		: function() { return _remoteAccessUrl; },
 	stoprefreshModes	: _stoprefreshModes,
@@ -7379,6 +7405,7 @@ $(document).ready(function() {
 		
 		UIManager.initEngine(styles.format(window.location.hostname), g_DeviceTypes, g_CustomTheme, function() {
 			UIManager.initCustomPages(g_CustomPages);	
+			VeraBox.initEngine();		
 			EventBus.publishEvent("on_ui_initFinished");
 		});
 	};
@@ -7391,7 +7418,6 @@ $(document).ready(function() {
 	EventBus.registerEventHandler("on_ui_initFinished",UIManager,UIManager.signal);
 	EventBus.registerEventHandler("on_ui_userDataLoaded",UIManager,UIManager.signal);
 	EventBus.registerEventHandler("on_ui_deviceStatusChanged",UIManager,"refreshUIPerDevice");
-	VeraBox.initEngine();		
 
 	var language = getQueryStringValue("lang") || window.navigator.userLanguage || window.navigator.language;
 	AltuiDebug.debug("language:"+language);
