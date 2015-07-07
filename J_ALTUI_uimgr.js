@@ -3666,14 +3666,11 @@ var UIManager  = ( function( window, undefined ) {
 			var newrev = parseInt(elems[0]);
 			var newfeatures = elems[1];
 			if (newrev > jsrevision) {
-				var url = elems[2];
-				if (confirm(_T("a newer version is available, do you want to upgrade"))) {	
+				var url = UPnPHelper.getUrlHead()+elems[2];
+				if (confirm(_T("a newer version #{0} of ALTUI is available, do you want to upgrade".format(newrev)))) {	
 					$.get(url)
-					.done( function() {
+					.always( function() {
 						PageMessage.message(_T("Upgrade Request succeeded, a Luup reload will happen"),"success");
-					})
-					.failure(function() {
-						PageMessage.message(_T("Upgrade Request failed"),"warning");
 					});
 				}
 			}
