@@ -418,8 +418,9 @@ var LuaEditor = (function () {
 })();
 
 var DialogManager = ( function() {
+	
+	// this method assumes htmlDialog id property is equal to 'name'
 	function _registerDialog( name, htmlDialog ) {
-		// $("div#dialogs").append(deviceModalTemplate.format( '', '', 0 ));
 		var dialog = $("div#dialogs div#"+name);
 		if (dialog.length ==0) 
 			$("div#dialogs").append(htmlDialog);
@@ -495,7 +496,7 @@ var DialogManager = ( function() {
 		});
 	};
 		
-	function _createSpinningDialog() {
+	function _createSpinningDialog(message) {
 				// 0: title, 1: body
 		var defaultSpinDialogModalTemplate="";
 		defaultSpinDialogModalTemplate = "<div id='dialogModal' class='modal' data-backdrop='static' data-keyboard='false'>";
@@ -503,13 +504,43 @@ var DialogManager = ( function() {
 		defaultSpinDialogModalTemplate += "    <div class='modal-content'>";
 		defaultSpinDialogModalTemplate += "      <div class='modal-body'>";
 		defaultSpinDialogModalTemplate += "      <div class='row-fluid'>";
-		defaultSpinDialogModalTemplate += "      {0}";
+		defaultSpinDialogModalTemplate += "      {0} {1}";
 		defaultSpinDialogModalTemplate += "      </div>";
 		defaultSpinDialogModalTemplate += "      </div>";
 		defaultSpinDialogModalTemplate += "    </div><!-- /.modal-content -->";
 		defaultSpinDialogModalTemplate += "  </div><!-- /.modal-dialog -->";
 		defaultSpinDialogModalTemplate += "</div><!-- /.modal -->";
-		return DialogManager.registerDialog('dialogModal',defaultSpinDialogModalTemplate.format( "<div class='big-spinner' style='height:70px;'></div>"));
+		return DialogManager.registerDialog('dialogModal',defaultSpinDialogModalTemplate.format( "<div class='big-spinner' style='height:70px;'></div>",message || ""));
+	};
+	
+	function _confirmDialog(message,cbfunc) {
+		var result = false;
+		var dialog = DialogManager.registerDialog('dialogModal',
+						defaultDialogModalTemplate.format( 
+								_T("Are you Sure ?"), 			// title
+								message,						// body
+								_T("Yes")						// prim button
+								));
+
+		// buttons
+		$('div#dialogs')		
+			.off('submit',"div#dialogModal form")
+			.on( 'submit',"div#dialogModal form", function() {
+				result = true;
+				dialog.modal('hide');
+			})
+			.off('hide.bs.modal',"div#dialogModal")
+			.on( 'hide.bs.modal',"div#dialogModal", function() {
+				if ($.isFunction(cbfunc))
+					(cbfunc)(result);
+			});
+
+		dialog.modal({                    // wire up the actual modal functionality and show the dialog
+		  "backdrop"  : "static",
+		  "keyboard"  : true,
+		  "show"      : true                     // ensure the modal is shown immediately
+		});
+		return result;
 	};
 	
 	function _createPropertyDialog(title)
@@ -517,8 +548,8 @@ var DialogManager = ( function() {
 		return DialogManager.registerDialog('dialogModal',
 					defaultDialogModalTemplate.format( 
 							title, 			// title
-							""
-							// "<form data-toggle='validator'></form>"	// body
+							"",				// body
+							_T("Save Changes")	// prim button
 							));
 	};
 	
@@ -926,6 +957,7 @@ var DialogManager = ( function() {
 	return {
 		registerDialog : _registerDialog,		// name, html
 		createSpinningDialog: _createSpinningDialog,
+		confirmDialog: _confirmDialog,
 		createPropertyDialog:_createPropertyDialog,
 		dlgAddCheck:_dlgAddCheck,
 		dlgAddColorPicker : _dlgAddColorPicker,	//(dialog, name, label, help, value, options)
@@ -3478,20 +3510,37 @@ var UIManager  = ( function( window, undefined ) {
 		html += "</div>";	// row
 		$(container).append( html );
 
-		$(".altui-device-attributes input").change( function() {
+		$(".altui-device-attributes input").change( function( event ) {
 			var deviceID = $(this).data('devid');
 			var attribute = $(this).prop('id');
+			var oldval = device[attribute];
 			var value = $(this).val();
-			if (confirm("Are you sure you want to modify this attribute")) {		
-				UPnPHelper.UPnPSetAttr(deviceID, attribute, value,function(result) {
-					if (result==null) {
-						PageMessage.message( "Set Attribute action failed!", "warning" );				
-					}
-					else {
-						PageMessage.message( "Set Attribute succeeded! a LUUP reload will happen now, be patient", "success" );			
-					}
-				});
-			}
+			var input = $(this);
+			DialogManager.confirmDialog(_T("Are you sure you want to modify this attribute"),function(result) {
+				if (result==true) {
+					UPnPHelper.UPnPSetAttr(deviceID, attribute, value,function(result) {
+						if (result==null) {
+							PageMessage.message( "Set Attribute action failed!", "warning" );				
+						}
+						else {
+							PageMessage.message( "Set Attribute succeeded! a LUUP reload will happen now, be patient", "success" );			
+						}
+					});
+				}
+				else {
+					$(input).val(oldval);
+				}
+			});
+			// if (confirm("Are you sure you want to modify this attribute")) {		
+				// UPnPHelper.UPnPSetAttr(deviceID, attribute, value,function(result) {
+					// if (result==null) {
+						// PageMessage.message( "Set Attribute action failed!", "warning" );				
+					// }
+					// else {
+						// PageMessage.message( "Set Attribute succeeded! a LUUP reload will happen now, be patient", "success" );			
+					// }
+				// });
+			// }
 		});
 	};
 		
@@ -3909,8 +3958,9 @@ var UIManager  = ( function( window, undefined ) {
 		propertyline += "      	</div>";
 		$('div#dialogModal')
 			.replaceWith(defaultDialogModalTemplate.format( 
-				'Image Properties',													// title
-				"<form>"+propertyline.format( widget.properties.url.htmlEncode() )+"</form>"		// body
+				'Image Properties',																// title
+				"<form>"+propertyline.format( widget.properties.url.htmlEncode() )+"</form>",	// body
+				_T("Save Changes")	// prim button
 				));
 				
 		// buttons
@@ -4141,7 +4191,7 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		// clone for temporary storage
 		var widget = $.extend( true, {}, real_widget );
-		var dialog = DialogManager.createPropertyDialog('OnOff Button Properties');
+		var dialog = DialogManager.createPropertyDialog('Camera Properties');
 		
 		DialogManager.dlgAddDevices( dialog , widget.properties.deviceid, 
 			function() {
@@ -4965,7 +5015,8 @@ var UIManager  = ( function( window, undefined ) {
 			var html = UIManager.cameraDraw(id);
 			$('div#dialogModal').replaceWith(defaultDialogModalTemplate.format( 
 				'Camera',									// title
-				html	// body
+				html,	// body
+				_T("Save Changes")	// prim button
 			));
 			$('div#dialogModal').modal();
 		};
@@ -5369,7 +5420,8 @@ var UIManager  = ( function( window, undefined ) {
 			$('div#dialogModal')
 				.replaceWith(defaultDialogModalTemplate.format( 
 					'Page Properties',					// title
-					"<form>"+propertyline+"</form>"		// body
+					"<form>"+propertyline+"</form>",		// body
+					_T("Save Changes")	// prim button
 					));
 					
 			// buttons
@@ -7282,7 +7334,7 @@ $(document).ready(function() {
 		deviceActionModalTemplate += "  </div><!-- /.modal-dialog -->";
 		deviceActionModalTemplate += "</div><!-- /.modal -->";
 
-		// 0: title, 1: body
+		// 0: title, 1: body, 2: primary button text like _T("Save Changes")
 		defaultDialogModalTemplate = "<div id='dialogModal' class='modal fade'>";
 		defaultDialogModalTemplate += "  <div class='modal-dialog modal-lg'>";
 		defaultDialogModalTemplate += "    <form class='form' data-toggle='validator' onsubmit='return false;'>";
@@ -7298,7 +7350,7 @@ $(document).ready(function() {
 		defaultDialogModalTemplate += "      </div>";
 		defaultDialogModalTemplate += "      <div class='modal-footer'>";
 		defaultDialogModalTemplate += "        <button type='button' class='btn btn-default' data-dismiss='modal'>"+_T("Close")+"</button>";
-		defaultDialogModalTemplate += "        <button type='submit' class='btn btn-primary'>"+_T("Save Changes")+"</button>";
+		defaultDialogModalTemplate += "        <button type='submit' class='btn btn-primary'>{2}</button>";
 		defaultDialogModalTemplate += "      </div>";
 		defaultDialogModalTemplate += "    </div><!-- /.modal-content -->";
 		defaultDialogModalTemplate += "    </form>";
