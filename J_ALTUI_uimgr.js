@@ -3531,16 +3531,6 @@ var UIManager  = ( function( window, undefined ) {
 					$(input).val(oldval);
 				}
 			});
-			// if (confirm("Are you sure you want to modify this attribute")) {		
-				// UPnPHelper.UPnPSetAttr(deviceID, attribute, value,function(result) {
-					// if (result==null) {
-						// PageMessage.message( "Set Attribute action failed!", "warning" );				
-					// }
-					// else {
-						// PageMessage.message( "Set Attribute succeeded! a LUUP reload will happen now, be patient", "success" );			
-					// }
-				// });
-			// }
 		});
 	};
 		
@@ -3716,12 +3706,14 @@ var UIManager  = ( function( window, undefined ) {
 			var newfeatures = elems[1];
 			if (newrev > jsrevision) {
 				var url = UPnPHelper.getUrlHead()+elems[2];
-				if (confirm(_T("a newer version #{0} of ALTUI is available, do you want to upgrade".format(newrev)))) {	
-					$.get(url)
-					.always( function() {
-						PageMessage.message(_T("Upgrade Request succeeded, a Luup reload will happen"),"success");
-					});
-				}
+				DialogManager.confirmDialog(_T("a newer version #{0} of ALTUI is available, do you want to upgrade").format(newrev),function(result) {
+					if (result==true) {
+						$.get(url)
+						.always( function() {
+							PageMessage.message(_T("Upgrade Request succeeded, a Luup reload will happen"),"success");
+						});
+					}
+				});
 			}
 		}
 	};
@@ -4719,11 +4711,12 @@ var UIManager  = ( function( window, undefined ) {
 		$("#altui-device-attributes-"+devid).toggle(false);			// hide them by default;
 		$("#altui-device-usedin-"+devid).toggle(false);			// hide them by default;
 		$(".altui-debug-div").toggle(false);						// hide
-		$(".altui-deldevice").click( function() {
-			var id = $(this).prop('id');
-			VeraBox.deleteDevice(id);
-		});
-
+		$(container).off('click','.altui-deldevice')
+					.on('click','.altui-deldevice',  function(e) {
+						var id = $(this).prop('id');
+						VeraBox.deleteDevice(id);
+					});
+					
 		$("#altui-toggle-attributes").click( function() {
 			$("#altui-device-attributes-"+devid).toggle();		// toogle attribute box
 			$("#altui-toggle-attributes span.caret").toggleClass( "caret-reversed" );
@@ -5052,10 +5045,9 @@ var UIManager  = ( function( window, undefined ) {
 				$(this).html("<input id='"+devid+"' class='altui-device-title-input' value='"+text+"'></input>");
 
 				$("input#"+devid+".altui-device-title-input").focusout({devid:devid},function(event){ 
-					var newname = $(this).val();
-					UPnPHelper.renameDevice(devid, newname);
 					var device = VeraBox.getDeviceByID(event.data.devid);
-					device.name = newname;
+					var newname = $(this).val();
+					UPnPHelper.renameDevice(devid, newname );
 					$(this).parent().text(device.name);
 				});
 			})
@@ -5340,30 +5332,34 @@ var UIManager  = ( function( window, undefined ) {
 			});
 			$(".altui-plugin-update").click(function() {
 				var id = $(this).prop("id");
-				if (id!=undefined && confirm("are you sure you want to update plugin "+id))
-				{
-					var val = $("#altui-plugin-version-"+id).val();
-					if ($.isNumeric(val)==true) {
-						UPnPHelper.UPnPUpdatePluginVersion(id,val,function(result) {
-							PageMessage.message( _T("Update Plugin succeeded, be patient Luup will reload"), "success");
-							alert(result);
-						});
+				if (id==undefined)	return;
+				DialogManager.confirmDialog(_T("are you sure you want to update plugin #{0}").format(id),function(result) {
+					if (result==true) {
+						var val = $("#altui-plugin-version-"+id).val();
+						if ($.isNumeric(val)==true) {
+							UPnPHelper.UPnPUpdatePluginVersion(id,val,function(result) {
+								PageMessage.message( _T("Update Plugin succeeded, be patient Luup will reload"), "success");
+								alert(result);
+							});
+						}
+						else
+							UPnPHelper.UPnPUpdatePlugin(id,function(result) {
+								PageMessage.message( _T("Update Plugin succeeded, be patient Luup will reload"), "success");
+								alert(result);
+							});
 					}
-					else
-						UPnPHelper.UPnPUpdatePlugin(id,function(result) {
-							PageMessage.message( _T("Update Plugin succeeded, be patient Luup will reload"), "success");
-							alert(result);
-						});
-				}
+				});
 			});
 			$(".altui-plugin-uninstall").click(function() {
 				var id = $(this).prop("id");
-				if (id!=undefined && confirm("are you sure you want to uninstall this plugin "+id+" and all its created devices"))
-				{
-					UPnPHelper.UPnPDeletePlugin(id,function(result) {
-						alert(result);
-					});
-				}
+				if (id==undefined)	return;
+				DialogManager.confirmDialog(_T("are you sure you want to uninstall this plugin #{0} and all its created devices").format(id),function(result) {
+					if (result==true) {
+						UPnPHelper.UPnPDeletePlugin(id,function(result) {
+							alert(result);
+						});
+					}
+				});
 			});
 		};	
 		
@@ -5834,8 +5830,11 @@ var UIManager  = ( function( window, undefined ) {
 		var lua = VeraBox.getLuaStartup();
 		UIManager.pageEditorForm("Lua Startup Code",lua,"Submit",function(newlua) {
 			if (newlua!=lua) {
-				if (confirm("do you want to change lua startup code ? if yes, it will generate a LUA reload, be patient..."))
-					VeraBox.setStartupCode(newlua);
+				DialogManager.confirmDialog(_T("do you want to change lua startup code ? if yes, it will generate a LUA reload, be patient..."),function(result) {
+					if (result==true) {
+						VeraBox.setStartupCode(newlua);
+					}
+				});
 			}
 		});
 	},

@@ -238,17 +238,23 @@ var UPnPHelper = (function(window,undefined) {
 	
 	function _renameDevice( devid, newname, roomid )
 	{
-		if (confirm(_T("Are you sure you want to modify this device to:")+newname)) {
-			var url = _getUrlHead()+"?id=device&action=rename&device="+devid+"&name="+newname;
-			if (roomid !=undefined)
-				url = url+"&room="+roomid;
-			_exec( url, function(result) {	
-				if (result!="OK") 
-					PageMessage.message( _T("Device modify failed!"), "warning" );
-				else
-					PageMessage.message( _T("Device modified!"), "success" );
-			} );
-		}
+		var device = VeraBox.getDeviceByID(devid);
+		var oldname = device.name;
+		DialogManager.confirmDialog(_T("Are you sure you want to modify this device to:")+newname,function(result) {
+			if (result==true) {
+				device.name = newname;
+				device.dirty = true;
+				var url = _getUrlHead()+"?id=device&action=rename&device="+devid+"&name="+newname;
+				if (roomid !=undefined)
+					url = url+"&room="+roomid;
+				_exec( url, function(result) {	
+					if (result!="OK") 
+						PageMessage.message( _T("Device modify failed!"), "warning" );
+					else
+						PageMessage.message( _T("Device modified!"), "success" );
+				} );
+			}
+		});
 	};
 	
 	function _createDevice( descr, dfile, ifile, roomnum, cbfunc )
@@ -1128,27 +1134,29 @@ var VeraBox = ( function( window, undefined ) {
 
 	function _deleteRoom(id)
 	{	
-		if (confirm(_T("Are you sure you want to delete room")+" ("+id+")")) {
-			var url = "data_request?id=room&action=delete&room="+id;
-			var jqxhr = $.ajax( {
-				url: url,
-				type: "GET",
-				dataType: "text"
-			})
-			  .done(function(data) {
-				if (data!="ERROR") {
-					PageMessage.message(_T("Deleted Room")+" "+id, "success", true);
-				}
-				else {
-					PageMessage.message(_T("Could not delete Room")+" "+id, "warning");
-				}
-			  })
-			  .fail(function(jqXHR, textStatus) {
-				PageMessage.message( _T("Delete Room failed")+ ": " + textStatus , "danger");
-			  })
-			  .always(function() {
-			  });
-		}
+		DialogManager.confirmDialog(_T("Are you sure you want to delete room")+" ("+id+")",function(result) {
+			if (result==true) {
+				var url = "data_request?id=room&action=delete&room="+id;
+				var jqxhr = $.ajax( {
+					url: url,
+					type: "GET",
+					dataType: "text"
+				})
+				  .done(function(data) {
+					if (data!="ERROR") {
+						PageMessage.message(_T("Deleted Room")+" "+id, "success", true);
+					}
+					else {
+						PageMessage.message(_T("Could not delete Room")+" "+id, "warning");
+					}
+				  })
+				  .fail(function(jqXHR, textStatus) {
+					PageMessage.message( _T("Delete Room failed")+ ": " + textStatus , "danger");
+				  })
+				  .always(function() {
+				  });
+			}
+		});
 	};
 
 	function _runScene(id)
@@ -1208,27 +1216,29 @@ var VeraBox = ( function( window, undefined ) {
 
 	function _deleteDevice(id)
 	{
-		if (confirm(_T("Are you sure you want to delete device ({0})").format(id))) {
-			var url = "data_request?id=device&action=delete&device="+id;
-			var jqxhr = $.ajax( {
-				url: url,
-				type: "GET",
-				dataType: "text"
-			})
-			.done(function(data) {
-				if (data!="ERROR") {
-					PageMessage.message(_T("Deleted Device {0} successfully ").format(id), "success", true);
-				}
-				else {
-					PageMessage.message(_T("Could not delete Device {0}").format(id), "warning");
-				}
-			})
-			.fail(function(jqXHR, textStatus) {
-				PageMessage.message( _T("Delete Device failed")+": " + textStatus , "danger");
-			})
-			.always(function() {
-			});
-		}
+		DialogManager.confirmDialog(_T("Are you sure you want to delete device ({0})").format(id),function(result) {
+			if (result==true) {
+				var url = "data_request?id=device&action=delete&device="+id;
+				var jqxhr = $.ajax( {
+					url: url,
+					type: "GET",
+					dataType: "text"
+				})
+				.done(function(data) {
+					if (data!="ERROR") {
+						PageMessage.message(_T("Deleted Device {0} successfully ").format(id), "success", true);
+					}
+					else {
+						PageMessage.message(_T("Could not delete Device {0}").format(id), "warning");
+					}
+				})
+				.fail(function(jqXHR, textStatus) {
+					PageMessage.message( _T("Delete Device failed")+": " + textStatus , "danger");
+				})
+				.always(function() {
+				});
+			}
+		});
 	};
 	
 	function _updateNeighbors(deviceid) {
@@ -1250,27 +1260,29 @@ var VeraBox = ( function( window, undefined ) {
 	
 	function _deleteScene(id)
 	{
-		if (confirm(_T("Are you sure you want to delete scene ({0})").format(id))) {
-			var url = "data_request?id=scene&action=delete&scene="+id;
-			var jqxhr = $.ajax( {
-				url: url,
-				type: "GET",
-				dataType: "text"
-			})
-			.done(function(data) {
-				if (data!="ERROR") {
-					PageMessage.message(_T("Deleted Scene {0} successfully ").format(id), "success", true);
-				}
-				else {
-					PageMessage.message(_T("Could not delete Scene {0}").format(id), "warning");
-				}
-			})
-			.fail(function(jqXHR, textStatus) {
-				PageMessage.message( _T("Delete Scene failed")+": " + textStatus , "danger");
-			})
-			.always(function() {
-			});
-		}
+		DialogManager.confirmDialog(_T("Are you sure you want to delete scene ({0})").format(id),function(result) {
+			if (result==true) {
+				var url = "data_request?id=scene&action=delete&scene="+id;
+				var jqxhr = $.ajax( {
+					url: url,
+					type: "GET",
+					dataType: "text"
+				})
+				.done(function(data) {
+					if (data!="ERROR") {
+						PageMessage.message(_T("Deleted Scene {0} successfully ").format(id), "success", true);
+					}
+					else {
+						PageMessage.message(_T("Could not delete Scene {0}").format(id), "warning");
+					}
+				})
+				.fail(function(jqXHR, textStatus) {
+					PageMessage.message( _T("Delete Scene failed")+": " + textStatus , "danger");
+				})
+				.always(function() {
+				});
+			}
+		});
 	};
 
 	function _setStartupCode(newlua) 
