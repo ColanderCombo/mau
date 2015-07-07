@@ -31,6 +31,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 // UIManager.loadScript('https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["corechart","table","gauge"]}]}');
+var AltUI_revision = "$Revision$";
 var _HouseModes = [];
 var deviceModalTemplate = "";
 var deviceActionModalTemplate = "";
@@ -3656,44 +3657,45 @@ var UIManager  = ( function( window, undefined ) {
 		}
 	};
 	
-	function _myJsonPCallback(data) {
-		console.log(data)
-		alert(data);
-	};
-	
-	function _checkAltuiUpdate(jsrevision) {
-		var url = "http://code.mios.com/svn_public/mios_alternate_ui/lastver.txt";
-		$.ajax({
-		  url: url,
-		  dataType: "jsonp",
-		  success: function (data) {
-		  }
-		});
-		//
-		// $.get(url)
-		// .done( function(data) {
-			// alert(data);
-			// var tokens=data.split(",");
-			// if (parseInt(jsrevision) < parseInt(tokens[0])) {
-				// pageMessage.message(_T("A newer version is available, you can click here to upgrade"),"info");
-			// }
-		// });
+	function _checkAltuiUpdate(data) {
+		var re = /\$Revision:\s*(\d*).*\$/; 
+		var m;
+		if ((m = re.exec(AltUI_revision)) !== null) {
+			var jsrevision = parseInt(m[1]);
+			var elems = data.split(",");
+			var newrev = parseInt(elems[0]);
+			var newfeatures = elems[1];
+			if (newrev > jsrevision) {
+				var url = elem[2];
+				$.get(url)
+				.done( function() {
+					PageMessage.message(_T("Upgrade Request succeeded, a Luup reload will happen"),"success");
+				})
+			}
+		}
 	};
 	
 	function _refreshFooter() {
 		// refresh footer if needed
 		if ($("small#altui-footer span.bg-danger").length == 1) {
-			var str = "$Revision$";
 			var re = /\$Revision:\s*(\d*).*\$/; 
 			var m;
-			if ((m = re.exec(str)) !== null) {
+			if ((m = re.exec(AltUI_revision)) !== null) {
 				var jsrevision = m[1];
 				var info = VeraBox.getBoxInfo();
 				var infotbl=[];
 				for( var key in info) { infotbl.push( info[key] || "") };
 				$("small#altui-footer").html( "<p>AltUI {0}.{1}, amg0,{2}</p>".format(_version,jsrevision,infotbl.join(", ")));
 				$("small#altui-footer").append( "<span>"+UIManager.getPayPalButtonHtml( false ) + "</span>");
-				_checkAltuiUpdate(jsrevision);
+				
+				// JSPON call that will trigger a response with a call to _checkAltuiUpdate
+				var url = "http://code.mios.com/svn_public/mios_alternate_ui/lastver.txt";
+				$.ajax({
+				  url: url,
+				  dataType: "jsonp",
+				  success: function (data) {
+				  }
+				});
 			}
 		}
 	};
@@ -4444,7 +4446,7 @@ var UIManager  = ( function( window, undefined ) {
 	clearScripts	: _clearScripts,
 	
 	// UI helpers
-	myJsonPCallback		: _myJsonPCallback,
+	checkAltuiUpdate	: _checkAltuiUpdate,
 	UI7Check			: function() { return _ui7Check; },
 	RemoteAccessUrl		: function() { return _remoteAccessUrl; },
 	stoprefreshModes	: _stoprefreshModes,
