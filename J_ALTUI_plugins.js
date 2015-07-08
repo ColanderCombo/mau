@@ -101,30 +101,30 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	
 	// return the html string inside the .panel-body of the .altui-device#id panel
 	function _drawCamera(devid, device) {
-		var img = $("<img class='altui-camera-picture'></img>")
-			.attr('src',"data_request?id=request_image&res=low&cam="+device.id+"&t="+ new Date().getTime())
-			.height(50)
-			.width(66);
+		if (VeraBox.isRemoteAccess()) {
+			var img = $("<img class='altui-camera-picture'></img>")
+				.attr('src',"data_request?id=request_image&res=low&cam="+device.id+"&t="+ new Date().getTime())
+				.height(50)
+				.width(66);
 
-		return img.wrap( "<div></div>" ).parent().html();
-
-		/*
-		var streamurl = "url(http://{0}{1})".format(
-			device.ip,	//ip
-			VeraBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" )	//DirectStreamingURL
-		);
-		var div = $("<div class='altui-camera-picture'></div>")
-			.css({
-				"background-image": streamurl,
-				"background-size": "contain",
-				"margin-left": 55,
-				"margin-top": 1
-				})
-			// .css("background-size","contain")
-			.height(50)
-			.width(50);
-		return div.wrap( "<div></div>" ).parent().html();
-		*/
+			return img.wrap( "<div></div>" ).parent().html();
+		} else {
+			var streamurl = "url(http://{0}{1})".format(
+				device.ip,	//ip
+				VeraBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" )	//DirectStreamingURL
+			);
+			var div = $("<div class='altui-camera-picture'></div>")
+				.css({
+					"background-image": streamurl,
+					"background-size": "contain",
+					"margin-left": 55,
+					"margin-top": 1
+					})
+				// .css("background-size","contain")
+				.height(50)
+				.width(50);
+			return div.wrap( "<div></div>" ).parent().html();
+		}
 	}
 	
 	// return the html string inside the .panel-body of the .altui-device#id panel

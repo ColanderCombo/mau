@@ -204,5 +204,6 @@ Localization.init( {
 	"Are you sure you want to delete device ({0})":"Are you sure you want to delete device ({0})",
 	"Are you sure you want to delete room":"Are you sure you want to delete room",
 	"Are you sure you want to uninstall this plugin #{0} and all its created devices":"Are you sure you want to uninstall this plugin #{0} and all its created devices",
-	"a newer version #{0} of ALTUI is available, do you want to upgrade ?":"a newer version #{0} of ALTUI is available, do you want to upgrade ?"
+	"a newer version #{0} of ALTUI is available, do you want to upgrade ?":"a newer version #{0} of ALTUI is available, do you want to upgrade ?",
+	"Question":"Question"
 	});

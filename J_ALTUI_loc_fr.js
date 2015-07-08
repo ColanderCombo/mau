@@ -204,5 +204,6 @@ Localization.init( {
 	"Are you sure you want to delete device ({0})":"Voulez vous vraiment détruire le périphérique ({0})",
 	"Are you sure you want to delete room":"Voulez vous vraiment détruire la pièce",
 	"Are you sure you want to uninstall this plugin #{0} and all its created devices":"Voulez vous vraiment désinstaller ce plugin #{0} et tous les périphériques qu'il a créé",
-	"a newer version #{0} of ALTUI is available, do you want to upgrade ?":"une nouvelle version #{0} de ALTUI est disponible, voulez vous mettre a jour ?"
+	"a newer version #{0} of ALTUI is available, do you want to upgrade ?":"une nouvelle version #{0} de ALTUI est disponible, voulez vous mettre a jour ?",
+	"Question":"Question"
 });

@@ -792,6 +792,10 @@ local function getDefaultConfig()
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawPowerMeter",
 	}
+	tbl["urn:schemas-upnp-org:device:DigitalSecurityCamera:1"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawCamera",
+	}
 	tbl["urn:schemas-upnp-org:device:DigitalSecurityCamera:2"]= {
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawCamera",

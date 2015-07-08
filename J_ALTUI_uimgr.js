@@ -525,10 +525,9 @@ var DialogManager = ( function() {
 		var dialog = DialogManager.registerDialog('dialogModal',
 						defaultDialogModalTemplate.format( 
 								warningpic+_T("Are you Sure ?"), 			// title
-								message,						// body
-								_T("Yes")						// prim button
+								message						// body
 								));
-
+		DialogManager.dlgAddDialogButton(dialog, true, _T("Yes"));
 		// buttons
 		$('div#dialogs')		
 			.off('submit',"div#dialogModal form")
@@ -552,12 +551,21 @@ var DialogManager = ( function() {
 	
 	function _createPropertyDialog(title)
 	{
-		return DialogManager.registerDialog('dialogModal',
-					defaultDialogModalTemplate.format( 
-							title, 			// title
-							"",				// body
-							_T("Save Changes")	// prim button
+		var dialog =  DialogManager.registerDialog('dialogModal',
+						defaultDialogModalTemplate.format( 
+								title, 			// title
+								""				// body
 							));
+		DialogManager.dlgAddDialogButton(dialog, true, _T("Save Changes"));
+		return dialog;
+	};
+	
+	function _dlgAddDialogButton(dialog, bSubmit, label) {
+		var html = "<button type='{0}' class='btn btn-primary'>{1}</button>".format( 
+			(bSubmit ? 'submit' : 'button'),
+			label
+			)
+		$(dialog).find(".modal-footer").append(html);
 	};
 	
 	function _dlgAddCheck(dialog, name, value, label)
@@ -966,6 +974,7 @@ var DialogManager = ( function() {
 		createSpinningDialog: _createSpinningDialog,
 		confirmDialog: _confirmDialog,
 		createPropertyDialog:_createPropertyDialog,
+		dlgAddDialogButton: _dlgAddDialogButton,	// (dialog, bSubmit, label)
 		dlgAddCheck:_dlgAddCheck,
 		dlgAddColorPicker : _dlgAddColorPicker,	//(dialog, name, label, help, value, options)
 		dlgAddLine:_dlgAddLine,
@@ -3964,13 +3973,13 @@ var UIManager  = ( function( window, undefined ) {
 		propertyline += "      		<label for='altui-widget-imgsource'>Image Source</label>";
 		propertyline += "      		<input id='altui-widget-imgsource' class='form-control' type='url' value='{0}' placeholder='enter url or data URI here'></input>";
 		propertyline += "      	</div>";
-		$('div#dialogModal')
-			.replaceWith(defaultDialogModalTemplate.format( 
-				'Image Properties',																// title
-				"<form>"+propertyline.format( widget.properties.url.htmlEncode() )+"</form>",	// body
-				_T("Save Changes")	// prim button
-				));
-				
+		var dialog = DialogManager.registerDialog('dialogModal',
+						defaultDialogModalTemplate.format( 
+						'Image Properties',																// title
+						"<form>"+propertyline.format( widget.properties.url.htmlEncode() )+"</form>"	// body
+					));
+
+		DialogManager.dlgAddDialogButton($('div#dialogModal'), true, _T("Save Changes"));				
 		// buttons
 		$('div#dialogModal form').off('submit');
 		$('div#dialogModal form').on( 'submit', function() {
@@ -4608,8 +4617,7 @@ var UIManager  = ( function( window, undefined ) {
 		$(".altui-leftnav").empty();
 		$(".altui-device-toolbar").remove();
 		$("#dialogs").empty();
-		// DialogManager.registerDialog('dialogModal',defaultDialogModalTemplate.format( 'vide', 'vide'));
-		// DialogManager.registerDialog('deviceModal',deviceModalTemplate.format( '', '', 0 ));
+
 		$(".altui-scripts").remove();
 		$("body").append("<div class='altui-scripts'></div>");
 	},
@@ -5022,10 +5030,9 @@ var UIManager  = ( function( window, undefined ) {
 			var id = $(this).parents(".altui-device").prop('id');
 			var device = VeraBox.getDeviceByID(id);
 			var html = UIManager.cameraDraw(id);
-			$('div#dialogModal').replaceWith(defaultDialogModalTemplate.format( 
-				'Camera',									// title
-				html,	// body
-				_T("Save Changes")	// prim button
+			var dialog = DialogManager.registerDialog('dialogModal',defaultDialogModalTemplate.format( 
+				'Camera',	// title
+				html		// body
 			));
 			$('div#dialogModal').modal();
 		};
@@ -5429,13 +5436,13 @@ var UIManager  = ( function( window, undefined ) {
 				propertyline += "</div>";
 			});
 
-			$('div#dialogModal')
-				.replaceWith(defaultDialogModalTemplate.format( 
-					'Page Properties',					// title
-					"<form>"+propertyline+"</form>",		// body
-					_T("Save Changes")	// prim button
-					));
-					
+			var dialog = DialogManager.registerDialog('dialogModal',
+							defaultDialogModalTemplate.format( 
+							'Page Properties',					// title
+							"<form>"+propertyline+"</form>"		// body
+						));
+
+			DialogManager.dlgAddDialogButton($('div#dialogModal'), true, _T("Save Changes"));							
 			// buttons
 			$('div#dialogModal button.btn-primary').off('click');
 			$('div#dialogModal button.btn-primary').on( 'click', function() {
@@ -7365,7 +7372,7 @@ $(document).ready(function() {
 		defaultDialogModalTemplate += "      </div>";
 		defaultDialogModalTemplate += "      <div class='modal-footer'>";
 		defaultDialogModalTemplate += "        <button type='button' class='btn btn-default' data-dismiss='modal'>"+_T("Close")+"</button>";
-		defaultDialogModalTemplate += "        <button type='submit' class='btn btn-primary'>{2}</button>";
+		// defaultDialogModalTemplate += "        <button type='submit' class='btn btn-primary'>{2}</button>";
 		defaultDialogModalTemplate += "      </div>";
 		defaultDialogModalTemplate += "    </div><!-- /.modal-content -->";
 		defaultDialogModalTemplate += "    </form>";
