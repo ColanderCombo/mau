@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.54"
+local version = "v0.55"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 -- local updateFrequencySec = 120	-- refreshes every x seconds
 -- local socket = require("socket")
@@ -627,8 +627,15 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				local response = os.execute(command)
 				local file = io.open('/tmp/oscommand.log','r')
 				local result = file:read("*a")
+				local resultcode = ""
 				file:close()
-				return json.encode( {success=(response==0 or response==true), result=result} ) , "application/json"
+				if (response==0 or response==true) then
+					resultcode="1,"
+				else
+					resultcode="0,"
+				end
+				return resultcode..result , "text/plain"
+				-- return json.encode( {success=(response==0 or response==true), result=result} ) , "application/json"
 			end,
 		["rooms"] = 
 			function(params)
