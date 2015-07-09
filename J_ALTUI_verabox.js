@@ -2083,6 +2083,7 @@ var Ajax = (function(window,undefined) {
 				url: url,
 				type: options.method,
 				data: options.parameters,
+				processData : false,			
 				dataType: "text"
 			})
 			.done(function(data, textStatus, jqXHR) {
