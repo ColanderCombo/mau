@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("337,Camera Thumbnail + option control;refactor of option screen,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=27966")
+UIManager.checkAltuiUpdate("342,Camera Thumbnail + option control;refactor of option screen;Fix for RGBW;Fix for Sonos,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=27974")
