@@ -2079,12 +2079,20 @@ var Ajax = (function(window,undefined) {
 				onComplete : null,
 			}, opts);
 			
+			var urlHead = url;
+			var params = [];
+			$.each(options.parameters, function(index,value) {
+				params.push( index+"="+value );	// we assume nothing requires uri encoding here
+			});
+			if (params.length>0) {
+				urlHead = urlHead + "?" + params.join('&');
+			}
 			var jqxhr = $.ajax( {
-				url: url,
+				url: urlHead,
 				type: options.method,
-				data: options.parameters,
-				processData : false,			
-				dataType: "text"
+				// data: options.parameters,
+				// processData : false,			
+				// dataType: "text"
 			})
 			.done(function(data, textStatus, jqXHR) {
 				if ($.isFunction( options.onSuccess )) {
