@@ -33,7 +33,7 @@ Localization.init( {
 	"Custom Pages Editor": "Pagine Personalizzate Editore",
 	"Lua Startup": "Lua Avviare",
 	"Lua Code Test":"Lua Codice Verificare",
-	"Optimizations": "Ottimizzazioni",
+	"Options": "Options",
 	"Unmuted,Muted":"Normale,Muto",
 	"Normal,Debug":"Normale,Debug",
 	"Up":"Alza",
@@ -205,5 +205,9 @@ Localization.init( {
 	"Are you sure you want to delete room":"Are you sure you want to delete room",
 	"Are you sure you want to uninstall this plugin #{0} and all its created devices":"Are you sure you want to uninstall this plugin #{0} and all its created devices",
 	"a newer version #{0} of ALTUI is available, do you want to upgrade ?":"a newer version #{0} of ALTUI is available, do you want to upgrade ?",
-	"Question":"Question"
+	"Question":"Question",
+	"Options":"Options",
+	"Show Video Thumbnail in Local mode":"Show Video Thumbnail in Local mode",
+	"Cache Control":"Cache Control",
+	"Custom Pages Control":"Custom Pages Control"
 	});

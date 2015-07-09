@@ -4558,7 +4558,7 @@ var UIManager  = ( function( window, undefined ) {
 			{ id:11, title:_T('Credits'), onclick:'UIManager.pageCredits()', parent:0 },
 			{ id:12, title:_T('LuaTest'), onclick:'UIManager.pageLuaTest()', parent:0 },
 			{ id:13, title:_T('LuaStart'), onclick:'UIManager.pageLuaStart()', parent:0 },
-			{ id:14, title:_T('Optimize'), onclick:'UIManager.pageOptimize()', parent:0 },
+			{ id:14, title:_T('Options'), onclick:'UIManager.pageOptions()', parent:0 },
 			{ id:15, title:_T('Editor'), onclick:'UIManager.pageEditor()', parent:8 },
 			{ id:16, title:_T('ZWave'), onclick:'UIManager.pageZwave()', parent:0 },
 			{ id:17, title:_T('Localize'), onclick:'UIManager.pageLocalization()', parent:0 },
@@ -7178,8 +7178,11 @@ var UIManager  = ( function( window, undefined ) {
 		);
 	},
 	
-	pageOptimize: function() {
-		UIManager.clearPage(_T('Optimize'),_T("Optimizations"));
+	pageOptions: function() {
+		var _checkOptions = [
+			{ id:'ShowVideoThumbnail', label:_T("Show Video Thumbnail in Local mode")  },
+		];
+		UIManager.clearPage(_T('Options'),_T("Options"));
 
 		var color = IconDB.isDB() ? "text-success" : "text-danger";
 		var okGlyph = glyphTemplate.format( "ok-sign", "OK" , color );
@@ -7193,58 +7196,98 @@ var UIManager  = ( function( window, undefined ) {
 		color =  MyLocalStorage.get("Pages")!=null ? "text-success" : "text-danger";
 		var okGlyph4 = glyphTemplate.format( "ok-sign", "OK" , color );
 		
-		var html = "<div class='btn-group' role='group' aria-label='Icon DB'>";
-		html += "<button class='btn btn-default altui-save-IconDB' type='submit'>"+saveGlyph+" Save Icon DB</button>";
-		html += "<button class='btn btn-default altui-clear-IconDB' type='submit'>"+okGlyph+" Clear Icon DB</button>";
+		var html = "";
+		
+		html += "<div class='col-xs-12'>";
+		html +="<div class='panel panel-default'>";
+		html +="  <div class='panel-heading'>"+_T("Options")+"</div>";
+		html +="  <div class='panel-body'>";
+		html += "<div class='row'>";
+			$.each(_checkOptions, function(id,check) {
+				var init =  MyLocalStorage.getSettings(check.id) || "";
+				html += "<div class='col-sm-6'>";
+					html +="<label class='checkbox-inline'>";
+					html +=("  <input type='checkbox' id='altui-"+check.id+"' " + ( (init==true) ? 'checked' : '') +" value='"+init+"' title='"+check.id+"'>"+check.label);
+					html +="</label>";
+				html += "</div>";
+				$(".altui-mainpanel").on("click","#altui-"+check.id,function(){ 
+					MyLocalStorage.setSettings(check.id, $("#altui-"+check.id).is(':checked'));
+				});
+			});		
+		html +="  </div>";
+		html +="  </div>";
+		html +="</div>";
+		html +="</div>";
+		
+		html += "<div class='col-xs-12'>";
+		html +="<div class='panel panel-default'>";
+		html +="  <div class='panel-heading'>"+_T("Cache Control")+"</div>";
+		html +="  <div class='panel-body'>";
+			html +="<div class='btn-group' role='group' aria-label='Icon DB'>";
+			html += "<button class='btn btn-default altui-save-IconDB' type='submit'>"+saveGlyph+" Save Icon DB</button>";
+			html += "<button class='btn btn-default altui-clear-IconDB' type='submit'>"+okGlyph+" Clear Icon DB</button>";
+			html += "</div>";
+			html += "<div class='btn-group' role='group' aria-label='File DB'>";
+			html += "<button class='btn btn-default altui-save-FileDB' type='submit'>"+saveGlyph+" Save File DB</button>";
+			html += "<button class='btn btn-default altui-clear-FileDB' type='submit'>"+okGlyph2+" Clear File DB</button>";
+			html += "</div>";
+			html += "<div class='btn-group' role='group' aria-label='User Data DB'>";
+			html += "<button class='btn btn-default altui-save-userdata' type='submit'>"+saveGlyph+"Save UserData</button>";
+			html += "<button class='btn btn-default altui-clear-userdata' type='submit'>"+okGlyph3+" Clear UserData</button>";
+			html += "</div>";
 		html += "</div>";
-		html += "<div class='btn-group' role='group' aria-label='File DB'>";
-		html += "<button class='btn btn-default altui-save-FileDB' type='submit'>"+saveGlyph+" Save File DB</button>";
-		html += "<button class='btn btn-default altui-clear-FileDB' type='submit'>"+okGlyph2+" Clear File DB</button>";
+		html +="  </div>";
+		html +="</div>";
+		
+		html += "<div class='col-xs-12'>";
+		html +="<div class='panel panel-default'>";
+		html +="  <div class='panel-heading'>"+_T("Custom Pages Control")+"</div>";
+		html +="  <div class='panel-body'>";
+			html += "<div class='btn-group' role='group' aria-label='User Pages DB'>";
+			html += "<button class='btn btn-default altui-save-userpage' type='submit'>"+saveGlyph+"Save User Pages</button>";
+			html += "<button class='btn btn-default altui-restore-userpage' type='submit'>"+loadGlyph+"Restore From User Pages Cache</button>";
+			html += "<button class='btn btn-default altui-clear-userpage' type='submit'>"+okGlyph4+" Clear User Pages Cache</button>";
+			html += "</div>";
 		html += "</div>";
-		html += "<div class='btn-group' role='group' aria-label='User Data DB'>";
-		html += "<button class='btn btn-default altui-save-userdata' type='submit'>"+saveGlyph+"Save UserData</button>";
-		html += "<button class='btn btn-default altui-clear-userdata' type='submit'>"+okGlyph3+" Clear UserData</button>";
-		html += "</div>";
-		html += "<div class='btn-group' role='group' aria-label='User Pages DB'>";
-		html += "<button class='btn btn-default altui-save-userpage' type='submit'>"+saveGlyph+"Save User Pages</button>";
-		html += "<button class='btn btn-default altui-restore-userpage' type='submit'>"+loadGlyph+"Restore From User Pages Cache</button>";
-		html += "<button class='btn btn-default altui-clear-userpage' type='submit'>"+okGlyph4+" Clear User Pages Cache</button>";
-		html += "</div>";
+		html +="  </div>";
+		html +="</div>";
+
 		$(".altui-mainpanel").append(html);
+		
 		$(".altui-save-IconDB").click( function() {
 			IconDB.saveDB();
-			UIManager.pageOptimize();
+			UIManager.pageOptions();
 		});
 		$(".altui-clear-IconDB").click( function() {
 			IconDB.resetDB();
-			UIManager.pageOptimize();
+			UIManager.pageOptions();
 		});
 		$(".altui-save-FileDB").click( function() {
 			FileDB.saveDB();
-			UIManager.pageOptimize();
+			UIManager.pageOptions();
 		});
 		$(".altui-clear-FileDB").click( function() {
 			FileDB.resetDB();
-			UIManager.pageOptimize();
+			UIManager.pageOptions();
 		});
 		$(".altui-save-userdata").click( function() {
 			VeraBox.saveEngine();
-			UIManager.pageOptimize();
+			UIManager.pageOptions();
 		});
 		$(".altui-clear-userdata").click( function() {
 			MyLocalStorage.clear("VeraBox"); 
-			UIManager.pageOptimize();
+			UIManager.pageOptions();
 		});
 		$(".altui-save-userpage").click( function() {
 			PageManager.savePages();
 		});
 		$(".altui-restore-userpage").click( function() {
 			PageManager.recoverFromStorage();
-			UIManager.pageOptimize();
+			UIManager.pageOptions();
 		});
 		$(".altui-clear-userpage").click( function() {
 			PageManager.clearStorage();
-			UIManager.pageOptimize();
+			UIManager.pageOptions();
 		});
 	},
 	
@@ -7448,7 +7491,7 @@ $(document).ready(function() {
 		body+="			<li><a id='altui-tbl-device' href='#' >"+_T("Devices")+"</a></li>";
 		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>Admin</li>";
-		body+="			<li><a id='altui-optimize' href='#'>"+_T("Optimizations")+"</a></li>";
+		body+="			<li><a id='altui-optimize' href='#'>"+_T("Options")+"</a></li>";
 		body+="			<li><a id='altui-localize' href='#'>"+_T("Localization")+"</a></li>";
 		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>"+_T("Misc")+"</li>";
@@ -7560,7 +7603,7 @@ $(document).ready(function() {
 		.on( "click", "#altui-quality", UIManager.pageQuality )		
 		.on( "click", "#altui-energy", UIManager.pagePower )	
 		.on( "click", "#altui-tbl-device", UIManager.pageTblDevices )
-		.on( "click", "#altui-optimize", UIManager.pageOptimize )
+		.on( "click", "#altui-optimize", UIManager.pageOptions )
 		.on( "click", "#altui-localize", UIManager.pageLocalization  )
 		.on( "click", "#altui-debug-btn", function() {
 			$(".altui-debug-div").toggle();
