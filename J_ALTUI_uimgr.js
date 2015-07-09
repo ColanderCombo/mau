@@ -3152,8 +3152,8 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		
 		function _displayControl( domparent, device, control, idx, groupoffset ) {
-			var paddingleft = parseInt($("#altui-device-controlpanel-"+devid).css("padding-left"));
-			var paddingtop = parseInt($("#altui-device-controlpanel-"+devid+" .panel-body ").css("padding-top"));
+			var paddingleft = parseInt($("#altui-device-controlpanel-"+devid).css("padding-left")) + (groupoffset.left || 0);
+			var paddingtop = parseInt($("#altui-device-controlpanel-"+devid+" .panel-body ").css("padding-top")) + (groupoffset.top || 0);
 			switch(control.ControlType) {
 				case "line_break": 
 				case "spacer": 
@@ -3245,10 +3245,10 @@ var UIManager  = ( function( window, undefined ) {
 							.appendTo( $(domparent) );
 						
 						control.Display.Width = Math.max( control.Display.Width || 10 , $(button).outerWidth() );
-						if (control.Display.Top && control.Display.Left) {
+						if ((control.Display.Top && control.Display.Left) /*|| (groupoffset.top && groupoffset.left)*/){
 							button.css({
-									top: paddingtop + (control.Display.Top || 0), 
-									left: paddingleft  + (control.Display.Left || 0), 
+									top: paddingtop + (control.Display.Top  || 0), 
+									left: paddingleft  + (control.Display.Left  || 0), 
 									"min-width": control.Display.Width+"px",	// forcing bootstrap
 									"max-width": control.Display.Width+"px",	// forcing bootstrap
 									position:'absolute'
@@ -5025,17 +5025,17 @@ var UIManager  = ( function( window, undefined ) {
 			
 		};
 				
-		function _onClickCamera()
-		{
-			var id = $(this).parents(".altui-device").prop('id');
-			var device = VeraBox.getDeviceByID(id);
-			var html = UIManager.cameraDraw(id);
-			var dialog = DialogManager.registerDialog('dialogModal',defaultDialogModalTemplate.format( 
-				'Camera',	// title
-				html		// body
-			));
-			$('div#dialogModal').modal();
-		};
+		// function _onClickCamera()
+		// {
+			// var id = $(this).parents(".altui-device").prop('id');
+			// var device = VeraBox.getDeviceByID(id);
+			// var html = UIManager.cameraDraw(id);
+			// var dialog = DialogManager.registerDialog('dialogModal',defaultDialogModalTemplate.format( 
+				// 'Camera',	// title
+				// html		// body
+			// ));
+			// $('div#dialogModal').modal();
+		// };
 		
 		// Page Preparation
 		UIManager.clearPage(_T('Devices'),_T("Devices"));
@@ -5057,9 +5057,7 @@ var UIManager  = ( function( window, undefined ) {
 
 		// deletegated event for title click / rename for device
 		$(".altui-mainpanel")
-			// .off("click",".altui-camera-picture")
-			.on("click",".altui-camera-picture", _onClickCamera )
-			// .off("click",".altui-device-title-name")
+			// .on("click",".altui-camera-picture", _onClickCamera )
 			.on("click",".altui-device-title-name",function() { 
 				if ($(this).find("input.altui-device-title-input").length>=1)
 					return;
