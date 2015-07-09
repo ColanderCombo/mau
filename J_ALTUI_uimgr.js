@@ -5809,6 +5809,7 @@ var UIManager  = ( function( window, undefined ) {
 			{label:_T("Free Space"), command:'df -h' },
 			{label:_T("Plugin Files"), command:'ls -l /etc/cmh-ludl' },
 			{label:_T("Log Sizes"), command:'ls -l /var/log/cmh' },
+			{label:_T("Search Logs"), command:"cat /var/log/cmh/LuaUPnP.log | grep '{0}'" },
 		];
 		
 		UIManager.clearPage(_T('OsCommand'),_T("OS Command"));
@@ -5820,7 +5821,7 @@ var UIManager  = ( function( window, undefined ) {
 		html+="    <label for='altui-btngroup'>"+_T("Frequent Commands")+"</label>";
 		html+="  	<div class='btn-group' id='altui-btngroup'>";
 		$.each(commands, function(idx,obj) {
-			html += "<button type='button' class='btn btn-default' onclick='$(\"#oscommand\").val(\"{1}\");$(\"#altui-oscommand-button\").click();return false;'>{0}</button>".format(obj.label,obj.command);
+			html += "<button type='button' class='btn btn-default altui-oscommand-button' data-cmd='{1}' '>{0}</button>".format(obj.label,obj.command.replace(/'/g, '&quot;'));
 		});
 		html+="  	</div>";
 		html+="  </div>";
@@ -5829,20 +5830,55 @@ var UIManager  = ( function( window, undefined ) {
 		html+="    <input type='text' class='form-control' id='oscommand' placeholder='Type your OS command like: df '>";
 		html+="  </div>";
 		html+="</form>";
-		html+="<button type='button' id='altui-oscommand-button' class='btn btn-default'>"+_T("Run")+"</button>";
+		html+="<button type='button' id='altui-oscommand-exec-button' class='btn btn-default'>"+_T("Run")+"</button>";
 		html+="<hr>";
 		html+="<h3>"+_T("Output")+"</h3>";
 		html+="<pre id='altui-oscommand-result' class='pre-scrollable'></pre>";
 		html+="</div>";
 		$(".altui-mainpanel").append( html );
-		$("#altui-oscommand-button").click( function() {
-			var oscmd = $("#oscommand").val();
-			show_loading();
-			VeraBox.osCommand(oscmd,function(res) {
-				hide_loading();
-				$('#altui-oscommand-result').html( (res.success==true) ? res.result : _T("failed to execute"));
-			});
+
+		$(".altui-oscommand-button").click( function(e) { 
+			// e.stopPropagation();
+			var val = $(this).data("cmd");
+			$("#oscommand").val( val );
+			setTimeout( function() { $("#altui-oscommand-exec-button").click() } ,100 );
 		});
+		
+		$("#altui-oscommand-exec-button").click( function() { 
+			function _execCmd(cmd) {
+				show_loading();
+				VeraBox.osCommand(oscmd,function(res) {
+					hide_loading();
+					$('#altui-oscommand-result').html( (res.success==true) ? res.result : _T("failed to execute"));
+				});
+			};
+			
+			var oscmd = $("#oscommand").val();
+			if (oscmd.indexOf("{0}") > -1) {
+				var dialog = DialogManager.registerDialog('dialogModal',
+								defaultDialogModalTemplate.format( 
+								_T('Command Parameters'),		// title
+								"<form></form>"					// body
+							));
+
+				DialogManager.dlgAddLine(dialog, 'param0', _T('Parameter'), "","", {required:''} );
+				DialogManager.dlgAddDialogButton(dialog, true, _T("Execute"));
+				$('div#dialogModal').modal();
+				$('div#dialogs')
+					.off('submit',"div#dialogModal")
+					.on( 'submit',"div#dialogModal", function() {
+							$('div#dialogModal').modal('hide');
+							oscmd = oscmd.format( $("#altui-widget-param0").val() );
+							$("#oscommand").val( oscmd );
+							setTimeout(function() {
+								_execCmd($("#oscommand").val( ));
+							}, 200 );
+						});
+			}
+			else
+				_execCmd(oscmd);
+		});
+		// });
 	},
 	
 	pageLuaStart: function ()
