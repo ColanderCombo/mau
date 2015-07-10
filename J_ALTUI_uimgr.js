@@ -5731,7 +5731,7 @@ var UIManager  = ( function( window, undefined ) {
 		html +="<form class='form-inline' action='https://www.paypal.com/cgi-bin/webscr' method='post' target='_top'>";
 		html +="<input type='hidden' name='cmd' value='_s-xclick'>";
 		html +="<input type='hidden' name='encrypted' value='-----BEGIN PKCS7-----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-----END PKCS7-----'>";
-		html +="<input type='image' src='https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG_global.gif' border='0' name='submit' alt='PayPal – The safer, easier way to pay online.'>";
+		html +="<input type='image' src='https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG_global.gif' border='0' name='submit' alt='PayPal Ö The safer, easier way to pay online.'>";
 		html +="<img alt='' border='0' src='https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif' width='1' height='1'>";
 		html +="</form>";
 		return html;
@@ -5817,8 +5817,20 @@ var UIManager  = ( function( window, undefined ) {
 			{label:_T("Tail Logs"), command:"tail -n 50 /var/log/cmh/LuaUPnP.log" },
 		];
 		var actions = [
-			{ name:'delete', glyph:deleteGlyph, function() {} }
+			{ name:'delete', glyph:deleteGlyph }
 		];
+		function _drawFrequentCommandBar(commands) {
+			var html="";
+			html+="  <div id='altui-frequent-commands-bar' class='form-group'>";
+			html+="    <label for='altui-btngroup'>"+_T("Frequent Commands")+editButtonHtml+"</label>";
+			html+="  	<div class='btn-group' id='altui-btngroup'>";
+			$.each(commands, function(idx,obj) {
+				html += "<button id='{0}' type='button' class='btn btn-default altui-oscommand-button' data-cmd='{2}' '>{1}</button>".format(idx,obj.label,obj.command.replace(/'/g, '&quot;'));
+			});
+			html+="  	</div>";
+			html+="  </div>";
+			return html;
+		};
 		function _drawCommandTable(commands) {
 			var html="";
 			html+= "<table class='table table-condensed altui-oscommand-configtbl'>";
@@ -5848,7 +5860,7 @@ var UIManager  = ( function( window, undefined ) {
 			html += smallbuttonTemplate.format( commands.length, 'altui-oscommand-configtbl-action-add', plusGlyph ,_T('Add') );
 			html+= "</td>";
 			$.each(commands[0],function(key,val) {
-				html+= "<td>"+"<input type='text' class='form-control' id='"+key+"' placeholder='"+key+"'>"+"</td>";
+				html+= "<td>"+"<input required type='text' class='form-control' id='"+key+"' placeholder='"+key+"'>"+"</td>";
 			})
 			html+= "</tr>";
 
@@ -5863,14 +5875,7 @@ var UIManager  = ( function( window, undefined ) {
 		var html = "";
 		html+="<div class='col-xs-12'><form>";
 		html+=	"<p>"+_T("Enter a Vera OS ( Unix ) command, the stdout will be returned and displayed below")+"</p>";
-		html+="  <div class='form-group'>";
-		html+="    <label for='altui-btngroup'>"+_T("Frequent Commands")+editButtonHtml+"</label>";
-		html+="  	<div class='btn-group' id='altui-btngroup'>";
-		$.each(commands, function(idx,obj) {
-			html += "<button type='button' class='btn btn-default altui-oscommand-button' data-cmd='{1}' '>{0}</button>".format(obj.label,obj.command.replace(/'/g, '&quot;'));
-		});
-		html+="  	</div>";
-		html+="  </div>";
+		html += _drawFrequentCommandBar(commands);
 		html+="  <div class='form-group'>";
 		html+="    <label for='oscommand'>"+_T("OS Command")+"</label>";
 		html+="    <input type='text' class='form-control' id='oscommand' placeholder='Type your OS command like: df '>";
@@ -5924,14 +5929,38 @@ var UIManager  = ( function( window, undefined ) {
 			else
 				_execCmd(oscmd);
 		});
-		$(".altui-editoscmd").click( function(e) { 
+		
+		// SHOW EDIT TABLE
+		$(".altui-mainpanel").on("click",".altui-editoscmd",function(e){ 
 			if ( $(".altui-oscommand-configtbl").length == 0 ) {
-				$("#altui-btngroup").after( _drawCommandTable(commands) );
+				$("#altui-frequent-commands-bar").after(   _drawCommandTable(commands) );
 			}
 			else {
 				$(".altui-oscommand-configtbl").remove();
 			}
 		});
+		
+		// DELETE
+		$(".altui-mainpanel").on("click",".altui-oscommand-configtbl-action-delete",function(e){ 
+			//delete command
+			var index = $(this).prop('id');
+			commands.splice(index,1);
+			$("div#altui-frequent-commands-bar").replaceWith( _drawFrequentCommandBar(commands) );
+			$("table.altui-oscommand-configtbl").replaceWith( _drawCommandTable(commands) );
+		});
+
+		// ADD
+		$(".altui-mainpanel").on("click",".altui-oscommand-configtbl-action-add",function(e){ 
+			var tr = $(this).closest("tr"); 
+			var label =tr.find("input#label").val();
+			var command = tr.find("input#command").val();
+			if ( label && command ) {
+				commands.push( {label:label, command:command } );
+				$("div#altui-frequent-commands-bar").replaceWith( _drawFrequentCommandBar(commands) );
+				$("table.altui-oscommand-configtbl").replaceWith( _drawCommandTable(commands) );
+			}
+		});
+
 	},
 	
 	pageLuaStart: function ()
