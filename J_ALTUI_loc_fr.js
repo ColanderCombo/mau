@@ -208,6 +208,6 @@ Localization.init( {
 	"Question":"Question",
 	"Options":"Options",
 	"Show Video Thumbnail in Local mode":"Vignettes Camera en Vidéo en mode local",
-	"Cache Control":"Control du Cache",
-	"Custom Pages Control":"Control des Pages Utilisateurs"
+	"Cache Control":"Controle du Cache",
+	"Custom Pages Control":"Controle des Pages Utilisateurs"
 });

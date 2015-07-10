@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.55"
+local version = "v0.56"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 -- local updateFrequencySec = 120	-- refreshes every x seconds
 -- local socket = require("socket")
@@ -392,7 +392,7 @@ local function getScriptContent( filename )
 end
 
 local function getDataFor( deviceID,name )
-	log("getDataFor("..name..")")
+	debug("getDataFor("..name..")")
 	local name = "Data_"..name
 	
 	local num = 0
@@ -751,6 +751,10 @@ local function getDefaultConfig()
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawTempSensor",
 	}
 	tbl["urn:schemas-upnp-org:device:Heater:1"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawHeater",
+	}
+	tbl["urn:schemas-upnp-org:device:HVAC_ZoneThermostat:1"]= {
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawHeater",
 	}

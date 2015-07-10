@@ -27,6 +27,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-motion {font-size: 22px;}";
 		style += ".altui-weather-text, .altui-lasttrip-text {font-size: 13px;}";
 		style += ".altui-red { color:red;}";
+		style += ".altui-blue { color:blue;}";
 		style += ".altui-dimmable-slider { margin-left: 60px; }";	
 		style += ".altui-infoviewer-log,.altui-window-btn,.altui-datamine-open { margin-top: 10px; }";	
 		style += "div.altui-windowcover button.btn-sm { width: 4em; }";
@@ -148,10 +149,14 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			ws.tempFormat="";
 		
 		var status = VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:TemperatureSensor1', 'CurrentTemperature' ); 
-		var newsetpoint = VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Heat', 'CurrentSetpoint' ); 
+		var heatsetpoint = VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Heat', 'CurrentSetpoint' ); 
+		var coldsetpoint = VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Cool', 'CurrentSetpoint' ); 
 		html += ("<span class='altui-temperature' >"+((status!=null) ? (status+"&deg;"+ws.tempFormat) : "--") +"</span>");
-		if (newsetpoint!=null) {
-			html += ("<span class='altui-temperature altui-red' > / "+newsetpoint+"&deg;"+ws.tempFormat+"</span>");
+		if (heatsetpoint!=null) {
+			html += ("<span class='altui-temperature altui-red' > / "+heatsetpoint+"&deg;"+ws.tempFormat+"</span>");
+		}
+		if (coldsetpoint!=null) {
+			html += ("<span class='altui-temperature altui-blue' > / "+coldsetpoint+"&deg;"+ws.tempFormat+"</span>");
 		}
 		return html;
 	}

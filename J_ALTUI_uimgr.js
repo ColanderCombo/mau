@@ -342,7 +342,11 @@ var styles ="					\
 		height: 50px;		\
 		margin-top: 1px;	\
 		width: 50px;		\
-	}";		
+	}						\
+	.altui-oscommand-configtbl th {		\
+	text-transform: capitalize;			\
+}										\
+";		
 
 // 0: variable , 1: value , 2: service
 var deviceVariableLineTemplate = "  <tr>";
@@ -5810,15 +5814,57 @@ var UIManager  = ( function( window, undefined ) {
 			{label:_T("Plugin Files"), command:'ls -l /etc/cmh-ludl' },
 			{label:_T("Log Sizes"), command:'ls -l /var/log/cmh' },
 			{label:_T("Search Logs"), command:"cat /var/log/cmh/LuaUPnP.log | grep '{0}'" },
+			{label:_T("Tail Logs"), command:"tail -n 50 /var/log/cmh/LuaUPnP.log" },
 		];
+		var actions = [
+			{ name:'delete', glyph:deleteGlyph, function() {} }
+		];
+		function _drawCommandTable(commands) {
+			var html="";
+			html+= "<table class='table table-condensed altui-oscommand-configtbl'>";
+			html+= "    <thead>";
+			html+= "      <tr>";
+			html+= "<th>"+_T("Actions")+"</th>";
+			$.each(commands[0],function(key,val) {
+				html+= "<th>"+_T(key)+"</th>";
+			})
+			html+= "      </tr>";
+			html+= "    </thead>";
+			html+= "    <tbody>";
+			$.each(commands,function(idxcmd,cmd) {
+				html+= "<tr>";
+				html+= "<td>";
+				$.each(actions,function(idxaction,action) {
+					html += smallbuttonTemplate.format( idxcmd, 'altui-oscommand-configtbl-action-'+action.name, action.glyph ,action.name);
+				});
+				html+= "</td>";
+				$.each(cmd,function(key,val) {
+					html+= "<td>"+val+"</td>";
+				})
+				html+= "</tr>";
+			})
+			html+= "<tr>";
+			html+= "<td>";
+			html += smallbuttonTemplate.format( commands.length, 'altui-oscommand-configtbl-action-add', plusGlyph ,_T('Add') );
+			html+= "</td>";
+			$.each(commands[0],function(key,val) {
+				html+= "<td>"+"<input type='text' class='form-control' id='"+key+"' placeholder='"+key+"'>"+"</td>";
+			})
+			html+= "</tr>";
+
+			html+= "    </tbody>";
+			html+= "</table>";
+			return html;
+		};
 		
 		UIManager.clearPage(_T('OsCommand'),_T("OS Command"));
-		$(".altui-mainpanel").append("<p>"+_T("Enter a Vera OS ( Unix ) command, the stdout will be returned and displayed below")+"</p>");
 		
+		var editButtonHtml = buttonTemplate.format( 'altui-editoscmd-0', 'altui-editoscmd', wrenchGlyph,'default');
 		var html = "";
 		html+="<div class='col-xs-12'><form>";
+		html+=	"<p>"+_T("Enter a Vera OS ( Unix ) command, the stdout will be returned and displayed below")+"</p>";
 		html+="  <div class='form-group'>";
-		html+="    <label for='altui-btngroup'>"+_T("Frequent Commands")+"</label>";
+		html+="    <label for='altui-btngroup'>"+_T("Frequent Commands")+editButtonHtml+"</label>";
 		html+="  	<div class='btn-group' id='altui-btngroup'>";
 		$.each(commands, function(idx,obj) {
 			html += "<button type='button' class='btn btn-default altui-oscommand-button' data-cmd='{1}' '>{0}</button>".format(obj.label,obj.command.replace(/'/g, '&quot;'));
@@ -5878,7 +5924,14 @@ var UIManager  = ( function( window, undefined ) {
 			else
 				_execCmd(oscmd);
 		});
-		// });
+		$(".altui-editoscmd").click( function(e) { 
+			if ( $(".altui-oscommand-configtbl").length == 0 ) {
+				$("#altui-btngroup").after( _drawCommandTable(commands) );
+			}
+			else {
+				$(".altui-oscommand-configtbl").remove();
+			}
+		});
 	},
 	
 	pageLuaStart: function ()
