@@ -216,5 +216,7 @@ Localization.init( {
 	"label":"label",
 	"command":"command",
 	"Add":"Ajouter",
-	"Default":"Défault"
+	"Default":"Défaut",
+	"Command Parameters":"Paramètres de Commande",
+	"Parameter":"Paramètre"
 });

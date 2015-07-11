@@ -5919,7 +5919,7 @@ var UIManager  = ( function( window, undefined ) {
 							));
 
 				DialogManager.dlgAddLine(dialog, 'param0', _T('Parameter'), "","", {required:''} );
-				DialogManager.dlgAddDialogButton(dialog, true, _T("Execute"));
+				DialogManager.dlgAddDialogButton(dialog, true, _T("Run"));
 				$('div#dialogModal').modal();
 				$('div#dialogs')
 					.off('submit',"div#dialogModal")
