@@ -51,6 +51,7 @@ var optHorGlyph="<span class='glyphicon glyphicon-option-horizontal' aria-hidden
 var plusGlyph="<span class='glyphicon glyphicon-plus' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Add'></span>";
 var saveGlyph="<span class='glyphicon glyphicon-save' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Save'></span>";
 var labelGlyph="<span class='glyphicon glyphicon-font' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Label'></span>";
+var refreshGlyph="";
 var searchGlyph = "";
 var questionGlyph = "";
 var staremtpyGlyph = "";
@@ -5808,7 +5809,7 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pageOsCommand: function ()
 	{
-		var commands = [
+		var defaultCommands = [
 			{label:_T("Disk Usage"), command:'du' },
 			{label:_T("Free Space"), command:'df -h' },
 			{label:_T("Plugin Files"), command:'ls -l /etc/cmh-ludl' },
@@ -5816,6 +5817,7 @@ var UIManager  = ( function( window, undefined ) {
 			{label:_T("Search Logs"), command:"cat /var/log/cmh/LuaUPnP.log | grep '{0}'" },
 			{label:_T("Tail Logs"), command:"tail -n 50 /var/log/cmh/LuaUPnP.log" },
 		];
+		var commands = MyLocalStorage.getSettings("OsCommands") || defaultCommands;
 		var actions = [
 			{ name:'delete', glyph:deleteGlyph }
 		];
@@ -5863,7 +5865,11 @@ var UIManager  = ( function( window, undefined ) {
 				html+= "<td>"+"<input required type='text' class='form-control' id='"+key+"' placeholder='"+key+"'>"+"</td>";
 			})
 			html+= "</tr>";
-
+			html+= "<tr>";
+			html+= "<td>";
+			html += smallbuttonTemplate.format( commands.length, 'altui-oscommand-configtbl-action-reset', refreshGlyph ,_T('Default') );
+			html+= "</td><td colspan=2></td>";
+			html+= "</tr>";
 			html+= "    </tbody>";
 			html+= "</table>";
 			return html;
@@ -5888,14 +5894,14 @@ var UIManager  = ( function( window, undefined ) {
 		html+="</div>";
 		$(".altui-mainpanel").append( html );
 
-		$(".altui-oscommand-button").click( function(e) { 
+		$(".altui-mainpanel").on("click",".altui-oscommand-button",function(e){ 
 			// e.stopPropagation();
 			var val = $(this).data("cmd");
 			$("#oscommand").val( val );
 			setTimeout( function() { $("#altui-oscommand-exec-button").click() } ,100 );
 		});
 		
-		$("#altui-oscommand-exec-button").click( function() { 
+		$(".altui-mainpanel").on("click","#altui-oscommand-exec-button",function(e){ 
 			function _execCmd(cmd) {
 				show_loading();
 				VeraBox.osCommand(oscmd,function(res) {
@@ -5947,6 +5953,7 @@ var UIManager  = ( function( window, undefined ) {
 			commands.splice(index,1);
 			$("div#altui-frequent-commands-bar").replaceWith( _drawFrequentCommandBar(commands) );
 			$("table.altui-oscommand-configtbl").replaceWith( _drawCommandTable(commands) );
+			MyLocalStorage.setSettings("OsCommands",commands);
 		});
 
 		// ADD
@@ -5958,9 +5965,17 @@ var UIManager  = ( function( window, undefined ) {
 				commands.push( {label:label, command:command } );
 				$("div#altui-frequent-commands-bar").replaceWith( _drawFrequentCommandBar(commands) );
 				$("table.altui-oscommand-configtbl").replaceWith( _drawCommandTable(commands) );
+				MyLocalStorage.setSettings("OsCommands",commands);
 			}
 		});
 
+		// RESET
+		$(".altui-mainpanel").on("click",".altui-oscommand-configtbl-action-reset",function(e){ 
+			commands = cloneObject(defaultCommands);
+			$("div#altui-frequent-commands-bar").replaceWith( _drawFrequentCommandBar(commands) );
+			$("table.altui-oscommand-configtbl").replaceWith( _drawCommandTable(commands) );
+			MyLocalStorage.setSettings("OsCommands",commands);
+		});
 	},
 	
 	pageLuaStart: function ()
@@ -7543,6 +7558,7 @@ $(document).ready(function() {
 		starGlyph = glyphTemplate.format( "star", _T("Favorite"), "altui-favorite text-warning" );
 		questionGlyph=glyphTemplate.format( "question-sign", _T("Question"), "text-warning" );
 		searchGlyph=glyphTemplate.format( "search", _T("Search"), "" );
+		refreshGlyph=glyphTemplate.format( "refresh", _T("Refresh"), "text-warning" );
 		removeGlyph=glyphTemplate.format( "remove", _T("Remove"), "" );
 		loadGlyph = glyphTemplate.format( "open", _T("Load") , "");
 		infoGlyph = glyphTemplate.format( "info-sign", _T("Info") , "");
