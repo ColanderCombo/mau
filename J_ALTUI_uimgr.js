@@ -5875,6 +5875,22 @@ var UIManager  = ( function( window, undefined ) {
 			return html;
 		};
 		
+		function _replaceANSI(str) {
+			var re = /\[33;1m(.*)\[0m/g;
+			var subst = '<span class=\'altui-orange\'>$1</span>'; 
+			str = str.replace(re, subst);			
+			re = /\[35;1m(.*)\[0m/g;
+			subst = '<span class=\'altui-magenta\'>$1</span>'; 
+			str = str.replace(re, subst);			
+			re = /\[31;1m(.*)\[0m/g;
+			subst = '<span class=\'altui-red\'>$1</span>'; 
+			str = str.replace(re, subst);	
+			re = /\[36;1m(.*)\[0m/g;
+			subst = '<span class=\'altui-cyan\'>$1</span>'; 
+			str = str.replace(re, subst);				
+			return str;
+		};
+		
 		UIManager.clearPage(_T('OsCommand'),_T("OS Command"));
 		
 		var editButtonHtml = buttonTemplate.format( 'altui-editoscmd-0', 'altui-editoscmd', wrenchGlyph,'default');
@@ -5906,7 +5922,7 @@ var UIManager  = ( function( window, undefined ) {
 				show_loading();
 				VeraBox.osCommand(oscmd,function(res) {
 					hide_loading();
-					$('#altui-oscommand-result').html( (res.success==true) ? res.result : _T("failed to execute"));
+					$('#altui-oscommand-result').html( (res.success==true) ? _replaceANSI(res.result) : _T("failed to execute"));
 				});
 			};
 			
@@ -5929,7 +5945,7 @@ var UIManager  = ( function( window, undefined ) {
 							$("#oscommand").val( oscmd );
 							setTimeout(function() {
 								_execCmd($("#oscommand").val( ));
-							}, 200 );
+							}, 300 );
 						});
 			}
 			else
