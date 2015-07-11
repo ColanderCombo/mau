@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("342,Camera Thumbnail + option control;refactor of option screen;Fix for RGBW;Fix for Sonos,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=27974")
+UIManager.checkAltuiUpdate("349,OS Commands fix; OS Commands edition; Heater: Hot & Cold set point display; urn:schemas-upnp-org:device:HVAC_ZoneThermostat:1 support,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=27980")
