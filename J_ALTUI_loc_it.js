@@ -209,5 +209,12 @@ Localization.init( {
 	"Options":"Options",
 	"Show Video Thumbnail in Local mode":"Show Video Thumbnail in Local mode",
 	"Cache Control":"Cache Control",
-	"Custom Pages Control":"Custom Pages Control"
+	"Custom Pages Control":"Custom Pages Control",
+	"Refresh":"Refresh",
+	"Search Logs":"Search Logs",
+	"Tail Logs":"Tail Logs",
+	"label":"label",
+	"command":"command",
+	"Add":"Add",
+	"Default":"Default"
 	});
