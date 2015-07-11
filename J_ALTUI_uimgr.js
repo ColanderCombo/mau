@@ -5839,7 +5839,7 @@ var UIManager  = ( function( window, undefined ) {
 			html+= "    <thead>";
 			html+= "      <tr>";
 			html+= "<th>"+_T("Actions")+"</th>";
-			$.each(commands[0],function(key,val) {
+			$.each(defaultCommands[0] ,function(key,val) {
 				html+= "<th>"+_T(key)+"</th>";
 			})
 			html+= "      </tr>";
@@ -5861,7 +5861,7 @@ var UIManager  = ( function( window, undefined ) {
 			html+= "<td>";
 			html += smallbuttonTemplate.format( commands.length, 'altui-oscommand-configtbl-action-add', plusGlyph ,_T('Add') );
 			html+= "</td>";
-			$.each(commands[0],function(key,val) {
+			$.each(defaultCommands[0],function(key,val) {
 				html+= "<td>"+"<input required type='text' class='form-control' id='"+key+"' placeholder='"+key+"'>"+"</td>";
 			})
 			html+= "</tr>";
