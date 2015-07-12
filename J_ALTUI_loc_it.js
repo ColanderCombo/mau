@@ -218,5 +218,9 @@ Localization.init( {
 	"Add":"Add",
 	"Default":"Default",
 	"Command Parameters":"Command Parameters",
-	"Parameter":"Parameter"
+	"Parameter":"Parameter",
+	"Test Code":"Test Code",
+	"Panels":"Panels",
+	"Reports":"Reports",
+	"Evolutions":"Evolutions"
 	});

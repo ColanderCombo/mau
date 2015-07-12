@@ -208,15 +208,19 @@ Localization.init( {
 	"Question":"Question",
 	"Options":"Options",
 	"Show Video Thumbnail in Local mode":"Vignettes Camera en Vidéo en mode local",
-	"Cache Control":"Controle du Cache",
-	"Custom Pages Control":"Controle des Pages Utilisateurs",
+	"Cache Control":"Contrôle du Cache",
+	"Custom Pages Control":"Contrôle des Pages Utilisateurs",
 	"Refresh":"Rafraichir",
 	"Search Logs":"Cherche Logs",
 	"Tail Logs":"Fin Logs",
 	"label":"label",
-	"command":"command",
+	"command":"commande",
 	"Add":"Ajouter",
 	"Default":"Défaut",
 	"Command Parameters":"Paramètres de Commande",
-	"Parameter":"Paramètre"
+	"Parameter":"Paramètre",
+	"Test Code":"Test Code",
+	"Panels":"Panneaux",
+	"Reports":"Rapports",
+	"Evolutions":"Évolutions"
 });
