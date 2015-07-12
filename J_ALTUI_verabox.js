@@ -1501,6 +1501,18 @@ var VeraBox = ( function( window, undefined ) {
 		return;
 	};
 		
+	function _getDeviceVariableHistory( device, varidx, cbfunc) {
+		var id = device.id;
+		var state = device.states[varidx];
+		if ($.isFunction(cbfunc)) {
+			var cmd = "cat /var/log/cmh/LuaUPnP.log | grep \"{0}\"".format(state.variable);
+			_osCommand(cmd,function(res) {
+				(cbfunc)(res.result);
+			})
+		}
+		return;
+	};
+
 	function _getDeviceActions(device,cbfunc) {
 		if (device) {
 			var _devicetypesDB = UIManager.getDeviceTypesDB();
@@ -1598,6 +1610,7 @@ var VeraBox = ( function( window, undefined ) {
 	getDeviceByID 	: _getDeviceByID, 
 	getDeviceBatteryLevel : _deviceBatteryLevel,
 	getDeviceStaticUI : _getDeviceStaticUI,
+	getDeviceVariableHistory : _getDeviceVariableHistory,
 	getDeviceActions: _getDeviceActions,
 	getDeviceEvents : _getDeviceEvents,
 	getDeviceDependants : _getDeviceDependants,

@@ -52,6 +52,7 @@ var plusGlyph="<span class='glyphicon glyphicon-plus' aria-hidden='true' data-to
 var saveGlyph="<span class='glyphicon glyphicon-save' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Save'></span>";
 var labelGlyph="<span class='glyphicon glyphicon-font' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Label'></span>";
 var refreshGlyph="";
+var calendarGlyph="";
 var searchGlyph = "";
 var questionGlyph = "";
 var staremtpyGlyph = "";
@@ -75,6 +76,10 @@ var defaultIconSrc="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAA
 
 var styles ="					\
 	.ui-resizable-helper { border: 2px dotted #00F; }	\
+	button.altui-variable-history {	\
+		padding-top: 	1px;	\
+		padding-bottom: 1px;	\
+	}					\
 	.altui-warningicon {	\
 		font-size: 25px;\
 		padding-left: 5px;		\
@@ -348,13 +353,6 @@ var styles ="					\
 	text-transform: capitalize;			\
 }										\
 ";		
-
-// 0: variable , 1: value , 2: service
-var deviceVariableLineTemplate = "  <tr>";
-// deviceVariableLineTemplate += "         <th scope='row'>1</th>";
-deviceVariableLineTemplate += "         <td><span title='{2}'>{0}</span></td>";
-deviceVariableLineTemplate += "         <td id='{3}' class='altui-variable-value' >{1}</td>";
-deviceVariableLineTemplate += "     </tr>";
 
 // 0:name 1:name
 var deviceActionParamTemplate = "<div class='input-group input-group-sm'>";
@@ -2555,6 +2553,14 @@ var UIManager  = ( function( window, undefined ) {
 	}
 	
 	function _deviceDrawVariables(devid) {
+		// 0: variable , 1: value , 2: service
+		var deviceVariableLineTemplate = "  <tr>";
+		// deviceVariableLineTemplate += "         <th scope='row'>1</th>";
+		deviceVariableLineTemplate += "         <td><span title='{2}'>{0}</span></td>";
+		deviceVariableLineTemplate += 	("<td>"+smallbuttonTemplate.format( '{3}', 'altui-variable-history', calendarGlyph,'History')+"</td>");
+		deviceVariableLineTemplate += "         <td id='{3}' class='altui-variable-value' >{1}</td>";
+		deviceVariableLineTemplate += "     </tr>";
+
 		function _clickOnValue() {
 			var id = $(this).prop('id');	// base64
 			var tbl = [device.states[id].service , device.states[id].variable]//atob(id).split('.');
@@ -2592,6 +2598,20 @@ var UIManager  = ( function( window, undefined ) {
 
 			// update modal with new text
 			DialogManager.registerDialog('deviceModal',deviceModalTemplate.format( lines.join(''), device.name, devid ));
+			$("button.altui-variable-history").click( function() {
+				var tr = $(this).closest("tr");
+				var varidx = tr.find("td.altui-variable-value").prop('id');
+				var historypre = $(this).closest("tbody").find("pre#"+varidx);
+				var width = tr.width();
+				if (historypre.length==0) {
+					VeraBox.getDeviceVariableHistory( device, varidx, function(history) {
+						var html = ("<tr><td colspan='3'><pre id='{0}' style='max-width:"+width+"px;' class='altui-variable-history-text pre-scrollable'>{1}</pre></td></tr>").format(varidx,history);
+						tr.after(html);
+					});
+				}
+				else
+					historypre.closest("tr").remove();
+			});
 			$(".altui-variable-value").click( _clickOnValue );
 			// show the modal
 			$('#deviceModal').modal();
@@ -7494,12 +7514,14 @@ $(document).ready(function() {
 		deviceModalTemplate += "        <h4 class='modal-title'>{1} <small>#{2}</small> - Variables</h4>";
 		deviceModalTemplate += "      </div>";
 		deviceModalTemplate += "      <div class='modal-body'>";
-		deviceModalTemplate += "      <div class='row-fluid'>";
+		deviceModalTemplate += "      <div class='row' >";
+		deviceModalTemplate += "      <div class='col-xs-12' style='overflow-x: auto;'>";
 		deviceModalTemplate += " <table class='table table-condensed'>";
 		deviceModalTemplate += "       <thead>";
 		deviceModalTemplate += "         <tr>";
 		// deviceModalTemplate += "           <th>#</th>";
 		deviceModalTemplate += "           <th>"+_T("Variable")+"</th>";
+		deviceModalTemplate += "           <th></th>";
 		deviceModalTemplate += "           <th>"+_T("Value")+"</th>";
 		deviceModalTemplate += "         </tr>";
 		deviceModalTemplate += "       </thead>";
@@ -7507,8 +7529,9 @@ $(document).ready(function() {
 		deviceModalTemplate += "       {0}";					// lines goes here
 		deviceModalTemplate += "       </tbody>";
 		deviceModalTemplate += "     </table>";
-		deviceModalTemplate += "      </div>";
-		deviceModalTemplate += "      </div>";
+		deviceModalTemplate += "      </div>";	// col
+		deviceModalTemplate += "      </div>";	// row
+		deviceModalTemplate += "      </div>";	// body
 		deviceModalTemplate += "      <div class='modal-footer'>";
 		deviceModalTemplate += "        <button type='button' class='btn btn-primary' data-dismiss='modal'>"+_T("Close")+"</button>";
 		// deviceModalTemplate += "        <button type='button' class='btn btn-primary'>Save changes</button>";
@@ -7574,6 +7597,7 @@ $(document).ready(function() {
 		starGlyph = glyphTemplate.format( "star", _T("Favorite"), "altui-favorite text-warning" );
 		questionGlyph=glyphTemplate.format( "question-sign", _T("Question"), "text-warning" );
 		searchGlyph=glyphTemplate.format( "search", _T("Search"), "" );
+		calendarGlyph=glyphTemplate.format( "calendar", _T("History"), "" );
 		refreshGlyph=glyphTemplate.format( "refresh", _T("Refresh"), "text-warning" );
 		removeGlyph=glyphTemplate.format( "remove", _T("Remove"), "" );
 		loadGlyph = glyphTemplate.format( "open", _T("Load") , "");
