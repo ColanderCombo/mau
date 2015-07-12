@@ -1505,9 +1505,20 @@ var VeraBox = ( function( window, undefined ) {
 		var id = device.id;
 		var state = device.states[varidx];
 		if ($.isFunction(cbfunc)) {
-			var cmd = "cat /var/log/cmh/LuaUPnP.log | grep \"{0}\"".format(state.variable);
-			_osCommand(cmd,function(res) {
-				(cbfunc)(res.result);
+			var cmd = "cat /var/log/cmh/LuaUPnP.log | grep \"Device_Variable::m_szValue_set device: {0}.*;1m{1}\"".format(device.id,state.variable);
+			_osCommand(cmd,function(str) {
+				var lines=[]
+				var re = /\d*\t(\d*\/\d*\/\d*\s\d*:\d*:\d*.\d*).*was:(.*)now:(.*) #.*/g; 
+				var m;
+				while ((m = re.exec(str.result)) !== null) {
+					if (m.index === re.lastIndex) {
+						re.lastIndex++;
+					}
+					// View your result using the m-variable.
+					// eg m[0] etc.
+					lines.push("{0}\t{1}\t{2}".format(m[1],m[2],m[3]));
+				}
+				(cbfunc)(lines.join('\n') /* str.result */);
 			})
 		}
 		return;
