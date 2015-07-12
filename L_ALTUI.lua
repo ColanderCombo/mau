@@ -623,7 +623,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				-- local handle = io.popen(command)
 				-- local result = handle:read("*a")
 				-- handle:close()
-				local command = lul_parameters["oscommand"] .. '> /tmp/oscommand.log'
+				local command = url_decode( lul_parameters["oscommand"] ) .. '> /tmp/oscommand.log'
 				local response = os.execute(command)
 				local file = io.open('/tmp/oscommand.log','r')
 				local result = file:read("*a")

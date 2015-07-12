@@ -1180,7 +1180,7 @@ var VeraBox = ( function( window, undefined ) {
 	};
 
 	function _osCommand(cmd,cbfunc) {
-		var url = "data_request?id=lr_ALTUI_Handler&command=oscommand&oscommand={0}".format(cmd);
+		var url = "data_request?id=lr_ALTUI_Handler&command=oscommand&oscommand={0}".format( encodeURIComponent(cmd) );
 		var jqxhr = $.ajax( {
 			url: url,
 			type: "GET",
@@ -1505,7 +1505,11 @@ var VeraBox = ( function( window, undefined ) {
 		var id = device.id;
 		var state = device.states[varidx];
 		if ($.isFunction(cbfunc)) {
-			var cmd = "cat /var/log/cmh/LuaUPnP.log | grep \"Device_Variable::m_szValue_set device: {0}.*;1m{1}\"".format(device.id,state.variable);
+			// var cmd = "cat /var/log/cmh/LuaUPnP.log | grep \"Device_Variable::m_szValue_set device: {0}.*;1m{1}\"".format(device.id,state.variable);
+			var cmd = "cat /var/log/cmh/LuaUPnP.log | grep 'Device_Variable::m_szValue_set device: {0}.*;1m{1}\033'".format(device.id,state.variable);
+			// var cmd = "cat /var/log/cmh/LuaUPnP.log | grep $'Device_Variable::m_szValue_set device: {0}.*\033\[35;1m{1}\033\[0m'".format(device.id,state.variable);
+			// var cmd = "cat /var/log/cmh/LuaUPnP.log | grep $'\033\[35;1m{1}\033\[0m'".format(device.id,state.variable);
+
 			_osCommand(cmd,function(str) {
 				var lines=[]
 				var re = /\d*\t(\d*\/\d*\/\d*\s\d*:\d*:\d*.\d*).*was:(.*)now:(.*) #.*/g; 
