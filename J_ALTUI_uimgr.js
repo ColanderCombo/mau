@@ -1112,7 +1112,7 @@ var SceneEditor = function (scene) {
 			$('div#dialogModal').modal();
 		});
 		
-		$('div#dialogs').off('submit',"div#dialogModal form").on( 'submit',"div#dialogModal form", { button: jqButton }, function( event ) {	
+		$('div#dialogs').on( 'submit',"div#dialogModal form", { button: jqButton }, function( event ) {	
 			trigger.name = $("#altui-widget-TriggerName").val();
 			trigger.enabled = 1;
 			trigger.device = $("#altui-select-device").val();
@@ -1351,11 +1351,9 @@ var SceneEditor = function (scene) {
 		_showHideItems( timer.type );
 		
 		$('div#dialogs')
-			.off('change',"div#dialogModal form")
 			.on( 'change',"div#dialogModal #altui-widget-TimerType", function() {
 				_showHideItems( $(this).val() );
 			})
-			.off('submit',"div#dialogModal form")
 			.on( 'submit',"div#dialogModal form", 
 				{  button: jqButton },
 				function( event ) {
@@ -1457,7 +1455,6 @@ var SceneEditor = function (scene) {
 		});
 		
 		$('div#dialogs')
-			.off('submit',"div#dialogModal form")
 			.on( 'submit',"div#dialogModal form", 
 			{ scene: scene, button: jqButton },
 			function( event ) {
@@ -1542,7 +1539,6 @@ var SceneEditor = function (scene) {
 				step: 1
 			});
 			$('div#dialogs')
-				.off('submit',"div#dialogModal form")
 				.on( 'submit',"div#dialogModal form", 
 					{ scene: scene, group:group, button:_button },
 					function( event ) {
@@ -1721,26 +1717,25 @@ var SceneEditor = function (scene) {
 		});
 		
 		$(".altui-mainpanel")
-		// .off("click",".altui-scene-editbutton")
-		.on("click",".altui-scene-editbutton",function(){ 
-			scene.lua = $("#altui-luascene").val();
-			scene.name = $("#altui-scene-name-input").val();
-			if (scene.paused==undefined)
-				scene.paused=0;
-			// scene.paused = 0;		// UI7 seems to use this but could not find where in UI7.
-			if (UIManager.UI7Check()==true) {
-				var selectedmode = $(".altui-housemode div.preset_selected");
-				if (selectedmode.length>0) {
-					scene.modeStatus = $.map( selectedmode, function(elem,idx) {
-							return $(elem).prop('id').substring("altui-mode".length);
-						} ).join(",");
+			.on("click",".altui-scene-editbutton",function(){ 
+				scene.lua = $("#altui-luascene").val();
+				scene.name = $("#altui-scene-name-input").val();
+				if (scene.paused==undefined)
+					scene.paused=0;
+				// scene.paused = 0;		// UI7 seems to use this but could not find where in UI7.
+				if (UIManager.UI7Check()==true) {
+					var selectedmode = $(".altui-housemode div.preset_selected");
+					if (selectedmode.length>0) {
+						scene.modeStatus = $.map( selectedmode, function(elem,idx) {
+								return $(elem).prop('id').substring("altui-mode".length);
+							} ).join(",");
+					}
+					else
+						scene.modeStatus="0";
 				}
-				else
-					scene.modeStatus="0";
-			}
-			VeraBox.editScene(sceneid,scene);
-			_showSaveNeeded(true);
-		});
+				VeraBox.editScene(sceneid,scene);
+				_showSaveNeeded(true);
+			});
 
 		// $(".altui-mainpanel").off("click",".altui-deltrigger");
 		$(".altui-mainpanel").on("click",".altui-deltrigger",function(){ 
@@ -1752,7 +1747,6 @@ var SceneEditor = function (scene) {
 		});
 		
 		$(".altui-mainpanel")
-			// .off("click",".altui-housemode")
 			.on("click",".altui-housemode",function(){ 
 				var div = $(this).find("div.housemode");
 				if (div.hasClass("preset_selected"))
@@ -1761,7 +1755,6 @@ var SceneEditor = function (scene) {
 					div.removeClass("preset_unselected").addClass("preset_selected");
 				_showSaveNeeded();
 			})
-			// .off("click",".altui-deltimer")
 			.on("click",".altui-deltimer",function(){ 
 				var id = parseInt($(this).prop('id'));
 				$.each(scene.timers , function (idx,timer) {
@@ -1780,16 +1773,13 @@ var SceneEditor = function (scene) {
 				PageMessage.message( "Timer deleted, remember to save your changes", "info");
 				// VeraBox.setScene(sceneid,scene);
 			})
-			// .off("click",".altui-edittimer")
 			.on("click",".altui-edittimer",function(){ 
 				var id = parseInt($(this).prop('id'));
 				_editTimer( id , $(this) );
 			})
-			// .off("click",".altui-addtimer")
 			.on("click",".altui-addtimer",function(){ 
 				_editTimer( -1 , $(this) );
 			})
-			// .off("click",".altui-delaction")
 			.on("click",".altui-delaction",function(){ 
 				// groupid . actionid
 				var ids = $(this).prop('id').split('.');
@@ -1800,14 +1790,12 @@ var SceneEditor = function (scene) {
 				PageMessage.message( "Action deleted, remember to save your changes", "info");
 				// VeraBox.setScene(sceneid,scene);
 			})
-			// .off("click",".altui-editaction")
 			.on("click",".altui-editaction",function(){ 
 				var ids = $(this).prop('id').split('.');
 				var group = scene.groups[ ids[0] ];
 				var action = group.actions[ ids[1] ];
 				_editAction(scene,action,ids[1],ids[0],$(this));
 			})
-			// .off("click",".altui-addaction")
 			.on("click",".altui-addaction",function(){ 
 				var newaction = {
 					device:'',
@@ -1818,7 +1806,6 @@ var SceneEditor = function (scene) {
 				var idg = $(this).parents("table[data-group-idx]").data("group-idx");
 				_editAction(scene,newaction,-1,idg,$(this));
 			})
-			// .off("click",".altui-delgroup")
 			.on("click",".altui-delgroup",function(){ 
 				var id = parseInt($(this).prop('id'));
 				$(this).parents("tr").remove();
@@ -1826,26 +1813,21 @@ var SceneEditor = function (scene) {
 				_showSaveNeeded();
 				PageMessage.message( "Group of actions deleted, remember to save your changes", "info");
 			})
-			// .off("click",".altui-editgroup")
 			.on("click",".altui-editgroup",function(){ 
 				var groupidx = parseInt($(this).prop('id'));
 				_editGroup( groupidx, scene.groups[ groupidx ] , $(this) );
 			})
-			// .off("click",".altui-addgroup")
 			.on("click",".altui-addgroup",function(){ 
 				var group = {"delay":'',"actions":[]};
 				_editGroup( -1 , group , $(this) );
 			})
-			// .off("click",".altui-edittrigger")
 			.on("click",".altui-edittrigger",function(){ 
 				var triggeridx = $(this).parents("tr[data-trigger-idx]").data("trigger-idx");
 				_editTrigger( triggeridx , $(this) );
 			})
-			// .off("click",".altui-addtrigger")
 			.on("click",".altui-addtrigger",function(){ 
 				_editTrigger( -1 , $(this) );
 			})
-			// .off("click",".altui-pausescene")
 			.on("click",".altui-pausescene",function(){ 
 				scene.paused = (scene.paused==1) ? 0 : 1;
 				$(this).removeClass('paused activated').addClass( ((scene.paused>0) ? 'paused':'activated') );			
