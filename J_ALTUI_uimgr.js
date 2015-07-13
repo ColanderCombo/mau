@@ -413,8 +413,9 @@ var DialogManager = ( function() {
 			$("div#dialogs").append(htmlDialog);
 		else
 			$(dialog).replaceWith(htmlDialog);
+		dialog = $("div#dialogs div#"+name);
 		dialog.off();	// remove all callbacks for now
-		return  $("div#dialogs div#"+name);
+		return  dialog;
 	};
 	
 	function _getActionParameterHtml( id, device, actionname, actiondescriptor, cbfunc )
@@ -429,10 +430,8 @@ var DialogManager = ( function() {
 							bFound = true;
 							$.each(action.input, function(idx,param){
 								var curvalue = actiondescriptor.params[param] || '';
-								// Html += "<div class='form-group'>";
 								Html += ("	<label for='"+id+"-"+param+"'>"+param+"</label>");
 								Html += ("	<input id='"+id+"-"+param+"' class='form-control' type='text' required value='"+curvalue+"' placeholder='enter parameter value'></input>");
-								// Html += "</div>";
 							});
 						}
 						return !bFound;
