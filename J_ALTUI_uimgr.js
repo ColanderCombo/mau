@@ -357,17 +357,6 @@ var styles ="					\
 }										\
 ";		
 
-// 0:name 1:name
-var deviceActionParamTemplate = "<div class='input-group input-group-sm'>";
-deviceActionParamTemplate +=	"  <span class='input-group-addon' id='sizing-addon3'>{0}</span>";
-deviceActionParamTemplate +=	"  <input type='text' class='form-control' placeholder='{1}' aria-describedby='sizing-addon3'>";
-deviceActionParamTemplate +=	"</div>";
-
-// 0: action , 1: value , 2: service, 3: devid
-var deviceActionLineTemplate = "  <tr>";
-deviceActionLineTemplate += "         <td><span title='{2}'><button class='btn btn-default btn-sm altui-run-action' data-devid='{3}' data-service='{2}' >{0}</button></span></td>";
-deviceActionLineTemplate += "         <td>{1}</td>";
-deviceActionLineTemplate += "     </tr>";
 
 var LuaEditor = (function () {
 	// 0: Lua code to edit
@@ -397,34 +386,20 @@ var LuaEditor = (function () {
 	
 	return {
 		openDialog: function(luacode, onSaveCB) {
-			var dialog = luaEditorModalTemplate.format( luacode );
-			if ($('div#luaEditorModal').length==0)
-				$(".altui-mainpanel").append(dialog);
-			else
-				$('div#luaEditorModal').replaceWith(dialog);
-					
-			$("#luaEditorModal").off("click touchend",".altui-luacode-test");
-			$("#luaEditorModal").on("click touchend",".altui-luacode-test",function(){ 
-				var lua = $("#altui-luacode-text").val();
-				VeraBox.runLua(lua, function(result) {
-					alert(result);
-					// if ( result == "Passed")
-						// PageMessage.message( "Test code succeeded", "success");
-					// else
-						// PageMessage.message( "Test code failed", "danger");
+			var dialog =  DialogManager.registerDialog( 'luaEditorModal', luaEditorModalTemplate.format( luacode ) )
+			dialog
+				.on("click touchend",".altui-luacode-test",function(){ 
+					var lua = $("#altui-luacode-text").val();
+					VeraBox.runLua(lua, function(result) {
+						alert(result);
+					});
+				})
+				.on("click touchend",".altui-luacode-save",function(){ 
+					// Save Callback
+					var code = $("#altui-luacode-text").val();
+					onSaveCB(code);
 				});
-			});
-			
-			$("#luaEditorModal").off("click touchend",".altui-luacode-save");
-			$("#luaEditorModal").on("click touchend",".altui-luacode-save",function(){ 
-				// Save Callback
-				var code = $("#altui-luacode-text").val();
-				onSaveCB(code);
-				
-			});
-
-		// show the modal
-			$('#luaEditorModal').modal();
+			dialog.modal();
 		}
 	};
 })();
@@ -438,6 +413,7 @@ var DialogManager = ( function() {
 			$("div#dialogs").append(htmlDialog);
 		else
 			$(dialog).replaceWith(htmlDialog);
+		dialog.off();	// remove all callbacks for now
 		return  $("div#dialogs div#"+name);
 	};
 	
@@ -1726,7 +1702,6 @@ var SceneEditor = function (scene) {
 		//
 		$(".altui-json-code").hide();
 		$(".altui-mainpanel")
-			// .off("click",".altui-luatrigger")
 			.on("click",".altui-luatrigger",function() { 
 				var id = parseInt($(this).prop('id'));
 				LuaEditor.openDialog( scene.triggers[id].lua !=undefined ? scene.triggers[id].lua : "" , function(code){
@@ -1735,7 +1710,6 @@ var SceneEditor = function (scene) {
 					PageMessage.message( "Event Lua code edited, remember to save your changes", "info");
 					});
 			})
-			// .off("click",".altui-triggertimerestrict")
 			.on("click",".altui-triggertimerestrict",function() { 
 				var id = parseInt($(this).prop('id'));
 				_editTriggerRestrict( id , $(this) );
@@ -2668,6 +2642,18 @@ var UIManager  = ( function( window, undefined ) {
 	
 	function _deviceDrawActions(devid) {
 		
+		// 0:name 1:name
+		var deviceActionParamTemplate = "<div class='input-group input-group-sm'>";
+		deviceActionParamTemplate +=	"  <span class='input-group-addon' id='sizing-addon3'>{0}</span>";
+		deviceActionParamTemplate +=	"  <input type='text' class='form-control' placeholder='{1}' aria-describedby='sizing-addon3'>";
+		deviceActionParamTemplate +=	"</div>";
+
+		// 0: action , 1: value , 2: service, 3: devid
+		var deviceActionLineTemplate = "  <tr>";
+		deviceActionLineTemplate += "         <td><span title='{2}'><button class='btn btn-default btn-sm altui-run-action' data-devid='{3}' data-service='{2}' >{0}</button></span></td>";
+		deviceActionLineTemplate += "         <td>{1}</td>";
+		deviceActionLineTemplate += "     </tr>";
+
 		// for each services for that device type
 		// enumerate actions name & parameters		
 		var device = VeraBox.getDeviceByID( devid );
