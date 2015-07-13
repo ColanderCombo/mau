@@ -1511,8 +1511,11 @@ var VeraBox = ( function( window, undefined ) {
 			// var cmd = "cat /var/log/cmh/LuaUPnP.log | grep $'\033\[35;1m{1}\033\[0m'".format(device.id,state.variable);
 
 			_osCommand(cmd,function(str) {
-				var lines=[]
-				var re = /\d*\t(\d*\/\d*\/\d*\s\d*:\d*:\d*.\d*).*was:(.*)now:(.*) #.*/g; 
+				var result = {
+					lines:[],
+					result:str
+				};
+				var re = /\d*\t(\d*\/\d*\/\d*\s\d*:\d*:\d*.\d*).*was: (.*) now: (.*) #.*/g; 
 				var m;
 				while ((m = re.exec(str.result)) !== null) {
 					if (m.index === re.lastIndex) {
@@ -1520,9 +1523,9 @@ var VeraBox = ( function( window, undefined ) {
 					}
 					// View your result using the m-variable.
 					// eg m[0] etc.
-					lines.push("{0}\t{1}\t{2}".format(m[1],m[2],m[3]));
+					result.lines.push({date:m[1], old:m[2], new:m[3]});
 				}
-				(cbfunc)(lines.join('\n') /* str.result */);
+				(cbfunc)(result);
 			})
 		}
 		return;

@@ -2605,7 +2605,13 @@ var UIManager  = ( function( window, undefined ) {
 				var width = tr.width();
 				if (historypre.length==0) {
 					VeraBox.getDeviceVariableHistory( device, varidx, function(history) {
-						var html = ("<tr><td colspan='3'><pre id='{0}' style='max-width:"+width+"px;' class='altui-variable-history-text pre-scrollable'>{1}</pre></td></tr>").format(varidx,history);
+						AltuiDebug.debug("getDeviceVariableHistory returned :"+history.result); 
+						var html = "<tr><td colspan='3'>";
+						var lines = $.map(history.lines, function(e) {
+							return "{0}\t'{1}'\t'{2}'".format(e.date,e.old,e.new);
+						});
+						html += ("<pre id='{0}' style='max-width:"+width+"px;' class='altui-variable-history-text pre-scrollable'>{1}</pre>").format(varidx,lines.join('\n'));
+						html += "</td></tr>";
 						tr.after(html);
 					});
 				}
@@ -7643,20 +7649,6 @@ $(document).ready(function() {
 		body+="			</ul>";
 		body+="		</li>";
 		body+="		<li class='dropdown'>";
-		body+="		  <a href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-expanded='false'>"+_T("Reports")+"<span class='caret'></span></a>";
-		body+="		  <ul class='dropdown-menu' role='menu'>";
-		body+="			<li class='dropdown-header'>Graphic</li>";
-		body+="			<li><a id='altui-energy' href='#' >"+_T("Power Chart")+"</a></li>";
-		body+="			<li><a id='altui-childrennetwork' href='#' >"+_T("Parent/Child Network")+"</a></li>";
-		body+="			<li><a id='altui-zwavenetwork' href='#' >"+_T("zWave Network")+"</a></li>";
-		body+="			<li><a id='altui-zwaveroutes' href='#' >"+_T("zWave Routes")+"</a></li>";
-		body+="			<li><a id='altui-quality' href='#' >"+_T("Network Quality")+"</a></li>";
-		body+="			<li class='divider'></li>";
-		body+="			<li class='dropdown-header'>Tables</li>";
-		body+="			<li><a id='altui-tbl-device' href='#' >"+_T("Devices")+"</a></li>";
-		body+="		  </ul>";
-		body+="		</li>";
-		body+="		<li class='dropdown'>";
 		body+="		  <a href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-expanded='false'>"+_T("More")+"<span class='caret'></span></a>";
 		body+="		  <ul class='dropdown-menu' role='menu'>";
 		body+="			<li><a id='altui-remoteaccess' href='#' >"+_T("Remote Access Login")+"</a></li>";
@@ -7667,6 +7659,16 @@ $(document).ready(function() {
 		body+="			<li><a id='altui-luastart' href='#' >"+_T("Lua Startup Code")+"</a></li>";
 		body+="			<li><a id='altui-luatest' href='#' >"+_T("Lua Test Code")+"</a></li>";
 		body+="			<li><a id='altui-oscommand' href='#' >"+_T("OS Command")+"</a></li>";
+		body+="			<li class='divider'></li>";
+		body+="			<li class='dropdown-header'>Graphic</li>";
+		body+="			<li><a id='altui-energy' href='#' >"+_T("Power Chart")+"</a></li>";
+		body+="			<li><a id='altui-childrennetwork' href='#' >"+_T("Parent/Child Network")+"</a></li>";
+		body+="			<li><a id='altui-zwavenetwork' href='#' >"+_T("zWave Network")+"</a></li>";
+		body+="			<li><a id='altui-zwaveroutes' href='#' >"+_T("zWave Routes")+"</a></li>";
+		body+="			<li><a id='altui-quality' href='#' >"+_T("Network Quality")+"</a></li>";
+		body+="			<li class='divider'></li>";
+		body+="			<li class='dropdown-header'>Tables</li>";
+		body+="			<li><a id='altui-tbl-device' href='#' >"+_T("Devices")+"</a></li>";
 		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>Admin</li>";
 		body+="			<li><a id='altui-optimize' href='#'>"+_T("Options")+"</a></li>";
