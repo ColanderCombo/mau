@@ -1002,23 +1002,26 @@ var VeraBox = ( function( window, undefined ) {
 			jsonp.ud.scenes=[];
 			jsonp.ud.rooms=[];
 			jsonp.ud.static_data=data.static_data;
-			$.each(data.devices, function(idx,device) {
-				device.favorite=Favorites.get('device',device.id);
-				jsonp.ud.devices.push(device);
-			});
-			$.each(data.scenes, function(idx,scene) {
-				scene.favorite=Favorites.get('scene',scene.id);
-				jsonp.ud.scenes.push(scene);
-			});
-			$.each(data.rooms, function(idx,room) {
-				jsonp.ud.rooms.push(room);
-			});
+			if (data.devices)
+				$.each(data.devices, function(idx,device) {
+					device.favorite=Favorites.get('device',device.id);
+					jsonp.ud.devices.push(device);
+				});
+			if (data.scenes)
+				$.each(data.scenes, function(idx,scene) {
+					scene.favorite=Favorites.get('scene',scene.id);
+					jsonp.ud.scenes.push(scene);
+				});
+			if (data.rooms)
+				$.each(data.rooms, function(idx,room) {
+					jsonp.ud.rooms.push(room);
+				});
 			
 			// update the static ui information for the future displays
 			$.each(_user_data.static_data || [], function(idx,ui_static_data) {
 				var dt = ui_static_data.device_type == undefined ? ui_static_data.DeviceType : ui_static_data.device_type;
 				if (dt!=undefined) {
-					UIManager.updateDeviceTypeUIDB( dt, ui_static_data);				
+					MultiBox.updateDeviceTypeUIDB( dt, ui_static_data);				
 				}
 			});
 			
@@ -1026,7 +1029,7 @@ var VeraBox = ( function( window, undefined ) {
 			$.each(_user_data.devices || [], function(idx,device) {
 				var dt = device.device_type;
 				if (dt!=undefined)
-					UIManager.updateDeviceTypeUPnpDB( dt, device.device_file);	// pass device file so UPNP data can be read
+					MultiBox.updateDeviceTypeUPnpDB( dt, device.device_file);	// pass device file so UPNP data can be read
 				if (device!=null) {	
 					device.dirty=true; 
 					EventBus.publishEvent("on_ui_deviceStatusChanged",device);
@@ -1686,7 +1689,7 @@ var VeraBox = ( function( window, undefined ) {
 	getCategoryTitle : _getCategoryTitle,
 	getCategories	 : _getCategories,
 	getDeviceTypes 	: function() 	{	return _devicetypes; },
-	isRemoteAccess	: function() 	{ 	return window.location.origin.indexOf("mios.com")!=-1; /*return true;*/ },
+	// isRemoteAccess	: function() 	{ 	return window.location.origin.indexOf("mios.com")!=-1; /*return true;*/ },
 
 	// energy
 	getPower		: _getPower,
@@ -1710,7 +1713,6 @@ var VeraBox = ( function( window, undefined ) {
 	initEngine		: function() 	{
 						_loadEngine();
 						_initDataEngine();				// init the data collection engine
-						UIManager.refreshUI( true , true );	// full & first time full display
 					},		
   };
 } )( window );

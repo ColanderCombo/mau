@@ -107,7 +107,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	function _drawCamera(devid, device) {
 		var video = MyLocalStorage.getSettings('ShowVideoThumbnail') || "";
 
-		if ( VeraBox.isRemoteAccess() || (video==false) ) {
+		if ( MultiBox.isRemoteAccess() || (video==false) ) {
 			var img = $("<img class='altui-camera-picture'></img>")
 				.attr('src',"data_request?id=request_image&res=low&cam="+device.id+"&t="+ new Date().getTime())
 				.height(50)
@@ -122,7 +122,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			var div = $("<div class='altui-camera-picture'></div>")
 				.css({
 					"background-image": streamurl,
-					"background-size": "contain",
+					"background-size": "cover",
 					"margin-left": 55,
 					"margin-top": 1
 					})

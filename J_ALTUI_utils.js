@@ -297,6 +297,7 @@ var Favorites = ( function (undefined) {
 
 var EventBus = ( function (undefined) {
 	var _subscriptions = {
+		"on_altui_deviceTypeLoaded" : [],	// table of { func, object }
 		"on_ui_deviceStatusChanged" : [],	// table of { func, object }
 		"on_ui_userDataFirstLoaded" : [],
 		"on_ui_userDataLoaded" : [],

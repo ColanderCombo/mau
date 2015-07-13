@@ -1012,7 +1012,7 @@ var SceneEditor = function (scene) {
 		function _findEventFromTriggerTemplate(device,template)
 		{
 			var devtype = device.device_type;
-			var _devicetypesDB = UIManager.getDeviceTypesDB();
+			var _devicetypesDB = MultiBox.getDeviceTypesDB();
 			var event = null;
 			$.each( _devicetypesDB[devtype].ui_static_data.eventList2, function( idx,e) {
 				if (e.id == template) {
@@ -2063,8 +2063,7 @@ var PageMessage = (function(window, undefined ) {
 var UIManager  = ( function( window, undefined ) {  
 	var edittools = [];
 	var tools = [];
-	function _initLocalizedGlobals() 
-	{
+	function _initLocalizedGlobals() {
 		edittools = [
 			{id:1000, glyph:'object-align-top' , onclick: onAlignTop},
 			{id:1010, glyph:'object-align-horizontal', onclick: onAlignHorizontal },
@@ -2272,7 +2271,7 @@ var UIManager  = ( function( window, undefined ) {
 	//---------------------------------------------------------
 
 	// var _uiengine = null;		// setTimeout timer object for ui refresh
-	var _devicetypesDB = {};
+	// var _devicetypesDB = {};
 	var _ui7Check = true;
 	var _version = "";
 	var _remoteAccessUrl = "";
@@ -2389,12 +2388,19 @@ var UIManager  = ( function( window, undefined ) {
 	};
 	
 	function _initDB(devicetypes,cbfunc) {		
-		$.extend(true,_devicetypesDB,devicetypes);
-		// foreach load the module if needed
-		// AltuiDebug.SetDebug( _devicetypesDB["info"].debug ) ;
+
+		EventBus.registerEventHandler("on_altui_deviceTypeLoaded",UIManager,function() {
+			(cbfunc)();
+		});
+		
+		var _devicetypesDB = MultiBox.initDB(devicetypes);
 		_ui7Check = (_devicetypesDB["info"].ui7Check == "true" );
 		_version = _devicetypesDB["info"].PluginVersion;
 		_remoteAccessUrl =_devicetypesDB["info"].RemoteAccess;
+		
+		// foreach load the module if needed
+		// AltuiDebug.SetDebug( _devicetypesDB["info"].debug ) ;
+
 		var _toload=0;
 		$.each(_devicetypesDB, function(devtype,obj) {
 			if (obj!=null && obj.ScriptFile!=null) {
@@ -2419,67 +2425,12 @@ var UIManager  = ( function( window, undefined ) {
 		if ($.isFunction(cbfunc)) {
 			function notifyTermination() {
 				if (_toload==0)
-					(cbfunc)();
+					EventBus.publishEvent("on_altui_deviceTypeLoaded");
 				else
 					setTimeout( notifyTermination, 500 );
 			};
 			notifyTermination();
 		}
-	};
-	
-	function _addDeviceType(devtype, obj) {
-		if (_devicetypesDB[devtype]==null) {
-			_devicetypesDB[devtype]={};
-		};
-		$.extend(true,_devicetypesDB[devtype],obj);
-	};
-
-	function _updateDeviceTypeUPnpDB( devtype, Dfilename )
-	{
-		//http://192.168.1.16:3480/luvd/S_IPhone.xml
-		//http://192.168.1.16:3480/data_request?id=device
-		if (_devicetypesDB[devtype]==null) {
-			_devicetypesDB[devtype]={};
-		};
-		
-		// only try to load if not loaded or in the process of loading it
-		if (_devicetypesDB[devtype].Dfilename == undefined) {
-			_devicetypesDB[devtype].Dfilename = Dfilename;
-			
-			// get it into the cache ( or get it from the cache )
-			FileDB.getFileContent(Dfilename , function( xmlstr , jqXHR ) {
-				try {
-					var doc = jqXHR ? ((jqXHR.responseXML != undefined) ? jqXHR.responseXML : $.parseXML( xmlstr )) : $.parseXML( xmlstr );
-					
-					var xml = $( doc );
-					var imp = xml.find("implementationFile");
-					_devicetypesDB[devtype].Ifilename= imp.text();
-					_devicetypesDB[devtype].Services = [];
-					var serviceIDs = xml.find("serviceId");
-					var Sfilenames = xml.find("SCPDURL");
-					xml.find("serviceId").each( function (index,value) {
-						// get all services files name, but do not get content, will be fetched on demand
-						_devicetypesDB[devtype].Services.push({
-							ServiceId : $(value).text(),
-							SFilename : $(Sfilenames[index]).text(),
-							Actions : []
-						});
-					});
-				}
-				catch(e) {
-					console.log("error in xml parsing, Dfile:"+Dfilename);
-					console.log("xmlstr"+xmlstr);
-				}
-			}  );
-		}
-	};
-
-	function _updateDeviceTypeUIDB(devtype, ui_definitions)
-	{
-		if (_devicetypesDB[devtype]==null) {
-			_devicetypesDB[devtype]={};
-		};
-		_devicetypesDB[devtype].ui_static_data = ui_definitions;
 	};
 
 	function _enhanceValue(value) 
@@ -2775,6 +2726,7 @@ var UIManager  = ( function( window, undefined ) {
 //_devicetypesDB[ device.device_type ].ui_static_data.flashicon
 //_devicetypesDB[ device.device_type ].ui_static_data.default_icon
 	function _getDeviceIconPath(id, device) {
+		var _devicetypesDB = MultiBox.getDeviceTypesDB();
 		var icon='';
 		switch( device.device_type ) {
 			case 'urn:schemas-futzle-com:device:CountdownTimer:1': 
@@ -2890,6 +2842,7 @@ var UIManager  = ( function( window, undefined ) {
 
 	function _deviceIconHtml( device, deviceid )	// deviceid if device is null
 	{
+		var _devicetypesDB = MultiBox.getDeviceTypesDB();
 		if (device==null)
 			device = VeraBox.getDeviceByID(deviceid);
 		if (device==null)
@@ -2903,7 +2856,7 @@ var UIManager  = ( function( window, undefined ) {
 		//otherwise
 		var iconPath = _getDeviceIconPath( device.id,device );
 		var iconDataSrc = "";
-		if (VeraBox.isRemoteAccess()) {
+		if (MultiBox.isRemoteAccess()) {
 			iconDataSrc = IconDB.getIconContent( iconPath, function(data) {
 				$("img[data-org-src='"+iconPath+"']").attr('src',data);
 			});
@@ -2974,6 +2927,7 @@ var UIManager  = ( function( window, undefined ) {
 			// if not, defaults to _defaultDeviceDraw()
 			
 			var devicebodyHtml = "";
+			var _devicetypesDB = MultiBox.getDeviceTypesDB();
 			if (_devicetypesDB[ device.device_type ]!=null && _devicetypesDB[ device.device_type ].DeviceDrawFunc!=null) {
 				//drawfunction = eval( _devicetypesDB[ device.device_type ].DeviceDrawFunc );
 				devicebodyHtml+= _executeFunctionByName(_devicetypesDB[ device.device_type ].DeviceDrawFunc, window, id, device);
@@ -3040,7 +2994,7 @@ var UIManager  = ( function( window, undefined ) {
 		var device = VeraBox.getDeviceByID(id);
 		if (device) {
 			var directstreaming = VeraBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" );
-			if (VeraBox.isRemoteAccess() || isNullOrEmpty(directstreaming) || isIE11()  )
+			if (MultiBox.isRemoteAccess() || isNullOrEmpty(directstreaming) || isIE11()  )
 			{
 				obj = $("<img></img>")
 					.attr('src',"data_request?id=request_image&res=low&cam="+device.id+"&t="+ new Date().getTime())
@@ -3419,7 +3373,7 @@ var UIManager  = ( function( window, undefined ) {
 					//{"ControlGroup":"3","ControlType":"image","top":"0","left":"0","Display":{"url":"?id=request_image&cam=","Top":0,"Left":0,"Width":320,"Height":240}}
 					var container = $(domparent).parents(".altui-device-controlpanel-container").addClass("altui-norefresh");
 					var directstreaming = VeraBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" );
-					if (VeraBox.isRemoteAccess() || isNullOrEmpty(directstreaming) || isIE11() ) {
+					if (MultiBox.isRemoteAccess() || isNullOrEmpty(directstreaming) || isIE11() ) {
 						var img = $("<img></img>")
 							.appendTo($(domparent))
 							.css({
@@ -3486,6 +3440,7 @@ var UIManager  = ( function( window, undefined ) {
 	};
 	
 	function _deviceDrawControlPanelOneTabContent(devid, device, parent, tabidx ) {
+		var _devicetypesDB = MultiBox.getDeviceTypesDB();
 		var dt = _devicetypesDB[device.device_type];
 		if (dt!=null && dt.ControlPanelFunc!=null && (tabidx==0)) {
 			_executeFunctionByName(dt.ControlPanelFunc, window, devid, device, parent);
@@ -3590,7 +3545,7 @@ var UIManager  = ( function( window, undefined ) {
 	};
 
 	function _deviceDrawControlPanel(devid, device, container ) {
-		
+		var _devicetypesDB = MultiBox.getDeviceTypesDB();	
 		function _defereddisplay(bAsync) {
 			function _createDeviceTabs( device, bExtraTab, tabs ) {
 				var lines= [];
@@ -3654,7 +3609,7 @@ var UIManager  = ( function( window, undefined ) {
 				_deviceDrawWireFrame(devid,device,container);
 				$(container).append( "<div class='row'><div class='altui-debug-div'></div></div>" );	// Draw hidden debug panel
 
-				container = container.find(".panel-body");				
+				container = container.find(".panel-body");						
 				var dt = _devicetypesDB[device.device_type];
 				var bExtraTab = (dt.ControlPanelFunc!=null);
 				$(container).append( "<div class='row'>" + _createDeviceTabs( device, bExtraTab, dt.ui_static_data.Tabs ) + "</div>" );
@@ -4552,12 +4507,6 @@ var UIManager  = ( function( window, undefined ) {
 	sceneDraw			: _sceneDraw,
 	refreshUI 			: _refreshUI,					// 
 	refreshUIPerDevice	: _refreshUIPerDevice,
-	
-	//static info per device type
-	addDeviceType : _addDeviceType,									// update devitetype plugin function calls ( from LUA )
-	updateDeviceTypeUIDB : _updateDeviceTypeUIDB,					// update devicetype UI static infos ( from user_data )
-	updateDeviceTypeUPnpDB : _updateDeviceTypeUPnpDB,				// update devicetype UPNP information ( from D_xx S_xx files )
-	getDeviceTypesDB : function() {	return _devicetypesDB; },		// just a reader
 	
 	// breadcumb
 	breadCrumb: function( title , param ) {
@@ -7716,7 +7665,7 @@ $(document).ready(function() {
 		
 		UIManager.initEngine(styles.format(window.location.hostname), g_DeviceTypes, g_CustomTheme, function() {
 			UIManager.initCustomPages(g_CustomPages);	
-			VeraBox.initEngine();		
+			MultiBox.initEngine();
 			EventBus.publishEvent("on_ui_initFinished");
 		});
 	};
