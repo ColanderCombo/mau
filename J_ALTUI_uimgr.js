@@ -2616,7 +2616,7 @@ var UIManager  = ( function( window, undefined ) {
 						html +="<tbody>";
 						html += ("<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>".format(_T("Date"),_T("Old"),_T("New")));
 						$.each(history.lines, function(i,e) {
-							html += ("<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>".format(e.date,e.old,e.new));
+							html += ("<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>".format(e.date,_enhanceValue(e.old),_enhanceValue(e.new)));
 						});
 						html +="</tbody>";
 						html +="</table>";
