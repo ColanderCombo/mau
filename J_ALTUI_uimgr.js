@@ -2613,8 +2613,10 @@ var UIManager  = ( function( window, undefined ) {
 						html += "<div class='panel panel-default'> <div class='panel-body'>";
 						// html += "<div class='table-responsive'>";
 						html +="<table id='{0}' class='table table-condensed altui-variable-value-history'>".format(varidx);
+						html +="<thead>";
+						html += ("<tr><th>{0}</th><th>{1}</th><th>{2}</th></tr>".format(_T("Date"),_T("Old"),_T("New")));
+						html +="</thead>";
 						html +="<tbody>";
-						html += ("<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>".format(_T("Date"),_T("Old"),_T("New")));
 						$.each(history.lines, function(i,e) {
 							html += ("<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>".format(e.date,_enhanceValue(e.old),_enhanceValue(e.new)));
 						});
@@ -3055,7 +3057,8 @@ var UIManager  = ( function( window, undefined ) {
 
 		var runButtonHtml = buttonTemplate.format( scene.id, 'altui-runscene pull-left', _T("Run")+"&nbsp;"+runGlyph,'primary');
 		var editButtonHtml = buttonTemplate.format( scene.id, 'altui-editscene pull-left', wrenchGlyph,'default');
-		return scenecontainerTemplate.format(scene.id, label, 'tooltip', runButtonHtml + editButtonHtml , lastrun, nextrun);
+		var calendarHtml = buttonTemplate.format( scene.id, 'altui-scene-history pull-left', calendarGlyph,'default');
+		return scenecontainerTemplate.format(scene.id, label, 'tooltip', runButtonHtml + editButtonHtml + calendarHtml , lastrun, nextrun);
 	};
 	
 	function _cameraDraw(id,size) // size:1,2,3,... 1=220px
@@ -5181,6 +5184,31 @@ var UIManager  = ( function( window, undefined ) {
 				.on("click",".altui-editscene",function() {
 					var sceneid = $(this).prop("id");
 					UIManager.pageSceneEdit( sceneid );
+				})
+				.on("click",".altui-scene-history",function() {
+					var sceneid = $(this).prop("id");
+					var dialog =  DialogManager.registerDialog('dialogModal',
+						defaultDialogModalTemplate.format( 
+						_T("Scene History"), 			// title
+						""				// body
+						));
+					VeraBox.getSceneHistory( sceneid, function(history) {
+						var html="";
+						html += "<div class='panel panel-default'> <div class='panel-body'>";
+						html +="<table id='{0}' class='table table-condensed altui-variable-value-history'>".format(sceneid);
+						html +="<thead>";
+						html += ("<tr><th>{0}</th><th>{1}</th></tr>".format(_T("Date"),_T("Name")));
+						html +="</thead>";
+						html +="<tbody>";
+						$.each(history.lines, function(i,e) {
+							html += ("<tr><td>{0}</td><td>{1}</td></tr>".format( e.date, e.name) );
+						});
+						html +="</tbody>";
+						html +="</table>";
+						html += "  </div></div>";
+						$(dialog).find(".row-fluid").append(html);
+						$('div#dialogModal').modal();
+					});
 				})
 				.on("click",".altui-favorite",function(event) { 
 					var sceneid = $(this).closest(".altui-scene").prop('id');

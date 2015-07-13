@@ -224,5 +224,6 @@ Localization.init( {
 	"Reports":"Reports",
 	"Evolutions":"Evolutions",
 	"History":"History",
-	"Date":"Date","Old":"Old","New":"New"
+	"Date":"Date","Old":"Old","New":"New",
+	"Scene History":"Scene History"
 	});

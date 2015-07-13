@@ -1501,6 +1501,30 @@ var VeraBox = ( function( window, undefined ) {
 		return;
 	};
 		
+	function _getSceneHistory( id, cbfunc) {
+		if ($.isFunction(cbfunc)) {
+			// var cmd = "cat /var/log/cmh/LuaUPnP.log | grep \"Device_Variable::m_szValue_set device: {0}.*;1m{1}\"".format(device.id,state.variable);
+			var cmd = "cat /var/log/cmh/LuaUPnP.log | grep 'Scene::RunScene running {0}'".format(id);
+			_osCommand(cmd,function(str) {
+				var result = {
+					lines:[],
+					result:str
+				};
+				var re = /\d*\t(\d*\/\d*\/\d*\s\d*:\d*:\d*.\d*).*Scene::RunScene running \d+ (.*) <.*/g; 
+				var m;
+				while ((m = re.exec(str.result)) !== null) {
+					if (m.index === re.lastIndex) {
+						re.lastIndex++;
+					}
+					// View your result using the m-variable.
+					// eg m[0] etc.
+					result.lines.push({date:m[1], name:m[2]});
+				}
+				(cbfunc)(result);
+			})
+		}
+	};
+	
 	function _getDeviceVariableHistory( device, varidx, cbfunc) {
 		var id = device.id;
 		var state = device.states[varidx];
@@ -1634,6 +1658,7 @@ var VeraBox = ( function( window, undefined ) {
 	getDeviceDependants : _getDeviceDependants,
 	isDeviceZwave	: _isDeviceZwave,
 	getScenes		: _getScenes,
+	getSceneHistory : _getSceneHistory,
 	getScenesSync	: function() { return _scenes; },
 	getSceneByID 	: _getSceneByID,
 	getNewSceneID	: _getNewSceneID,
