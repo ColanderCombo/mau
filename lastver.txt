@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("354,OS Commands fix; OS Commands edition; Ansi color in OS command output; Heater: Hot & Cold set point display; urn:schemas-upnp-org:device:HVAC_ZoneThermostat:1 support,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28016")
+UIManager.checkAltuiUpdate("364,Scene Execution History ( from logs); Device Variable change History ( from logs);some bug fixes,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28028")
