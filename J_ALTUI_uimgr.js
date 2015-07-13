@@ -76,6 +76,9 @@ var defaultIconSrc="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAA
 
 var styles ="					\
 	.ui-resizable-helper { border: 2px dotted #00F; }	\
+	.altui-variable-value-history td:first-child {	\
+		width:170px;	\
+	}					\
 	button.altui-variable-history {	\
 		padding-top: 	1px;	\
 		padding-bottom: 1px;	\
@@ -2601,16 +2604,28 @@ var UIManager  = ( function( window, undefined ) {
 			$("button.altui-variable-history").click( function() {
 				var tr = $(this).closest("tr");
 				var varidx = tr.find("td.altui-variable-value").prop('id');
-				var historypre = $(this).closest("tbody").find("pre#"+varidx);
+				var historypre = $(this).closest("tbody").find("table#"+varidx);
 				var width = tr.width();
 				if (historypre.length==0) {
 					VeraBox.getDeviceVariableHistory( device, varidx, function(history) {
 						AltuiDebug.debug("getDeviceVariableHistory returned :"+history.result); 
 						var html = "<tr><td colspan='3'>";
-						var lines = $.map(history.lines, function(e) {
-							return "{0}\t'{1}'\t'{2}'".format(e.date,e.old,e.new);
+						html += "<div class='panel panel-default'> <div class='panel-body'>";
+						// html += "<div class='table-responsive'>";
+						html +="<table id='{0}' class='table table-condensed altui-variable-value-history'>".format(varidx);
+						html +="<tbody>";
+						html += ("<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>".format(_T("Date"),_T("Old"),_T("New")));
+						$.each(history.lines, function(i,e) {
+							html += ("<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>".format(e.date,e.old,e.new));
 						});
-						html += ("<pre id='{0}' style='max-width:"+width+"px;' class='altui-variable-history-text pre-scrollable'>{1}</pre>").format(varidx,lines.join('\n'));
+						html +="</tbody>";
+						html +="</table>";
+						// html += "</div>";
+						html += "  </div></div>";
+						// var lines = $.map(history.lines, function(e) {
+							// return "{0}\t'{1}'\t'{2}'".format(e.date,e.old,e.new);
+						// });
+						// html += ("<pre id='{0}' style='max-width:"+width+"px;' class='altui-variable-history-text pre-scrollable'>{1}</pre>").format(varidx,lines.join('\n'));
 						html += "</td></tr>";
 						tr.after(html);
 					});

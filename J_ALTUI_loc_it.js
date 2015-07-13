@@ -223,5 +223,6 @@ Localization.init( {
 	"Panels":"Panels",
 	"Reports":"Reports",
 	"Evolutions":"Evolutions",
-	"History":"History"
+	"History":"History",
+	"Date":"Date","Old":"Old","New":"New"
 	});

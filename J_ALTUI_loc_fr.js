@@ -222,6 +222,7 @@ Localization.init( {
 	"Test Code":"Test Code",
 	"Panels":"Panneaux",
 	"Reports":"Rapports",
-	"Evolutions":"Évolutions"?
-	"History":"Historique"
+	"Evolutions":"Évolutions",
+	"History":"Historique",
+	"Date":"Date","Old":"Ancien","New":"Nouveau"
 });
