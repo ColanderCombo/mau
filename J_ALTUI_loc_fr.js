@@ -226,5 +226,7 @@ Localization.init( {
 	"History":"Historique",
 	"Date":"Date","Old":"Ancien","New":"Nouveau",
 	"Scene History":"Scene History",
-	"Button Label":"Label Bouton","Color":"Couleur"
+	"Button Label":"Label Bouton","Color":"Couleur",
+	"Ran Scene #{0} successfully":"Exécution avec succès de la Scène #{0}",
+	"Not used in scenes":"Pas d'utilisation dans les scènes"
 });

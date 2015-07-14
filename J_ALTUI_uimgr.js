@@ -3465,9 +3465,12 @@ var UIManager  = ( function( window, undefined ) {
 		html +="<div class='row'>";
 		html += "<div id='altui-device-usedin-"+devid+"' class='col-xs-12 altui-device-usedin'>"
 		html += "<ul>";
-		$.each(usedin_objects, function(idx,obj) {
-			html += "<li>{0} '{2}' in scene #{1} '{3}'</li>".format(obj.type, obj.scene, obj.trigger ? obj.trigger.name : obj.action.action ,obj.name);
-		});
+		if (usedin_objects.length>0)
+			$.each(usedin_objects, function(idx,obj) {
+				html += "<li>{0} '{2}' in scene #{1} '{3}'</li>".format(obj.type, obj.scene, obj.trigger ? obj.trigger.name : obj.action.action ,obj.name);
+			});
+		else
+			html += "<li>{0}</li>".format(_T("Not used in scenes"));
 		html += "</ul>";
 		// html +=  "<span><pre>{0}</pre></span>".format( JSON.stringify(usedin_objects) );
 		html += "</div>";
