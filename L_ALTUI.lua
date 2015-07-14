@@ -10,14 +10,8 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.56"
+local version = "v0.57"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
--- local updateFrequencySec = 120	-- refreshes every x seconds
--- local socket = require("socket")
--- local http = require("socket.http")
--- local ltn12 = require("ltn12")
--- local lom = require("lxp.lom") -- http://matthewwild.co.uk/projects/luaexpat/lom.html
--- local xpath = require("xpath")
 local json = require("L_ALTUIjson")
 local mime = require("mime")
 
@@ -317,7 +311,7 @@ end
 
 local function getSetVariableIfEmpty(serviceId, name, deviceId, default)
 	local curValue = luup.variable_get(serviceId, name, deviceId)
-	if (curValue == nil) or (curValue == "") then
+	if (curValue == nil) or (curValue:trim() == "") then
 		curValue = default
 		luup.variable_set(serviceId, name, curValue, deviceId)
 	end
@@ -455,7 +449,7 @@ local htmlLayout = [[
     <!-- Bootstrap core JavaScript    ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
 	<!-- Latest compiled and minified JavaScript -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script> 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-bootgrid/1.2.0/jquery.bootgrid.min.js"></script> 	
@@ -861,6 +855,7 @@ function startupDeferred(lul_device)
 	local oldversion = getSetVariable(service, "Version", lul_device, version)
 	local present = getSetVariable(service,"Present", lul_device, 0)
 	local remoteurl =getSetVariable(service,"RemoteAccess", lul_device, "https://vera-ui.strongcubedfitness.com/Veralogin.php")
+	local localurl = getSetVariableIfEmpty(service,"LocalHome", lul_device, "/port_3480/data_request?id=lr_ALTUI_Handler&command=home")
 	local css = getSetVariable(service,"ThemeCSS", lul_device, "")
 	
 	if (debugmode=="1") then
