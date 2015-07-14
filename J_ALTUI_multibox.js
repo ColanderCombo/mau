@@ -232,6 +232,18 @@ var MultiBox = ( function( window, undefined ) {
 	function _getIcon( imgpath , cbfunc ) {
 		return _controllers[0].controller.getIcon( imgpath , cbfunc );
 	};
+	function _triggerAltUIUpgrade(urlsuffix) {
+		var url = UPnPHelper.getUrlHead()+urlsuffix;
+		$.ajax({
+			url:url,
+			method:"GET",
+			cache: false
+		})
+		.always( function() {
+			PageMessage.message(_T("Upgrade Request succeeded, a Luup reload will happen"),"success");
+		});
+	};
+	
   return {
 	//---------------------------------------------------------
 	// PUBLIC  functions
@@ -313,71 +325,8 @@ var MultiBox = ( function( window, undefined ) {
 	resetPollCounters	: _resetPollCounters,	//()
 	isUserDataCached	: _isUserDataCached,	//()
 	getIcon				: _getIcon,				//( imgpath , cbfunc )
-/*	
-	getIcon			: _getIcon, 		// workaround to get image from vera box
-	getWeatherSettings : _getWeatherSettings,
-	getLuaStartup 	: _getLuaStartup,
-    getRooms		: _getRooms,		// in the future getRooms could cache the information and only call _getRooms when needed
-    getRoomsSync	: function() { return _rooms; },
-	getRoomByID		: _getRoomByID,		// roomid
-	getDevices		: _getDevices,
-    getDevicesSync	: function() { return _devices; },
-	getDeviceByType : _getDeviceByType,
-	getDeviceByAltID : _getDeviceByAltID,
-	getDeviceByID 	: _getDeviceByID, 
-
-	getDeviceStaticUI : _getDeviceStaticUI,
-	getDeviceVariableHistory : _getDeviceVariableHistory,
-	getDeviceActions: _getDeviceActions,
-	getDeviceEvents : _getDeviceEvents,
-	getDeviceDependants : _getDeviceDependants,
-	isDeviceZwave	: _isDeviceZwave,
-	getScenes		: _getScenes,
-	getSceneHistory : _getSceneHistory,
-	getScenesSync	: function() { return _scenes; },
-	getSceneByID 	: _getSceneByID,
-	getNewSceneID	: _getNewSceneID,
-	getPlugins		: _getPlugins,
-	getPluginByID 	: _getPluginByID, 
-	setStatus		: _setStatus,
-	getStatus		: _getStatus,
-	getStates		: _getStates,
 	
-	createDevice	: _createDevice,
-	deleteDevice	: _deleteDevice,
-	updateNeighbors	: _updateNeighbors, // id=lu_action&action=UpdateNeighbors&Device=3&DeviceNum=1
-	createRoom		: _createRoom,
-	deleteRoom		: _deleteRoom,
-	runScene		: _runScene,
-	editScene		: _editScene,			//(sceneid,scene);
-	deleteScene		: _deleteScene,
-	reloadEngine	: _reloadEngine,	
-	reboot			: _reboot,
-	setStartupCode	: _setStartupCode,
-	
-	getCategoryTitle : _getCategoryTitle,
-	getCategories	 : _getCategories,
-
-
-	// energy
-	getPower		: _getPower,
-	
-	// stats
-	resetPollCounters : _resetPollCounters,
-	
-	// oscommand http://192.168.1.16/port_3480/data_request?id=lr_ALTUI_Handler&command=oscommand&oscommand=df
-	osCommand 		: _osCommand,	//(cmd,cbfunc)		
-	runLua			: _runLua,
-	
-	// caching user data changes and saving them at user request
-	updateChangeCache :_updateChangeCache,
-	saveChangeCaches  :_saveChangeCaches,
-	
-	// save page data into altui plugin device
-	saveData			: _saveData,		//  name, data , cbfunc
-	saveEngine 			: _saveEngine, 
-	loadEngine 			: _loadEngine, 
-	isUserDataCached	: _isUserDataCached,
-	*/
+	// Upgrade
+	triggerAltUIUpgrade	: _triggerAltUIUpgrade,		//(url suffix)
   };
 } )( window );

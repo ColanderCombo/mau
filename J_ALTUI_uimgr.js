@@ -3710,18 +3710,9 @@ var UIManager  = ( function( window, undefined ) {
 			var newrev = parseInt(elems[0]);
 			var newfeatures = elems[1].split(';');
 			if (newrev > jsrevision) {
-				var url = UPnPHelper.getUrlHead()+elems[2];
 				DialogManager.confirmDialog(_T("a newer version #{0} of ALTUI is available, do you want to upgrade ?").format(newrev),function(result) {
-					if (result==true) {
-						$.ajax({
-							url:url,
-							method:"GET",
-							cache: false
-						})
-						.always( function() {
-							PageMessage.message(_T("Upgrade Request succeeded, a Luup reload will happen"),"success");
-						});
-					}
+					if (result==true)
+						MultiBox.triggerAltUIUpgrade(elems[2]);
 				});
 				var html ="<ul>";
 				html += $.map(newfeatures,function(e) { return "<li>"+e+"</li>"} ).join('');
@@ -3745,12 +3736,13 @@ var UIManager  = ( function( window, undefined ) {
 				$("small#altui-footer").append( "<span>"+UIManager.getPayPalButtonHtml( false ) + "</span>");
 				
 				// JSONP call that will trigger a response with a call to _checkAltuiUpdate(data)
-				var url = "http://code.mios.com/svn_public/mios_alternate_ui/lastver.txt";
+				var url = "//code.mios.com/svn_public/mios_alternate_ui/lastver.txt";
 				$.ajax({
 				  url: url,
 				  dataType: "jsonp",
 				  cache:false,
 				  success: function (data) {
+					  alert(data);
 				  }
 				});
 			}

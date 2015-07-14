@@ -127,8 +127,8 @@ function altui_Settings(deviceID) {
 
 	var htmltest = '<button id="altui-open">Open Window</button>';
 	var htmlConfig = '<textarea id="altui-config" rows="6" cols="50"></textarea>';
-	var htmlTheme = '<input id="altui-theme" class="altui-ui-input"></input>';
-	var htmlHome = '<input id="altui-home" class="altui-ui-input"></input>';
+	var htmlTheme = '<input id="altui-theme" class="altui-ui-input form-control"></input>';
+	var htmlHome = '<input id="altui-home" class="altui-ui-input form-control"></input>';
 	var htmlSetConfig= '<button id="altui-setconfig">Set Configuration</button>';
 	var htmlResetConfig= '<button id="altui-resetconfig">Default Configuration</button>';
 	var htmlViewJson = '<button id="altui-viewconfig">View Configuration</button>';
@@ -140,7 +140,7 @@ function altui_Settings(deviceID) {
 		'<tr><td>Config</td><td> '+htmlConfig+' </td></tr>' +
 		'<tr><td>Theme</td><td> '+htmlTheme+' </td></tr>' +
 		'<tr><td>Home Page</td><td> '+htmlHome+' </td></tr>' +
-		'<tr><td>url options</td><td><ul><li>home=(pageHome , pageRooms , pageDevices , pageScenes , pageSceneEdit , pagePlugins , pageUsePages , pageEditPages , pageCredits , pageLuaTest , pageLuaStart , pageOptions , pageEditor , pageZwave , pageLocalization , pagePower , pageChildren , pageRoutes , pageQuality , pageTblDevices , pageOsCommand)</li><li>lang=(en , fr , it)</li></ul></td></tr>' +
+		'<tr><td>url options</td><td><ul><li><b>home</b>=(pageHome , pageRooms , pageDevices , pageScenes , pageSceneEdit , pagePlugins , pageUsePages , pageEditPages , pageCredits , pageLuaTest , pageLuaStart , pageOptions , pageEditor , pageZwave , pageLocalization , pagePower , pageChildren , pageRoutes , pageQuality , pageTblDevices , pageOsCommand)</li><li><b>lang</b>=(en , fr , it)</li></ul></td></tr>' +
 		'<tr><td>Actions</td><td> '+htmlViewJson+htmlSetConfig+htmlResetConfig+' </td></tr>' +
 		'</table>'+
 		'</div>' ;
