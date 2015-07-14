@@ -536,7 +536,7 @@ var VeraBox = ( function( ip_addr ) {
 	
 	function _reboot()
 	{
-		VeraBox.runLua("os.execute('reboot')", function(result) {
+		this.runLua("os.execute('reboot')", function(result) {
 			if ( result == "Passed")
 				PageMessage.message( "Reboot request succeeded", "success");
 			else
@@ -1245,7 +1245,7 @@ var VeraBox = ( function( ip_addr ) {
 	};
 	
 	function _updateNeighbors(deviceid) {
-		var zwavenet = VeraBox.getDeviceByType("urn:schemas-micasaverde-com:device:ZWaveNetwork:1");
+		var zwavenet = this.getDeviceByType("urn:schemas-micasaverde-com:device:ZWaveNetwork:1");
 		if (zwavenet==null)
 			return;
 		
@@ -1746,7 +1746,8 @@ var PageManager = (function() {
 		AltuiDebug.debug("PageManager.savePages(), pages="+JSON.stringify(_pages));
 		MyLocalStorage.set("Pages",_pages);
 		var names = $.map( _pages, function(page,idx) {	return page.name;	} );
-		VeraBox.saveData( "CustomPages", JSON.stringify(names), function(data) {
+		var that = this;
+		that.saveData( "CustomPages", JSON.stringify(names), function(data) {
 			if (data!="")
 				PageMessage.message("Save Pages success", "success");
 			else
@@ -1754,7 +1755,7 @@ var PageManager = (function() {
 		});
 		
 		$.each(_pages, function(idx,page) {
-			VeraBox.saveData( page.name, JSON.stringify(page), function(data) {
+			that.saveData( page.name, JSON.stringify(page), function(data) {
 			if (data!="")
 				PageMessage.message("Save for "+page.name+" succeeded.", "success");
 			else
@@ -1894,7 +1895,7 @@ var IconDB = ( function (window, undefined) {
 		// if undefined and not yet started to fetch, then go fetch it
 		if (_dbIcon[name]==undefined) {
 			_dbIcon[name]="pending"
-			VeraBox.getIcon( name, function(data) {
+			MultiBox.getIcon( name, function(data) {
 				
 				// store in cache and call callback
 				_dbIcon[name]=data;
@@ -2110,7 +2111,7 @@ function get_event_definition(DeviceType){
 }
 
 function new_scene_id(){
-	return VeraBox.getNewSceneID();
+	return MultiBox.getNewSceneID();
     // var sceneIDs=[];
     // var indexNo=jsonp.ud.scenes.length;
     // if(indexNo==0){
@@ -2704,7 +2705,7 @@ var api = {
 		});
 	},
 	getRoomObject: function(roomId) {
-		return VeraBox.getRoomByID(roomId);
+		return MultiBox.getRoomByID(roomId);
 	},
 	getSceneDescription: function(sceneId, options) {
 		var scene = this.getSceneByID(sceneId);

@@ -97,6 +97,9 @@ var MultiBox = ( function( window, undefined ) {
 	function _getRoomsSync() {
 		return _controllers[0].controller.getRoomsSync();
 	};
+	function _getRoomByID( roomid ) {
+		return _controllers[0].controller.getRoomByID( roomid );
+	};
 	function _deleteRoom(id) {
 		return _controllers[0].controller.deleteRoom(id);
 	};
@@ -226,6 +229,9 @@ var MultiBox = ( function( window, undefined ) {
 	function _isUserDataCached() {
 		return _controllers[0].controller.isUserDataCached();
 	};
+	function _getIcon( imgpath , cbfunc ) {
+		return _controllers[0].controller.getIcon( imgpath , cbfunc );
+	};
   return {
 	//---------------------------------------------------------
 	// PUBLIC  functions
@@ -258,7 +264,8 @@ var MultiBox = ( function( window, undefined ) {
 	getRoomsSync	: _getRoomsSync,	//()
 	deleteRoom		: _deleteRoom,		//(id)
 	createRoom		: _createRoom,		//(name)
-	
+	getRoomByID		: _getRoomByID,		//( roomid )
+		
 	// Devices
 	createDevice			: _createDevice,			// ( param , cbfunc )
 	deleteDevice			: _deleteDevice,			// id
@@ -305,6 +312,7 @@ var MultiBox = ( function( window, undefined ) {
 	getPower			: _getPower,			//(cbfunc)
 	resetPollCounters	: _resetPollCounters,	//()
 	isUserDataCached	: _isUserDataCached,	//()
+	getIcon				: _getIcon,				//( imgpath , cbfunc )
 /*	
 	getIcon			: _getIcon, 		// workaround to get image from vera box
 	getWeatherSettings : _getWeatherSettings,
