@@ -225,5 +225,6 @@ Localization.init( {
 	"Evolutions":"Evolutions",
 	"History":"History",
 	"Date":"Date","Old":"Old","New":"New",
-	"Scene History":"Scene History"
+	"Scene History":"Scene History",
+	"Button Label":"Button Label","Color":"Color"
 	});

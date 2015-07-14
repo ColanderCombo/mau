@@ -390,7 +390,7 @@ var LuaEditor = (function () {
 			dialog
 				.on("click touchend",".altui-luacode-test",function(){ 
 					var lua = $("#altui-luacode-text").val();
-					VeraBox.runLua(lua, function(result) {
+					MultiBox.runLua(lua, function(result) {
 						alert(result);
 					});
 				})
@@ -423,7 +423,7 @@ var DialogManager = ( function() {
 		if ($.isFunction( cbfunc )) {
 			var Html="";
 			var bFound = false;
-			VeraBox.getDeviceActions(device,function( services ) {
+			MultiBox.getDeviceActions(device,function( services ) {
 				$.each(services, function(idx,service) {
 					$.each(service.Actions, function(idx2,action) {
 						if (action.name == actionname) {
@@ -444,7 +444,7 @@ var DialogManager = ( function() {
 	};
 	
 	function _getDeviceServiceVariableSelect(deviceid, service, variable) {
-		var device = VeraBox.getDeviceByID( deviceid );
+		var device = MultiBox.getDeviceByID( deviceid );
 		var select = $("<select id='altui-select-variable' class='form-control'></select>");
 		if (device!=null) {
 			$.each(device.states.sort(_sortByVariableName), function(idx,state) {
@@ -458,8 +458,8 @@ var DialogManager = ( function() {
 	};
 
 	function _getDeviceActionSelect(id, deviceid, actiondescriptor, cbfunc) {
-		var device = VeraBox.getDeviceByID(deviceid);
-		VeraBox.getDeviceActions(device,function( services ) {
+		var device = MultiBox.getDeviceByID(deviceid);
+		MultiBox.getDeviceActions(device,function( services ) {
 			var select = $("<select required id='"+id+"' class='form-control'></select>");
 			select.append("<option value='0' {0}>Select ...</option>".format( actiondescriptor.action==''? 'selected' : ''));
 			$.each(services, function(idx,service) {
@@ -764,7 +764,7 @@ var DialogManager = ( function() {
 	{
 		var select = $("<select id='altui-select-device' class='form-control'></select>");
 		select.append("<option value='0' {0}>Select ...</option>".format( deviceid==0? 'selected' : ''));
-		VeraBox.getDevices( 
+		MultiBox.getDevices( 
 			function(idx,device) {
 				select.append('<option value={0} {2}>{1}</option>'.format( device.id, device.name, deviceid==device.id ? 'selected' : ''));
 			},
@@ -787,7 +787,7 @@ var DialogManager = ( function() {
 	{
 		var select = $("<select id='altui-widget-sceneid' class='form-control'></select>");
 		select.append("<option value='0' {0}>Select ...</option>".format( widget.properties.sceneid==0? 'selected' : ''));
-		VeraBox.getScenes( 
+		MultiBox.getScenes( 
 			function(idx, scene) {
 				select.append('<option value={0} {2}>{1}</option>'.format( scene.id, scene.name, widget.properties.sceneid==scene.id ? 'selected' : ''));				
 			}, 
@@ -868,8 +868,8 @@ var DialogManager = ( function() {
 			args=[];
 			eventid=0;
 			selected_event = null;
-			var device = VeraBox.getDeviceByID( deviceid );
-			var events = VeraBox.getDeviceEvents(device);
+			var device = MultiBox.getDeviceByID( deviceid );
+			var events = MultiBox.getDeviceEvents(device);
 			$("select#"+htmlid).replaceWith( _getSelectForEvents( events ) );
 			$(".altui-arguments").html( _getEventArguments(selected_event, args) );
 		});
@@ -878,8 +878,8 @@ var DialogManager = ( function() {
 			args=[];
 			eventid=$(this).val();
 			selected_event = null;
-			var device = VeraBox.getDeviceByID( deviceid );
-			var events = VeraBox.getDeviceEvents(device);
+			var device = MultiBox.getDeviceByID( deviceid );
+			var events = MultiBox.getDeviceEvents(device);
 			$.each(events, function(idx,event){
 				if (eventid==event.id) {
 					selected_event = event;
@@ -888,8 +888,8 @@ var DialogManager = ( function() {
 			$(".altui-arguments").html( _getEventArguments(selected_event, args) );
 		});
 		
-		var device = VeraBox.getDeviceByID( deviceid );
-		var events = VeraBox.getDeviceEvents(device);
+		var device = MultiBox.getDeviceByID( deviceid );
+		var events = MultiBox.getDeviceEvents(device);
 		var propertyline = "";
 		propertyline += "<div class='form-group'>";
 		propertyline += "	<label for='"+htmlid+"'>"+label+"</label>";
@@ -913,7 +913,7 @@ var DialogManager = ( function() {
 			widget.properties.deviceid = $("#altui-select-device").val();
 			_getActionParameterHtml( 
 				id+"-parameters",
-				VeraBox.getDeviceByID(widget.properties.deviceid), 
+				MultiBox.getDeviceByID(widget.properties.deviceid), 
 				actiondescriptor.action, 
 				actiondescriptor, 
 				function(html) {
@@ -1035,7 +1035,7 @@ var SceneEditor = function (scene) {
 		
 		var html="";
 		var deviceid = trigger.device;
-		var device = VeraBox.getDeviceByID(deviceid);
+		var device = MultiBox.getDeviceByID(deviceid);
 		var event = _findEventFromTriggerTemplate( device, trigger.template );
 		html +="<tr data-trigger-idx='"+idx+"'>";
 		html +="<td>";
@@ -1403,7 +1403,7 @@ var SceneEditor = function (scene) {
 	};
 	
 	function _displayDevice(deviceid) {
-		var device = VeraBox.getDeviceByID(deviceid);
+		var device = MultiBox.getDeviceByID(deviceid);
 		return device.name + "<small class='text-muted'> (#"+deviceid+")</small>";
 	};
 	
@@ -1585,7 +1585,7 @@ var SceneEditor = function (scene) {
 	function _sceneEditDraw() {
 		var htmlSceneEditButton = "  <button type='submit' class='btn btn-default altui-scene-editbutton'>"+_T("Submit")+"</button>";
 		var htmlSceneAddButtonTmpl = "  <button type='submit' class='btn btn-default {0}'>"+plusGlyph+"</button>";
-		var rooms = VeraBox.getRoomsSync();
+		var rooms = MultiBox.getRoomsSync();
 		
 		var htmlRoomSelect = "<select id='altui-room-list' class='form-control'>";
 		if (rooms)
@@ -1733,7 +1733,7 @@ var SceneEditor = function (scene) {
 					else
 						scene.modeStatus="0";
 				}
-				VeraBox.editScene(sceneid,scene);
+				MultiBox.editScene(sceneid,scene);
 				_showSaveNeeded(true);
 			});
 
@@ -1743,7 +1743,7 @@ var SceneEditor = function (scene) {
 			$(this).parents("tr").remove();
 			_showSaveNeeded();
 			PageMessage.message( "Trigger deleted, remember to save your changes", "info");
-			// VeraBox.setScene(sceneid,scene);
+			// MultiBox.setScene(sceneid,scene);
 		});
 		
 		$(".altui-mainpanel")
@@ -1771,7 +1771,7 @@ var SceneEditor = function (scene) {
 				});
 				$(this).parents("tr").remove();
 				PageMessage.message( "Timer deleted, remember to save your changes", "info");
-				// VeraBox.setScene(sceneid,scene);
+				// MultiBox.setScene(sceneid,scene);
 			})
 			.on("click",".altui-edittimer",function(){ 
 				var id = parseInt($(this).prop('id'));
@@ -1788,7 +1788,7 @@ var SceneEditor = function (scene) {
 				$(this).parents("tr").first().remove();
 				_showSaveNeeded();
 				PageMessage.message( "Action deleted, remember to save your changes", "info");
-				// VeraBox.setScene(sceneid,scene);
+				// MultiBox.setScene(sceneid,scene);
 			})
 			.on("click",".altui-editaction",function(){ 
 				var ids = $(this).prop('id').split('.');
@@ -1934,7 +1934,7 @@ var PageMessage = (function(window, undefined ) {
 		if (bReload==true) {
 			if (level=="success")
 				level="info";
-			html += "<button class='btn btn-default btn-sm altui-savechanges-button' onclick='VeraBox.saveChangeCaches(\"{0}\")'>Save Changes</button>";
+			html += "<button class='btn btn-default btn-sm altui-savechanges-button' onclick='MultiBox.saveChangeCaches(\"{0}\")'>Save Changes</button>";
 		}
 
 		//
@@ -2091,7 +2091,7 @@ var UIManager  = ( function( window, undefined ) {
 				widgetdisplay: function(widget,bEdit)	{ 
 					return "<p style='color:{1};'>{0}</p>".format( 
 						(widget.properties.deviceid!=0) 
-							? (VeraBox.getStatus( widget.properties.deviceid, widget.properties.service, widget.properties.variable ) || '')
+							? (MultiBox.getStatus( widget.properties.deviceid, widget.properties.service, widget.properties.variable ) || '')
 							: 'not defined',
 						widget.properties.color);
 				},
@@ -2133,7 +2133,7 @@ var UIManager  = ( function( window, undefined ) {
 				property: _onPropertyRunscene, 
 				onWidgetResize: _onResizeStub,
 				widgetdisplay: function(widget,bEdit)	{ 
-				return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='VeraBox.runScene({0})' style='{5}'>{4}{2}</button>".format(
+				return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='MultiBox.runScene({0})' style='{5}'>{4}{2}</button>".format(
 						widget.properties.sceneid,
 						'altui-widget-runscene-button',
 						runGlyph.replace('glyphicon','pull-right glyphicon'),
@@ -2182,7 +2182,7 @@ var UIManager  = ( function( window, undefined ) {
 					var status=0;
 					if (widget.properties.deviceid>0)
 					{
-						status = VeraBox.getStatus(widget.properties.deviceid, widget.properties.service, widget.properties.variable);
+						status = MultiBox.getStatus(widget.properties.deviceid, widget.properties.service, widget.properties.variable);
 						if  ((status==undefined) || (status==null) ||(status==false) || (status=='0') )
 							status = 0;
 						else if ((status=='true') || (status=='1') || (status>=1))
@@ -2473,7 +2473,7 @@ var UIManager  = ( function( window, undefined ) {
 		function _clickOnValue() {
 			var id = $(this).prop('id');	// base64
 			var tbl = [device.states[id].service , device.states[id].variable]//atob(id).split('.');
-			var value = VeraBox.getStatus(devid,tbl[0],tbl[1]);
+			var value = MultiBox.getStatus(devid,tbl[0],tbl[1]);
 			$(this).off( "click");
 			$(this).html( _enhanceEditorValue(id,value) );
 			$("input#inp"+id).focusout( function() {
@@ -2485,14 +2485,14 @@ var UIManager  = ( function( window, undefined ) {
 					var locale = d.getTime() + (d.getTimezoneOffset()*60000);	// add offset so that it is locale
 					val = locale/1000;
 				}
-				VeraBox.setStatus( devid, tbl[0],tbl[1], val );
+				MultiBox.setStatus( devid, tbl[0],tbl[1], val );
 				$(this).parent().click(_clickOnValue);
 				$(this).replaceWith(_enhanceValue(val));					
 			});
 		};
 			
 		// prepare the text for the modal .. .for each variable do a line, add lines to template
-		var device = VeraBox.getDeviceByID( devid );
+		var device = MultiBox.getDeviceByID( devid );
 		if (device!=null) {
 			var lines = [];
 			$.each(device.states.sort(_sortByVariableName), function(idx,state) {
@@ -2513,7 +2513,7 @@ var UIManager  = ( function( window, undefined ) {
 				var historypre = $(this).closest("tbody").find("table#"+varidx);
 				var width = tr.width();
 				if (historypre.length==0) {
-					VeraBox.getDeviceVariableHistory( device, varidx, function(history) {
+					MultiBox.getDeviceVariableHistory( device, varidx, function(history) {
 						AltuiDebug.debug("getDeviceVariableHistory returned :"+history.result); 
 						var html = "<tr><td colspan='3'>";
 						html += "<div class='panel panel-default'> <div class='panel-body'>";
@@ -2554,7 +2554,7 @@ var UIManager  = ( function( window, undefined ) {
 			.off('click')
 			.on('click', function() {
 				if (confirm("Are you sure you want to create this device")) {			
-					VeraBox.createDevice( {
+					MultiBox.createDevice( {
 						dfile: $("#altui-input-dfile").val(),
 						ifile: $("#altui-input-ifile").val(),
 						descr: $("#altui-input-dtitle").val()
@@ -2588,10 +2588,10 @@ var UIManager  = ( function( window, undefined ) {
 
 		// for each services for that device type
 		// enumerate actions name & parameters		
-		var device = VeraBox.getDeviceByID( devid );
+		var device = MultiBox.getDeviceByID( devid );
 
-		VeraBox.getDeviceActions(device, function( services ) {
-			AltuiDebug.debug("VeraBox.getDeviceActions => returns services:{0}".format( JSON.stringify(services)));
+		MultiBox.getDeviceActions(device, function( services ) {
+			AltuiDebug.debug("MultiBox.getDeviceActions => returns services:{0}".format( JSON.stringify(services)));
 			var lines = [];
 			$.each( services, function( idx,service) {
 				$.each( service.Actions, function (key1,action) {
@@ -2604,7 +2604,7 @@ var UIManager  = ( function( window, undefined ) {
 			});
 			
 			// update modal with new text
-			var extrabuttons = VeraBox.isDeviceZwave(devid) ? buttonTemplate.format( devid, "altui-update-neighbors", _T("Update Neighbors"),"default") : "";
+			var extrabuttons = MultiBox.isDeviceZwave(devid) ? buttonTemplate.format( devid, "altui-update-neighbors", _T("Update Neighbors"),"default") : "";
 			DialogManager.registerDialog('deviceActionModal',deviceActionModalTemplate.format( lines.join(''), device.name, devid, extrabuttons ));
 
 			$('div#deviceActionModal button.altui-run-action').click( function() {
@@ -2627,7 +2627,7 @@ var UIManager  = ( function( window, undefined ) {
 			});
 			$('div#deviceActionModal button.altui-update-neighbors').click( function() {
 				var deviceID = $(this).prop('id');
-				VeraBox.updateNeighbors( deviceID );
+				MultiBox.updateNeighbors( deviceID );
 			});
 				
 			// show the modal
@@ -2688,11 +2688,11 @@ var UIManager  = ( function( window, undefined ) {
 	
 	function _defaultDeviceDrawWatts( devid, device ) {
 		html ="";
-		var watts = parseInt(VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'Watts' )); 
+		var watts = parseInt(MultiBox.getStatus( devid, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'Watts' )); 
 		if (isNaN(watts)==false) 
 			html += wattTemplate.format(watts);
 		else {
-			watts = parseInt(VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'UserSuppliedWattage' )); 
+			watts = parseInt(MultiBox.getStatus( devid, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'UserSuppliedWattage' )); 
 			if (isNaN(watts)==false) 
 				html += wattTemplate.format(watts);
 		}
@@ -2754,7 +2754,7 @@ var UIManager  = ( function( window, undefined ) {
 								if (_isObject(obj) && (obj.img!=undefined) ) {
 									// obj.conditions is an array
 									// obj.img s the icon
-									if (VeraBox.evaluateConditions(device.id, device.subcategory_num || -1, obj.conditions))
+									if (MultiBox.evaluateConditions(device.id, device.subcategory_num || -1, obj.conditions))
 									{
 										bFound = true;
 										str = obj.img;
@@ -2787,7 +2787,7 @@ var UIManager  = ( function( window, undefined ) {
 								var ds = dt.ui_static_data.DisplayStatus;
 								if ((ds.Service != undefined) && (ds.Variable != undefined))
 								{
-									var variable = VeraBox.getStatus( device.id, ds.Service, ds.Variable );
+									var variable = MultiBox.getStatus( device.id, ds.Service, ds.Variable );
 									if (variable==null) 
 										variable=0;
 									var status = variable / (ds.MaxValue - ds.MinValue);
@@ -2844,7 +2844,7 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		var _devicetypesDB = MultiBox.getDeviceTypesDB();
 		if (device==null)
-			device = VeraBox.getDeviceByID(deviceid);
+			device = MultiBox.getDeviceByID(deviceid);
 		if (device==null)
 			return "<img class='altui-device-icon pull-left img-rounded' data-org-src='/err' src='"+defaultIconSrc+"' alt='_todo_' onerror='UIManager.onDeviceIconError("+deviceid+")' ></img>";
 		
@@ -2869,7 +2869,7 @@ var UIManager  = ( function( window, undefined ) {
 	function _deviceDraw(id, device) {
 		var iconHtml = _deviceIconHtml( device );
 		var batteryHtml ="";
-		var batteryLevel = VeraBox.getDeviceBatteryLevel(device);
+		var batteryLevel = MultiBox.getDeviceBatteryLevel(device);
 		if (batteryLevel != null)
 		{
 			var color="danger";
@@ -2991,9 +2991,9 @@ var UIManager  = ( function( window, undefined ) {
 				// height:265
 			// };
 			
-		var device = VeraBox.getDeviceByID(id);
+		var device = MultiBox.getDeviceByID(id);
 		if (device) {
-			var directstreaming = VeraBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" );
+			var directstreaming = MultiBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" );
 			if (MultiBox.isRemoteAccess() || isNullOrEmpty(directstreaming) || isIE11()  )
 			{
 				obj = $("<img></img>")
@@ -3017,7 +3017,7 @@ var UIManager  = ( function( window, undefined ) {
 			{
 				var streamurl = "url(http://{0}{1})".format(
 					device.ip,	//ip
-					VeraBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" )	//DirectStreamingURL
+					MultiBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" )	//DirectStreamingURL
 				);
 
 				obj = $("<div ></div>") .css({
@@ -3153,7 +3153,7 @@ var UIManager  = ( function( window, undefined ) {
 				};
 				case "variable": {
 					// Width is ignored on UI5
-					$( "<p>{0}</p>".format( VeraBox.getStatus( devid, control.Display.Service, control.Display.Variable ) || "" ))
+					$( "<p>{0}</p>".format( MultiBox.getStatus( devid, control.Display.Service, control.Display.Variable ) || "" ))
 						.appendTo( $(domparent) )
 						.css({
 							top: paddingtop + (control.Display.Top || 0), 
@@ -3164,15 +3164,15 @@ var UIManager  = ( function( window, undefined ) {
 					break;
 				};	
 				case "multi_state_button": {
-					var value1 = VeraBox.getStatus( devid, control.states[0].Display.Service, control.states[0].Display.Variable );
-					var value2 = VeraBox.getStatus( devid, control.states[1].Display.Service, control.states[1].Display.Variable );
+					var value1 = MultiBox.getStatus( devid, control.states[0].Display.Service, control.states[0].Display.Variable );
+					var value2 = MultiBox.getStatus( devid, control.states[1].Display.Service, control.states[1].Display.Variable );
 					var armedValue1 = control.states[0].Display.Value;
 					var armedValue2 = control.states[1].Display.Value;
 					var bInverted = (armedValue2>armedValue1);
 					var csvlabel = (bInverted ? "{1},{0}" : "{0},{1}").format( control.states[1].Label.text,control.states[0].Label.text);
 					var onoff = (bInverted ? (value2==armedValue2): (value1==armedValue1) );
 					if (device.device_type == "urn:schemas-upnp-org:device:DimmableLight:1")		// special case ! VERA is not following the JSON file here
-						onoff = parseInt(VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status' )); 
+						onoff = parseInt(MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status' )); 
 					var uniqid = devid+"-"+idx;
 					var html=ALTUI_PluginDisplays.createOnOffButton(onoff , "altui-device-msb-"+uniqid , csvlabel);
 					var obj = $(html);
@@ -3208,7 +3208,7 @@ var UIManager  = ( function( window, undefined ) {
 						var bActif = false;
 						if (control.Display.Service && control.Display.Variable) {
 							var valueToMatch = control.Display.Value || 1 ;
-							var valueNow = VeraBox.getStatus( devid, control.Display.Service, control.Display.Variable )
+							var valueNow = MultiBox.getStatus( devid, control.Display.Service, control.Display.Variable )
 							bActif = (valueToMatch==valueNow);
 						}
 						var button = $( "<button type='button' class='btn btn-{1} altui-controlpanel-button'>{0}</button>".format(control.Label.text, bActif ? 'primary' : 'default'))
@@ -3257,7 +3257,7 @@ var UIManager  = ( function( window, undefined ) {
 					break;
 				};
 				case "slider": {
-					var val = VeraBox.getStatus( devid, control.Display.Service, control.Display.Variable ) || 0;
+					var val = MultiBox.getStatus( devid, control.Display.Service, control.Display.Variable ) || 0;
 					var uniqid = devid+"-"+idx;
 					var symbol = control.LabelSymbol ? control.LabelSymbol.text : '';
 					$("<div id='altui-slider-horizontal-value-"+uniqid+"' class=''></div>")
@@ -3338,7 +3338,7 @@ var UIManager  = ( function( window, undefined ) {
 					};
 					
 					// {"ControlGroup":"6","ControlType":"slider_vertical","top":"0","left":"3.5","ControlPair":"1","ID":"NewCurrentSetpointCool","Style":"numeric","Display":{"Service":"urn:upnp-org:serviceId:TemperatureSetpoint1_Cool","Variable":"CurrentSetpoint","Top":30,"Left":570,"Width":100,"Height":20},"Command":{"Service":"urn:upnp-org:serviceId:TemperatureSetpoint1_Cool","Action":"SetCurrentSetpoint","Parameters":[{"Name":"NewCurrentSetpoint","ID":"NewCurrentSetpointCool"}]},"ControlCode":"cooling_setpoint"}
-					var val = VeraBox.getStatus( devid, control.Display.Service, control.Display.Variable );
+					var val = MultiBox.getStatus( devid, control.Display.Service, control.Display.Variable );
 					var uniqid = devid+"-"+idx;
 					_displaySliderValue(uniqid,control,val)
 
@@ -3372,7 +3372,7 @@ var UIManager  = ( function( window, undefined ) {
 				case "image": {
 					//{"ControlGroup":"3","ControlType":"image","top":"0","left":"0","Display":{"url":"?id=request_image&cam=","Top":0,"Left":0,"Width":320,"Height":240}}
 					var container = $(domparent).parents(".altui-device-controlpanel-container").addClass("altui-norefresh");
-					var directstreaming = VeraBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" );
+					var directstreaming = MultiBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" );
 					if (MultiBox.isRemoteAccess() || isNullOrEmpty(directstreaming) || isIE11() ) {
 						var img = $("<img></img>")
 							.appendTo($(domparent))
@@ -3460,7 +3460,7 @@ var UIManager  = ( function( window, undefined ) {
 
 
 	function _deviceDrawDeviceUsedIn(devid, device, container ) {
-		var usedin_objects = VeraBox.getDeviceDependants(device);
+		var usedin_objects = MultiBox.getDeviceDependants(device);
 		var html ="";
 		html +="<div class='row'>";
 		html += "<div id='altui-device-usedin-"+devid+"' class='col-xs-12 altui-device-usedin'>"
@@ -3574,7 +3574,7 @@ var UIManager  = ( function( window, undefined ) {
 				return lines.join('')+html;
 			};
 			function _deviceDrawWireFrame(devid,device,container) {
-				var rooms = VeraBox.getRoomsSync();
+				var rooms = MultiBox.getRoomsSync();
 				var htmlRoomSelect = "<select id='altui-room-list' class='form-control input-sm'>";
 				if (rooms)
 						htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format("No Room",0,'');
@@ -3720,7 +3720,7 @@ var UIManager  = ( function( window, undefined ) {
 			var m;
 			if ((m = re.exec(AltUI_revision)) !== null) {
 				var jsrevision = m[1];
-				var info = VeraBox.getBoxInfo();
+				var info = MultiBox.getBoxInfo();
 				var infotbl=[];
 				for( var key in info) { infotbl.push( info[key] || "") };
 				$("small#altui-footer").html( "<p>AltUI {0}.{1}, amg0,{2}</p>".format(_version,jsrevision,infotbl.join(", ")));
@@ -3746,7 +3746,7 @@ var UIManager  = ( function( window, undefined ) {
 			toolbarHtml+=  (homeGlyph + '&nbsp;' +_T('Rooms') + "<span class='caret'></span>");
 			toolbarHtml+="  </button>";
 			toolbarHtml+="  <ul class='dropdown-menu' role='menu'>";
-				var rooms = VeraBox.getRoomsSync();
+				var rooms = MultiBox.getRoomsSync();
 				$.each([{id:-1,name:_T('All')},{id:0,name:_T('No Room')}], function( idx, room) {
 					toolbarHtml+="<li><a href='#' id='{1}'>{0}</a></li>".format(room.name,room.id);
 				});
@@ -3777,7 +3777,7 @@ var UIManager  = ( function( window, undefined ) {
 		// to avoid a refresh to erase an opened popup menu
 		$(".altui-device:not(:has(div.btn-group.open))").each( function( index, element) {
 			var devid = $(element).prop("id");
-			var device = VeraBox.getDeviceByID( devid );
+			var device = MultiBox.getDeviceByID( devid );
 			if ( (device!=null) && (bFull==true || device.dirty==true) ) {
 				
 				// get HTML for device and draw it
@@ -3800,7 +3800,7 @@ var UIManager  = ( function( window, undefined ) {
 		// refresh scenes
 		$(".altui-scene").not(".altui-norefresh").each( function(index,element) {
 			var sceneid = $(element).prop("id");
-			var scene = VeraBox.getSceneByID( sceneid );
+			var scene = MultiBox.getSceneByID( sceneid );
 			// get HTML for scene and draw it
 			var html = _sceneDraw( scene);
 			$(element).replaceWith(  html );
@@ -3836,7 +3836,7 @@ var UIManager  = ( function( window, undefined ) {
 		// console.log("refresh");
 		_stoprefreshModes();
 		if (UIManager.UI7Check()==true) {
-			VeraBox.getHouseMode( function (mode) {
+			MultiBox.getHouseMode( function (mode) {
 				// console.log("mode="+mode);
 				if (mode) {
 					$("div.housemode").removeClass("preset_selected").addClass("preset_unselected");
@@ -3983,14 +3983,14 @@ var UIManager  = ( function( window, undefined ) {
 			// save for real this time
 			real_widget.properties.deviceid = widget.properties.deviceid;
 			real_widget.properties.color = $('#altui-widget-Color').val();
-			var states = VeraBox.getStates( widget.properties.deviceid );
+			var states = MultiBox.getStates( widget.properties.deviceid );
 			var selected = states[ $("#altui-select-variable").val() ];
 			real_widget.properties.service = selected.service;
 			real_widget.properties.variable = selected.variable;
 			$('div#dialogModal').modal('hide');
 			_showSavePageNeeded(true);
 			_replaceElementKeepAttributes( $(".altui-custompage-canvas .altui-widget#"+real_widget.id) , _getWidgetHtml(real_widget,true) );
-			// $(".altui-custompage-canvas .altui-widget#"+real_widget.id).find("p").text( VeraBox.getStatus( real_widget.properties.deviceid , real_widget.properties.service, real_widget.properties.variable ) );
+			// $(".altui-custompage-canvas .altui-widget#"+real_widget.id).find("p").text( MultiBox.getStatus( real_widget.properties.deviceid , real_widget.properties.service, real_widget.properties.variable ) );
 		});
 	};
 
@@ -4111,7 +4111,7 @@ var UIManager  = ( function( window, undefined ) {
 			real_widget.properties.deviceid = widget.properties.deviceid;
 			real_widget.properties.inverted = $("#altui-widget-Inverted").is(':checked');
 
-			var states = VeraBox.getStates( widget.properties.deviceid );
+			var states = MultiBox.getStates( widget.properties.deviceid );
 			var selected = states[ $("#altui-select-variable").val() ];
 			real_widget.properties.variable = selected.variable;
 			real_widget.properties.service = selected.service;
@@ -4228,7 +4228,7 @@ var UIManager  = ( function( window, undefined ) {
 			.on( 'submit',"div#dialogModal form", function() {
 			// save for real this time
 			real_widget.properties.deviceid = widget.properties.deviceid;
-			var states = VeraBox.getStates( widget.properties.deviceid );
+			var states = MultiBox.getStates( widget.properties.deviceid );
 			var selected = states[ $("#altui-select-variable").val() ];
 			real_widget.properties.variable = selected.variable;
 			real_widget.properties.service = selected.service;
@@ -4253,7 +4253,7 @@ var UIManager  = ( function( window, undefined ) {
 	function _onDisplayGauge(page,widgetid,bEdit)
 	{
 		var widget=PageManager.getWidgetByID( page, widgetid );
-		var value = parseFloat( VeraBox.getStatus(widget.properties.deviceid, widget.properties.service, widget.properties.variable) || 0 );
+		var value = parseFloat( MultiBox.getStatus(widget.properties.deviceid, widget.properties.service, widget.properties.variable) || 0 );
 		var data = google.visualization.arrayToDataTable([
 		  ['Label', 'Value'],
 		  [widget.properties.label || '', value],
@@ -4358,9 +4358,9 @@ var UIManager  = ( function( window, undefined ) {
 		var page = PageManager.getPageFromName( pagename );
 		var widget=PageManager.getWidgetByID( page, widgetid );
 		// find the device
-		var device= VeraBox.getDeviceByID( widget.properties.deviceid);
+		var device= MultiBox.getDeviceByID( widget.properties.deviceid);
 		// trigger the right action
-		var status = VeraBox.getStatus(widget.properties.deviceid, widget.properties.service, widget.properties.variable);
+		var status = MultiBox.getStatus(widget.properties.deviceid, widget.properties.service, widget.properties.variable);
 		if  ((status==undefined) || (status==false) || (status=='0') )
 			status = 0;
 		else if ((status=='true') || (status=='1') || (status>=1))
@@ -4620,7 +4620,7 @@ var UIManager  = ( function( window, undefined ) {
 			});
 		}
 
-		VeraBox.getRooms( function( id, room) {
+		MultiBox.getRooms( function( id, room) {
 			$(".altui-leftnav").append( leftNavButtonTemplate.format( room.id, (room!=null) ? room.name : "No Room") );	
 		});
 	},
@@ -4649,7 +4649,7 @@ var UIManager  = ( function( window, undefined ) {
 			.append($("<div class='col-xs-12'><table id='table' class='table table-condensed'><thead><tr><th>ID</th><th>Name</th><th>Actions</th></tr></thead><tbody></tbody></table></div>"));
 
 		var roomListTemplate = "<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>";	
-		VeraBox.getRooms( function( idx, room) {
+		MultiBox.getRooms( function( idx, room) {
 			var id = room.id;
 			var delButtonHtml = smallbuttonTemplate.format( id, 'altui-delroom', deleteGlyph);
 			$(".altui-mainpanel tbody").append( roomListTemplate.format(id,(room!=null) ? room.name : "No Room",delButtonHtml) );
@@ -4657,23 +4657,23 @@ var UIManager  = ( function( window, undefined ) {
 			// install click handler for buttons
 			$("button.altui-delroom#"+id).click( function(event) {
 				var id = $(this).prop('id');
-				VeraBox.deleteRoom( id );
+				MultiBox.deleteRoom( id );
 			});
 		});
 		
 		// $(".altui-mainpanel").off("click","button#altui-create-room");
 		$(".altui-mainpanel").on("click","button#altui-create-room",function() 
 		{
-			VeraBox.createRoom( $("#altui-create-room-name").val() );
+			MultiBox.createRoom( $("#altui-create-room-name").val() );
 		});
 
 	},
 
 	pageControlPanel: function( devid ) 
 	{
-		var rooms = VeraBox.getRoomsSync();
-		var device = VeraBox.getDeviceByID( devid );
-		var category = VeraBox.getCategoryTitle( device.category_num );
+		var rooms = MultiBox.getRoomsSync();
+		var device = MultiBox.getDeviceByID( devid );
+		var category = MultiBox.getCategoryTitle( device.category_num );
 
 		UIManager.clearPage(_T('Control Panel'),"{0} <small>{1} <small>#{2}</small></small>".format( device.name , category ,devid));
 		
@@ -4703,7 +4703,7 @@ var UIManager  = ( function( window, undefined ) {
 		$(container).off('click','.altui-deldevice')
 					.on('click','.altui-deldevice',  function(e) {
 						var id = $(this).prop('id');
-						VeraBox.deleteDevice(id);
+						MultiBox.deleteDevice(id);
 					});
 					
 		$("#altui-toggle-attributes").click( function() {
@@ -4731,7 +4731,7 @@ var UIManager  = ( function( window, undefined ) {
 		$(container).on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
 			var controlpanel = $(e.target).closest(".altui-device-controlpanel");
 			var devid = parseInt($(controlpanel).data("devid"));
-			var device = VeraBox.getDeviceByID( devid );
+			var device = MultiBox.getDeviceByID( devid );
 			var activeTabIdx = _getActiveDeviceTabIdx();
 			var domparent  =  $('div#altui-devtab-content-'+activeTabIdx);
 			_displayActiveDeviceTab(activeTabIdx, device, domparent);
@@ -4757,7 +4757,7 @@ var UIManager  = ( function( window, undefined ) {
 		
 		// filter function
 		function deviceFilter(device) {
-			var batteryLevel = VeraBox.getDeviceBatteryLevel(device);
+			var batteryLevel = MultiBox.getDeviceBatteryLevel(device);
 			var regexp = new RegExp(RegExp.escape(_deviceDisplayFilter.filtername),"i")
 			return ( (_deviceDisplayFilter.room <0) || (device!=null && device.room == _deviceDisplayFilter.room) ) 
 				&& ( (_deviceDisplayFilter.invisible == true) || (device.invisible != "1") )	
@@ -4874,7 +4874,7 @@ var UIManager  = ( function( window, undefined ) {
 			toolbarHtml+="  </button>";
 			toolbarHtml+="  <ul class='dropdown-menu' role='menu'>";
 			toolbarHtml+="<li><a href='#' id='{0}'>{1}</a></li>".format(0,_T('All'));
-			VeraBox.getCategories(
+			MultiBox.getCategories(
 				function(idx,category) {
 					toolbarHtml+="<li><a href='#' id='{0}'>{1}</a></li>".format(category.id,category.name);
 				},
@@ -4901,7 +4901,7 @@ var UIManager  = ( function( window, undefined ) {
 					$("#altui-device-search-btn").off("click touchend").on("click touchend",function() { $(this).focus(); });
 
 					$("#altui-device-name-filter input").autocomplete({
-						source: $.map( VeraBox.getDevicesSync() , function( device, i ) { return device.name; }  ),
+						source: $.map( MultiBox.getDevicesSync() , function( device, i ) { return device.name; }  ),
 						appendTo: "#altui-device-name-filter",
 						delay: 500,
 						// minLength: 3,
@@ -4979,7 +4979,7 @@ var UIManager  = ( function( window, undefined ) {
 		{
 			$(".altui-mainpanel").empty();
 			// Category & Form filter
-			VeraBox.getDevices( drawDeviceContainer , filterfunc, endDrawDevice);
+			MultiBox.getDevices( drawDeviceContainer , filterfunc, endDrawDevice);
 		};
 		
 		function _onClickRoomButton(roomid)
@@ -4993,7 +4993,7 @@ var UIManager  = ( function( window, undefined ) {
 		// function _onClickCamera()
 		// {
 			// var id = $(this).parents(".altui-device").prop('id');
-			// var device = VeraBox.getDeviceByID(id);
+			// var device = MultiBox.getDeviceByID(id);
 			// var html = UIManager.cameraDraw(id);
 			// var dialog = DialogManager.registerDialog('dialogModal',defaultDialogModalTemplate.format( 
 				// 'Camera',	// title
@@ -5031,7 +5031,7 @@ var UIManager  = ( function( window, undefined ) {
 				$(this).html("<input id='"+devid+"' class='altui-device-title-input' value='"+text+"'></input>");
 
 				$("input#"+devid+".altui-device-title-input").focusout({devid:devid},function(event){ 
-					var device = VeraBox.getDeviceByID(event.data.devid);
+					var device = MultiBox.getDeviceByID(event.data.devid);
 					var newname = $(this).val();
 					UPnPHelper.renameDevice(devid, newname );
 					$(this).parent().text(device.name);
@@ -5040,7 +5040,7 @@ var UIManager  = ( function( window, undefined ) {
 			// .off("click",".altui-favorite")
 			.on("click",".altui-favorite",function(event) { 
 				var devid = $(this).parents(".altui-device").prop('id');
-				var device = VeraBox.getDeviceByID(devid);
+				var device = MultiBox.getDeviceByID(devid);
 				device.favorite = !device.favorite;
 				$(this).parents(".altui-device-title").html(_enhancedDeviceTitle(device));
 				Favorites.set('device', devid, device.favorite);
@@ -5081,20 +5081,20 @@ var UIManager  = ( function( window, undefined ) {
 				// .off("click",".altui-delscene")
 				.on("click",".altui-delscene",function() {
 					var sceneid = $(this).prop("id");
-					VeraBox.deleteScene( sceneid );
+					MultiBox.deleteScene( sceneid );
 				})
 				// .off("click",".altui-pausescene")
 				.on("click",".altui-pausescene",function() {
 					var sceneid = $(this).closest(".altui-scene").prop('id');
-					var scene = VeraBox.getSceneByID(sceneid);
+					var scene = MultiBox.getSceneByID(sceneid);
 					scene.paused = (scene.paused==1) ? 0 : 1;
-					VeraBox.editScene( sceneid , scene);
+					MultiBox.editScene( sceneid , scene);
 				})
 				// .off("click",".altui-runscene")
 				.on("click",".altui-runscene",function() {
 					var sceneid = $(this).prop("id");
 					$(this).removeClass("btn-primary").addClass("btn-success");
-					VeraBox.runScene( sceneid );
+					MultiBox.runScene( sceneid );
 				})
 				// .off("click",".altui-editscene")
 				.on("click",".altui-editscene",function() {
@@ -5108,7 +5108,7 @@ var UIManager  = ( function( window, undefined ) {
 						_T("Scene History"), 			// title
 						""				// body
 						));
-					VeraBox.getSceneHistory( sceneid, function(history) {
+					MultiBox.getSceneHistory( sceneid, function(history) {
 						var html="";
 						html += "<div class='panel panel-default'> <div class='panel-body'>";
 						html +="<table id='{0}' class='table table-condensed altui-variable-value-history'>".format(sceneid);
@@ -5128,7 +5128,7 @@ var UIManager  = ( function( window, undefined ) {
 				})
 				.on("click",".altui-favorite",function(event) { 
 					var sceneid = $(this).closest(".altui-scene").prop('id');
-					var scene = VeraBox.getSceneByID(sceneid);
+					var scene = MultiBox.getSceneByID(sceneid);
 					scene.favorite = !scene.favorite;
 					Favorites.set('scene', sceneid, scene.favorite );
 					$(this).replaceWith( (scene.favorite==true) ? starGlyph : staremtpyGlyph );
@@ -5144,7 +5144,7 @@ var UIManager  = ( function( window, undefined ) {
 		function _drawScenes( filterfunc )
 		{
 			$(".altui-mainpanel").empty();
-			VeraBox.getScenes( sceneDraw , filterfunc, afterSceneListDraw )
+			MultiBox.getScenes( sceneDraw , filterfunc, afterSceneListDraw )
 		}
 		
 		UIManager.clearPage(_T('Scenes'),_T("Scenes"));
@@ -5169,9 +5169,9 @@ var UIManager  = ( function( window, undefined ) {
 	pageSceneEdit: function (sceneid)
 	{
 		// Deep copy so we can edit it
-		var orgscene = (sceneid!=-1) ? VeraBox.getSceneByID( sceneid ) : { 
+		var orgscene = (sceneid!=-1) ? MultiBox.getSceneByID( sceneid ) : { 
 				name:"New Scene",
-				id: VeraBox.getNewSceneID(),
+				id: MultiBox.getNewSceneID(),
 				triggers: [],
 				groups: [{"delay":0,"actions":[]}],
 				timers: [],
@@ -5208,7 +5208,7 @@ var UIManager  = ( function( window, undefined ) {
 		UIManager.clearPage(_T('Plugins'),_T("Plugins"));
 
 		function _getScriptFileList(devicetype) {
-			var dtdb = UIManager.getDeviceTypesDB();
+			var dtdb = MultiBox.getDeviceTypesDB();
 			var dt = dtdb[devicetype];
 			var scripts = {};
 			if ( dt.ui_static_data && dt.ui_static_data.Tabs )
@@ -5271,7 +5271,7 @@ var UIManager  = ( function( window, undefined ) {
 		
 		function endDrawPlugin() {
 			// adding manually installed plugin
-			var devices = VeraBox.getDevicesSync();
+			var devices = MultiBox.getDevicesSync();
 			var manual_plugins={};
 
 			// first aggregate to find manually installed plugin
@@ -5375,7 +5375,7 @@ var UIManager  = ( function( window, undefined ) {
 		};	
 		
 		$(".altui-mainpanel").append($("<table id='table' class='table table-condensed'><thead><tr><th></th><th>"+_T("Name")+"</th><th>"+_T("Version")+"</th><th>"+_T("Files")+"</th><th>Actions</th><th>"+_T("Update")+"</th><th>"+_T("Uninstall")+"</th></tr></thead><tbody></tbody></table>"));
-		VeraBox.getPlugins( drawPlugin , endDrawPlugin);
+		MultiBox.getPlugins( drawPlugin , endDrawPlugin);
 	},
 
 	pageUsePages: function ()
@@ -5783,7 +5783,7 @@ var UIManager  = ( function( window, undefined ) {
 		UIManager.clearPage(_T('LuaTest'),_T("LUA Code Test"));
 		$(".altui-mainpanel").append("<p>This test code will succeed if it is syntactically correct and does not return false. an error in the code or a return false will trigger a failure</p>");
 		UIManager.pageEditorForm("Lua Test Code","return true",_T("Submit"),function(lua) {
-			VeraBox.runLua(lua, function(result) {
+			MultiBox.runLua(lua, function(result) {
 				if ( result == "Passed")
 					PageMessage.message( _T("Code execution succeeded"), "success");
 				else
@@ -5905,7 +5905,7 @@ var UIManager  = ( function( window, undefined ) {
 		$(".altui-mainpanel").on("click","#altui-oscommand-exec-button",function(e){ 
 			function _execCmd(cmd) {
 				show_loading();
-				VeraBox.osCommand(oscmd,function(res) {
+				MultiBox.osCommand(oscmd,function(res) {
 					hide_loading();
 					$('#altui-oscommand-result').html( (res.success==true) ? _replaceANSI(res.result) : _T("failed to execute"));
 				});
@@ -5982,12 +5982,12 @@ var UIManager  = ( function( window, undefined ) {
 	pageLuaStart: function ()
 	{
 		UIManager.clearPage(_T('LuaStart'),_T("LUA Startup"));
-		var lua = VeraBox.getLuaStartup();
+		var lua = MultiBox.getLuaStartup();
 		UIManager.pageEditorForm("Lua Startup Code",lua,"Submit",function(newlua) {
 			if (newlua!=lua) {
 				DialogManager.confirmDialog(_T("do you want to change lua startup code ? if yes, it will generate a LUA reload, be patient..."),function(result) {
 					if (result==true) {
-						VeraBox.setStartupCode(newlua);
+						MultiBox.setStartupCode(newlua);
 					}
 				});
 			}
@@ -6041,7 +6041,7 @@ var UIManager  = ( function( window, undefined ) {
 		function _refreshPowerChart() {
 			if ($(".altui-energy-d3chart").length==0)
 				return;	// stop refreshing
-			VeraBox.getPower( function(res) {
+			MultiBox.getPower( function(res) {
 				var data = _processEnergyData(res);
 				var x = d3.scale.linear()
 						.range([0, width])
@@ -6076,7 +6076,7 @@ var UIManager  = ( function( window, undefined ) {
 			if ($(".altui-energy-d3chart").length==0)
 				return;	// stop refreshing
 
-			VeraBox.getPower( function(res) {
+			MultiBox.getPower( function(res) {
 				// prepare data
 				var data = _processEnergyData(res);
 				
@@ -6151,8 +6151,8 @@ var UIManager  = ( function( window, undefined ) {
 		function _commQuality(id) {
 			//PollOk/(PollOk+PollNoReply)
 			var service="urn:micasaverde-com:serviceId:ZWaveDevice1"
-			var PollNoReply = parseInt(VeraBox.getStatus(id,service,"PollNoReply"));
-			var PollOk = parseInt(VeraBox.getStatus(id,service,"PollOk"));
+			var PollNoReply = parseInt(MultiBox.getStatus(id,service,"PollNoReply"));
+			var PollOk = parseInt(MultiBox.getStatus(id,service,"PollOk"));
 			if (PollOk+PollNoReply>0)
 				return ( PollOk / (PollOk+PollNoReply) );
 			return 1;
@@ -6173,7 +6173,7 @@ var UIManager  = ( function( window, undefined ) {
 				if (s.variable=="Neighbors") {
 					result = s.value.split(',');
 					$.each(result, function(i,r) {
-						var device = VeraBox.getDeviceByAltID( 1, r );	// 1=zWave controller, r=altid
+						var device = MultiBox.getDeviceByAltID( 1, r );	// 1=zWave controller, r=altid
 						result[i] = (device) ? device.id : null;
 					});
 					return false;
@@ -6182,7 +6182,7 @@ var UIManager  = ( function( window, undefined ) {
 			return result;
 		};
 		var width=0, height=0, chart=null, orders=null;
-		var data = $.grep( VeraBox.getDevicesSync() , function(d) {return d.id_parent==1;} );
+		var data = $.grep( MultiBox.getDevicesSync() , function(d) {return d.id_parent==1;} );
 		orders = {
 			id:$.map( data.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function(d) { return d.id; }),
 			name: $.map( data.sort( sortByName ), function(d) { return d.id; }),
@@ -6362,7 +6362,7 @@ var UIManager  = ( function( window, undefined ) {
 		UIManager.loadD3Script( _drawzWavechart );
 		
 		$("#altui-reset-pollcounters").click(function() {
-			VeraBox.resetPollCounters();
+			MultiBox.resetPollCounters();
 		});
 		
 		$("#altui-zwavechart-order").change( function() {
@@ -6474,11 +6474,11 @@ var UIManager  = ( function( window, undefined ) {
 				data = { nodes:[] , links:[] };
 				var color = {};
 				var nColor = 0;
-				var devices = VeraBox.getDevicesSync();
+				var devices = MultiBox.getDevicesSync();
 
 				// data.root={ id:0, zwid:0, name:"root", children:[] };
 				if (devices) {
-					var zwavenet = VeraBox.getDeviceByType("urn:schemas-micasaverde-com:device:ZWaveNetwork:1");
+					var zwavenet = MultiBox.getDeviceByType("urn:schemas-micasaverde-com:device:ZWaveNetwork:1");
 					if (zwavenet) {
 						color[zwavenet.device_type]=nColor++;
 						data.nodes.push({ 
@@ -6493,8 +6493,8 @@ var UIManager  = ( function( window, undefined ) {
 							});
 						var y=ygap;
 						$.each( devices.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function( idx,device ) {
-							var ManualRoute = VeraBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","ManualRoute");
-							var AutoRoute = VeraBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","AutoRoute");
+							var ManualRoute = MultiBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","ManualRoute");
+							var AutoRoute = MultiBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","AutoRoute");
 							if ( ManualRoute || AutoRoute)
 							{
 								var route = ( ManualRoute && (ManualRoute!="undefined")) ? ManualRoute : AutoRoute;
@@ -6696,7 +6696,7 @@ var UIManager  = ( function( window, undefined ) {
 			data = { root:[], nodes:[] , links:[] };
 			var color = {};
 			var nColor = 0;
-			var devices = VeraBox.getDevicesSync();
+			var devices = MultiBox.getDevicesSync();
 
 			data.root={ id:0, zwid:0, name:"root", children:[] };
 			if (devices) {
@@ -6936,11 +6936,11 @@ var UIManager  = ( function( window, undefined ) {
 				data = { root:[], nodes:[] , links:[] };
 				var color = {};
 				var nColor = 0;
-				var devices = VeraBox.getDevicesSync();
+				var devices = MultiBox.getDevicesSync();
 
 				data.root={ id:0, zwid:0, name:"root", children:[] };
 				if (devices) {
-					var zwavenet = VeraBox.getDeviceByType("urn:schemas-micasaverde-com:device:ZWaveNetwork:1");
+					var zwavenet = MultiBox.getDeviceByType("urn:schemas-micasaverde-com:device:ZWaveNetwork:1");
 					if (zwavenet) {
 						color[zwavenet.device_type]=nColor++;
 						data.nodes.push({ 
@@ -6954,8 +6954,8 @@ var UIManager  = ( function( window, undefined ) {
 							routes: []
 							});
 						$.each( devices.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function( idx,device ) {
-							var ManualRoute = VeraBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","ManualRoute");
-							var AutoRoute = VeraBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","AutoRoute");
+							var ManualRoute = MultiBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","ManualRoute");
+							var AutoRoute = MultiBox.getStatus(device.id,"urn:micasaverde-com:serviceId:ZWaveDevice1","AutoRoute");
 							if ( ManualRoute || AutoRoute)
 							{
 								var route = ( ManualRoute && (ManualRoute!="undefined")) ? ManualRoute : AutoRoute;
@@ -7211,7 +7211,7 @@ var UIManager  = ( function( window, undefined ) {
 			var id = $(this).find(".housemode").prop('id');
 			var mode = id.substr("altui-mode".length);
 			// console.log("set mode="+mode);
-			VeraBox.setHouseMode(mode);
+			MultiBox.setHouseMode(mode);
 		});
 
 	},
@@ -7224,7 +7224,7 @@ var UIManager  = ( function( window, undefined ) {
 	pageTblDevices : function() {
 		UIManager.clearPage(_T('TblDevices'),_T("Table Devices"));
 
-		VeraBox.getDevices( 
+		MultiBox.getDevices( 
 			null,	// per device callback not useful here
 			
 			function(device) { 	// filter
@@ -7324,7 +7324,7 @@ var UIManager  = ( function( window, undefined ) {
 		color = FileDB.isDB() ? "text-success" : "text-danger";
 		var okGlyph2 = glyphTemplate.format( "ok-sign", "OK" , color );
 		
-		color = VeraBox.isUserDataCached() ? "text-success" : "text-danger";
+		color = MultiBox.isUserDataCached() ? "text-success" : "text-danger";
 		var okGlyph3 = glyphTemplate.format( "ok-sign", "OK" , color );
 		
 		color =  MyLocalStorage.get("Pages")!=null ? "text-success" : "text-danger";
@@ -7405,7 +7405,7 @@ var UIManager  = ( function( window, undefined ) {
 			UIManager.pageOptions();
 		});
 		$(".altui-save-userdata").click( function() {
-			VeraBox.saveEngine();
+			MultiBox.saveEngine();
 			UIManager.pageOptions();
 		});
 		$(".altui-clear-userdata").click( function() {
@@ -7710,7 +7710,7 @@ $(document).ready(function() {
 	$( window ).unload(function() {
 		// save state to accelerate the launch next time
 		// UIManager.saveEngine();	
-		VeraBox.saveEngine();
+		MultiBox.saveEngine();
 		AltuiDebug.debug("exiting");
 	});
 	
@@ -7723,15 +7723,15 @@ $(document).ready(function() {
 				$(".navbar-collapse").collapse('hide');
 		} )
 		.on ("click touchend", ".imgLogo", UIManager.pageHome )
-		// .on ("click", ".altui-savechanges-button", VeraBox.saveChangeCaches )
+		// .on ("click", ".altui-savechanges-button", MultiBox.saveChangeCaches )
 		.on ("click", "#menu_room", UIManager.pageRooms )
 		.on ("click", "#menu_device", UIManager.pageDevices )
 		.on ("click", "#menu_scene", UIManager.pageScenes )
 		.on ("click", "#menu_plugins", UIManager.pagePlugins )
 		.on ("click", "#altui-pages-see", UIManager.pageUsePages )
 		.on ("click", "#altui-pages-edit", UIManager.pageEditPages )
-		.on( "click", "#altui-reload", VeraBox.reloadEngine )
-		.on( "click", "#altui-reboot", VeraBox.reboot )
+		.on( "click", "#altui-reload", MultiBox.reloadEngine )
+		.on( "click", "#altui-reboot", MultiBox.reboot )
 		.on( "click", "#altui-remoteaccess", UIManager.pageRemoteAccess )
 		.on( "click", "#altui-credits", UIManager.pageCredits )
 		.on( "click", "#altui-oscommand", UIManager.pageOsCommand )

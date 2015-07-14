@@ -238,7 +238,7 @@ var UPnPHelper = (function(window,undefined) {
 	
 	function _renameDevice( devid, newname, roomid )
 	{
-		var device = VeraBox.getDeviceByID(devid);
+		var device = this.getDeviceByID(devid);
 		var oldname = device.name;
 		DialogManager.confirmDialog(_T("Are you sure you want to modify this device to:")+newname,function(result) {
 			if (result==true) {
@@ -496,7 +496,7 @@ var UPnPHelper = (function(window,undefined) {
     // </s:Body>
 // </s:Envelope>
 
-var VeraBox = ( function( window, undefined ) {
+var VeraBox = ( function( ip_addr ) {
   //---------------------------------------------------------
   // private functions
   //---------------------------------------------------------
@@ -887,7 +887,7 @@ var VeraBox = ( function( window, undefined ) {
 			{
 				var str = "";
 				if (isInteger( condition.value )) {
-					var val = VeraBox.getStatus( deviceid, condition.service, condition.variable );
+					var val = MultiBox.controllerOf(deviceid).getStatus( deviceid, condition.service, condition.variable );
 					if (val=="")
 						AltuiDebug.debug( "devid:{0} service:{1} variable:{2} devsubcat:{3} value:'{4}' should not be null".format( 
 							deviceid,
@@ -904,7 +904,7 @@ var VeraBox = ( function( window, undefined ) {
 				}
 				else {
 					str = "('{0}' {1} '{2}')".format(
-						VeraBox.getStatus( deviceid, condition.service, condition.variable ),
+						MultiBox.controllerOf(deviceid).getStatus( deviceid, condition.service, condition.variable ),
 						condition.operator, 
 						condition.value 
 					);
@@ -1164,7 +1164,7 @@ var VeraBox = ( function( window, undefined ) {
 
 	function _runScene(id)
 	{
-		if ( (id>0) && (VeraBox.getSceneByID(id) != null) ) {			
+		if ( (id>0) && (this.getSceneByID(id) != null) ) {			
 			var url = "data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="+id;
 			var jqxhr = $.ajax( {
 				url: url,
@@ -1340,7 +1340,7 @@ var VeraBox = ( function( window, undefined ) {
 		return staticroot;
 	};
 	
-	function _deviceBatteryLevel(device) {
+	function _getDeviceBatteryLevel(device) {
 		var batteryLevel=null;
 		$.each(device.states, function(idx,state) {
 			if ( (state.variable=="BatteryLevel") && (state.service=="urn:micasaverde-com:serviceId:HaDevice1") )
@@ -1560,7 +1560,7 @@ var VeraBox = ( function( window, undefined ) {
 
 	function _getDeviceActions(device,cbfunc) {
 		if (device) {
-			var _devicetypesDB = UIManager.getDeviceTypesDB();
+			var _devicetypesDB = MultiBox.getDeviceTypesDB();
 			var dt = _devicetypesDB[device.device_type];
 			_loadDeviceActions(dt,cbfunc);
 		}
@@ -1572,7 +1572,7 @@ var VeraBox = ( function( window, undefined ) {
 	
 	function _getDeviceDependants(device) {
 		var usedin_objects =[];
-		var scenes = VeraBox.getScenesSync();
+		var scenes = this.getScenesSync();
 		$.each(scenes,function( idx,scene) {
 			if (scene.triggers)
 				$.each(scene.triggers, function(idx,trigger) {
@@ -1594,7 +1594,7 @@ var VeraBox = ( function( window, undefined ) {
 	
 	function _getDeviceEvents(device) {
 		if (device) {
-			var _devicetypesDB = UIManager.getDeviceTypesDB();
+			var _devicetypesDB = MultiBox.getDeviceTypesDB();
 			var dt = _devicetypesDB[device.device_type];
 			if  ((dt.ui_static_data == undefined) || (dt.ui_static_data.eventList2==undefined))
 				return [];
@@ -1604,9 +1604,9 @@ var VeraBox = ( function( window, undefined ) {
 	};
 	
 	function _isDeviceZwave(id) {
-		var device = VeraBox.getDeviceByID(id);
+		var device = this.getDeviceByID(id);
 		if (device && device.id_parent) {
-			var parent = VeraBox.getDeviceByID( device.id_parent );
+			var parent = this.getDeviceByID( device.id_parent );
 			if (parent) {
 				if (parent.device_type == "urn:schemas-micasaverde-com:device:ZWaveNetwork:1")
 					return true;
@@ -1616,17 +1616,17 @@ var VeraBox = ( function( window, undefined ) {
 	};
 	
 	function _resetPollCounters() {
-		VeraBox.getDevices( 
+		this.getDevices( 
 			function(luaid,device) {
 				var id = device.id;
 				var service="urn:micasaverde-com:serviceId:ZWaveDevice1"
-				var PollNoReply = parseInt(VeraBox.getStatus(id,service,"PollNoReply"));
-				var PollOk = parseInt(VeraBox.getStatus(id,service,"PollOk"));
+				var PollNoReply = parseInt(MultiBox.controllerOf(id).getStatus(id,service,"PollNoReply"));
+				var PollOk = parseInt(MultiBox.controllerOf(id).getStatus(id,service,"PollOk"));
 				if (! isNaN(PollNoReply) ) {
-					VeraBox.setStatus( id, service, "PollNoReply", 0   );
+					MultiBox.controllerOf(id).setStatus( id, service, "PollNoReply", 0   );
 				}
 				if (! isNaN(PollOk) ) {
-					VeraBox.setStatus( id, service, "PollOk", 0   );
+					MultiBox.controllerOf(id).setStatus( id, service, "PollOk", 0   );
 				}
 			}, 
 			function(device) {
@@ -1653,7 +1653,7 @@ var VeraBox = ( function( window, undefined ) {
 	getDeviceByType : _getDeviceByType,
 	getDeviceByAltID : _getDeviceByAltID,
 	getDeviceByID 	: _getDeviceByID, 
-	getDeviceBatteryLevel : _deviceBatteryLevel,
+	getDeviceBatteryLevel : _getDeviceBatteryLevel,
 	getDeviceStaticUI : _getDeviceStaticUI,
 	getDeviceVariableHistory : _getDeviceVariableHistory,
 	getDeviceActions: _getDeviceActions,
@@ -1715,7 +1715,7 @@ var VeraBox = ( function( window, undefined ) {
 						_initDataEngine();				// init the data collection engine
 					},		
   };
-} )( window );
+});	// not invoked, object does not exists
 
 var PageManager = (function() {
 	var _pages = null;
@@ -1969,7 +1969,7 @@ var FileDB = ( function (window, undefined) {
 var data_request_url = UPnPHelper.getUrlHead()+'?';
 var command_url = UPnPHelper.getUrlHead().replace('/data_request','');
 function get_device_state(deviceId, serviceId, variable, dynamic) {
-	return VeraBox.getStatus( deviceId, serviceId, variable );
+	return MultiBox.getStatus( deviceId, serviceId, variable );
 };
 
 function set_device_state (deviceId, serviceId, variable, value, dynamic) {
@@ -1978,7 +1978,7 @@ function set_device_state (deviceId, serviceId, variable, value, dynamic) {
 	// 1 : means dynamic, lost at the next restart if not save
 	if (dynamic==undefined)
 		dynamic = 0;
-	VeraBox.setStatus( deviceId, serviceId, variable, value  , dynamic );
+	MultiBox.setStatus( deviceId, serviceId, variable, value  , dynamic );
 	return true;
 };
 
@@ -2600,7 +2600,7 @@ var api = {
 		return _JSAPI_ctx.deviceid;
 	},
 	getCurrentHouseMode: function(onSuccess, onFailure, context) {
-		VeraBox.getHouseMode( function (mode) {
+		MultiBox.getHouseMode( function (mode) {
 			if (mode==null) {
 				if (onFailure)
 					(onFailure).call(context);
@@ -2611,7 +2611,7 @@ var api = {
 		});
 	},
 	setCurrentHouseMode: function(modeValue, onSuccess, onFailure, context) {
-		VeraBox.setHouseMode(modeValue,function(mode) {
+		MultiBox.setHouseMode(modeValue,function(mode) {
 			if (mode==null) {
 				if (onFailure)
 					(onFailure).call(context);
@@ -2660,7 +2660,7 @@ var api = {
 		return 'unnamed device';
 	},
 	getEventDefinition: function(deviceType) {
-		var _devicetypesDB = UIManager.getDeviceTypesDB();
+		var _devicetypesDB = MultiBox.getDeviceTypesDB();
 		var dt = _devicetypesDB[deviceType];
 		if  ((dt.ui_static_data == undefined) || (dt.ui_static_data.eventList2==undefined))
 			return [];
@@ -2707,7 +2707,7 @@ var api = {
 		return VeraBox.getRoomByID(roomId);
 	},
 	getSceneDescription: function(sceneId, options) {
-		var scene = VeraBox.getSceneByID(sceneId);
+		var scene = this.getSceneByID(sceneId);
 		return JSON.stringify(scene);
 	},
 	registerEventHandler: function(eventName, object, functionName) {

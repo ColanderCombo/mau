@@ -92,7 +92,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	//---------------------------------------------------------
 	function _toggleButton(devid, htmlselector, service, variable, cbfunc) {
 		//'#altui-onoffbtn-'+devid
-		var status = VeraBox.getStatus( devid, service, variable );
+		var status = MultiBox.getStatus( devid, service, variable );
 		if ($.isNumeric(status))
 		{
 			status = parseInt( status );
@@ -117,7 +117,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		} else {
 			var streamurl = "url(http://{0}{1})".format(
 				device.ip,	//ip
-				VeraBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" )	//DirectStreamingURL
+				MultiBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" )	//DirectStreamingURL
 			);
 			var div = $("<div class='altui-camera-picture'></div>")
 				.css({
@@ -136,24 +136,24 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	// return the html string inside the .panel-body of the .altui-device#id panel
 	function _drawTempSensor(devid, device) {
 		var html = "";
-		var ws = VeraBox.getWeatherSettings();
+		var ws = MultiBox.getWeatherSettings();
 		if (ws.tempFormat==undefined)
 			ws.tempFormat="";
 		
-		var status = parseFloat(VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:TemperatureSensor1', 'CurrentTemperature' )); 
+		var status = parseFloat(MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:TemperatureSensor1', 'CurrentTemperature' )); 
 		html += ("<span class='altui-temperature' >"+status+"&deg;"+ws.tempFormat+"</span>");
 		return html;
 	}
 	
 	function _drawHeater(devid, device) {
 		var html = "";
-		var ws = VeraBox.getWeatherSettings();
+		var ws = MultiBox.getWeatherSettings();
 		if (ws.tempFormat==undefined)
 			ws.tempFormat="";
 		
-		var status = VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:TemperatureSensor1', 'CurrentTemperature' ); 
-		var heatsetpoint = VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Heat', 'CurrentSetpoint' ); 
-		var coldsetpoint = VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Cool', 'CurrentSetpoint' ); 
+		var status = MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:TemperatureSensor1', 'CurrentTemperature' ); 
+		var heatsetpoint = MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Heat', 'CurrentSetpoint' ); 
+		var coldsetpoint = MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Cool', 'CurrentSetpoint' ); 
 		html += ("<span class='altui-temperature' >"+((status!=null) ? (status+"&deg;"+ws.tempFormat) : "--") +"</span>");
 		if (heatsetpoint!=null) {
 			html += ("<span class='altui-temperature altui-red' > / "+heatsetpoint+"&deg;"+ws.tempFormat+"</span>");
@@ -167,14 +167,14 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	// return the html string inside the .panel-body of the .altui-device#id panel
 	function _drawHumidity(devid, device) {
 		var html = "";
-		var status = parseInt(VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:HumiditySensor1', 'CurrentLevel' )); 
+		var status = parseInt(MultiBox.getStatus( devid, 'urn:micasaverde-com:serviceId:HumiditySensor1', 'CurrentLevel' )); 
 		html += ("<span class='altui-humidity' >"+status+" % </span>");
 		return html;
 	};
 	
 	function _drawLight(devid, device) {
 		var html = "";
-		var status = parseInt(VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:LightSensor1', 'CurrentLevel' )); 
+		var status = parseInt(MultiBox.getStatus( devid, 'urn:micasaverde-com:serviceId:LightSensor1', 'CurrentLevel' )); 
 		var unit = (status>100) ? "lux" : "% or lux";
 		html += ("<span class='altui-light' >{0} {1}</span>".format(status,unit));
 		return html;
@@ -194,7 +194,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	};
 
 	function _drawWindowCover(devid, device) {
-		var status = VeraBox.getStatus(device.id,"urn:upnp-org:serviceId:Dimming1","LoadLevelStatus");	// 0 - 100
+		var status = MultiBox.getStatus(device.id,"urn:upnp-org:serviceId:Dimming1","LoadLevelStatus");	// 0 - 100
 
 		var html = "";
 		html += "<div class='pull-right'><div id='altui-wc-"+device.id+"' class='btn-group altui-windowcover' role='group' aria-label='...'>";
@@ -225,14 +225,14 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var bodywidth=$(".altui-device-body").first().width();
 		
 		// load level
-		var level = parseInt(VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:Dimming1', 'LoadLevelTarget' )); 
+		var level = parseInt(MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:Dimming1', 'LoadLevelTarget' )); 
 		if (isNaN(level)==true) 
-			level = parseInt(VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:Dimming1', 'LoadLevelStatus' )); 
+			level = parseInt(MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:Dimming1', 'LoadLevelStatus' )); 
 		
 		html += ("<span id='slider-val-"+devid+"' class='altui-dimmable' >"+level+"% </span>");
 
 		// on off button
-		var status = parseInt(VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status' )); 
+		var status = parseInt(MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status' )); 
 		// if ( (device.status==1) || (device.status==5) )  {  
 		// if ( level != status )  {  
 		// if ( ( ( device.Jobs != null ) && ( device.Jobs.length>0) ) || (device.status==1) || (device.status==5) ) {  
@@ -263,11 +263,11 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 
 	// return the html string inside the .panel-body of the .altui-device#id panel
 	function _drawDoorLock(devid, device) {
-		var status = VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:DoorLock1', 'Status' );
+		var status = MultiBox.getStatus( devid, 'urn:micasaverde-com:serviceId:DoorLock1', 'Status' );
 		var html ="";
 		html += ALTUI_PluginDisplays.createOnOffButton( status,"altui-onoffbtn-"+devid, _T("Unlock,Lock") , "pull-right");
 		
-		var lasttrip = VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'LastTrip' );
+		var lasttrip = MultiBox.getStatus( devid, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'LastTrip' );
 		if (lasttrip != null) {
 			var lasttripdate = _toIso(new Date(lasttrip*1000),' ');
 			html+= "<div class='altui-lasttrip-text text-muted'>{0} {1}</div>".format( timeGlyph,lasttripdate );
@@ -293,18 +293,18 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var html = "";
 		
 		// armed, tripped
-		var tripped = parseInt(VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Tripped' )); 
+		var tripped = parseInt(MultiBox.getStatus( devid, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Tripped' )); 
 		html += ("<span class='altui-motion' >{0}</span>".format( (tripped==true) ? "<span class='glyphicon glyphicon-flash text-danger' aria-hidden='true'></span>" : ""));
 
 		// armed button
-		// var status = parseInt(VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status' )); 
+		// var status = parseInt(MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status' )); 
 		// if ( ( ( device.Jobs != null ) && ( device.Jobs.length>0) ) || (device.status==1) || (device.status==5) ) {  
 			// status = -1;
 		// }
-		var armed = parseInt(VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Armed' )); 
+		var armed = parseInt(MultiBox.getStatus( devid, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Armed' )); 
 		html += _createOnOffButton( armed,"altui-onoffbtn-"+devid, _T("Bypass,Arm"), "pull-right" );
 		
-		var lasttrip = VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'LastTrip' );
+		var lasttrip = MultiBox.getStatus( devid, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'LastTrip' );
 		if (lasttrip != null) {
 			var lasttripdate = _toIso(new Date(lasttrip*1000),' ');
 			html+= "<div class='altui-lasttrip-text text-muted'>{0} {1}</div>".format( timeGlyph,lasttripdate );
@@ -322,7 +322,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var html ="";
 		html += UIManager.defaultDeviceDrawWatts(devid, device);
 
-		var status = parseInt(VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status' )); 
+		var status = parseInt(MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status' )); 
 		// if ( ( ( device.Jobs != null ) && ( device.Jobs.length>0) ) || (device.status==1) || (device.status==5) ) {  
 		// if ( (device.status==1) || (device.status==5))  {  
 		if ( _isBusyStatus(device) )  {  
@@ -339,11 +339,11 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	function _drawPowerMeter(devid, device) {
 		var html ="";
 		var wattTemplate = "<div class='altui-watts '>{0} <small>Watts</small></div>";		
-		var watts = parseFloat(VeraBox.getStatus( devid, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'Watts' )); 
+		var watts = parseFloat(MultiBox.getStatus( devid, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'Watts' )); 
 		if (isNaN(watts)==false) 
 			html += wattTemplate.format(watts);
 		var voltTemplate = "<div class='altui-volts '>{0} <small>Volts</small></div>";
-		var volts = parseFloat(VeraBox.getStatus( devid, 'urn:brultech-com:serviceId:PowerMeter1', 'Volts' ));
+		var volts = parseFloat(MultiBox.getStatus( devid, 'urn:brultech-com:serviceId:PowerMeter1', 'Volts' ));
 		if (isNaN(volts)==false) 
 			html += voltTemplate .format(volts);
 		return html;
@@ -351,16 +351,16 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	
 	function _drawCountDown(devid, device) {
 		var html ="";
-		var remaining = parseInt(VeraBox.getStatus( devid, 'urn:futzle-com:serviceId:CountdownTimer1', 'Remaining' ));
-		var duration = parseInt(VeraBox.getStatus( devid, 'urn:futzle-com:serviceId:CountdownTimer1', 'Duration' ));
+		var remaining = parseInt(MultiBox.getStatus( devid, 'urn:futzle-com:serviceId:CountdownTimer1', 'Remaining' ));
+		var duration = parseInt(MultiBox.getStatus( devid, 'urn:futzle-com:serviceId:CountdownTimer1', 'Duration' ));
 		html+= "<div class='altui-countdown'>{0} / {1}</div>".format( remaining , duration );
 		return html;
 	};
 
 	function _drawVacation(devid, device) {
 		var html ="";
-		var status = parseInt( VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status') );
-		var expiryDate =  VeraBox.getStatus( devid, 'urn:futzle-com:serviceId:HolidayVirtualSwitch1', 'OverrideExpiryDate');
+		var status = parseInt( MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status') );
+		var expiryDate =  MultiBox.getStatus( devid, 'urn:futzle-com:serviceId:HolidayVirtualSwitch1', 'OverrideExpiryDate');
 		html+= "<div class='altui-watts '>{0}</div>".format( (status==1) ? _T("Holiday") : _T("Working") );
 		html+= "<div class=''>{0}</div>".format( expiryDate );
 		return html;
@@ -368,8 +368,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 
 	function _drawWeather(devid, device) {
 		var html ="";
-		var condition = VeraBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'Condition');
-		var wind = VeraBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'WindCondition');
+		var condition = MultiBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'Condition');
+		var wind = MultiBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'WindCondition');
 		html+= "<div class='altui-weather-text'>{0}</div>".format( condition );
 		html+= ("<div class='altui-weather-text'>"+_T("Wind")+": {0}</div>").format( wind );
 		return html;
@@ -377,7 +377,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	
 	function _drawWeatherIcon(devid, device) {
 		var html ="";
-		var conditionGroup = VeraBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'ConditionGroup');
+		var conditionGroup = MultiBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'ConditionGroup');
 		var newsrc = (conditionGroup!=null) ? "http://icons.wxug.com/i/c/i/"+conditionGroup+".gif" : defaultIconSrc;
 		return "<img class='altui-device-icon pull-left img-rounded' src='"+newsrc+"' alt='"+conditionGroup+"' onerror='UIManager.onDeviceIconError("+device.id+")' ></img>";
 	};
@@ -394,7 +394,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	
 	function _drawInfoViewer(devid, device) {
 		var html ="";
-		var pattern = VeraBox.getStatus( devid, 'urn:a-lurker-com:serviceId:InfoViewer1', 'LuaPattern');
+		var pattern = MultiBox.getStatus( devid, 'urn:a-lurker-com:serviceId:InfoViewer1', 'LuaPattern');
 		if (pattern!="")
 			html+= "<span class=''>Pattern: {0}</span>".format( pattern.htmlEncode() );
 		html+="<button type='button' class='pull-right altui-infoviewer-log btn btn-default btn-sm '>"+_T("Open")+"</button>" ;

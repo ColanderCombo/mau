@@ -22,7 +22,7 @@ var ALTUI_IPhoneLocator= ( function( window, undefined ) {
 
 
 	function _drawAltUI(devid, device) {
-		var debug = VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:altui1', 'Debug' ); 
+		var debug = MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:altui1', 'Debug' ); 
 		
 		var html ="";
 		html += ALTUI_PluginDisplays.createOnOffButton( debug,"altui-onoffbtn-"+devid, _T("Normal,Debug") , "pull-right");
@@ -35,9 +35,9 @@ var ALTUI_IPhoneLocator= ( function( window, undefined ) {
 	
 	// return the html string inside the .panel-body of the .altui-device#id panel
 	function _drawIPhone(devid, device) {
-		var dist = parseFloat(VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:IPhoneLocator1', 'Distance' )); 
-		var unit = VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:IPhoneLocator1', 'Unit' ); 
-		var mute = VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:IPhoneLocator1', 'Muted' ); 
+		var dist = parseFloat(MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:IPhoneLocator1', 'Distance' )); 
+		var unit = MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:IPhoneLocator1', 'Unit' ); 
+		var mute = MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:IPhoneLocator1', 'Muted' ); 
 		
 		var html ="";
 		html+=("<span class='altui-iphone' > "+dist+" </span>");
@@ -52,8 +52,8 @@ var ALTUI_IPhoneLocator= ( function( window, undefined ) {
 	};
 	
 	function _drawCanalplus(devid, device) {
-		var channel = VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:cplus1', 'CurrentChannel' ).split(','); 
-		var present = VeraBox.getStatus( devid, 'urn:upnp-org:serviceId:cplus1', 'Present' );
+		var channel = MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:cplus1', 'CurrentChannel' ).split(','); 
+		var present = MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:cplus1', 'Present' );
 		var html ="";
 		html += ALTUI_PluginDisplays.createOnOffButton( present,"altui-onoffbtn-"+devid, _T("OFF,ON"), "pull-right" );
 		if (channel.length>=2)
