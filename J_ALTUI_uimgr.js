@@ -7419,7 +7419,7 @@ var UIManager  = ( function( window, undefined ) {
 			UIManager.pageOptions();
 		});
 		$(".altui-clear-userdata").click( function() {
-			MyLocalStorage.clear("VeraBox"); 
+			MultiBox.clearEngine();
 			UIManager.pageOptions();
 		});
 		$(".altui-save-userpage").click( function() {

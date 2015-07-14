@@ -75,15 +75,24 @@ var MultiBox = ( function( window, undefined ) {
 	};
 	
 	function _initEngine() {
-		$.each(_controllers, function(i,box) {
-			box.controller = new VeraBox(box.ip);
+		$.each(_controllers, function(idx,box) {
+			box.controller = new VeraBox(idx,box.ip);
 			box.controller.initEngine();
 		});
 		// VeraBox.initEngine();
 		UIManager.refreshUI( true , true );	// full & first time full display
 	};
 	function _saveEngine() {
-		return _controllers[0].controller.saveEngine();
+		$.each(_controllers, function(idx,box) {
+			box.controller.saveEngine();
+		});
+		return;
+	};
+	function _clearEngine() {
+		$.each(_controllers, function(idx,box) {
+			box.controller.clearEngine();
+		});
+		return;
 	};
 	function _getBoxInfo() {
 		return _controllers[0].controller.getBoxInfo();
@@ -271,6 +280,7 @@ var MultiBox = ( function( window, undefined ) {
 	reloadEngine			: _reloadEngine,	
 	reboot					: _reboot,
 	saveEngine				: _saveEngine,	//()
+	clearEngine				: _clearEngine,	//()
 	
 	// controller selection
 	controllerOf : _controllerOf,	//(deviceid)
@@ -366,5 +376,6 @@ var MultiBox = ( function( window, undefined ) {
 	
 	// Upgrade
 	triggerAltUIUpgrade	: _triggerAltUIUpgrade,		//(url suffix)
+	
   };
 } )( window );

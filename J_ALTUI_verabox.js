@@ -486,11 +486,12 @@ var UPnPHelper = (function(ip_addr) {
     // </s:Body>
 // </s:Envelope>
 
-var VeraBox = ( function( ip_addr ) {
+var VeraBox = ( function( uniq_id, ip_addr ) {
   //---------------------------------------------------------
   // private functions
   //---------------------------------------------------------
-	var _upnpHelper = new UPnPHelper(ip_addr);
+	var _upnpHelper = new UPnPHelper(ip_addr);	// for common UPNP ajax
+	var _uniqID = uniq_id;						// assigned by Multibox, unique, can be used for Settings & other things
 	var _dataEngine = null;
 	var _rooms = null;
 	var _scenes = null;
@@ -1044,7 +1045,7 @@ var VeraBox = ( function( ip_addr ) {
 		}
 	};
 
-	function _isUserDataCached() {	return MyLocalStorage.get("VeraBox")!=null; }
+	function _isUserDataCached() {	return MyLocalStorage.get("VeraBox"+_uniqID)!=null; }
 	
 	function _saveEngine() {
 		AltuiDebug.debug("_saveEngine()");
@@ -1053,13 +1054,15 @@ var VeraBox = ( function( ip_addr ) {
 			// _user_data_DataVersion :  _user_data_DataVersion,
 			// _user_data_LoadTime : _user_data_LoadTime
 		};
-		
-		MyLocalStorage.set("VeraBox",verabox);
+		return MyLocalStorage.set("VeraBox"+_uniqID,verabox);
+	};
+	function _clearEngine() {
+		return MyLocalStorage.clear("VeraBox"+_uniqID);
 	};
 
 	function _loadEngine() {
 		AltuiDebug.debug("_loadEngine()");
-		var verabox = MyLocalStorage.get("VeraBox");
+		var verabox = MyLocalStorage.get("VeraBox"+_uniqID);
 		if (verabox)
 		{
 			// _user_data_LoadTime 	= verabox._user_data_LoadTime;
@@ -1088,7 +1091,7 @@ var VeraBox = ( function( ip_addr ) {
 			_dataEngine = setTimeout( _refreshEngine, 2000 );
 		})
 		.fail(function(jqXHR, textStatus) {
-			_dataEngine = setTimeout( _initDataEngine, 1000 );
+			_dataEngine = setTimeout( _initDataEngine, 2000 );
 			PageMessage.message( _T("VERA did not respond") + ": " + textStatus , "danger");
 		})
 		.always(function() {
@@ -1721,6 +1724,7 @@ var VeraBox = ( function( ip_addr ) {
 	// save page data into altui plugin device
 	saveData		: _saveData,		//  name, data , cbfunc
 	saveEngine 		: _saveEngine, 
+	clearEngine		: _clearEngine,
 	loadEngine 		: _loadEngine, 
 	isUserDataCached	: _isUserDataCached,
 	initEngine		: function() 	{
@@ -1729,252 +1733,6 @@ var VeraBox = ( function( ip_addr ) {
 					},		
   };
 });	// not invoked, object does not exists
-
-var PageManager = (function() {
-	var _pages = null;
-			// var pages = [
-			// { id:1, name:'test' },
-			// { id:2, name:'page2' },
-		// ];
-
-	function _init(pages) {
-		if (_pages==null)	// otherwise, already initialized 
-		{
-			AltuiDebug.debug("PageManager.init(), pages="+JSON.stringify(pages));
-			_pages = [];
-			$.each( pages, function(idx,page) {
-				_pages.push( $.extend( true, {id:0, name:'', background:''}, page) );
-			});
-		}
-	};
-	
-	function _recoverFromStorage() {
-		_pages = MyLocalStorage.get("Pages");
-	};
-	function _clearStorage() {
-		MyLocalStorage.clear("Pages");
-	};
-	
-	function _savePages() {
-		AltuiDebug.debug("PageManager.savePages(), pages="+JSON.stringify(_pages));
-		MyLocalStorage.set("Pages",_pages);
-		var names = $.map( _pages, function(page,idx) {	return page.name;	} );
-		var that = this;
-		that.saveData( "CustomPages", JSON.stringify(names), function(data) {
-			if (data!="")
-				PageMessage.message("Save Pages success", "success");
-			else
-				PageMessage.message("Save Pages failure", "danger");
-		});
-		
-		$.each(_pages, function(idx,page) {
-			that.saveData( page.name, JSON.stringify(page), function(data) {
-			if (data!="")
-				PageMessage.message("Save for "+page.name+" succeeded.", "success");
-			else
-				PageMessage.message( "Save for "+page.name+" did not succeed." , "danger");
-			});
-		});
-	};
-
-	function _addPage() {
-		var id = 0;
-		$.each(_pages, function(idx,page) {
-			id = Math.max(id, page.id );
-		});
-		id++;
-		_pages.push({ 
-			id:id, 
-			name:'page'+id,
-			background: 'rgb(232, 231, 231)'
-		});
-		return _pages;
-	};
-
-	function _deletePage(name) {
-		$.each( _pages, function( idx,page) {
-			if ( page.name==name) {
-				_pages.splice(idx,1);
-				return false;
-			}
-		});
-		return _pages;
-	};
-		
-	function _getPageFromName( name ) {
-		var result = null;
-		if (name)
-			$.each( _pages, function( idx,page) {
-				if ( page.name==name) {
-					result = page;
-					return false;
-				}
-			});
-		return result;
-	};
-	
-	function _updateChildrenInPage( page, widgetid, position , size )
-	{
-		if (page.children)
-			$.each(page.children, function(idx,child) {
-				if (child.id == widgetid) {
-					if (position)
-						child.position = jQuery.extend(true, {}, position);
-					if (size)
-						child.size = jQuery.extend(true, {}, size);
-				}
-			});
-	};		
-
-	function _insertChildrenInPage( page, tool, position )
-	{
-		var id = 0;
-		if (page !=null) {
-			if (page.children == undefined) 
-				page.children = new Array();
-			$.each(page.children, function(idx,child) {
-				id = Math.max(id, child.id );
-			});
-			id++;
-			page.children.push( {
-					id: id,
-					cls: tool.cls,
-					position: jQuery.extend(true, {}, position),
-					properties : jQuery.extend(true, {}, tool.properties),	// default values
-			});				
-		}
-		return id;	//0 if error
-	};
-		
-	function _removeChildrenInPage( page, widgetid )
-	{
-		var widget = null;
-		$.each(page.children, function(idx,child) {
-			if (child.id==widgetid)
-			{
-				widget = child;
-				page.children.splice(idx,1);
-				return false;	// break loop
-			}
-		});
-		return widget;
-	};
-		
-	function _getWidgetByID( page, widgetid ) {
-		var widget=null;
-		$.each(page.children, function(idx,child) {
-			if (child.id == widgetid) {
-				widget = child;
-				return false;
-			}
-		});
-		return widget;
-	};
-	
-	function _forEachPage( func ) {
-		$.each(_pages, func);
-	};
-	
-	return {
-		init :_init,
-		recoverFromStorage : _recoverFromStorage,
-		clearStorage : _clearStorage,
-		forEachPage: _forEachPage,
-		getPageFromName: _getPageFromName,
-		savePages: _savePages,
-		addPage: _addPage,
-		deletePage: _deletePage,
-		updateChildrenInPage: _updateChildrenInPage,
-		insertChildrenInPage: _insertChildrenInPage,
-		removeChildrenInPage: _removeChildrenInPage,
-		getWidgetByID: _getWidgetByID
-	};
-})();
-
-var IconDB = ( function (window, undefined) {
-	var _dbIcon = null;
-	
-	function _getIconContent( name , cbfunc ) {
-		if (_dbIcon == null) {
-			_dbIcon = MyLocalStorage.get("IconDB");
-			if (_dbIcon==null)
-				_dbIcon={}
-		}
-
-		// do not load http based sources from the VERA itself
-		if (name.startsWith("http"))
-			return name;
-		
-		// if undefined and not yet started to fetch, then go fetch it
-		if (_dbIcon[name]==undefined) {
-			_dbIcon[name]="pending"
-			MultiBox.getIcon( name, function(data) {
-				
-				// store in cache and call callback
-				_dbIcon[name]=data;
-				if ($.isFunction(cbfunc))
-					cbfunc(data);
-				
-			});
-		}
-		
-		// if not yet there, or still pending , return nothing - it will arrive later in a callback
-		return ((_dbIcon[name]!=undefined) && (_dbIcon[name]!="pending"))  ? _dbIcon[name] : "" ;
-	};
-	
-	return {
-		getIconContent  : _getIconContent,
-		isDB			: function()	{ 	return MyLocalStorage.get("IconDB")!=null;			},
-		saveDB			: function() 	{	MyLocalStorage.set("IconDB", _dbIcon);	  	},
-		resetDB			: function() 	{	MyLocalStorage.clear("IconDB"); _dbIcon = {}; }
-	}
-} )( window );
-
-var FileDB = ( function (window, undefined) {
-	var _dbFile = null;
-	
-	function _getFileContent( name, cbfunc ) {
-		AltuiDebug.debug("_getFileContent( {0} )".format(name));
-		if (_dbFile == null) {
-			_dbFile = MyLocalStorage.get("FileDB");
-			if (_dbFile==null)
-				_dbFile={}
-		}
-		
-		if ($.isFunction(cbfunc)==false)
-			return null;
-		
-		if (_dbFile[name]!=undefined)
-			if (_dbFile[name]=="pending")
-			{
-				AltuiDebug.debug("_getFileContent( {0} ) ==> not yet here, defered in 200ms".format(name));
-				setTimeout( FileDB.getFileContent, 200, name,cbfunc );
-			}
-			else {
-				AltuiDebug.debug("_getFileContent( {0} ) ==> returning content from cache".format(name));
-				cbfunc(_dbFile[name]); 
-			}
-		else {
-			_dbFile[name]="pending";
-			// console.log("getting file "+name);
-			AltuiDebug.debug("_getFileContent( {0} ) ==> asking content to Vera".format(name));
-			MultiBox.getFileContent( name, function(data,jqXHR) {
-				AltuiDebug.debug("_getFileContent( {0} ) ==> returning async content from Vera".format(name));
-				_dbFile[name] = data;
-				cbfunc(data,jqXHR);
-			});
-		}
-		return 0;
-	};
-	
-	return {
-		getFileContent  : _getFileContent,
-		isDB			: function()	{ 	return MyLocalStorage.get("FileDB")!=null;			},
-		saveDB			: function(db) 	{	MyLocalStorage.set("FileDB", _dbFile);	  	},
-		resetDB			: function(db) 	{	MyLocalStorage.clear("FileDB"); _dbFile = {}; }
-	}
-} )( window );
-
 
 // ======================================================================
 // Global for UI5 UI7 javascript compatibility
