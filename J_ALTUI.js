@@ -140,6 +140,7 @@ function altui_Settings(deviceID) {
 		'<tr><td>Config</td><td> '+htmlConfig+' </td></tr>' +
 		'<tr><td>Theme</td><td> '+htmlTheme+' </td></tr>' +
 		'<tr><td>Home Page</td><td> '+htmlHome+' </td></tr>' +
+		'<tr><td>url options</td><td><ul><li>home=(pageHome , pageRooms , pageDevices , pageScenes , pageSceneEdit , pagePlugins , pageUsePages , pageEditPages , pageCredits , pageLuaTest , pageLuaStart , pageOptions , pageEditor , pageZwave , pageLocalization , pagePower , pageChildren , pageRoutes , pageQuality , pageTblDevices , pageOsCommand)</li><li>lang=(en , fr , it)</li></ul></td></tr>' +
 		'<tr><td>Actions</td><td> '+htmlViewJson+htmlSetConfig+htmlResetConfig+' </td></tr>' +
 		'</table>'+
 		'</div>' ;
