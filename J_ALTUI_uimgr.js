@@ -374,19 +374,22 @@ var LuaEditor = (function () {
 	luaEditorModalTemplate += "      	</div>";
 	luaEditorModalTemplate += "      </div>";
 	luaEditorModalTemplate += "      <div class='modal-footer'>";
-	luaEditorModalTemplate += "        <button type='button' class='btn btn-default' data-dismiss='modal'>"+_T("Close")+"</button>";
-	luaEditorModalTemplate += "        <button type='button' class='btn btn-default altui-luacode-test' >"+_T("Test Code")+"</button>";
-	luaEditorModalTemplate += "        <button type='button' class='btn btn-primary altui-luacode-save' data-dismiss='modal'>"+_T("Save Changes")+"</button>";
+	// luaEditorModalTemplate += "        <button type='button' class='btn btn-default' data-dismiss='modal'>"+_T("Close")+"</button>";
+	// luaEditorModalTemplate += "        <button type='button' class='btn btn-default altui-luacode-test' >"+_T("Test Code")+"</button>";
+	// luaEditorModalTemplate += "        <button type='button' class='btn btn-primary altui-luacode-save' data-dismiss='modal'>"+_T("Save Changes")+"</button>";
 	luaEditorModalTemplate += "      </div>";
 	luaEditorModalTemplate += "    </div><!-- /.modal-content -->";
 	luaEditorModalTemplate += "  </div><!-- /.modal-dialog -->";
 	luaEditorModalTemplate += "</div><!-- /.modal -->";
 
-	$(".altui-mainpanel").append(luaEditorModalTemplate);
+	// $(".altui-mainpanel").append(luaEditorModalTemplate);
 	
 	return {
 		openDialog: function(luacode, onSaveCB) {
 			var dialog =  DialogManager.registerDialog( 'luaEditorModal', luaEditorModalTemplate.format( luacode ) )
+			DialogManager.dlgAddDialogButton(dialog, false, _T("Close"), '', { 'data-dismiss':'modal'} );
+			DialogManager.dlgAddDialogButton(dialog, false, _T("Test Code"),'altui-luacode-test');
+			DialogManager.dlgAddDialogButton(dialog, true, _T("Save Changes"),'altui-luacode-save',{ 'data-dismiss':'modal'});
 			dialog
 				.on("click touchend",".altui-luacode-test",function(){ 
 					var lua = $("#altui-luacode-text").val();
@@ -405,6 +408,20 @@ var LuaEditor = (function () {
 })();
 
 var DialogManager = ( function() {
+		
+	function _optionsToString(options)
+	{
+		var tbl=[];
+		options = $.extend( { },options);
+		
+		$.each( options, function(key,val) {
+			var typ = Object.prototype.toString.call(val);
+			if ((typ!="[object Object]") && (typ!="[object Array]")){
+				tbl.push("{0}='{1}'".format(key,val)); 
+			}
+		});
+		return tbl.join(' ');
+	};
 	
 	// this method assumes htmlDialog id property is equal to 'name'
 	function _registerDialog( name, htmlDialog ) {
@@ -538,13 +555,16 @@ var DialogManager = ( function() {
 								""				// body
 							));
 		DialogManager.dlgAddDialogButton(dialog, true, _T("Save Changes"));
-		return dialog;
+		return dialog; 
 	};
 	
-	function _dlgAddDialogButton(dialog, bSubmit, label) {
-		var html = "<button type='{0}' class='btn btn-primary'>{1}</button>".format( 
+	function _dlgAddDialogButton(dialog, bSubmit, label, extraclass, extraattrs) {
+		var html = "<button type='{0}' class='btn {2} {3}' {4} >{1}</button>".format( 
 			(bSubmit ? 'submit' : 'button'),
-			label
+			label,
+			'btn-'+(bSubmit ? 'primary' : 'default'),
+			(extraclass) ? extraclass : '',
+			(extraattrs) ? _optionsToString(extraattrs) : ''
 			)
 		$(dialog).find(".modal-footer").append(html);
 	};
@@ -577,20 +597,6 @@ var DialogManager = ( function() {
 		$(dialog).find(".row-fluid").append(propertyline);
 	};
 	
-	function _optionsToString(options)
-	{
-		var tbl=[];
-		options = $.extend( { type:'text' },options);
-		
-		$.each( options, function(key,val) {
-			var typ = Object.prototype.toString.call(val);
-			if ((typ!="[object Object]") && (typ!="[object Array]")){
-				tbl.push("{0}='{1}'".format(key,val)); 
-			}
-		});
-		return tbl.join(' ');
-	};
-	
 	function _dlgAddColorPicker(dialog, name, label, help, value, options)
 	{
 		var optstr = _optionsToString(options);
@@ -608,7 +614,7 @@ var DialogManager = ( function() {
 
 	function _dlgAddLine(dialog, name, label, value,help, options)
 	{
-		var optstr = _optionsToString(options);
+		var optstr = _optionsToString($.extend( {type:'text'},options));
 		value = (value==undefined) ? '' : value ;
 		var placeholder = ((options !=undefined) && (options.placeholder==undefined)) ? "placeholder:'enter "+name+"'" : "";
 		var propertyline = "";
@@ -2367,6 +2373,15 @@ var UIManager  = ( function( window, undefined ) {
 				
 				re = /\$\$\((.*?)\)/g; 
 				subst = '$($1)'; 
+				code = code.replace(re, subst);
+			}
+			if (name=="J_OWServer.js") {
+				// J_OWServer.js & others
+				re = /=\s*new\s+Hash\(\);/g; 
+				subst = '= {};'; 
+				code = code.replace(re, subst);
+				re = /.set\((.*),(.*)\)/g; 
+				subst = '[$1]=$2'; 
 				code = code.replace(re, subst);
 			}
 		}

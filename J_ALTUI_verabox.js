@@ -2127,6 +2127,13 @@ function new_scene_id(){
 }
 
 var Ajax = (function(window,undefined) {
+	function Response(data,jqXHR) {
+		return {
+			getHeader: function(name) { return (jqXHR.getResponseHeader(name) || null); },
+			headerJSON: null,
+			responseText:data
+		};
+	};
 	return {
 		Request: function (url,opts) {
 			
@@ -2155,7 +2162,8 @@ var Ajax = (function(window,undefined) {
 			})
 			.done(function(data, textStatus, jqXHR) {
 				if ($.isFunction( options.onSuccess )) {
-					(options.onSuccess)(data);
+					var response = new Response(data,jqXHR);
+					(options.onSuccess)(response);
 				}
 			})
 			.fail(function(jqXHR, textStatus, errorThrown) {
@@ -2163,7 +2171,7 @@ var Ajax = (function(window,undefined) {
 					(options.onFailure)(textStatus);
 				}
 			})
-			.always(function() {
+			.always(function(data_jqXHR, textStatus, jqXHR_errorThrown) {
 				if ($.isFunction( options.onComplete )) {
 					(options.onComplete)("");
 				}

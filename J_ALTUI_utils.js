@@ -158,6 +158,14 @@ if (typeof String.prototype.htmlEncode == 'undefined') {
 	}
 };
 
+if (typeof String.prototype.evalJSON != 'function') {
+  // see below for better implementation!
+  String.prototype.evalJSON = function (){
+	var content = this;
+    return JSON.parse(content);
+  }
+};
+
 function _format2Digits(d) {
 	return ("0"+d).substr(-2);
 };	
