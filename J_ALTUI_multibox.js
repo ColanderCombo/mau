@@ -109,6 +109,9 @@ var MultiBox = ( function( window, undefined ) {
 	function _createDevice( param , cbfunc ) {
 		return _controllers[0].controller.createDevice( param , cbfunc );
 	};
+	function _renameDevice( deviceid, newname ) {
+		return _controllers[0].controller.renameDevice( param , cbfunc );
+	};
 	function _deleteDevice(id) {
 		return _controllers[0].controller.deleteDevice(id);
 	};
@@ -150,6 +153,12 @@ var MultiBox = ( function( window, undefined ) {
 	};
 	function _setStatus( deviceid, service, variable, value, dynamic ) {
 		return _controllers[0].controller.setStatus( deviceid, service, variable, value, dynamic );
+	};
+	function _runAction(deviceid, service, action, params) {
+		return _controllers[0].controller.getUPnPHelper().UPnPAction(deviceid, service, action, params);
+	};
+	function _setAttr(deviceid, attribute, value,cbfunc) {
+		return _controllers[0].controller.getUPnPHelper().UPnPSetAttr(deviceid, attribute, value,cbfunc);
 	};
 	function _isDeviceZwave(id) {
 		return _controllers[0].controller.isDeviceZwave(id);
@@ -217,6 +226,18 @@ var MultiBox = ( function( window, undefined ) {
 	function _getPlugins( func , endfunc ) {
 		return _controllers[0].controller.getPlugins( func , endfunc );
 	};
+	function _deletePlugin( id, cbfunc) {
+		return _controllers[0].controller.getUPnPHelper().UPnPDeletePlugin(id,cbfunc);
+	};
+	function _updatePlugin( id, cbfunc) {
+		return _controllers[0].controller.getUPnPHelper().UPnPUpdatePlugin(id,cbfunc);
+	};
+	function _updatePluginVersion( id, ver, cbfunc) {
+		return _controllers[0].controller.getUPnPHelper().UPnPUpdatePluginVersion(id,ver,cbfunc);
+	};
+	function _getFileContent(filename , cbfunc) {
+		return _controllers[0].controller.getUPnPHelper().UPnPGetFile( filename, cbfunc);
+	};
 	function _osCommand(cmd,cbfunc) {
 		return _controllers[0].controller.osCommand(cmd,cbfunc);
 	};
@@ -233,15 +254,10 @@ var MultiBox = ( function( window, undefined ) {
 		return _controllers[0].controller.getIcon( imgpath , cbfunc );
 	};
 	function _triggerAltUIUpgrade(urlsuffix) {
-		var url = UPnPHelper.getUrlHead()+urlsuffix;
-		$.ajax({
-			url:url,
-			method:"GET",
-			cache: false
-		})
-		.always( function() {
-			PageMessage.message(_T("Upgrade Request succeeded, a Luup reload will happen"),"success");
-		});
+		_controllers[0].controller.triggerAltUIUpgrade(urlsuffix);
+	};
+	function _buildUPnPGetFileUrl(name) {
+		return _controllers[0].controller.getUPnPHelper().buildUPnPGetFileUrl(name);
 	};
 	
   return {
@@ -281,6 +297,7 @@ var MultiBox = ( function( window, undefined ) {
 	// Devices
 	createDevice			: _createDevice,			// ( param , cbfunc )
 	deleteDevice			: _deleteDevice,			// id
+	renameDevice			: _renameDevice,			// (devid, newname )
 	getDevices				: _getDevices, 				// ( func , filterfunc, endfunc )
 	getDevicesSync			: _getDevicesSync,			// ()
 	getDeviceByID			: _getDeviceByID,			// ( devid ) 
@@ -294,10 +311,21 @@ var MultiBox = ( function( window, undefined ) {
 	evaluateConditions 		: _evaluateConditions,		// ( deviceid,devsubcat,conditions ) evaluate a device condition table ( AND between conditions )
 	getStates				: _getStates,
 	getStatus				: _getStatus,				// ( deviceid, service, variable ) 
-	setStatus				: _setStatus,				// ( deviceid, service, variable, value, dynamic )
+	setStatus				: _setStatus,				// ( deviceid, service, variable, value, dynamic )				
+	setAttr					: _setAttr,					// ( deviceID, attribute, value,function(result) )
+	runAction				: _runAction,				// (deviceid, service, action, params);
 	isDeviceZwave			: _isDeviceZwave,			// (id)
 	updateNeighbors			: _updateNeighbors,			// (deviceid)
-	
+	setOnOff				: function ( deviceID, onoff) {
+								this.runAction( deviceID, 'urn:upnp-org:serviceId:SwitchPower1', 'SetTarget', {'newTargetValue':onoff} );
+							},
+	setArm					: function ( deviceID, armed) {
+								this.runAction( deviceID, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'SetArmed', {'newArmedValue':armed} );
+							},
+	setDoorLock				: function ( deviceID, armed) {
+								this.runAction( deviceID, 'urn:micasaverde-com:serviceId:DoorLock1', 'SetTarget', {'newTargetValue':armed} );
+							},
+		
 	// Categories
 	getCategoryTitle : _getCategoryTitle,		// ( catnum )
 	getCategories	 : _getCategories,			// ( cbfunc, filterfunc, endfunc )
@@ -320,11 +348,16 @@ var MultiBox = ( function( window, undefined ) {
 	saveChangeCaches	: _saveChangeCaches,	//( msgidx ) 
 	updateChangeCache	: _updateChangeCache,	//( target ) 
 	getPlugins			: _getPlugins,			//( func , endfunc ) 
+	deletePlugin		: _deletePlugin,		//(id,function(result)
+	updatePlugin		: _updatePlugin,		//(id,function(result)
+	updatePluginVersion	: _updatePluginVersion,	//(id,ver,function(result)
+	getFileContent		: _getFileContent,		//(Dfilename , function( xmlstr , jqXHR ) 
 	osCommand			: _osCommand,			//(cmd,cbfunc) 
 	getPower			: _getPower,			//(cbfunc)
 	resetPollCounters	: _resetPollCounters,	//()
 	isUserDataCached	: _isUserDataCached,	//()
 	getIcon				: _getIcon,				//( imgpath , cbfunc )
+	buildUPnPGetFileUrl : _buildUPnPGetFileUrl,	// (name)
 	
 	// Upgrade
 	triggerAltUIUpgrade	: _triggerAltUIUpgrade,		//(url suffix)

@@ -99,7 +99,7 @@ html+="<tr><td><button class='altui-cplus-button btn btn-default' id='VOL-'>VOL-
 		
 		$(".altui-cplus-button").click( function() {
 			var id = $(this).prop('id');
-			UPnPHelper.UPnPAction( devid, 'urn:upnp-org:serviceId:cplus1', 'SendKey', {keyStream:id} );
+			MultiBox.runAction( devid, 'urn:upnp-org:serviceId:cplus1', 'SendKey', {keyStream:id} );
 		});
 	};	
 	
@@ -117,17 +117,17 @@ html+="<tr><td><button class='altui-cplus-button btn btn-default' id='VOL-'>VOL-
 	// drawControlPanel : _drawControlPanel,
 	toggleDebug : function (devid,htmlid) {
 		ALTUI_PluginDisplays.toggleButton(devid, htmlid, 'urn:upnp-org:serviceId:altui1', 'Debug', function(id,newval) {
-			UPnPHelper.UPnPAction( devid, 'urn:upnp-org:serviceId:altui1', 'SetDebug', {newDebugMode:newval} );
+			MultiBox.runAction( devid, 'urn:upnp-org:serviceId:altui1', 'SetDebug', {newDebugMode:newval} );
 		});
 	},
 	toggleMute : function (devid,htmlid) {
 		ALTUI_PluginDisplays.toggleButton(devid, htmlid, 'urn:upnp-org:serviceId:IPhoneLocator1', 'Muted', function(id,newval) {
-			UPnPHelper.UPnPAction( devid, 'urn:upnp-org:serviceId:IPhoneLocator1', 'SetMute', {newMuteStatus:newval} );
+			MultiBox.runAction( devid, 'urn:upnp-org:serviceId:IPhoneLocator1', 'SetMute', {newMuteStatus:newval} );
 		});
 	},
 	toggleCplusOnOff : function (devid,htmlid) {
 		ALTUI_PluginDisplays.toggleButton(devid, htmlid, 'urn:upnp-org:serviceId:cplus1', 'Present', function(id,newval) {
-			UPnPHelper.UPnPAction( devid, 'urn:upnp-org:serviceId:cplus1', 'SetPower', {newPowerState:newval} );
+			MultiBox.runAction( devid, 'urn:upnp-org:serviceId:cplus1', 'SetPower', {newPowerState:newval} );
 		});
 	},
 	};

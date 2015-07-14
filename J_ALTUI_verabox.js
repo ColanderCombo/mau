@@ -18,10 +18,11 @@ jsonp.ud.rooms=[];
 jsonp.ud.static_data=[];
 var user_changes=0;
 
-var UPnPHelper = (function(window,undefined) {
+var UPnPHelper = (function(ip_addr) {
 	//---------------------------------------------------------
 	// private functions
 	//---------------------------------------------------------	
+	var _ipaddr = ip_addr;
 	var XML_CHAR_MAP = {
 	'<': '&lt;',
 	'>': '&gt;',
@@ -37,7 +38,7 @@ var UPnPHelper = (function(window,undefined) {
 	}
 
 	function _getUrlHead() {
-		return window.location.pathname;
+		return (_ipaddr=='') ? window.location.pathname : "{0}//{1}{2}".format(window.location.protocol,_ipaddr,window.location.pathname);
 	}
 	
 	function _buildAttributeSetUrl( deviceID, attribute, value) {
@@ -455,19 +456,8 @@ var UPnPHelper = (function(window,undefined) {
 		renameDevice 	: _renameDevice,
 		createDevice	: _createDevice,
 		sceneAction 	: _sceneAction,			// (sceneobj)  will be transformed in json
-		
-		setOnOff		: function ( deviceID, onoff) {
-			_UPnPAction( deviceID, 'urn:upnp-org:serviceId:SwitchPower1', 'SetTarget', {'newTargetValue':onoff} );
-		},
-		setArm			: function ( deviceID, armed) {
-			_UPnPAction( deviceID, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'SetArmed', {'newArmedValue':armed} );
-			// _UPnPSet( deviceID, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Armed', armed );
-		},
-		setDoorLock			: function ( deviceID, armed) {
-			_UPnPAction( deviceID, 'urn:micasaverde-com:serviceId:DoorLock1', 'SetTarget', {'newTargetValue':armed} );
-		},
 	};
-}) (window);
+});	// not invoked, the object does not exist
 
 
 // url : http://192.168.1.16/port_49451/upnp/control/dev_1
@@ -500,6 +490,7 @@ var VeraBox = ( function( ip_addr ) {
   //---------------------------------------------------------
   // private functions
   //---------------------------------------------------------
+	var _upnpHelper = new UPnPHelper(ip_addr);
 	var _dataEngine = null;
 	var _rooms = null;
 	var _scenes = null;
@@ -520,7 +511,7 @@ var VeraBox = ( function( ip_addr ) {
 	function _setDevices(arr) 		{	_devices = arr;		};
 	
 	function _saveChangeCaches( msgidx ) {
-		UPnPHelper.ModifyUserData( _change_cached_user_data, function() {
+		_upnpHelper.ModifyUserData( _change_cached_user_data, function() {
 			PageMessage.message("ModifyUserData called & returned, a restart will occur now","success");
 			PageMessage.clearMessage(msgidx);
 		});
@@ -534,6 +525,18 @@ var VeraBox = ( function( ip_addr ) {
 		user_changes=1; //UI5 compat
 	};
 	
+	function _triggerAltUIUpgrade(urlsuffix) {
+		var url = _upnpHelper.getUrlHead()+urlsuffix;
+		$.ajax({
+			url:url,
+			method:"GET",
+			cache: false
+		})
+		.always( function() {
+			PageMessage.message(_T("Upgrade Request succeeded, a Luup reload will happen"),"success");
+		});
+	};
+	
 	function _reboot()
 	{
 		this.runLua("os.execute('reboot')", function(result) {
@@ -545,7 +548,7 @@ var VeraBox = ( function( ip_addr ) {
 	};
 	function _reloadEngine()
 	{
-		UPnPHelper.reloadEngine( function(data) {
+		_upnpHelper.reloadEngine( function(data) {
 			if (data!=null) {
 				// reload worked,  reset all cache
 				_rooms = null;
@@ -737,7 +740,7 @@ var VeraBox = ( function( ip_addr ) {
 
 	function _setHouseMode(newmode,cbfunc) {
 		if ((newmode<=4) && (newmode>=1)) {
-			UPnPHelper.UPnPAction( 0, 'urn:micasaverde-com:serviceId:HomeAutomationGateway1', 'SetHouseMode', { Mode:newmode },cbfunc );
+			_upnpHelper.UPnPAction( 0, 'urn:micasaverde-com:serviceId:HomeAutomationGateway1', 'SetHouseMode', { Mode:newmode },cbfunc );
 		}
 	};
 	
@@ -873,7 +876,7 @@ var VeraBox = ( function( ip_addr ) {
 		}
 		else {
 			// update vera
-			UPnPHelper.UPnPSet( deviceid, service, variable, value );
+			_upnpHelper.UPnPSet( deviceid, service, variable, value );
 		}
 	};
 	
@@ -1109,7 +1112,7 @@ var VeraBox = ( function( ip_addr ) {
 	
 	function _createDevice( param , cbfunc ) {
 		var target = $.extend( {descr:'default title', dfile:'', ifile:'', roomnum:0 } , param );
-		UPnPHelper.createDevice( target.descr, target.dfile, target.ifile, target.roomnum , cbfunc );
+		_upnpHelper.createDevice( target.descr, target.dfile, target.ifile, target.roomnum , cbfunc );
 	};
 	
 	function _createRoom(name)
@@ -1208,7 +1211,7 @@ var VeraBox = ( function( ip_addr ) {
 	};
 	
 	function _runLua(code, cbfunc) {
-		UPnPHelper.UPnPRunLua(code, function(result) {
+		_upnpHelper.UPnPRunLua(code, function(result) {
 			var res = "Fail";
 			if (result.indexOf("<OK>OK</OK>") !=-1)
 				res ="Passed";
@@ -1217,6 +1220,11 @@ var VeraBox = ( function( ip_addr ) {
 		});
 	};
 
+	function _renameDevice(id)
+	{
+		return _upnpHelper.renameDevice(devid, newname );
+	};
+	
 	function _deleteDevice(id)
 	{
 		DialogManager.confirmDialog(_T("Are you sure you want to delete device ({0})").format(id),function(result) {
@@ -1251,7 +1259,7 @@ var VeraBox = ( function( ip_addr ) {
 		
 		var params={};
 		params[ "Device" ] = deviceid;
-		UPnPHelper.UPnPAction( zwavenet.id, "urn:micasaverde-com:serviceId:ZWaveNetwork1", "UpdateNeighbors", params, function(data) {
+		_upnpHelper.UPnPAction( zwavenet.id, "urn:micasaverde-com:serviceId:ZWaveNetwork1", "UpdateNeighbors", params, function(data) {
 			if (data!=null) {
 				PageMessage.message(_T("Update Neighbors succeeded"));
 			}
@@ -1291,7 +1299,7 @@ var VeraBox = ( function( ip_addr ) {
 	function _setStartupCode(newlua) 
 	{
 		return (newlua != undefined) ?
-				UPnPHelper.ModifyUserData( { "StartupCode":newlua } ) :
+				_upnpHelper.ModifyUserData( { "StartupCode":newlua } ) :
 				null;
 	};
 /*    "categories": [
@@ -1322,7 +1330,7 @@ var VeraBox = ( function( ip_addr ) {
 	
 	function _editScene(sceneid,scenejson)
 	{
-		UPnPHelper.sceneAction(scenejson);
+		_upnpHelper.sceneAction(scenejson);
 	};
 
 
@@ -1635,12 +1643,16 @@ var VeraBox = ( function( ip_addr ) {
 			null 
 		);		
 	};
-	
+	function _getUPnPHelper()	{
+		return _upnpHelper;
+	};
   // explicitly return public methods when this object is instantiated
   return {
 	//---------------------------------------------------------
 	// PUBLIC  functions
 	//---------------------------------------------------------
+	getUPnPHelper	: _getUPnPHelper,
+	triggerAltUIUpgrade : _triggerAltUIUpgrade,	// (suffix)
 	getIcon			: _getIcon, 		// workaround to get image from vera box
 	getWeatherSettings : _getWeatherSettings,
 	getBoxInfo		: _getBoxInfo,
@@ -1676,6 +1688,7 @@ var VeraBox = ( function( ip_addr ) {
 	
 	createDevice	: _createDevice,
 	deleteDevice	: _deleteDevice,
+	renameDevice	: _renameDevice,	// ( deviceid, newname )
 	updateNeighbors	: _updateNeighbors, // id=lu_action&action=UpdateNeighbors&Device=3&DeviceNum=1
 	createRoom		: _createRoom,
 	deleteRoom		: _deleteRoom,
@@ -1945,7 +1958,7 @@ var FileDB = ( function (window, undefined) {
 			_dbFile[name]="pending";
 			// console.log("getting file "+name);
 			AltuiDebug.debug("_getFileContent( {0} ) ==> asking content to Vera".format(name));
-			UPnPHelper.UPnPGetFile( name, function(data,jqXHR) {
+			MultiBox.getFileContent( name, function(data,jqXHR) {
 				AltuiDebug.debug("_getFileContent( {0} ) ==> returning async content from Vera".format(name));
 				_dbFile[name] = data;
 				cbfunc(data,jqXHR);
@@ -1967,8 +1980,8 @@ var FileDB = ( function (window, undefined) {
 // Global for UI5 UI7 javascript compatibility
 // ======================================================================
 
-var data_request_url = UPnPHelper.getUrlHead()+'?';
-var command_url = UPnPHelper.getUrlHead().replace('/data_request','');
+var data_request_url = window.location.pathname+'?';
+var command_url = window.location.pathname.replace('/data_request','');
 function get_device_state(deviceId, serviceId, variable, dynamic) {
 	return MultiBox.getStatus( deviceId, serviceId, variable );
 };
@@ -2736,7 +2749,7 @@ var api = {
 			onSuccess:null,
 			context:null
 		},options);
-		return UPnPHelper.UPnPAction( deviceId, service, action, options.actionArguments, function(data,jqXHR){
+		return _upnpHelper.UPnPAction( deviceId, service, action, options.actionArguments, function(data,jqXHR){
 			if (data==null) {
 				if (options.onFailure)
 					(options.onFailure).call(options.context,{
@@ -2757,7 +2770,7 @@ var api = {
 		return this.performActionOnDevice(deviceId, service, action, options);
 	},
 	runUpnpCode: function(code, options, onSuccess, onFailure, context) {
-		return UPnPHelper.UPnPRunLua(code, function(data) {
+		return _upnpHelper.UPnPRunLua(code, function(data) {
 			if (data==null) {
 				if (onFailure)
 					(onFailure).call(context,null);

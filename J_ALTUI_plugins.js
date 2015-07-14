@@ -188,9 +188,9 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var deviceid = e.parent().prop('id').substr("altui-wc-".length);
 		var actionname = e.prop('id').substr("altui-window-".length);
 		if (actionname=="Stop") 
-			UPnPHelper.UPnPAction( deviceid, "urn:upnp-org:serviceId:WindowCovering1", "Stop", {} );
+			MultiBox.runAction( deviceid, "urn:upnp-org:serviceId:WindowCovering1", "Stop", {} );
 		else
-			UPnPHelper.UPnPAction( deviceid, "urn:upnp-org:serviceId:Dimming1", "SetLoadLevelTarget", {newLoadlevelTarget: ((actionname=="Up") ? 100 : 0) } );
+			MultiBox.runAction( deviceid, "urn:upnp-org:serviceId:Dimming1", "SetLoadLevelTarget", {newLoadlevelTarget: ((actionname=="Up") ? 100 : 0) } );
 	};
 
 	function _drawWindowCover(devid, device) {
@@ -213,7 +213,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 
 	function _onSliderChange(event,ui) {
 		var deviceid = $(ui.handle).parents(".altui-device").prop("id");
-		UPnPHelper.UPnPAction( deviceid, "urn:upnp-org:serviceId:Dimming1", "SetLoadLevelTarget", {newLoadlevelTarget:ui.value} );
+		MultiBox.runAction( deviceid, "urn:upnp-org:serviceId:Dimming1", "SetLoadLevelTarget", {newLoadlevelTarget:ui.value} );
 	};
 
 	// return the html string inside the .panel-body of the .altui-device#id panel
@@ -448,17 +448,17 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	toggleButton    : _toggleButton,
 	toggleOnOffButton : function (devid,htmlid) {
 		_toggleButton(devid, htmlid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status', function(id,newval) {
-			UPnPHelper.setOnOff( devid, newval);
+			MultiBox.setOnOff( devid, newval);
 		});
 	},
 	toggleArmed : function (devid,htmlid) {
 		_toggleButton(devid, htmlid,'urn:micasaverde-com:serviceId:SecuritySensor1', 'Armed', function(id,newval) {
-			UPnPHelper.setArm( devid, newval);
+			MultiBox.setArm( devid, newval);
 		});
 	},
 	toggleDoorLock : function (devid, htmlid) {
 		_toggleButton(devid, htmlid,'urn:micasaverde-com:serviceId:DoorLock1', 'Status', function(id,newval) {
-			UPnPHelper.setDoorLock( devid, newval);
+			MultiBox.setDoorLock( devid, newval);
 		});
 	}
   };

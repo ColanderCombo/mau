@@ -2160,7 +2160,7 @@ var UIManager  = ( function( window, undefined ) {
 				property: _onPropertyUpnpAction, 
 				onWidgetResize: _onResizeStub,
 				widgetdisplay: function(widget,bEdit)	{ 
-					return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='UPnPHelper.UPnPAction( {0}, \"{4}\", \"{5}\", {6} )' style='{8}' >{7}{2}</button>".format(
+					return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='MultiBox.runAction( {0}, \"{4}\", \"{5}\", {6} )' style='{8}' >{7}{2}</button>".format(
 						widget.properties.deviceid,
 						'altui-widget-upnpaction-button',
 						runGlyph.replace('glyphicon','pull-right glyphicon'),
@@ -2636,7 +2636,7 @@ var UIManager  = ( function( window, undefined ) {
 						parameters[paramname]=paramvalue;
 				});
 				
-				UPnPHelper.UPnPAction( deviceID, service, action, parameters, function(result) {
+				MultiBox.runAction( deviceID, service, action, parameters, function(result) {
 					alert(result);
 				});
 			});
@@ -3209,7 +3209,7 @@ var UIManager  = ( function( window, undefined ) {
 							var parameters = {};
 							var whichone = (bInverted) ? newval : 1-newval;
 							parameters[ control.states[whichone].Command.Parameters[0].Name ] = control.states[whichone].Command.Parameters[0].Value; 
-							UPnPHelper.UPnPAction( devid, 
+							MultiBox.runAction( devid, 
 								control.states[whichone].Command.Service, control.states[whichone].Command.Action, 
 								parameters );
 						});						
@@ -3263,7 +3263,7 @@ var UIManager  = ( function( window, undefined ) {
 									if (param.ID)
 										parameters[ param.Name ] = $(domparent).find("#"+param.ID).val();
 								});
-								UPnPHelper.UPnPAction( devid, control.Command.Service, control.Command.Action, parameters, null );
+								MultiBox.runAction( devid, control.Command.Service, control.Command.Action, parameters, null );
 							});	
 					}
 					else {
@@ -3305,7 +3305,7 @@ var UIManager  = ( function( window, undefined ) {
 						  change: function( event, ui ) {
 							var params={};
 							params[ control.Command.Parameters[0].Name ] = ui.value;
-							UPnPHelper.UPnPAction( devid, control.Command.Service, control.Command.Action, params, null );
+							MultiBox.runAction( devid, control.Command.Service, control.Command.Action, params, null );
 						  } 
 						});
 					break;
@@ -3379,7 +3379,7 @@ var UIManager  = ( function( window, undefined ) {
 						  change: function( event, ui ) {
 							var params={};
 							params[ control.Command.Parameters[0].Name ] = ui.value;
-							UPnPHelper.UPnPAction( devid, control.Command.Service, control.Command.Action, params, null );
+							MultiBox.runAction( devid, control.Command.Service, control.Command.Action, params, null );
 						  } 
 						});
 					break;
@@ -3523,7 +3523,7 @@ var UIManager  = ( function( window, undefined ) {
 			var input = $(this);
 			DialogManager.confirmDialog(_T("Are you sure you want to modify this attribute"),function(result) {
 				if (result==true) {
-					UPnPHelper.UPnPSetAttr(deviceID, attribute, value,function(result) {
+					MultiBox.setAttr(deviceID, attribute, value,function(result) {
 						if (result==null) {
 							PageMessage.message( "Set Attribute action failed!", "warning" );				
 						}
@@ -3618,7 +3618,7 @@ var UIManager  = ( function( window, undefined ) {
 				html += "</div>";	// row
 				$(container).append( html.format(device.manufacturer || '', device.model || '', device.name || '', device.id) );	
 				$("#altui-room-list").change( function() {
-					UPnPHelper.renameDevice(devid, device.name, $(this).val() );
+					MultiBox.renameDevice(devid, device.name, $(this).val() );
 				});
 			};
 			if (_toLoad==0) {
@@ -4378,7 +4378,7 @@ var UIManager  = ( function( window, undefined ) {
 		var actiondescriptor = (status==1) ? widget.properties.action_off : widget.properties.action_on;
 		if (widget.properties.inverted)
 			status = 1-status;
-		UPnPHelper.UPnPAction( widget.properties.deviceid, actiondescriptor.service, actiondescriptor.action, actiondescriptor.params);
+		MultiBox.runAction( widget.properties.deviceid, actiondescriptor.service, actiondescriptor.action, actiondescriptor.params);
 	};
 	
 	// ------------------------------------------
@@ -5043,7 +5043,7 @@ var UIManager  = ( function( window, undefined ) {
 				$("input#"+devid+".altui-device-title-input").focusout({devid:devid},function(event){ 
 					var device = MultiBox.getDeviceByID(event.data.devid);
 					var newname = $(this).val();
-					UPnPHelper.renameDevice(devid, newname );
+					MultiBox.renameDevice(devid, newname );
 					$(this).parent().text(device.name);
 				});
 			})
@@ -5344,9 +5344,9 @@ var UIManager  = ( function( window, undefined ) {
 				var id = $(this).data("plugin");
 				var name = $(this).text();
 				FileDB.getFileContent(name , function( txt ) {
-					var url = UPnPHelper.buildUPnPGetFileUrl(name);
+					var url = MultiBox.buildUPnPGetFileUrl(name);
 					UIManager.pageEditor(name,txt,"Download",function(txt) {
-					$(".altui-mainpanel a[download]")[0].click();
+						$(".altui-mainpanel a[download]")[0].click();
 					});
 					$(".altui-mainpanel").prepend("<div class='hidden' >Download: <a href='"+url+"' download>"+name+"</a></div>");
 				});
@@ -5358,13 +5358,13 @@ var UIManager  = ( function( window, undefined ) {
 					if (result==true) {
 						var val = $("#altui-plugin-version-"+id).val();
 						if ($.isNumeric(val)==true) {
-							UPnPHelper.UPnPUpdatePluginVersion(id,val,function(result) {
+							MultiBox.updatePluginVersion(id,val,function(result) {
 								PageMessage.message( _T("Update Plugin succeeded, be patient Luup will reload"), "success");
 								// alert(result);
 							});
 						}
 						else
-							UPnPHelper.UPnPUpdatePlugin(id,function(result) {
+							MultiBox.updatePlugin(id,function(result) {
 								PageMessage.message( _T("Update Plugin succeeded, be patient Luup will reload"), "success");
 								// alert(result);
 							});
@@ -5376,7 +5376,7 @@ var UIManager  = ( function( window, undefined ) {
 				if (id==undefined)	return;
 				DialogManager.confirmDialog(_T("Are you sure you want to uninstall this plugin #{0} and all its created devices").format(id),function(result) {
 					if (result==true) {
-						UPnPHelper.UPnPDeletePlugin(id,function(result) {
+						MultiBox.deletePlugin(id,function(result) {
 							alert(result);
 						});
 					}
