@@ -281,7 +281,7 @@ var MultiBox = ( function( window, undefined ) {
 	updateDeviceTypeUPnpDB	: _updateDeviceTypeUPnpDB,	//( devtype, Dfilename )		update devicetype UPNP information ( from D_xx S_xx files )
 	updateDeviceTypeUIDB 	: _updateDeviceTypeUIDB,	//(devtype, ui_definitions)		update devicetype UI static infos ( from user_data )
 	
-	// Access mode
+	// Access & Modes
 	isRemoteAccess	: function() 	{ 	return window.location.origin.indexOf("mios.com")!=-1; /*return true;*/ },
 	getBoxInfo		: function() 	{	return _controllers[0].controller.getBoxInfo(); },
 	getHouseMode	: function(cb) 	{	return _controllers[0].controller.getHouseMode(cb); },		// (cbfunc)
@@ -316,6 +316,8 @@ var MultiBox = ( function( window, undefined ) {
 	runAction				: _runAction,				// (deviceid, service, action, params);
 	isDeviceZwave			: _isDeviceZwave,			// (id)
 	updateNeighbors			: _updateNeighbors,			// (deviceid)
+	
+	//Alias
 	setOnOff				: function ( deviceID, onoff) {
 								this.runAction( deviceID, 'urn:upnp-org:serviceId:SwitchPower1', 'SetTarget', {'newTargetValue':onoff} );
 							},
@@ -340,6 +342,12 @@ var MultiBox = ( function( window, undefined ) {
 	editScene			: _editScene,		//(sceneid,scenejson)		
 	runScene			: _runScene,		//(id)
 	
+	// Plugins
+	getPlugins			: _getPlugins,			//( func , endfunc ) 
+	deletePlugin		: _deletePlugin,		//(id,function(result)
+	updatePlugin		: _updatePlugin,		//(id,function(result)
+	updatePluginVersion	: _updatePluginVersion,	//(id,ver,function(result)
+
 	// Misc
 	getWeatherSettings 	: _getWeatherSettings,	// ()
 	runLua				: _runLua,				//(code, cbfunc) 
@@ -347,10 +355,7 @@ var MultiBox = ( function( window, undefined ) {
 	setStartupCode		: _setStartupCode,		//(code)	
 	saveChangeCaches	: _saveChangeCaches,	//( msgidx ) 
 	updateChangeCache	: _updateChangeCache,	//( target ) 
-	getPlugins			: _getPlugins,			//( func , endfunc ) 
-	deletePlugin		: _deletePlugin,		//(id,function(result)
-	updatePlugin		: _updatePlugin,		//(id,function(result)
-	updatePluginVersion	: _updatePluginVersion,	//(id,ver,function(result)
+
 	getFileContent		: _getFileContent,		//(Dfilename , function( xmlstr , jqXHR ) 
 	osCommand			: _osCommand,			//(cmd,cbfunc) 
 	getPower			: _getPower,			//(cbfunc)
