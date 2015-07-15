@@ -164,8 +164,8 @@ var MultiBox = ( function( window, undefined ) {
 	function _setStatus( deviceid, service, variable, value, dynamic ) {
 		return _controllers[0].controller.setStatus( deviceid, service, variable, value, dynamic );
 	};
-	function _runAction(deviceid, service, action, params) {
-		return _controllers[0].controller.getUPnPHelper().UPnPAction(deviceid, service, action, params);
+	function _runAction(deviceid, service, action, params,cbfunc) {
+		return _controllers[0].controller.getUPnPHelper().UPnPAction(deviceid, service, action, params,cbfunc);
 	};
 	function _setAttr(deviceid, attribute, value,cbfunc) {
 		return _controllers[0].controller.getUPnPHelper().UPnPSetAttr(deviceid, attribute, value,cbfunc);
@@ -324,7 +324,7 @@ var MultiBox = ( function( window, undefined ) {
 	getStatus				: _getStatus,				// ( deviceid, service, variable ) 
 	setStatus				: _setStatus,				// ( deviceid, service, variable, value, dynamic )				
 	setAttr					: _setAttr,					// ( deviceID, attribute, value,function(result) )
-	runAction				: _runAction,				// (deviceid, service, action, params);
+	runAction				: _runAction,				// (deviceid, service, action, params,cbfunc);
 	isDeviceZwave			: _isDeviceZwave,			// (id)
 	updateNeighbors			: _updateNeighbors,			// (deviceid)
 	

@@ -51,6 +51,11 @@ local function dumpString(str)
 	end
 end
 
+function proxyGet(lul_device,newUrl,resultName)
+	debug(string.format("proxyGet lul_device:%d,newUrl:%s,resultName:%s",lul_device,newUrl,resultName))
+	return true
+end
+
 function setDebugMode(lul_device,newDebugMode)
 	lul_device = tonumber(lul_device)
 	newDebugMode = tonumber(newDebugMode) or 0

@@ -17,6 +17,18 @@
             <defaultValue>0</defaultValue>
             <shortCode>debug</shortCode>
         </stateVariable>
+        <stateVariable sendEvents="no">
+            <name>Url</name>
+            <dataType>string</dataType>
+            <defaultValue></defaultValue>
+            <shortCode>url</shortCode>
+        </stateVariable>
+        <stateVariable sendEvents="no">
+            <name>Result</name>
+            <dataType>string</dataType>
+            <defaultValue></defaultValue>
+            <shortCode>result</shortCode>
+        </stateVariable>
 	</serviceStateTable>
     <actionList>
         <action>
@@ -26,6 +38,21 @@
                     <name>newDebugMode</name>
                     <direction>in</direction>
                     <relatedStateVariable>Debug</relatedStateVariable>
+                </argument>
+            </argumentList>
+        </action>
+        <action>
+            <name>ProxyGet</name>
+            <argumentList>
+                <argument>
+                    <name>newUrl</name>
+                    <direction>in</direction>
+                    <relatedStateVariable>Url</relatedStateVariable>
+                </argument>
+                <argument>
+                    <name>resultName</name>
+                    <direction>in</direction>
+                    <relatedStateVariable>Result</relatedStateVariable>
                 </argument>
             </argumentList>
         </action>
