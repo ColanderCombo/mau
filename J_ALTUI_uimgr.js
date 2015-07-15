@@ -431,7 +431,9 @@ var DialogManager = ( function() {
 		else
 			$(dialog).replaceWith(htmlDialog);
 		dialog = $("div#dialogs div#"+name);
-		dialog.off();	// remove all callbacks for now
+		// remove all callbacks for now
+		$(dialog).off();			
+		$("div#dialogs").off();
 		return  dialog;
 	};
 	
@@ -4588,10 +4590,10 @@ var UIManager  = ( function( window, undefined ) {
 		}
 		else
 			$("#altui-pagetitle").empty();
-		$(".altui-mainpanel").empty().off();
+		$(".altui-mainpanel").off().empty();
 		$(".altui-leftnav").empty();
 		$(".altui-device-toolbar").remove();
-		$("#dialogs").empty();
+		$("#dialogs").off().empty();
 
 		$(".altui-scripts").remove();
 		$("body").append("<div class='altui-scripts'></div>");
