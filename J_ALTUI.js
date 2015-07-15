@@ -108,6 +108,7 @@ function altui_Settings(deviceID) {
 	var config = get_device_state(deviceID,  altui_Svs, 'PluginConfig',1);
 	var themecss = get_device_state(deviceID,  altui_Svs, 'ThemeCSS',1);
 	var localhome = get_device_state(deviceID,  altui_Svs, 'LocalHome',1);
+	var localcdn = get_device_state(deviceID,  altui_Svs, 'LocalCDN',1);
 	var style='	<style>\
 	  table.altui_table td:first-child {\
 		width: 140px;\
@@ -129,6 +130,7 @@ function altui_Settings(deviceID) {
 	var htmlConfig = '<textarea id="altui-config" rows="6" cols="50"></textarea>';
 	var htmlTheme = '<input id="altui-theme" class="altui-ui-input form-control"></input>';
 	var htmlHome = '<input id="altui-home" class="altui-ui-input form-control"></input>';
+	var htmlCDN = '<input id="altui-cdn" class="altui-ui-input form-control" placeholder="optional localcdn pathname, uses internet otherwise"></input>';
 	var htmlSetConfig= '<button id="altui-setconfig">Set Configuration</button>';
 	var htmlResetConfig= '<button id="altui-resetconfig">Default Configuration</button>';
 	var htmlViewJson = '<button id="altui-viewconfig">View Configuration</button>';
@@ -141,6 +143,7 @@ function altui_Settings(deviceID) {
 		'<tr><td>Theme</td><td> '+htmlTheme+' </td></tr>' +
 		'<tr><td>Home Page</td><td> '+htmlHome+' </td></tr>' +
 		'<tr><td>url options</td><td><ul><li><b>home</b>=(pageHome , pageRooms , pageDevices , pageScenes , pageSceneEdit , pagePlugins , pageUsePages , pageEditPages , pageCredits , pageLuaTest , pageLuaStart , pageOptions , pageEditor , pageZwave , pageLocalization , pagePower , pageChildren , pageRoutes , pageQuality , pageTblDevices , pageOsCommand)</li><li><b>lang</b>=(en , fr , it)</li></ul></td></tr>' +
+		'<tr><td>Local CDN ?</td><td> '+htmlCDN+' </td></tr>' +
 		'<tr><td>Actions</td><td> '+htmlViewJson+htmlSetConfig+htmlResetConfig+' </td></tr>' +
 		'</table>'+
 		'</div>' ;
@@ -149,6 +152,7 @@ function altui_Settings(deviceID) {
 	set_panel_html(html);
 	jQuery( "#altui-theme" ).val(themecss);
 	jQuery( "#altui-home" ).val(localhome);
+	jQuery( "#altui-cdn" ).val(localcdn);
 	//
 	// test isregistered
 	//
@@ -160,6 +164,10 @@ function altui_Settings(deviceID) {
 	jQuery( "#altui-home" ).change( function() {
 		var home = jQuery(this).val()+' ';
 		saveVar(deviceID,  altui_Svs, "LocalHome", home, true);
+	});
+	jQuery( "#altui-cdn" ).change( function() {
+		var cdn = jQuery(this).val();
+		saveVar(deviceID,  altui_Svs, "LocalCDN", cdn, true);
 	});
 	jQuery( "#altui-open" ).click(function() {
 		var url = window.location.origin + jQuery( "#altui-home" ).val()
