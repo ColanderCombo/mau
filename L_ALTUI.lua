@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.57"
+local version = "v0.58"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -421,10 +421,40 @@ function switch( command, actiontable)
 	return actiontable["default"]
 end
 
+local htmlLocalScripts = [[
+    <script src="@localcdn@/jquery.min.js"></script>
+	<script src="@localcdn@/bootstrap.min.js"></script>
+    <script src="@localcdn@/jquery-ui.min.js"></script> 
+    <script src="@localcdn@/jquery.bootgrid.min.js"></script> 	
+    <script src="@localcdn@/jsapi.js"></script> 	
+]]
+
+local htmlScripts = [[
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-bootgrid/1.2.0/jquery.bootgrid.min.js"></script> 	
+	<script type="text/javascript" 
+	  src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["gauge","table"]}]}' >
+	</script>
+]]
+
 local htmlStyle = [[
 	<style>
 	body { padding-top: 70px; }
 	</style>
+]]
+
+local htmlLocalCSSlinks = [[
+	<link rel="stylesheet" href="@localcdn@/jquery-ui.css">
+	<link rel="stylesheet" href="@localcdn@/bootstrap.min.css">
+	<link rel="stylesheet" href="@localcdn@/jquery.bootgrid.min.css">
+]]
+
+local htmlCSSlinks = [[
+	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css">
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-bootgrid/1.2.0/jquery.bootgrid.min.css">
 ]]
 
 local htmlLayout = [[
@@ -435,10 +465,8 @@ local htmlLayout = [[
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<!-- Latest compiled and minified CSS -->
-	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css">
-	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-bootgrid/1.2.0/jquery.bootgrid.min.css">
 
+	@csslinks@
 	@style@
     <title>VERA AltUI</title>
 </head>
@@ -449,18 +477,10 @@ local htmlLayout = [[
     <!-- Bootstrap core JavaScript    ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
 	<!-- Latest compiled and minified JavaScript -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script> 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-bootgrid/1.2.0/jquery.bootgrid.min.js"></script> 	
 	
-    <!-- http://192.168.1.5/port_3480/J_ALTUI_utils.js?_=1421533594990 -->
+	@mandatory_scripts@
+	
 	<script src="J_ALTUI_jquery.ui.touch-punch.min.js"></script>
-	<script type="text/javascript" 
-	  src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["gauge","table"]}]}' >
-	</script>
-	
-
 	<script src="J_ALTUI_utils.js" ></script>
 	@optional_scripts@
 	<script src="J_ALTUI_verabox.js" ></script>
@@ -568,12 +588,21 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				-- local custompages = luup.variable_get(service, "CustomPages", deviceID) or "[]"
 				-- custompages = string.gsub(custompages,"'","\\x27")
 				-- custompages = string.gsub(custompages,"\"","\\x22")
+				local localcdn = getSetVariable(service, "LocalCDN", lul_device, "")
 				local variables={}
 				variables["hostname"] = hostname
-				variables["style"] = htmlStyle:template(variables)
+				variables["localcdn"] = localcdn
 				variables["devicetypes"] = json.encode(tbl)
 				variables["custompages"] = "["..table.concat(result_tbl, ",").."]"
 				variables["ThemeCSS"] = luup.variable_get(service, "ThemeCSS", deviceID) or ""
+				variables["style"] = htmlStyle
+				if (localcdn ~= "") then
+					variables["csslinks"] = htmlLocalCSSlinks:template(variables)
+					variables["mandatory_scripts"] = htmlLocalScripts:template(variables)
+				else
+					variables["csslinks"] = htmlCSSlinks
+					variables["mandatory_scripts"] = htmlScripts
+				end
 				-- " becomes \x22
 				variables["optional_scripts"] = optional_scripts
 				return htmlLayout:template(variables),"text/html"
@@ -857,6 +886,7 @@ function startupDeferred(lul_device)
 	local remoteurl =getSetVariable(service,"RemoteAccess", lul_device, "https://vera-ui.strongcubedfitness.com/Veralogin.php")
 	local localurl = getSetVariableIfEmpty(service,"LocalHome", lul_device, "/port_3480/data_request?id=lr_ALTUI_Handler&command=home")
 	local css = getSetVariable(service,"ThemeCSS", lul_device, "")
+	local localcdn = getSetVariable(service, "LocalCDN", lul_device, "")
 	
 	if (debugmode=="1") then
 		DEBUG_MODE = true
