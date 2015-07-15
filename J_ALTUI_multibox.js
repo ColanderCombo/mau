@@ -13,7 +13,8 @@
 var MultiBox = ( function( window, undefined ) {
 	var _devicetypesDB = {};
 	var _controllers = [
-		{ ip:'', urlHead:window.location.pathname, controller:null }		// no IP = primary box on which we opened the web page
+		{ ip:'', urlHead:window.location.pathname, controller:null },		// no IP = primary box on which we opened the web page
+		// { ip:'192.168.1.5', urlHead:'http://192.168.1.5/port_3480/', controller:null }		// no IP = primary box on which we opened the web page
 		//http://192.168.1.16:3480/luvd/S_IPhone.xml
 		//http://192.168.1.16:3480/data_request?id=device
 	];

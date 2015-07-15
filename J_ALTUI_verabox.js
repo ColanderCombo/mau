@@ -1077,7 +1077,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	
 	function _initDataEngine() {
 		_dataEngine = null;
-		var url = "data_request?id=user_data&output_format=json&DataVersion="+_user_data_DataVersion;
+		var url = _upnpHelper.getUrlHead()+ "?id=user_data&output_format=json&DataVersion="+_user_data_DataVersion;
 		AltuiDebug.debug("_initDataEngine() : url="+url);
 		$.ajax({
 			url:url,
