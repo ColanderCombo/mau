@@ -14,6 +14,9 @@ local version = "v0.58"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
+local http = require("socket.http")
+local ltn12 = require("ltn12")
+
 
 hostname = ""
 
@@ -53,6 +56,37 @@ end
 
 function proxyGet(lul_device,newUrl,resultName)
 	debug(string.format("proxyGet lul_device:%d,newUrl:%s,resultName:%s",lul_device,newUrl,resultName))
+	local result = {}
+	local myheaders = {}
+	local request, code = http.request({
+		url = newUrl,
+		headers = myheaders,
+		sink = ltn12.sink.table(result)
+	})
+	
+	-- fail to connect
+	if (request==nil) then
+		error(string.format("failed to connect to url:%s, http.request returned nil", newUrl))
+		return nil
+	elseif (code==401) then
+		warning(string.format("Access to url:%s requires a user/password: %d", newUrl,code))
+		return "unauthorized"
+	elseif (code~=200) then
+		warning(string.format("http.request to url:%s returned a bad code: %d", newUrl,code))
+		return nil
+	end
+	
+	-- everything looks good
+	local data = table.concat(result)
+	debug(string.format("request:%s",request))	
+	debug(string.format("code:%s",code))	
+	debug(string.format("data:%s",data))	
+	
+	-- write result in tmp area altui 
+	local file = assert(io.open('/tmp/altui_'..resultName,'w'))
+	local result = file:write(data)
+	file:close()
+
 	return true
 end
 
@@ -498,6 +532,7 @@ local htmlLayout = [[
 		var g_DeviceTypes =  JSON.parse('@devicetypes@');
 		var g_CustomPages = @custompages@;
 		var g_CustomTheme = '@ThemeCSS@';
+		var g_MyDeviceID = @mydeviceid@;
 	</script>
 	<script src="J_ALTUI_uimgr.js" defer ></script>
 	<hr>
@@ -601,6 +636,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				variables["custompages"] = "["..table.concat(result_tbl, ",").."]"
 				variables["ThemeCSS"] = luup.variable_get(service, "ThemeCSS", deviceID) or ""
 				variables["style"] = htmlStyle
+				variables["mydeviceid"] = deviceID
 				if (localcdn ~= "") then
 					variables["csslinks"] = htmlLocalCSSlinks:template(variables)
 					variables["mandatory_scripts"] = htmlLocalScripts:template(variables)
@@ -892,6 +928,9 @@ function startupDeferred(lul_device)
 	local localurl = getSetVariableIfEmpty(service,"LocalHome", lul_device, "/port_3480/data_request?id=lr_ALTUI_Handler&command=home")
 	local css = getSetVariable(service,"ThemeCSS", lul_device, "")
 	local localcdn = getSetVariable(service, "LocalCDN", lul_device, "")
+	
+	-- clean tmp area from our files
+	os.execute('rm /tmp/altui_*');
 	
 	if (debugmode=="1") then
 		DEBUG_MODE = true

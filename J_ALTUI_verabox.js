@@ -18,11 +18,14 @@ jsonp.ud.rooms=[];
 jsonp.ud.static_data=[];
 var user_changes=0;
 
-var UPnPHelper = (function(ip_addr) {
+var UPnPHelper = (function(ip_addr,veraidx) {
 	//---------------------------------------------------------
 	// private functions
 	//---------------------------------------------------------	
-	var _ipaddr = ip_addr;
+	var _ipaddr = ip_addr || '';
+	var _veraidx = veraidx || 0;
+	var _urlhead = (_ipaddr=='') ? window.location.pathname : ("http://{0}/port_3480/data_request".format(ip_addr));
+	var _proxyhead = "/port_3480/data_request?id=action&output_format=json&DeviceNum={0}&serviceId=urn:upnp-org:serviceId:altui1&resultName=altuictrl{1}&action=ProxyGet&newUrl=".format(g_MyDeviceID,veraidx);
 	var XML_CHAR_MAP = {
 	'<': '&lt;',
 	'>': '&gt;',
@@ -37,67 +40,74 @@ var UPnPHelper = (function(ip_addr) {
 		});
 	}
 
+	// return "/port_3480/data_request?id=action&output_format=json&DeviceNum={0}&serviceId=urn:upnp-org:serviceId:altui1&resultName=altuictrl{1}&action=ProxyGet&newUrl=http://{2}/port_3480/data_request"
+	// 		.format(g_MyDeviceID,idx,box.ip);	// ALTUI device for proxy if needed (secondary vera)
+	function _proxify(url) {
+		var url = (_ipaddr=='') ? url : (_proxyhead + encodeURIComponent( url ));
+		return url;
+	}
+	
 	function _getUrlHead() {
-		return (_ipaddr=='') ? window.location.pathname : "{0}//{1}{2}".format(window.location.protocol,_ipaddr,window.location.pathname);
+		return _urlhead;	// ALTUI device for proxy if needed (secondary vera)
 	}
 	
 	function _buildAttributeSetUrl( deviceID, attribute, value) {
 		// TODO: investigate if we can use : http://192.168.1.16/port_3480/data_request?id=lu_variableset&DeviceNum=58&Variable=onDashboard&Value=0
-		var urlHead ="data_request?id=lr_ALTUI_Handler&command=set_attribute&devid="+deviceID+"&attr="+encodeURIComponent(attribute)+"&value="+encodeURIComponent(value);
-		return urlHead;
+		var url = _getUrlHead()+"?id=lr_ALTUI_Handler&command=set_attribute&devid="+deviceID+"&attr="+attribute+"&value="+encodeURIComponent(value);
+		return _proxify(url);
 	}
 	
 	function _buildVariableSetUrl( deviceID, service, varName, varValue)
 	{
-		var urlHead = _getUrlHead()+'?id=variableset&DeviceNum='+deviceID+'&serviceId='+service+'&Variable='+varName+'&Value='+encodeURIComponent(varValue);
-		return urlHead;
+		var url = _getUrlHead()+'?id=variableset&DeviceNum='+deviceID+'&serviceId='+service+'&Variable='+varName+'&Value='+encodeURIComponent(varValue);
+		return _proxify(url);
 	}
 	function _buildVariableGetUrl( deviceID, service, varName)
 	{
-		var urlHead = _getUrlHead()+'?id=variableget&DeviceNum='+deviceID+'&serviceId='+service+'&Variable='+varName;
-		return urlHead;
+		var url = _getUrlHead()+'?id=variableget&DeviceNum='+deviceID+'&serviceId='+service+'&Variable='+varName;
+		return _proxify(url);
 	}
 	function _buildSceneCreateUrl()
 	{
 		//http://ip_address:3480/data_request?id=scene&action=create&json=
-		var urlHead = _getUrlHead()+'?id=scene&action=create';
-		return urlHead;
+		var url = _getUrlHead()+'?id=scene&action=create';
+		return _proxify(url);
 	}	
 	function _buildUPnPGetFileUrl( file )
 	{
-		var urlHead = window.location.pathname.replace("data_request","luvd/")+file;
-		return urlHead;
+		var url = _getUrlHead().replace("data_request","luvd/")+file;
+		return _proxify(url);
 	}
 	function _buildUPnPUpdatePluginVersion( pluginid ,version )
 	{
-		var urlHead = _getUrlHead()+'?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum={0}&Version={1}'.format(pluginid ,version);
-		return urlHead;
+		var url = _getUrlHead()+'?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum={0}&Version={1}'.format(pluginid ,version);
+		return _proxify(url);
 	}		
 	function _buildUPnPUpdatePlugin( pluginid )
 	{
-		var urlHead = _getUrlHead()+'?id=update_plugin&Plugin='+pluginid;
-		return urlHead;
+		var url = _getUrlHead()+'?id=update_plugin&Plugin='+pluginid;
+		return _proxify(url);
 	}		
 	function _buildUPnPActionUrl(deviceID,service,action,params)
 	{
-		var urlHead = _getUrlHead()+'?id=action&output_format=json&DeviceNum='+deviceID+'&serviceId='+service+'&action='+action;//'&newTargetValue=1';
+		var url = _getUrlHead()+'?id=action&output_format=json&DeviceNum='+deviceID+'&serviceId='+service+'&action='+action;//'&newTargetValue=1';
 		if (params != undefined) {
 			$.each(params, function(index,value) {
-				urlHead = urlHead+"&"+index+"="+value;
+				url = url+"&"+index+"="+encodeURIComponent(value);
 			});
 		};
-		return urlHead;
+		return _proxify(url);
 	};
 	function _buildUPnPRunLua(code) {
 	//http://192.168.1.5/port_3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunLua&DeviceNum=81&Code=getMapUrl(81)
-		var urlHead = _getUrlHead()+'?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunLua&Code='+encodeURIComponent(code);
-		return urlHead;	
+		var url = _getUrlHead()+'?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunLua&Code='+encodeURIComponent(code);
+		return _proxify(url);	
 	};
 	
 	function _buildHAGSoapUrl()
 	{
 		var url = window.location.protocol+'//'+window.location.hostname+"/port_49451/upnp/control/hag";
-		return url;
+		return _proxify(url);
 	}
 	
 	function _exec(url,cbfunc,mimetype) {
@@ -234,21 +244,22 @@ var UPnPHelper = (function(ip_addr) {
 	{
 		// Resets the Luup engine with any new configuration settings.
 		// Example: http://ip_address:3480/data_request?id=reload
-		_exec( _getUrlHead()+'?id=reload' , cbfunc);
+		var url = _getUrlHead()+'?id=reload';
+		_exec( _proxify(url) , cbfunc);
 	};
 	
 	function _renameDevice( devid, newname, roomid )
 	{
-		var device = this.getDeviceByID(devid);
+		var device = MultiBox.getDeviceByID(devid);
 		var oldname = device.name;
 		DialogManager.confirmDialog(_T("Are you sure you want to modify this device to:")+newname,function(result) {
 			if (result==true) {
 				device.name = newname;
 				device.dirty = true;
-				var url = _getUrlHead()+"?id=device&action=rename&device="+devid+"&name="+newname;
+				var url = _getUrlHead()+"?id=device&action=rename&device="+devid+"&name="+encodeURIComponent(newname);
 				if (roomid !=undefined)
 					url = url+"&room="+roomid;
-				_exec( url, function(result) {	
+				_exec( _proxify(url), function(result) {	
 					if (result!="OK") 
 						PageMessage.message( _T("Device modify failed!"), "warning" );
 					else
@@ -490,8 +501,8 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
   //---------------------------------------------------------
   // private functions
   //---------------------------------------------------------
-	var _upnpHelper = new UPnPHelper(ip_addr);	// for common UPNP ajax
-	var _uniqID = uniq_id;						// assigned by Multibox, unique, can be used for Settings & other things
+	var _upnpHelper = new UPnPHelper(ip_addr,uniq_id);	// for common UPNP ajax
+	var _uniqID = uniq_id;								// assigned by Multibox, unique, can be used for Settings & other things
 	var _dataEngine = null;
 	var _rooms = null;
 	var _scenes = null;
@@ -1223,9 +1234,9 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		});
 	};
 
-	function _renameDevice(id)
+	function _renameDevice(devid, newname, roomid)
 	{
-		return _upnpHelper.renameDevice(devid, newname );
+		return _upnpHelper.renameDevice(devid, newname, roomid);
 	};
 	
 	function _deleteDevice(id)
@@ -1615,9 +1626,9 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 	
 	function _isDeviceZwave(id) {
-		var device = this.getDeviceByID(id);
+		var device = MultiBox.getDeviceByID(id);
 		if (device && device.id_parent) {
-			var parent = this.getDeviceByID( device.id_parent );
+			var parent = MultiBox.getDeviceByID( device.id_parent );
 			if (parent) {
 				if (parent.device_type == "urn:schemas-micasaverde-com:device:ZWaveNetwork:1")
 					return true;
