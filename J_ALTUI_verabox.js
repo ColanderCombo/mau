@@ -124,7 +124,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		else {
 			// var jobid = parseInt(JSON.parse(data)["u:ProxyGetResponse"].JobID);
 			var url = window.location.pathname + "?id=lr_ALTUI_Handler&command=readtmp&filename={0}".format( _proxyresultarea );
-			$.ajax({
+			return $.ajax({
 				url: url,
 				type: "GET"
 			})
@@ -195,21 +195,21 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 				// }
 			// }
 		// };
-		_ModifyUserData( target, cbfunc );
+		return _ModifyUserData( target, cbfunc );
 	};
 	
 	function _UPnPSet( deviceID, service, varName, varValue )
 	{
-		_exec( _buildVariableSetUrl( deviceID, service, varName, varValue) );
+		return _exec( _buildVariableSetUrl( deviceID, service, varName, varValue) );
 	};
 
 	function _UPnPAction( deviceID, service, action, params, cbfunc )
 	{
-		_exec( _buildUPnPActionUrl(deviceID,service,action,params) , cbfunc);
+		return _exec( _buildUPnPActionUrl(deviceID,service,action,params) , cbfunc);
 	};
 	function _UPnPGetJobStatus( jobID , cbfunc )
 	{
-		_exec( _buildUPnPGetJobStatusUrl(jobID) , cbfunc);
+		return _exec( _buildUPnPGetJobStatusUrl(jobID) , cbfunc);
 	};
 	function _UPnPGetFile( devicefile, cbfunc )
 	{
@@ -218,7 +218,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		if (lastfour==".xml")
 			mimetype = "text/xml";
 		
-		_exec( _buildUPnPGetFileUrl( devicefile), function(data,jqXHR) {
+		return _exec( _buildUPnPGetFileUrl( devicefile), function(data,jqXHR) {
 			if (jqXHR.responseXML) {
 				data = new XMLSerializer().serializeToString(jqXHR.responseXML);
 				jqXHR.responseText=data;
@@ -241,7 +241,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		xml +="</s:Envelope>";
 
 		var url = _buildHAGSoapUrl();
-		$.ajax({
+		return $.ajax({
 			url: url,
 			type: "POST",
 			dataType: "text",
@@ -253,12 +253,14 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 			},
 		})
 		.done(function(data, textStatus, jqXHR) {
-			if ($.isFunction( cbfunc ))
-			{
-				var re = /<OK>(.+)<\/OK>/; 
-				var result = data.match(re);
-				cbfunc( ( result != null) && (result.length>=2) ? result[1] : null );		// device ID in call back
-			}
+			_unproxifyResult(data, textStatus, jqXHR, function(data,jqXHR) {
+				if ($.isFunction( cbfunc ))
+				{
+					var re = /<OK>(.+)<\/OK>/; 
+					var result = data.match(re);
+					cbfunc( ( result != null) && (result.length>=2) ? result[1] : null );		// device ID in call back
+				}
+			});
 		})
 		.fail(function(jqXHR, textStatus, errorThrown) {
 			if ($.isFunction( cbfunc ))
@@ -268,17 +270,17 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 
 	function _UPnPUpdatePluginVersion( pluginid, version, cbfunc )
 	{
-		_exec( _buildUPnPUpdatePluginVersion( pluginid,version), cbfunc );
+		return _exec( _buildUPnPUpdatePluginVersion( pluginid,version), cbfunc );
 	};
 	
 	function _UPnPUpdatePlugin( pluginid, cbfunc )
 	{
-		_exec( _buildUPnPUpdatePlugin( pluginid), cbfunc );
+		return _exec( _buildUPnPUpdatePlugin( pluginid), cbfunc );
 	};
 
 	function _UPnPRunLua( code, cbfunc )
 	{
-		_exec( _buildUPnPRunLua( code), cbfunc );
+		return _exec( _buildUPnPRunLua( code), cbfunc );
 	};
 
 	function _reloadEngine(cbfunc)
@@ -286,7 +288,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		// Resets the Luup engine with any new configuration settings.
 		// Example: http://ip_address:3480/data_request?id=reload
 		var url = _getUrlHead()+'?id=reload';
-		_exec( _proxify(url) , cbfunc);
+		return _exec( _proxify(url) , cbfunc);
 	};
 	
 	function _renameDevice( device, newname, roomid )
@@ -299,7 +301,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 				var url = _getUrlHead()+"?id=device&action=rename&device="+device.id+"&name="+encodeURIComponent(newname);
 				if (roomid !=undefined)
 					url = url+"&room="+roomid;
-				_exec( _proxify(url), function(result) {	
+				return _exec( _proxify(url), function(result) {	
 					if (result!="OK") 
 						PageMessage.message( _T("Device modify failed!"), "warning" );
 					else
@@ -330,7 +332,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		xml +="</s:Envelope>";
 
 		var url = _buildHAGSoapUrl();
-		$.ajax({
+		return $.ajax({
 			url: url,
 			type: "POST",
 			dataType: "text",
@@ -342,18 +344,18 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 			},
 		})
 		.done(function(data, textStatus, jqXHR) {
-			if ($.isFunction( cbfunc ))
-			{
-				var re = /<DeviceNum>(\d+)<\/DeviceNum>/; 
-				var result = data.match(re);
-				cbfunc( ( result != null) && (result.length>=2) ? result[1] : null );		// device ID in call back
-			}
+			_unproxifyResult(data, textStatus, jqXHR, function(data,jqXHR) {
+				if ($.isFunction( cbfunc ))
+				{
+					var re = /<DeviceNum>(\d+)<\/DeviceNum>/; 
+					var result = data.match(re);
+					cbfunc( ( result != null) && (result.length>=2) ? result[1] : null );		// device ID in call back
+				}
+			});
 		})
 		.fail(function(jqXHR, textStatus, errorThrown) {
 			if ($.isFunction( cbfunc ))
 				cbfunc(null);
-		})
-		.always(function() {
 		});
 	}
 	
@@ -410,7 +412,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 
 		$.extend( target, user_data );
 		var url = _buildHAGSoapUrl();
-		$.ajax({
+		return $.ajax({
 			url: url,
 			type: "POST",
 			dataType: "text",
@@ -422,14 +424,14 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 			},
 		})
 		.done(function(data, textStatus, jqXHR) {
-			if ($.isFunction( cbfunc ))
-				cbfunc(data);
+			_unproxifyResult(data, textStatus, jqXHR, function(data,jqXHR) {
+				if ($.isFunction( cbfunc ))
+					cbfunc(data);
+			});
 		})
 		.fail(function(jqXHR, textStatus, errorThrown) {
 			if ($.isFunction( cbfunc ))
 				cbfunc(null);
-		})
-		.always(function() {
 		});
 	};
 	
@@ -494,6 +496,8 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 
 		reloadEngine	: _reloadEngine,
 		getUrlHead		: _getUrlHead,
+		proxify			: _proxify,		// ( url )
+		unproxifyResult	: _unproxifyResult,	// data, textStatus, jqXHR, function(data,jqXHR)
 		buildUPnPGetFileUrl : _buildUPnPGetFileUrl,
 		UPnPSetAttr		: _UPnPSetAttr,	// ( deviceID, attribute, value, cbfunc)
 		UPnPSet			: _UPnPSet,		// ( deviceID, service, varName, varValue )
@@ -578,14 +582,28 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		user_changes=1; //UI5 compat
 	};
 	
+	function _httpGet(url,opts,cbfunc) {
+		var options = $.extend( {
+				url:	_upnpHelper.proxify( _upnpHelper.getUrlHead()+url ),
+				method:	"GET",
+				cache: 	false
+			} , opts);
+		var jqxhr = $.ajax( options)
+				.done(function(data, textStatus, jqXHR) {
+					_upnpHelper.unproxifyResult(data, textStatus, jqXHR, function(data,jqXHR) {
+						if ($.isFunction(cbfunc))
+							(cbfunc)(data);
+					});
+				})
+				.fail(function(jqXHR, textStatus, errorThrown) {
+					if ($.isFunction(cbfunc))
+						(cbfunc)(null);
+				});
+		return jqxhr;
+	};
+	
 	function _triggerAltUIUpgrade(urlsuffix) {
-		var url = _upnpHelper.getUrlHead()+urlsuffix;
-		$.ajax({
-			url:url,
-			method:"GET",
-			cache: false
-		})
-		.always( function() {
+		return _httpGet(urlsuffix,{}).always( function() {
 			PageMessage.message(_T("Upgrade Request succeeded, a Luup reload will happen"),"success");
 		});
 	};
@@ -631,23 +649,11 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 
 	function _getPower(cbfunc) {
-		var url = "data_request?id=live_energy_usage";
-		var jqxhr = $.ajax( {
-			url: url,
-			type: "GET",
-			dataType: "text",
-			cache: false
-		})
-		.done(function(data) {
-			if ( $.isFunction( cbfunc ) )  {
-				(cbfunc)(data);
-			}
-		})
-		.fail(function(jqXHR, textStatus) {
-			PageMessage.message( _T("VERA is busy, be patient. (returned {0})").format(textStatus) , "warning");
-		})
-		.always(function() {
-		});
+		var jqxhr = _httpGet("?id=live_energy_usage",{dataType: "text"},cbfunc);
+		jqxhr= jqxhr.fail(function(jqXHR, textStatus) {
+				PageMessage.message( _T("VERA is busy, be patient. (returned {0})").format(textStatus) , "warning");
+			});
+		return jqxhr;
 	};
 	
 	function _getWeatherSettings()
