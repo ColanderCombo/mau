@@ -24,8 +24,9 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 	//---------------------------------------------------------	
 	var _ipaddr = ip_addr || '';
 	var _veraidx = veraidx || 0;
+	var _proxyresultarea = "altuictrl"+_veraidx;
 	var _urlhead = (_ipaddr=='') ? window.location.pathname : ("http://{0}/port_3480/data_request".format(ip_addr));
-	var _proxyhead = "/port_3480/data_request?id=action&output_format=json&DeviceNum={0}&serviceId=urn:upnp-org:serviceId:altui1&resultName=altuictrl{1}&action=ProxyGet&newUrl=".format(g_MyDeviceID,veraidx);
+	var _proxyhead = "/port_3480/data_request?id=action&output_format=json&DeviceNum={0}&serviceId=urn:upnp-org:serviceId:altui1&resultName={1}&action=ProxyGet&newUrl=".format(g_MyDeviceID,_proxyresultarea);
 	var XML_CHAR_MAP = {
 	'<': '&lt;',
 	'>': '&gt;',
@@ -115,8 +116,31 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		return _proxify(url);
 	}
 	
-	function _getProxyJobData(jobid) {
-		return "coucou";
+	function _getProxyJobData(jobid,cbfunc) {
+		// allways ask this to the master controller, no proxy here
+		var url = window.location.pathname + "?id=lr_ALTUI_Handler&command=readtmp&filename={0}".format( _proxyresultarea );
+		$.ajax({
+			url: url,
+			type: "GET"
+		})
+		.done(function(data, textStatus, jqXHR) {
+			var success = (data[0]=="1");
+			if (success) {
+				if ($.isFunction( cbfunc )) {
+					cbfunc(data.substr(2),jqXHR);
+				}
+			}
+			else {
+				setTimeout(function() {
+					_getProxyJobData(jobid,cbfunc);
+				}, 500);
+			}
+		})
+		.fail(function(jqXHR, textStatus, errorThrown) {
+			if ($.isFunction( cbfunc )) {
+				cbfunc(null,jqXHR);
+			}
+		});
 	}
 	
 	function _exec(url,cbfunc,mimetype) {
@@ -142,10 +166,11 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 				// was a proxy, all we get for now is a Job ID
 				var jobid = parseInt(JSON.parse(data)["u:ProxyGetResponse"].JobID);
 				// wait for job completion, then callback with data
-				var data = _getProxyJobData(jobid);
-				if ($.isFunction( cbfunc )) {
-					cbfunc(data,null);	// no jqXHR
-				}
+				_getProxyJobData(jobid, function(data) {
+					if ($.isFunction( cbfunc )) {
+						cbfunc(data,null);	// no jqXHR
+					}
+				});
 			}
 		})
 		.fail(function(jqXHR, textStatus, errorThrown) {

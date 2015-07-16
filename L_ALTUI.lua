@@ -10,14 +10,13 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.58"
+local version = "v0.59"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
 local http = require("socket.http")
 local ltn12 = require("ltn12")
-
-
+local tmpprefix = "/tmp/altui_"		-- prefix for tmp files
 hostname = ""
 
 --calling a function from HTTP in the device context
@@ -54,6 +53,11 @@ local function dumpString(str)
 	end
 end
 
+function file_exists(name)
+   local f=io.open(name,"r")
+   if f~=nil then io.close(f) return true else return false end
+end
+
 function proxyGet(lul_device,newUrl,resultName)
 	debug(string.format("proxyGet lul_device:%d,newUrl:%s,resultName:%s",lul_device,newUrl,resultName))
 	local result = {}
@@ -83,7 +87,7 @@ function proxyGet(lul_device,newUrl,resultName)
 	debug(string.format("data:%s",data))	
 	
 	-- write result in tmp area altui 
-	local file = assert(io.open('/tmp/altui_'..resultName,'w'))
+	local file = assert(io.open(tmpprefix..resultName,'w'))
 	local result = file:write(data)
 	file:close()
 
@@ -681,6 +685,24 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 					var = luup.variable_get(service, variablename,  deviceID)
 				end
 				return "ok", "text/plain"
+			end,
+		["readtmp"] = 
+			function(params)
+				-- local command = lul_parameters["oscommand"]
+				-- local handle = io.popen(command)
+				-- local result = handle:read("*a")
+				-- handle:close()
+				local filename = url_decode( lul_parameters["filename"] )
+				local file = io.open(tmpprefix..filename,'r')
+				local result = ''
+				if file~=nil then 
+					result = "1,"..file:read("*a")
+					file:close()
+				else 
+					result = "0,"
+				end
+				return result , "text/plain"
+				-- return json.encode( {success=(response==0 or response==true), result=result} ) , "application/json"
 			end,
 		["oscommand"] = 
 			function(params)
