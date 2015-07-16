@@ -119,7 +119,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 	function _unproxifyResult(data, textStatus, jqXHR, cbfunc) {
 		if ( _ipaddr=='') {
 			if ($.isFunction( cbfunc ))
-				(cbfunc)(data, jqXHR );
+				(cbfunc)(data,  textStatus, jqXHR );
 		}
 		else {
 			// var jobid = parseInt(JSON.parse(data)["u:ProxyGetResponse"].JobID);
@@ -132,7 +132,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 				var success = (data[0]=="1");
 				if (success) {
 					if ($.isFunction( cbfunc )) {
-						cbfunc(data.substr(2),jqXHR);
+						cbfunc(data.substr(2),textStatus,jqXHR);
 					}
 				}
 				else {
@@ -143,7 +143,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 			})
 			.fail(function(jqXHR, textStatus, errorThrown) {
 				if ($.isFunction( cbfunc )) {
-					cbfunc(null,jqXHR);
+					cbfunc(null,textStatus,jqXHR);
 				}
 			});
 		}
@@ -164,7 +164,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		}
 		var jqxhr = $.ajax( options )
 			.done(function(data, textStatus, jqXHR) {
-				_unproxifyResult(data, textStatus, jqXHR, function(data,jqXHR) {
+				_unproxifyResult(data, textStatus, jqXHR, function(data,textStatus,jqXHR) {
 					if ($.isFunction( cbfunc )) {
 						cbfunc(data,jqXHR);
 					}
@@ -253,7 +253,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 			},
 		})
 		.done(function(data, textStatus, jqXHR) {
-			_unproxifyResult(data, textStatus, jqXHR, function(data,jqXHR) {
+			_unproxifyResult(data, textStatus, jqXHR, function(data,textStatus,jqXHR) {
 				if ($.isFunction( cbfunc ))
 				{
 					var re = /<OK>(.+)<\/OK>/; 
@@ -344,7 +344,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 			},
 		})
 		.done(function(data, textStatus, jqXHR) {
-			_unproxifyResult(data, textStatus, jqXHR, function(data,jqXHR) {
+			_unproxifyResult(data, textStatus, jqXHR, function(data,textStatus,jqXHR) {
 				if ($.isFunction( cbfunc ))
 				{
 					var re = /<DeviceNum>(\d+)<\/DeviceNum>/; 
@@ -424,7 +424,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 			},
 		})
 		.done(function(data, textStatus, jqXHR) {
-			_unproxifyResult(data, textStatus, jqXHR, function(data,jqXHR) {
+			_unproxifyResult(data, textStatus, jqXHR, function(data,textStatus,jqXHR) {
 				if ($.isFunction( cbfunc ))
 					cbfunc(data);
 			});
@@ -497,7 +497,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		reloadEngine	: _reloadEngine,
 		getUrlHead		: _getUrlHead,
 		proxify			: _proxify,		// ( url )
-		unproxifyResult	: _unproxifyResult,	// data, textStatus, jqXHR, function(data,jqXHR)
+		unproxifyResult	: _unproxifyResult,	// data, textStatus, jqXHR, function(data,textStatus,jqXHR)
 		buildUPnPGetFileUrl : _buildUPnPGetFileUrl,
 		UPnPSetAttr		: _UPnPSetAttr,	// ( deviceID, attribute, value, cbfunc)
 		UPnPSet			: _UPnPSet,		// ( deviceID, service, varName, varValue )
@@ -594,7 +594,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 
 		var jqxhr = $.ajax( options)
 				.done(function(data, textStatus, jqXHR) {
-					_upnpHelper.unproxifyResult(data, textStatus, jqXHR, function(data,jqXHR) {
+					_upnpHelper.unproxifyResult(data, textStatus, jqXHR, function(data,textStatus,jqXHR) {
 						if ($.isFunction(cbfunc))
 							(cbfunc)(data, textStatus, jqXHR);
 					});
@@ -946,8 +946,62 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		var bResult = eval(str);
 		return bResult;
 	};
-	
+
 	function _refreshEngine() {
+		var jqxhr = _httpGet("?id=lu_status2&output_format=json&DataVersion="+_status_data_DataVersion+"&Timeout=60&MinimumDelay=1500",
+			{beforeSend: function(xhr) { xhr.overrideMimeType('text/plain'); }},
+			function(data, textStatus, jqXHR)
+			{
+				if ((data) && (data != "") && (data != "NO_CHANGES") && (data != "Exiting") )
+				{
+					if ($.isPlainObject( data ) ==false)
+						data=JSON.parse(data);
+					_status_data_DataVersion = data.DataVersion;
+					_status_data_LoadTime = data.LoadTime;
+					if (data.devices != undefined)
+					{
+						$.each(data.devices, function( idx, device) {
+							userdata_device_idx = _findDeviceIdxByID(device.id);
+							_user_data.devices[userdata_device_idx].status = device.status;
+							_user_data.devices[userdata_device_idx].Jobs = device.Jobs;
+							_user_data.devices[userdata_device_idx].dirty = true;
+
+							if (device.states !=null) {
+								$.each(device.states, function( idx, state) {
+									$.each( _user_data.devices[userdata_device_idx].states , function( idx, userdata_state)
+									{
+										if ((userdata_state.service == state.service) && (userdata_state.variable == state.variable))
+										{
+											_user_data.devices[userdata_device_idx].states[idx].value = state.value;
+											return false; // break from the $.each()
+										}
+									});
+								});
+								EventBus.publishEvent("on_ui_deviceStatusChanged",device);
+							}
+						});
+					}
+					UIManager.refreshUI( false , false );	// partial and not first time
+					EventBus.publishEvent("on_startup_luStatusLoaded",data);
+					
+					// if user_data has changed, reload it
+					if (_user_data_DataVersion != data.UserData_DataVersion) {
+						_initDataEngine();
+					}
+					else {
+						setTimeout( _refreshEngine, 100 );
+					}
+				}
+				else {
+						// PageMessage.message( _T("VERA is busy, be patient. (returned {0})").format(textStatus) , "warning");
+						setTimeout( _refreshEngine, 1000 );
+				}
+			}
+		);
+		return jqxhr;	
+	}
+	
+	function _refreshEngine2() {
 		var url = "data_request?id=lu_status2&output_format=json&DataVersion="+_status_data_DataVersion;
 		url += "&Timeout=60&MinimumDelay=1500";
 		AltuiDebug.debug("_refreshEngine() : url="+url);
