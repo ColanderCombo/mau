@@ -163,20 +163,20 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 			options.beforeSend = function(xhr) { xhr.overrideMimeType("text/plain"); }
 		}
 		var jqxhr = $.ajax( options )
-		.done(function(data, textStatus, jqXHR) {
-			_unproxifyResult(data, textStatus, jqXHR, function(data,jqXHR) {
+			.done(function(data, textStatus, jqXHR) {
+				_unproxifyResult(data, textStatus, jqXHR, function(data,jqXHR) {
+					if ($.isFunction( cbfunc )) {
+						cbfunc(data,jqXHR);
+					}
+				});
+			})
+			.fail(function(jqXHR, textStatus, errorThrown) {
 				if ($.isFunction( cbfunc )) {
-					cbfunc(data,jqXHR);
+					cbfunc(null,jqXHR);
 				}
+				else
+					PageMessage.message( formatAjaxErrorMessage(jqXHR, textStatus), "warning" ) ;				
 			});
-		})
-		.fail(function(jqXHR, textStatus, errorThrown) {
-			if ($.isFunction( cbfunc )) {
-				cbfunc(null,jqXHR);
-			}
-			else
-				PageMessage.message( formatAjaxErrorMessage(jqXHR, textStatus), "warning" ) ;				
-		});
 		return jqxhr;
 	};
 
@@ -583,21 +583,26 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 	
 	function _httpGet(url,opts,cbfunc) {
-		var options = $.extend( {
+		var options = $.extend( true, 
+			{
 				url:	_upnpHelper.proxify( _upnpHelper.getUrlHead()+url ),
 				method:	"GET",
+				type: "GET",
+				dataType: "text",
 				cache: 	false
 			} , opts);
+
 		var jqxhr = $.ajax( options)
 				.done(function(data, textStatus, jqXHR) {
 					_upnpHelper.unproxifyResult(data, textStatus, jqXHR, function(data,jqXHR) {
 						if ($.isFunction(cbfunc))
-							(cbfunc)(data);
+							(cbfunc)(data, textStatus, jqXHR);
 					});
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
+					PageMessage.message( _T("VERA is busy, be patient. (returned {0})").format(textStatus) , "warning");
 					if ($.isFunction(cbfunc))
-						(cbfunc)(null);
+						(cbfunc)(null, textStatus, jqXHR);
 				});
 		return jqxhr;
 	};
@@ -725,25 +730,17 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	{
 		//http://192.168.1.16:3480/data_request?id=sdata&output_format=json
 		if (_categories==null) {
-			var url = "data_request?id=sdata&output_format=json";
-			var jqxhr = $.ajax( {
-				url: url,
-				type: "GET",
-				dataType: "text",
-				cache: false
-			})
-			.done(function(data) {
-				var arr = JSON.parse(data);
-				_categories = arr.categories;
-				if ( $.isFunction( cbfunc ) )  {
-					_asyncResponse( _categories.sort(_sortByName), cbfunc, filterfunc, endfunc );
+			var jqxhr = _httpGet("?id=sdata&output_format=json",{},function(data, textStatus, jqXHR) {
+				if (data) {
+					var arr = JSON.parse(data);
+					_categories = arr.categories;
+					if ( $.isFunction( cbfunc ) )  {
+						_asyncResponse( _categories.sort(_sortByName), cbfunc, filterfunc, endfunc );
+					}
+				} else {
+					_categories = null;
+					PageMessage.message( _T("VERA is busy, be patient. (returned {0})").format(textStatus) , "warning");
 				}
-			})
-			.fail(function(jqXHR, textStatus) {
-				_categories = null;
-				PageMessage.message( _T("VERA is busy, be patient. (returned {0})").format(textStatus) , "warning");
-			})
-			.always(function() {
 			});
 		} else {
 			_asyncResponse( _categories.sort(_sortByName), cbfunc, filterfunc, endfunc );
@@ -751,50 +748,13 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		return _categories;
 	};
 	function _getIcon( imgpath , cbfunc ) {
-		var url = "data_request?id=lr_ALTUI_Handler&command=image";
-		var result = "";
-		var jqxhr = $.ajax( {
-			url: url,
-			type: "GET",
-			//dataType: "text",
-			data: {
-				path: imgpath
-			}
-		})
-		.done(function(data) {
-			if ( $.isFunction( cbfunc ) )  {
-				cbfunc(data);			
-			}
-		})
-		.fail(function(jqXHR, textStatus) {
-			if ( $.isFunction( cbfunc ) )  {
-				cbfunc("");			
-			}
-		})
-		.always(function() {
-		});
-		return result;
+		var jqxhr = _httpGet("?id=sdata&output_format=json",{ data: { path: imgpath } },cbfunc);
+		return jqxhr;
 	};
 	
 	function _getHouseMode(cbfunc) {
-		var url = "data_request?id=variableget&DeviceNum=0&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&Variable=Mode";
-
-		$.ajax({
-			url:url,
-		})
-		.done(function(data) {
-			if ( $.isFunction( cbfunc ) )  {
-				cbfunc(data);			
-			}
-		})
-		.fail(function(jqXHR, textStatus) {
-			PageMessage.message( _T("VERA is busy, be patient. (returned {0})").format(textStatus) , "warning");
-			if ( $.isFunction( cbfunc ) )  {
-				cbfunc( null );			
-			}
-		})
-		.always(function() {
-		});
+		var jqxhr = _httpGet("?id=variableget&DeviceNum=0&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&Variable=Mode",{},cbfunc);
+		return jqxhr;		
 	};
 
 	function _setHouseMode(newmode,cbfunc) {
@@ -997,7 +957,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			beforeSend: function(xhr) { xhr.overrideMimeType('text/plain'); }
 		})
 		.done(function(data) {
-			if ((data) && (data != "NO_CHANGES") && (data != "Exiting") )
+			if ((data) && (data != "") && (data != "NO_CHANGES") && (data != "Exiting") )
 			{
 				if ($.isPlainObject( data ) ==false)
 					data=JSON.parse(data);
@@ -1034,11 +994,11 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 					_initDataEngine();
 				}
 				else {
-					setTimeout( _refreshEngine, 10 );
+					setTimeout( _refreshEngine, 100 );
 				}
 			}
 			else {
-					setTimeout( _refreshEngine, 10 );
+					setTimeout( _refreshEngine, 1000 );
 			}
 		})
 		.fail(function(jqXHR, textStatus) {
