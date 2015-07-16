@@ -67,6 +67,11 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		var url = _getUrlHead()+'?id=variableget&DeviceNum='+deviceID+'&serviceId='+service+'&Variable='+varName;
 		return _proxify(url);
 	}
+	function _buildUPnPGetJobStatusUrl(jobID)
+	{
+		var url = _getUrlHead()+'?id=jobstatus&job='+jobID;
+		return _proxify(url);
+	}
 	function _buildSceneCreateUrl()
 	{
 		//http://ip_address:3480/data_request?id=scene&action=create&json=
@@ -110,6 +115,10 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		return _proxify(url);
 	}
 	
+	function _getProxyJobData(jobid) {
+		return "coucou";
+	}
+	
 	function _exec(url,cbfunc,mimetype) {
 		var options = {
 			url: url,
@@ -125,8 +134,18 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		}
 		var jqxhr = $.ajax( options )
 		.done(function(data, textStatus, jqXHR) {
-			if ($.isFunction( cbfunc )) {
-				cbfunc(data,jqXHR);
+			if (_ipaddr=='') {
+				if ($.isFunction( cbfunc )) {
+					cbfunc(data,jqXHR);
+				}
+			} else {
+				// was a proxy, all we get for now is a Job ID
+				var jobid = parseInt(JSON.parse(data)["u:ProxyGetResponse"].JobID);
+				// wait for job completion, then callback with data
+				var data = _getProxyJobData(jobid);
+				if ($.isFunction( cbfunc )) {
+					cbfunc(data,null);	// no jqXHR
+				}
 			}
 		})
 		.fail(function(jqXHR, textStatus, errorThrown) {
@@ -167,7 +186,10 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 	{
 		_exec( _buildUPnPActionUrl(deviceID,service,action,params) , cbfunc);
 	};
-	
+	function _UPnPGetJobStatus( jobID , cbfunc )
+	{
+		_exec( _buildUPnPGetJobStatusUrl(jobID) , cbfunc);
+	};
 	function _UPnPGetFile( devicefile, cbfunc )
 	{
 		var mimetype ;
@@ -463,6 +485,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		UPnPUpdatePlugin: _UPnPUpdatePlugin,
 		UPnPDeletePlugin: _UPnPDeletePlugin,
 		UPnPRunLua 		: _UPnPRunLua,
+		UPnPGetJobStatus: _UPnPGetJobStatus,
 		ModifyUserData	: _ModifyUserData,
 		renameDevice 	: _renameDevice,
 		createDevice	: _createDevice,
@@ -863,6 +886,10 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		return state.value;
 	};
 	
+	function _getJobStatus( jobid , cbfunc ) 
+	{
+		return _upnpHelper.UPnPGetJobStatus(jobid, cbfunc );
+	};
 	// dynamic
 	// undefined or -1 : ALTUI mode , triggers a UPNP http save
 	// 0 : means not dynamic, will require a save
@@ -1697,6 +1724,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	setHouseMode	: _setHouseMode,
 	setStatus		: _setStatus,
 	getStatus		: _getStatus,
+	getJobStatus	: _getJobStatus,	//(jobid, cbfunc) 
 	getStates		: _getStates,
 	evaluateConditions : _evaluateConditions,		// evaluate a device condition table ( AND between conditions )
 	

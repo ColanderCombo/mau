@@ -14,7 +14,7 @@ var MultiBox = ( function( window, undefined ) {
 	var _devicetypesDB = {};
 	var _controllers = [
 		{ ip:''			  ,  controller:null },		// no IP = primary box on which we opened the web page
-		// { ip:'192.168.1.5',  controller:null }		// no IP = primary box on which we opened the web page
+		{ ip:'192.168.1.5',  controller:null }		// no IP = primary box on which we opened the web page
 		//http://192.168.1.16:3480/luvd/S_IPhone.xml
 		//http://192.168.1.16:3480/data_request?id=device
 		//http://192.168.1.16/port_3480/data_request?id=action&output_format=json&DeviceNum=162&serviceId=urn:upnp-org:serviceId:altui1&action=ProxyGet&newUrl=http://192.168.1.5/port_3480/data_request?id=lu_status2&output_format=json&DataVersion=1&Timeout=60&MinimumDelay=1500&resultName=alexis
@@ -168,6 +168,10 @@ var MultiBox = ( function( window, undefined ) {
 	};
 	function _setStatus( deviceid, service, variable, value, dynamic ) {
 		return _controllers[0].controller.setStatus( deviceid, service, variable, value, dynamic );
+	};
+	function _getJobStatus( jobid , cbfunc )
+	{
+		return _controllers[0].controller.getJobStatus( jobid, cbfunc );
 	};
 	function _runAction(deviceid, service, action, params,cbfunc) {
 		return _controllers[0].controller.getUPnPHelper().UPnPAction(deviceid, service, action, params,cbfunc);
@@ -332,6 +336,7 @@ var MultiBox = ( function( window, undefined ) {
 	getStates				: _getStates,
 	getStatus				: _getStatus,				// ( deviceid, service, variable ) 
 	setStatus				: _setStatus,				// ( deviceid, service, variable, value, dynamic )				
+	getJobStatus			: _getJobStatus,			// (  jobid , cbfunc )
 	setAttr					: _setAttr,					// ( deviceID, attribute, value,function(result) )
 	runAction				: _runAction,				// (deviceid, service, action, params,cbfunc);
 	isDeviceZwave			: _isDeviceZwave,			// (id)
