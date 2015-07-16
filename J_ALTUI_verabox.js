@@ -999,70 +999,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			}
 		);
 		return jqxhr;	
-	}
-	
-	function _refreshEngine2() {
-		var url = "data_request?id=lu_status2&output_format=json&DataVersion="+_status_data_DataVersion;
-		url += "&Timeout=60&MinimumDelay=1500";
-		AltuiDebug.debug("_refreshEngine() : url="+url);
-		$.ajax({
-			url:url,
-			// dataType:'text json'
-			beforeSend: function(xhr) { xhr.overrideMimeType('text/plain'); }
-		})
-		.done(function(data) {
-			if ((data) && (data != "") && (data != "NO_CHANGES") && (data != "Exiting") )
-			{
-				if ($.isPlainObject( data ) ==false)
-					data=JSON.parse(data);
-				_status_data_DataVersion = data.DataVersion;
-				_status_data_LoadTime = data.LoadTime;
-				if (data.devices != undefined)
-				{
-					$.each(data.devices, function( idx, device) {
-						userdata_device_idx = _findDeviceIdxByID(device.id);
-						_user_data.devices[userdata_device_idx].status = device.status;
-						_user_data.devices[userdata_device_idx].Jobs = device.Jobs;
-						_user_data.devices[userdata_device_idx].dirty = true;
-
-						if (device.states !=null) {
-							$.each(device.states, function( idx, state) {
-								$.each( _user_data.devices[userdata_device_idx].states , function( idx, userdata_state)
-								{
-									if ((userdata_state.service == state.service) && (userdata_state.variable == state.variable))
-									{
-										_user_data.devices[userdata_device_idx].states[idx].value = state.value;
-										return false; // break from the $.each()
-									}
-								});
-							});
-							EventBus.publishEvent("on_ui_deviceStatusChanged",device);
-						}
-					});
-				}
-				UIManager.refreshUI( false , false );	// partial and not first time
-				EventBus.publishEvent("on_startup_luStatusLoaded",data);
-				
-				// if user_data has changed, reload it
-				if (_user_data_DataVersion != data.UserData_DataVersion) {
-					_initDataEngine();
-				}
-				else {
-					setTimeout( _refreshEngine, 100 );
-				}
-			}
-			else {
-					setTimeout( _refreshEngine, 1000 );
-			}
-		})
-		.fail(function(jqXHR, textStatus) {
-			setTimeout( _refreshEngine, 1000 );
-			PageMessage.message( _T("VERA is busy, be patient. (returned {0})").format(textStatus) , "warning");
-		})
-		.always(function() {
-		});
-	};
-	
+	}	
 	
 	function _loadUserData(data) {
 		if ((data) && (data != "NO_CHANGES") && (data != "Exiting") )
@@ -1153,26 +1090,24 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	
 	function _initDataEngine() {
 		_dataEngine = null;
-		var url = _upnpHelper.getUrlHead()+ "?id=user_data&output_format=json&DataVersion="+_user_data_DataVersion;
-		AltuiDebug.debug("_initDataEngine() : url="+url);
-		$.ajax({
-			url:url,
-			// dataType: "text json",
-			beforeSend: function(xhr) { xhr.overrideMimeType('text/plain'); }
-		})
-		.done(function(data) {
-			_dataEngine = null;
-			_loadUserData(data);
-			UIManager.refreshUI( true ,false  );	// full but not first time
-			_dataEngine = setTimeout( _refreshEngine, 2000 );
-		})
-		.fail(function(jqXHR, textStatus) {
-			_dataEngine = setTimeout( _initDataEngine, 2000 );
-			PageMessage.message( _T("VERA did not respond") + ": " + textStatus , "danger");
-		})
-		.always(function() {
-			AltuiDebug.debug("_initDataEngine() (user_data) returned.");
-		});
+		AltuiDebug.debug("_initDataEngine()");
+		var jqxhr = _httpGet( "?id=user_data&output_format=json&DataVersion="+_user_data_DataVersion,
+			{beforeSend: function(xhr) { xhr.overrideMimeType('text/plain'); }},
+			function(data, textStatus, jqXHR) {
+				if (data!=null) {
+					_dataEngine = null;
+					_loadUserData(data);
+					UIManager.refreshUI( true ,false  );	// full but not first time
+					_dataEngine = setTimeout( _refreshEngine, 2000 );				
+				}
+				else {
+					_dataEngine = setTimeout( _initDataEngine, 2000 );
+					PageMessage.message( _T("VERA did not respond") + ": " + textStatus , "danger");
+				}
+			})
+			.always(function() {
+				AltuiDebug.debug("_initDataEngine() (user_data) returned.");
+			});
 	};
 	
 	function _getBoxInfo() {
