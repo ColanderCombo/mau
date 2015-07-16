@@ -3621,7 +3621,7 @@ var UIManager  = ( function( window, undefined ) {
 				html += "</div>";	// row
 				$(container).append( html.format(device.manufacturer || '', device.model || '', device.name || '', device.id) );	
 				$("#altui-room-list").change( function() {
-					MultiBox.renameDevice(devid, device.name, $(this).val() );
+					MultiBox.renameDevice(device, device.name, $(this).val() );
 				});
 			};
 			if (_toLoad==0) {
@@ -5043,7 +5043,7 @@ var UIManager  = ( function( window, undefined ) {
 				$("input#"+devid+".altui-device-title-input").focusout({devid:devid},function(event){ 
 					var device = MultiBox.getDeviceByID(event.data.devid);
 					var newname = $(this).val();
-					MultiBox.renameDevice(devid, newname );
+					MultiBox.renameDevice(device, newname );
 					$(this).parent().text(device.name);
 				});
 			})

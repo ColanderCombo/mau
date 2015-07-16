@@ -28,11 +28,11 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 	var _urlhead = (_ipaddr=='') ? window.location.pathname : ("http://{0}/port_3480/data_request".format(ip_addr));
 	var _proxyhead = "/port_3480/data_request?id=action&output_format=json&DeviceNum={0}&serviceId=urn:upnp-org:serviceId:altui1&resultName={1}&action=ProxyGet&newUrl=".format(g_MyDeviceID,_proxyresultarea);
 	var XML_CHAR_MAP = {
-	'<': '&lt;',
-	'>': '&gt;',
-	'&': '&amp;',
-	'"': '&quot;',
-	"'": '&apos;'
+		'<': '&lt;',
+		'>': '&gt;',
+		'&': '&amp;',
+		'"': '&quot;',
+		"'": '&apos;'
 	};
  
 	function escapeXml (s) {
@@ -116,32 +116,38 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		return _proxify(url);
 	}
 	
-	function _getProxyJobData(jobid,cbfunc) {
-		// allways ask this to the master controller, no proxy here
-		var url = window.location.pathname + "?id=lr_ALTUI_Handler&command=readtmp&filename={0}".format( _proxyresultarea );
-		$.ajax({
-			url: url,
-			type: "GET"
-		})
-		.done(function(data, textStatus, jqXHR) {
-			var success = (data[0]=="1");
-			if (success) {
-				if ($.isFunction( cbfunc )) {
-					cbfunc(data.substr(2),jqXHR);
+	function _unproxifyResult(data, textStatus, jqXHR, cbfunc) {
+		if ( _ipaddr=='') {
+			if ($.isFunction( cbfunc ))
+				(cbfunc)(data, jqXHR );
+		}
+		else {
+			// var jobid = parseInt(JSON.parse(data)["u:ProxyGetResponse"].JobID);
+			var url = window.location.pathname + "?id=lr_ALTUI_Handler&command=readtmp&filename={0}".format( _proxyresultarea );
+			$.ajax({
+				url: url,
+				type: "GET"
+			})
+			.done(function(data, textStatus, jqXHR) {
+				var success = (data[0]=="1");
+				if (success) {
+					if ($.isFunction( cbfunc )) {
+						cbfunc(data.substr(2),jqXHR);
+					}
 				}
-			}
-			else {
-				setTimeout(function() {
-					_getProxyJobData(jobid,cbfunc);
-				}, 500);
-			}
-		})
-		.fail(function(jqXHR, textStatus, errorThrown) {
-			if ($.isFunction( cbfunc )) {
-				cbfunc(null,jqXHR);
-			}
-		});
-	}
+				else {
+					setTimeout(function() {
+						_getProxyJobData(jobid,cbfunc);
+					}, 500);
+				}
+			})
+			.fail(function(jqXHR, textStatus, errorThrown) {
+				if ($.isFunction( cbfunc )) {
+					cbfunc(null,jqXHR);
+				}
+			});
+		}
+	};
 	
 	function _exec(url,cbfunc,mimetype) {
 		var options = {
@@ -158,20 +164,11 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		}
 		var jqxhr = $.ajax( options )
 		.done(function(data, textStatus, jqXHR) {
-			if (_ipaddr=='') {
+			_unproxifyResult(data, textStatus, jqXHR, function(data,jqXHR) {
 				if ($.isFunction( cbfunc )) {
 					cbfunc(data,jqXHR);
 				}
-			} else {
-				// was a proxy, all we get for now is a Job ID
-				var jobid = parseInt(JSON.parse(data)["u:ProxyGetResponse"].JobID);
-				// wait for job completion, then callback with data
-				_getProxyJobData(jobid, function(data) {
-					if ($.isFunction( cbfunc )) {
-						cbfunc(data,null);	// no jqXHR
-					}
-				});
-			}
+			});
 		})
 		.fail(function(jqXHR, textStatus, errorThrown) {
 			if ($.isFunction( cbfunc )) {
@@ -179,9 +176,8 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 			}
 			else
 				PageMessage.message( formatAjaxErrorMessage(jqXHR, textStatus), "warning" ) ;				
-		})
-		.always(function() {
 		});
+		return jqxhr;
 	};
 
 	function _UPnPSetAttr( deviceID, attribute, value, cbfunc)
@@ -267,8 +263,6 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		.fail(function(jqXHR, textStatus, errorThrown) {
 			if ($.isFunction( cbfunc ))
 				cbfunc(null);
-		})
-		.always(function() {
 		});
 	};
 
@@ -295,15 +289,14 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		_exec( _proxify(url) , cbfunc);
 	};
 	
-	function _renameDevice( devid, newname, roomid )
+	function _renameDevice( device, newname, roomid )
 	{
-		var device = MultiBox.getDeviceByID(devid);
 		var oldname = device.name;
 		DialogManager.confirmDialog(_T("Are you sure you want to modify this device to:")+newname,function(result) {
 			if (result==true) {
 				device.name = newname;
 				device.dirty = true;
-				var url = _getUrlHead()+"?id=device&action=rename&device="+devid+"&name="+encodeURIComponent(newname);
+				var url = _getUrlHead()+"?id=device&action=rename&device="+device.id+"&name="+encodeURIComponent(newname);
 				if (roomid !=undefined)
 					url = url+"&room="+roomid;
 				_exec( _proxify(url), function(result) {	
@@ -512,7 +505,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		UPnPRunLua 		: _UPnPRunLua,
 		UPnPGetJobStatus: _UPnPGetJobStatus,
 		ModifyUserData	: _ModifyUserData,
-		renameDevice 	: _renameDevice,
+		renameDevice 	: _renameDevice,		// ( device, newname, roomid )
 		createDevice	: _createDevice,
 		sceneAction 	: _sceneAction,			// (sceneobj)  will be transformed in json
 	};
@@ -1286,9 +1279,9 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		});
 	};
 
-	function _renameDevice(devid, newname, roomid)
+	function _renameDevice(device, newname, roomid)
 	{
-		return _upnpHelper.renameDevice(devid, newname, roomid);
+		return _upnpHelper.renameDevice(device, newname, roomid);
 	};
 	
 	function _deleteDevice(id)
@@ -1755,7 +1748,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	
 	createDevice	: _createDevice,
 	deleteDevice	: _deleteDevice,
-	renameDevice	: _renameDevice,	// ( deviceid, newname )
+	renameDevice	: _renameDevice,	// ( device, newname )
 	updateNeighbors	: _updateNeighbors, // id=lu_action&action=UpdateNeighbors&Device=3&DeviceNum=1
 	createRoom		: _createRoom,
 	deleteRoom		: _deleteRoom,
