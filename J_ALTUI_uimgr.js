@@ -2920,7 +2920,7 @@ var UIManager  = ( function( window, undefined ) {
 		dropdownTemplate += "</ul></div>";
 		dropdownTemplate += "<div class='pull-right text-muted'><small>#"+device.id+" </small></div>";
 
-		var devicecontainerTemplate	= "<div class='panel panel-{4} altui-device ' id='{0}'>"
+		var devicecontainerTemplate	= "<div class='panel panel-{4} altui-device' data-altuiid='{5}' id='{0}'>"
 		devicecontainerTemplate	+=		"<div class='panel-heading altui-device-heading'>"+dropdownTemplate+batteryHtml+"<div class='panel-title altui-device-title' data-toggle='tooltip' data-placement='left' title='{2}'>{1}</div></div>";
 		devicecontainerTemplate	+=  	"<div class='panel-body altui-device-body'>";
 		devicecontainerTemplate	+= 	  	iconHtml;
@@ -2958,7 +2958,8 @@ var UIManager  = ( function( window, undefined ) {
 				_enhancedDeviceTitle(device),
 				tooltip,
 				devicebodyHtml,
-				UIManager.jobStatusToColor(device.status));
+				UIManager.jobStatusToColor(device.status),
+				device.altuiid);
 			device.dirty=false;
 		}
 		return deviceHtml;
@@ -4823,11 +4824,11 @@ var UIManager  = ( function( window, undefined ) {
 		
 		function drawDeviceContainer(idx, device) {
 			var devicecontainerTemplate="<div class=' col-sm-6 col-md-4 col-lg-3 '>";
-			devicecontainerTemplate	+= 		"<div class='panel panel-default altui-device' id='{0}'>"
+			devicecontainerTemplate	+= 		"<div class='panel panel-default altui-device' data-altuiid='{1}' id='{0}'>"
 			devicecontainerTemplate	+= 	  	"</div>";
 			devicecontainerTemplate	+= 	"</div>";		
 			var domPanel = $(".altui-mainpanel");
-			domPanel.append(devicecontainerTemplate.format(device.id));	
+			domPanel.append(devicecontainerTemplate.format(device.id,device.altuiID));	
 		};
 
 		function _drawDeviceToolbar() {
@@ -5019,9 +5020,6 @@ var UIManager  = ( function( window, undefined ) {
 		$("#altui-pagetitle").css("display","inline").after("<div class='altui-device-toolbar'></div>");
 		
 		// Dialogs
-		// DialogManager.registerDialog('deviceModal',deviceModalTemplate.format( '', '', 0 ));
-		// $("div#dialogs").append(deviceModalTemplate.format( '', '', 0 ));
-		// $("div#dialogs").append(deviceActionModalTemplate.format( '', '', 0, '' ));
 		DialogManager.registerDialog('deviceCreateModal', _deviceCreateModalHtml() );
 		
 		// on the left, get the rooms
