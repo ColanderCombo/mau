@@ -471,6 +471,7 @@ local htmlLocalScripts = [[
     <script src="@localcdn@/jquery.bootgrid.min.js"></script> 	
     <script src="@localcdn@/jsapi.js"></script> 	
 ]]
+    -- <script src="@localcdn@/d3.min.js"></script> 	
 
 local htmlScripts = [[
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
@@ -481,6 +482,7 @@ local htmlScripts = [[
 	  src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["gauge","table"]}]}' >
 	</script>
 ]]
+    -- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script> 	
 
 local htmlStyle = [[
 	<style>

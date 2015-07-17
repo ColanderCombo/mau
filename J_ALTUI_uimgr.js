@@ -2315,9 +2315,9 @@ var UIManager  = ( function( window, undefined ) {
 	};
 	
 	function _loadD3Script( drawfunc ) {
-		//D3 scripts if needed
-		// scriptname = "http://d3js.org/d3.v3.min.js";
-		scriptname = "//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js";	//supports https
+		var altuidevice = MultiBox.getDeviceByID( g_MyDeviceID );
+		var localcdn = ( MultiBox.getStatus( g_MyDeviceID, "urn:upnp-org:serviceId:altui1", "LocalCDN" ).trim() || "");
+		scriptname = (localcdn=="") ? "//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js" : (localcdn+"/d3.min.js");	//supports https
 		var len = $('script[src="'+scriptname+'"]').length;
 		if (len==0) {				// not loaded yet
 			UIManager.loadScript(scriptname,function() {
