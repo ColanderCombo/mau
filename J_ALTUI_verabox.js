@@ -294,21 +294,17 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 	function _renameDevice( device, newname, roomid )
 	{
 		var oldname = device.name;
-		DialogManager.confirmDialog(_T("Are you sure you want to modify this device to:")+newname,function(result) {
-			if (result==true) {
-				device.name = newname;
-				device.dirty = true;
-				var url = _getUrlHead()+"?id=device&action=rename&device="+device.id+"&name="+encodeURIComponent(newname);
-				if (roomid !=undefined)
-					url = url+"&room="+roomid;
-				return _exec( _proxify(url), function(result) {	
-					if (result!="OK") 
-						PageMessage.message( _T("Device modify failed!"), "warning" );
-					else
-						PageMessage.message( _T("Device modified!"), "success" );
-				} );
-			}
-		});
+		device.name = newname;
+		device.dirty = true;
+		var url = _getUrlHead()+"?id=device&action=rename&device="+device.id+"&name="+encodeURIComponent(newname);
+		if (roomid !=undefined)
+			url = url+"&room="+roomid;
+		return _exec( _proxify(url), function(result) {	
+			if (result!="OK") 
+				PageMessage.message( _T("Device modify failed!"), "warning" );
+			else
+				PageMessage.message( _T("Device modified!"), "success" );
+		} );
 	};
 	
 	function _createDevice( descr, dfile, ifile, roomnum, cbfunc )
@@ -1108,6 +1104,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			.always(function() {
 				AltuiDebug.debug("_initDataEngine() (user_data) returned.");
 			});
+		return jqxhr;
 	};
 	
 	function _getBoxInfo() {
@@ -1126,102 +1123,63 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	
 	function _createDevice( param , cbfunc ) {
 		var target = $.extend( {descr:'default title', dfile:'', ifile:'', roomnum:0 } , param );
-		_upnpHelper.createDevice( target.descr, target.dfile, target.ifile, target.roomnum , cbfunc );
+		return _upnpHelper.createDevice( target.descr, target.dfile, target.ifile, target.roomnum , cbfunc );
 	};
 	
 	function _createRoom(name)
 	{	
-		var url = "data_request?id=room&action=create&name="+name;
-		var jqxhr = $.ajax( {
-			url: url,
-			type: "GET",
-			dataType: "text"
-		})
-		  .done(function(data) {
-			if (data!="ERROR") {
-				PageMessage.message(_T("Create Room succeeded for")+": "+name, "success", true);
-			}
-			else {
-				PageMessage.message(_T("Could not create Room")+": "+name, "warning");
-			}
-		  })
-		  .fail(function(jqXHR, textStatus) {
-			PageMessage.message( _T("Create Room failed")+": " + textStatus , "danger");
-		  })
-		  .always(function() {
-		  });
+		var jqxhr = _httpGet( "?id=room&action=create&name="+name, {}, function(data, textStatus, jqXHR) {
+				if ((data!=null) && (data!="ERROR")) 
+					PageMessage.message(_T("Create Room succeeded for")+": "+name, "success", true);
+				else 
+					PageMessage.message(_T("Could not create Room")+": "+name, "warning");
+			});
+		return jqxhr;
 	};
 
 	function _deleteRoom(id)
 	{	
-		DialogManager.confirmDialog(_T("Are you sure you want to delete room")+" ("+id+")",function(result) {
-			if (result==true) {
-				var url = "data_request?id=room&action=delete&room="+id;
-				var jqxhr = $.ajax( {
-					url: url,
-					type: "GET",
-					dataType: "text"
-				})
-				  .done(function(data) {
-					if (data!="ERROR") {
-						PageMessage.message(_T("Deleted Room")+" "+id, "success", true);
-					}
-					else {
-						PageMessage.message(_T("Could not delete Room")+" "+id, "warning");
-					}
-				  })
-				  .fail(function(jqXHR, textStatus) {
-					PageMessage.message( _T("Delete Room failed")+ ": " + textStatus , "danger");
-				  })
-				  .always(function() {
-				  });
-			}
+		var jqxhr = _httpGet( "?id=room&action=delete&room="+id, {}, function(data, textStatus, jqXHR) {
+			if ((data!=null) && (data!="ERROR")) 
+				PageMessage.message(_T("Deleted Room")+" "+id, "success", true);
+			else 
+				PageMessage.message(_T("Could not delete Room")+" "+id, "warning");
 		});
+		return jqxhr;
 	};
 
 	function _runScene(id)
 	{
-		if ( (id>0) && (this.getSceneByID(id) != null) ) {			
-			var url = "data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="+id;
-			var jqxhr = $.ajax( {
-				url: url,
-				type: "GET",
-				dataType: "text"
-			})
-			.done(function() {
+		if ( (id<=0) || ((this.getSceneByID(id) == null)) )
+			return null;
+		
+		var jqxhr = _httpGet( "?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="+id, {}, function(data, textStatus, jqXHR) {
+			if ((data!=null) && (data!="ERROR")) 
 				PageMessage.message(_T("Ran Scene #{0} successfully").format(id), "success");
-			})
-			.fail(function(jqXHR, textStatus) {
-				PageMessage.message( _T("VERA is busy, be patient. (returned {0})").format(textStatus) , "warning");
-			})
-			.always(function() {
-			});
-		}
+			else 
+				PageMessage.message(_T("Could not run Scene #{0}").format(id), "warning");
+		});
+		return jqxhr;
 	};
 
 	function _osCommand(cmd,cbfunc) {
-		var url = "data_request?id=lr_ALTUI_Handler&command=oscommand&oscommand={0}".format( encodeURIComponent(cmd) );
-		var jqxhr = $.ajax( {
-			url: url,
-			type: "GET",
-			dataType: "text"
-		})
-		.done(function(data, textStatus, jqXHR) {
-			var success = (data[0]=="1");
-			if (success)
-				PageMessage.message(_T("Os Command execution succeeded"), "success");
-			else
-				PageMessage.message( _T("Os Command execution on vera failed.") , "danger");
-			if ($.isFunction( cbfunc )) 
-				cbfunc({success:success, result:data.substr(2)},jqXHR);
-		})
-		.fail(function(jqXHR, textStatus) {
-			PageMessage.message( _T("Os Command execution request failed. (returned {0})").format(textStatus) , "danger");
-			if ($.isFunction( cbfunc )) 
-				cbfunc({success:false, result:null},jqXHR);
-		})
-		.always(function() {
+		var jqxhr = _httpGet( "?id=lr_ALTUI_Handler&command=oscommand&oscommand={0}".format( encodeURIComponent(cmd) ), {}, function(data, textStatus, jqXHR) {
+			if (data!=null) {
+				var success = (data[0]=="1");
+				if (success)
+					PageMessage.message(_T("Os Command execution succeeded"), "success");
+				else
+					PageMessage.message( _T("Os Command execution on vera failed.") , "danger");
+				if ($.isFunction( cbfunc )) 
+					cbfunc({success:success, result:data.substr(2)},jqXHR);
+			}
+			else {
+				PageMessage.message( _T("Os Command execution request failed. (returned {0})").format(textStatus) , "danger");
+				if ($.isFunction( cbfunc )) 
+					cbfunc({success:false, result:null},jqXHR);
+			}
 		});
+		return jqxhr;
 	};
 	
 	function _runLua(code, cbfunc) {
@@ -1241,29 +1199,15 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	
 	function _deleteDevice(id)
 	{
-		DialogManager.confirmDialog(_T("Are you sure you want to delete device ({0})").format(id),function(result) {
-			if (result==true) {
-				var url = "data_request?id=device&action=delete&device="+id;
-				var jqxhr = $.ajax( {
-					url: url,
-					type: "GET",
-					dataType: "text"
-				})
-				.done(function(data) {
-					if (data!="ERROR") {
-						PageMessage.message(_T("Deleted Device {0} successfully ").format(id), "success", true);
-					}
-					else {
-						PageMessage.message(_T("Could not delete Device {0}").format(id), "warning");
-					}
-				})
-				.fail(function(jqXHR, textStatus) {
-					PageMessage.message( _T("Delete Device failed")+": " + textStatus , "danger");
-				})
-				.always(function() {
-				});
+		var jqxhr = _httpGet( "?id=device&action=delete&device="+id, {}, function(data, textStatus, jqXHR) {
+			if ( (data!=null) && (data!="ERROR") ) {
+				PageMessage.message(_T("Deleted Device {0} successfully ").format(id), "success", true);
+			}
+			else {
+				PageMessage.message(_T("Could not delete Device {0}").format(id), "warning");
 			}
 		});
+		return jqxhr;
 	};
 	
 	function _updateNeighbors(deviceid) {
@@ -1285,29 +1229,15 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	
 	function _deleteScene(id)
 	{
-		DialogManager.confirmDialog(_T("Are you sure you want to delete scene ({0})").format(id),function(result) {
-			if (result==true) {
-				var url = "data_request?id=scene&action=delete&scene="+id;
-				var jqxhr = $.ajax( {
-					url: url,
-					type: "GET",
-					dataType: "text"
-				})
-				.done(function(data) {
-					if (data!="ERROR") {
-						PageMessage.message(_T("Deleted Scene {0} successfully ").format(id), "success", true);
-					}
-					else {
-						PageMessage.message(_T("Could not delete Scene {0}").format(id), "warning");
-					}
-				})
-				.fail(function(jqXHR, textStatus) {
-					PageMessage.message( _T("Delete Scene failed")+": " + textStatus , "danger");
-				})
-				.always(function() {
-				});
+		var jqxhr = _httpGet( "?id=scene&action=delete&scene="+id, {}, function(data, textStatus, jqXHR) {
+			if ( (data!=null) && (data!="ERROR") ) {
+				PageMessage.message(_T("Deleted Scene {0} successfully ").format(id), "success", true);
+			}
+			else {
+				PageMessage.message(_T("Could not delete Scene {0}").format(id), "warning");
 			}
 		});
+		return jqxhr;
 	};
 
 	function _setStartupCode(newlua) 

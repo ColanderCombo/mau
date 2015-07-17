@@ -3815,8 +3815,13 @@ var UIManager  = ( function( window, undefined ) {
 			var sceneid = $(element).prop("id");
 			var scene = MultiBox.getSceneByID( sceneid );
 			// get HTML for scene and draw it
-			var html = _sceneDraw( scene);
-			$(element).replaceWith(  html );
+			if (scene) {
+				var html = _sceneDraw( scene);
+				$(element).replaceWith(  html );
+			}
+			else {
+				$(element).parent().remove();
+			}
 		});
 		
 		// refresh custom pages
@@ -4670,7 +4675,11 @@ var UIManager  = ( function( window, undefined ) {
 			// install click handler for buttons
 			$("button.altui-delroom#"+id).click( function(event) {
 				var id = $(this).prop('id');
-				MultiBox.deleteRoom( id );
+				DialogManager.confirmDialog(_T("Are you sure you want to delete room")+" ("+id+")",function(result) {
+					if (result==true) {
+						MultiBox.deleteRoom( id );
+					}
+				})
 			});
 		});
 		
@@ -4716,7 +4725,11 @@ var UIManager  = ( function( window, undefined ) {
 		$(container).off('click','.altui-deldevice')
 					.on('click','.altui-deldevice',  function(e) {
 						var id = $(this).prop('id');
-						MultiBox.deleteDevice(id);
+						DialogManager.confirmDialog(_T("Are you sure you want to delete device ({0})").format(id),function(result) {
+							if (result==true) {
+								MultiBox.deleteDevice(id);
+							}
+						});
 					});
 					
 		$("#altui-toggle-attributes").click( function() {
@@ -5043,7 +5056,10 @@ var UIManager  = ( function( window, undefined ) {
 				$("input#"+devid+".altui-device-title-input").focusout({devid:devid},function(event){ 
 					var device = MultiBox.getDeviceByID(event.data.devid);
 					var newname = $(this).val();
-					MultiBox.renameDevice(device, newname );
+					DialogManager.confirmDialog(_T("Are you sure you want to modify this device to:")+newname,function(result) {
+						if (result==true)
+								MultiBox.renameDevice(device, newname );
+					});
 					$(this).parent().text(device.name);
 				});
 			})
@@ -5091,7 +5107,11 @@ var UIManager  = ( function( window, undefined ) {
 				// .off("click",".altui-delscene")
 				.on("click",".altui-delscene",function() {
 					var sceneid = $(this).prop("id");
-					MultiBox.deleteScene( sceneid );
+					DialogManager.confirmDialog(_T("Are you sure you want to delete scene ({0})").format(sceneid),function(result) {
+						if (result==true) {
+							MultiBox.deleteScene( sceneid );
+						}
+					});
 				})
 				// .off("click",".altui-pausescene")
 				.on("click",".altui-pausescene",function() {
