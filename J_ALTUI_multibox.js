@@ -76,17 +76,35 @@ var MultiBox = ( function( window, undefined ) {
 		};
 		_devicetypesDB[devtype].ui_static_data = ui_definitions;
 	};
+
+	function  _getAllEvents(name) {
+		return $.map( _controllers , function(o,i) {return name+"_"+i } );
+	};
 	
 	function _initEngine() {
+		function _AllLoaded(eventname) {
+			switch(eventname) {
+				case "on_ui_userDataLoaded":
+						UIManager.refreshUI( true , true );	// full & first time full display
+						break;
+				case "on_ui_userDataFirstLoaded":
+					break;
+			}
+			console.log(eventname);
+			EventBus.publishEvent(eventname);
+		};
+		EventBus.waitForAll( "on_ui_userDataFirstLoaded",
+							_getAllEvents("on_ui_userDataFirstLoaded"), this, _AllLoaded );
+		EventBus.waitForAll("on_ui_userDataLoaded",
+							_getAllEvents("on_ui_userDataLoaded"), this, _AllLoaded );
 		_controllers[0].controller = new VeraBox(0,'');		// create the main controller
 		_controllers[0].controller.initEngine();
 		$.each(_controllers, function(idx,box) {
 			if (box.controller == null) {
 				box.controller = new VeraBox(idx,box.ip);
-				// box.controller.initEngine();
+				box.controller.initEngine();		// will raise("on_ui_userDataFirstLoaded_"+_uniqID) ("on_ui_userDataLoaded_"+_uniqID)
 			}
 		});
-		UIManager.refreshUI( true , true );	// full & first time full display
 	};
 	function _saveEngine() {
 		$.each(_controllers, function(idx,box) {
@@ -179,8 +197,8 @@ var MultiBox = ( function( window, undefined ) {
 	function _setAttr(deviceid, attribute, value,cbfunc) {
 		return _controllers[0].controller.getUPnPHelper().UPnPSetAttr(deviceid, attribute, value,cbfunc);
 	};
-	function _isDeviceZwave(id) {
-		return _controllers[0].controller.isDeviceZwave(id);
+	function _isDeviceZwave(device) {
+		return _controllers[0].controller.isDeviceZwave(device);
 	};
 	function _updateNeighbors(deviceid) {
 		return _controllers[0].controller.updateNeighbors(deviceid);
@@ -339,7 +357,7 @@ var MultiBox = ( function( window, undefined ) {
 	getJobStatus			: _getJobStatus,			// (  jobid , cbfunc )
 	setAttr					: _setAttr,					// ( deviceID, attribute, value,function(result) )
 	runAction				: _runAction,				// (deviceid, service, action, params,cbfunc);
-	isDeviceZwave			: _isDeviceZwave,			// (id)
+	isDeviceZwave			: _isDeviceZwave,			// (device)
 	updateNeighbors			: _updateNeighbors,			// (deviceid)
 	
 	//Alias

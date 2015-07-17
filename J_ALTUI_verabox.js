@@ -137,8 +137,8 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 				}
 				else {
 					setTimeout(function() {
-						_getProxyJobData(jobid,cbfunc);
-					}, 500);
+						_unproxifyResult(data, textStatus, jqXHR, cbfunc);
+					}, 2000);
 				}
 			})
 			.fail(function(jqXHR, textStatus, errorThrown) {
@@ -432,57 +432,26 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 	};
 	
 	function _sceneAction( sceneobj ) {
-		if (0)  {
-			//
-			// DOES NOT WORK when the trigger has a LUA
-			//
-			var url= _buildSceneCreateUrl();
-			var data = JSON.stringify(sceneobj); //escapeXml(JSON.stringify(sceneobj));
-			url += "&json="+encodeURI(data);
-			$.ajax({
-				url: url,
-				type: "GET",
-				// processData: false,
-				contentType: "text/xml;charset=UTF-8",
-				// data:  {
-					// json:data,
-				// }
-			})
-			.done(function(data, textStatus, jqXHR) {
-				if (data=="ERROR")
-					PageMessage.message( "Scene action failed!", "warning" );
-				else {	
-					PageMessage.message( "Scene action succeeded! a LUUP reload will happen now, be patient", "success" );
-					_reloadEngine();
-				}
-			})
-			.fail(function(jqXHR, textStatus, errorThrown) {
-			})
-			.always(function() {
-			});		
-		}
-		else {
-			var id = sceneobj.id;	
-			var target = {
-				"devices":{},
-				"scenes":{},
-				"sections":{},
-				"rooms":{},
-				"InstalledPlugins":[],
-				"PluginSettings":[],
-				"users":{}
-			};
-			target.scenes["scenes_"+id]=sceneobj;
-			// console.log( JSON.stringify(target));
-			_ModifyUserData( target, function(result) {
-				if (result==null) {
-					PageMessage.message( "Scene action failed!", "warning" );				
-				}
-				else {
-					PageMessage.message( "Scene action succeeded! a LUUP reload will happen now, be patient", "success" );			
-				}
-			});
-		}
+		var id = sceneobj.id;	
+		var target = {
+			"devices":{},
+			"scenes":{},
+			"sections":{},
+			"rooms":{},
+			"InstalledPlugins":[],
+			"PluginSettings":[],
+			"users":{}
+		};
+		target.scenes["scenes_"+id]=sceneobj;
+		// console.log( JSON.stringify(target));
+		_ModifyUserData( target, function(result) {
+			if (result==null) {
+				PageMessage.message( "Scene action failed!", "warning" );				
+			}
+			else {
+				PageMessage.message( "Scene action succeeded! a LUUP reload will happen now, be patient", "success" );			
+			}
+		});
 	};
 	
 	return {
@@ -909,7 +878,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			{
 				var str = "";
 				if (isInteger( condition.value )) {
-					var val = MultiBox.controllerOf(deviceid).getStatus( deviceid, condition.service, condition.variable );
+					var val = _getStatus( deviceid, condition.service, condition.variable );
 					if (val=="")
 						AltuiDebug.debug( "devid:{0} service:{1} variable:{2} devsubcat:{3} value:'{4}' should not be null".format( 
 							deviceid,
@@ -926,7 +895,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 				}
 				else {
 					str = "('{0}' {1} '{2}')".format(
-						MultiBox.controllerOf(deviceid).getStatus( deviceid, condition.service, condition.variable ),
+						_getStatus( deviceid, condition.service, condition.variable ),
 						condition.operator, 
 						condition.value 
 					);
@@ -978,7 +947,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 						});
 					}
 					UIManager.refreshUI( false , false );	// partial and not first time
-					EventBus.publishEvent("on_startup_luStatusLoaded",data);
+					EventBus.publishEvent("on_startup_luStatusLoaded_"+_uniqID,data);
 					
 					// if user_data has changed, reload it
 					if (_user_data_DataVersion != data.UserData_DataVersion) {
@@ -1049,8 +1018,8 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 				}
 			});		
 			if (bFirst)
-				EventBus.publishEvent("on_ui_userDataFirstLoaded");
-			EventBus.publishEvent("on_ui_userDataLoaded");
+				EventBus.publishEvent("on_ui_userDataFirstLoaded_"+_uniqID);
+			EventBus.publishEvent("on_ui_userDataLoaded_"+_uniqID);
 		}
 	};
 
@@ -1242,9 +1211,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 
 	function _setStartupCode(newlua) 
 	{
-		return (newlua != undefined) ?
-				_upnpHelper.ModifyUserData( { "StartupCode":newlua } ) :
-				null;
+		return (newlua != undefined) ? _upnpHelper.ModifyUserData( { "StartupCode":newlua } ) : null;
 	};
 /*    "categories": [
         {
@@ -1293,18 +1260,14 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 	
 	function _getDeviceBatteryLevel(device) {
-		var batteryLevel=null;
-		$.each(device.states, function(idx,state) {
-			if ( (state.variable=="BatteryLevel") && (state.service=="urn:micasaverde-com:serviceId:HaDevice1") )
-			{
-				batteryLevel = state.value;
-				return false;	// exit the loop
-			}
-		});
+		var batteryLevel=_getStatus( device.id, "urn:micasaverde-com:serviceId:HaDevice1", "BatteryLevel" );
 		return batteryLevel; // Math.floor((Math.random() * 100) + 1);
 	};
 	
 	function _clearData(name, npage, cbfunc) {
+		if (_uniqID!=0);	// only supported on master controller
+			return;
+			
 		AltuiDebug.debug("_clearData( {0}, page:{1} )".format(name,npage));
 		var result = "";
 		var url = "data_request?id=lr_ALTUI_Handler&command=clear_data";//&pages="+encodeURIComponent(JSON.stringify(pages));
@@ -1332,6 +1295,9 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 	
 	function _saveDataChunk(name, npage, data, cbfunc) {
+		if (_uniqID!=0);	// only supported on master controller
+			return;
+
 		AltuiDebug.debug("_saveDataChunk( {0}, page:{1}, data:{2} chars  )".format(name,npage,data.length));
 		var result = "";
 		var url = "data_request?id=lr_ALTUI_Handler&command=save_data";//&pages="+encodeURIComponent(JSON.stringify(pages));
@@ -1361,6 +1327,9 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 
 	function _saveData( name, data , cbfunc) {
+		if (_uniqID!=0);	// only supported on master controller
+			return;
+			
 		AltuiDebug.debug("_saveData( {0}, {1} chars )".format(name,data.length));
 
 		// we need a workaround to pass data via a POST but for now, all we have is a Get
@@ -1555,8 +1524,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		return [];
 	};
 	
-	function _isDeviceZwave(id) {
-		var device = MultiBox.getDeviceByID(id);
+	function _isDeviceZwave(device) {
 		if (device && device.id_parent) {
 			var parent = MultiBox.getDeviceByID( device.id_parent );
 			if (parent) {
@@ -1572,13 +1540,13 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			function(luaid,device) {
 				var id = device.id;
 				var service="urn:micasaverde-com:serviceId:ZWaveDevice1"
-				var PollNoReply = parseInt(MultiBox.controllerOf(id).getStatus(id,service,"PollNoReply"));
-				var PollOk = parseInt(MultiBox.controllerOf(id).getStatus(id,service,"PollOk"));
+				var PollNoReply = parseInt(_getStatus(id,service,"PollNoReply"));
+				var PollOk = parseInt(_getStatus(id,service,"PollOk"));
 				if (! isNaN(PollNoReply) ) {
-					MultiBox.controllerOf(id).setStatus( id, service, "PollNoReply", 0   );
+					_setStatus( id, service, "PollNoReply", 0   );
 				}
 				if (! isNaN(PollOk) ) {
-					MultiBox.controllerOf(id).setStatus( id, service, "PollOk", 0   );
+					_setStatus( id, service, "PollOk", 0   );
 				}
 			}, 
 			function(device) {
@@ -1602,10 +1570,10 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	getBoxInfo		: _getBoxInfo,
 	getLuaStartup 	: _getLuaStartup,
     getRooms		: _getRooms,		// in the future getRooms could cache the information and only call _getRooms when needed
-    getRoomsSync	: function() { return _rooms; },
+    getRoomsSync	: function() 		{ return _rooms; },
 	getRoomByID		: _getRoomByID,		// roomid
 	getDevices		: _getDevices,
-    getDevicesSync	: function() { return _devices; },
+    getDevicesSync	: function() 		{ return _devices; },
 	getDeviceByType : _getDeviceByType,
 	getDeviceByAltID : _getDeviceByAltID,
 	getDeviceByID 	: _getDeviceByID, 
@@ -1615,10 +1583,10 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	getDeviceActions: _getDeviceActions,
 	getDeviceEvents : _getDeviceEvents,
 	getDeviceDependants : _getDeviceDependants,
-	isDeviceZwave	: _isDeviceZwave,
+	isDeviceZwave	: _isDeviceZwave,	//(device)
 	getScenes		: _getScenes,
 	getSceneHistory : _getSceneHistory,
-	getScenesSync	: function() { return _scenes; },
+	getScenesSync	: function() 		{ return _scenes; },
 	getSceneByID 	: _getSceneByID,
 	getNewSceneID	: _getNewSceneID,
 	getPlugins		: _getPlugins,
@@ -1646,7 +1614,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	
 	getCategoryTitle : _getCategoryTitle,
 	getCategories	 : _getCategories,
-	getDeviceTypes 	: function() 	{	return _devicetypes; },
+	getDeviceTypes 	: function() 		{	return _devicetypes; },
 	// isRemoteAccess	: function() 	{ 	return window.location.origin.indexOf("mios.com")!=-1; /*return true;*/ },
 
 	// energy
@@ -1825,18 +1793,6 @@ function get_event_definition(DeviceType){
 
 function new_scene_id(){
 	return MultiBox.getNewSceneID();
-    // var sceneIDs=[];
-    // var indexNo=jsonp.ud.scenes.length;
-    // if(indexNo==0){
-        // return offset_id+1;
-    // }
-    // for(var i=0;i<indexNo;i++){
-        // sceneIDs[sceneIDs.length]=jsonp.ud.scenes[i].id;
-    // }
-    // var sceneID=sceneIDs.max()+1;
-    // sceneID=(sceneID<offset_id)?(parseInt(sceneID)+offset_id):sceneID;
-
-    // return sceneID;
 }
 
 var Ajax = (function(window,undefined) {

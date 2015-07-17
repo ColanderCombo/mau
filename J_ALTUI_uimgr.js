@@ -2621,7 +2621,7 @@ var UIManager  = ( function( window, undefined ) {
 			});
 			
 			// update modal with new text
-			var extrabuttons = MultiBox.isDeviceZwave(devid) ? buttonTemplate.format( devid, "altui-update-neighbors", _T("Update Neighbors"),"default") : "";
+			var extrabuttons = MultiBox.isDeviceZwave(device) ? buttonTemplate.format( devid, "altui-update-neighbors", _T("Update Neighbors"),"default") : "";
 			DialogManager.registerDialog('deviceActionModal',deviceActionModalTemplate.format( lines.join(''), device.name, devid, extrabuttons ));
 
 			$('div#deviceActionModal button.altui-run-action').click( function() {

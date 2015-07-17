@@ -305,13 +305,30 @@ var Favorites = ( function (undefined) {
 
 var EventBus = ( function (undefined) {
 	var _subscriptions = {
+		// altui specific ones				// parameters
 		"on_altui_deviceTypeLoaded" : [],	// table of { func, object }
+		
+		// global ones 
 		"on_ui_deviceStatusChanged" : [],	// table of { func, object }
+		"on_ui_initFinished": [],
 		"on_ui_userDataFirstLoaded" : [],
 		"on_ui_userDataLoaded" : [],
 		"on_startup_luStatusLoaded" : [],
-		"on_ui_initFinished": [],
+		
+		// ctrl specific ones , 0 is the master then other are going to be added dynamically
+		"on_ui_userDataFirstLoaded_0" : [],
+		"on_ui_userDataLoaded_0" : [],
+		"on_startup_luStatusLoaded_0" : [],
 	};
+	function _allSet(tbl) {
+		var bResult = true;
+		$.each(tbl, function(k,v) {
+			if (v==false)
+				bResult = false;
+			return bResult;
+		});
+		return bResult;
+	};	
 	function _registerEventHandler(eventname, object, funcname ) {
 		if (_subscriptions[eventname] == undefined)
 			_subscriptions[eventname] = [];
@@ -325,6 +342,30 @@ var EventBus = ( function (undefined) {
 		if (bFound==false)
 			_subscriptions[eventname].push( {object: object , funcname: funcname} );
 	};
+	
+	function _waitForAll(event, eventtbl, object, funcname ) {
+		var _state = {};
+		function _signal(eventname/*, args */) {
+			var theArgs = arguments;
+			_state[eventname] = true;
+			// if all are true, call the object,funcname
+			if (_allSet(_state)) {
+				theArgs[0] = event;
+				if ($.isFunction(funcname)) {
+					(funcname).apply(object,theArgs);
+				} else {
+					// theArgs.unshift(eventname);
+					var func = object[funcname];
+					func.apply( object , theArgs );
+				}
+			}
+		};
+		$.each(eventtbl , function( idx, event) {
+			_state[event] = false;
+			_registerEventHandler(event, this, _signal );
+		})
+	};
+
 	function _publishEvent(eventname/*, args */) {
 		if (_subscriptions[eventname]) {
 			// var theArgs = [].slice.call(arguments, 1);	// remove first argument
@@ -338,11 +379,15 @@ var EventBus = ( function (undefined) {
 					func.apply( sub.object , theArgs );
 				}
 			});
+		} else {
+			_subscriptions[eventname] = [];
 		}
 	};
 	return {
-		registerEventHandler : _registerEventHandler,	//(eventname, object, funcname ) 
-		publishEvent : _publishEvent,	//(eventname, args)
+		registerEventHandler 	: _registerEventHandler,	//(eventname, object, funcname ) 
+		waitForAll 				: _waitForAll,			//(events, object, funcname )
+		publishEvent 			: _publishEvent,			//(eventname, args)
+		
 		getEventSupported : function() {
 			return Object.keys(_subscriptions);
 		},
