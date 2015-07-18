@@ -7695,7 +7695,7 @@ $(document).ready(function() {
 		
 		UIManager.initEngine(styles.format(window.location.hostname), g_DeviceTypes, g_CustomTheme, function() {
 			UIManager.initCustomPages(g_CustomPages);	
-			MultiBox.initEngine();
+			MultiBox.initEngine(g_ExtraController);
 			EventBus.publishEvent("on_ui_initFinished");
 		});
 	};

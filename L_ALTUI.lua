@@ -515,6 +515,7 @@ local htmlLayout = [[
 		var g_CustomPages = @custompages@;
 		var g_CustomTheme = '@ThemeCSS@';
 		var g_MyDeviceID = @mydeviceid@;
+		var g_ExtraController = '@extracontroller@';
 	</script>
 	<script src="J_ALTUI_uimgr.js" defer ></script>
 	<hr>
@@ -615,6 +616,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				variables["ThemeCSS"] = luup.variable_get(service, "ThemeCSS", deviceID) or ""
 				variables["style"] = htmlStyle
 				variables["mydeviceid"] = deviceID
+				variables["extracontroller"] = getSetVariable(service, "ExtraController", lul_device, "")
 				if (localcdn ~= "") then
 					variables["csslinks"] = htmlLocalCSSlinks:template(variables)
 					variables["mandatory_scripts"] = htmlLocalScripts:template(variables)
@@ -934,6 +936,7 @@ function startupDeferred(lul_device)
 	local localurl = getSetVariableIfEmpty(service,"LocalHome", lul_device, "/port_3480/data_request?id=lr_ALTUI_Handler&command=home")
 	local css = getSetVariable(service,"ThemeCSS", lul_device, "")
 	local localcdn = getSetVariable(service, "LocalCDN", lul_device, "")
+	local extraController= getSetVariable(service, "ExtraController", lul_device, "")
 	
 	-- clean tmp area from our files
 	os.execute('rm /tmp/altui_*');

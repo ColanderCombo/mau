@@ -14,7 +14,7 @@ var MultiBox = ( function( window, undefined ) {
 	var _devicetypesDB = {};
 	var _controllers = [
 		{ ip:''			  ,  controller:null },		// no IP = primary box on which we opened the web page
-		{ ip:'192.168.1.5',  controller:null }		// no IP = primary box on which we opened the web page
+		// { ip:'192.168.1.5',  controller:null }		// no IP = primary box on which we opened the web page
 		//http://192.168.1.16:3480/luvd/S_IPhone.xml
 		//http://192.168.1.16:3480/data_request?id=device
 		//http://192.168.1.16/port_3480/data_request?id=action&output_format=json&DeviceNum=162&serviceId=urn:upnp-org:serviceId:altui1&action=ProxyGet&newUrl=http://192.168.1.5/port_3480/data_request?id=lu_status2&output_format=json&DataVersion=1&Timeout=60&MinimumDelay=1500&resultName=alexis
@@ -81,7 +81,7 @@ var MultiBox = ( function( window, undefined ) {
 		return $.map( _controllers , function(o,i) {return name+"_"+i } );
 	};
 	
-	function _initEngine() {
+	function _initEngine(extraController) {
 		function _AllLoaded(eventname) {
 			switch(eventname) {
 				case "on_ui_userDataLoaded":
@@ -93,12 +93,20 @@ var MultiBox = ( function( window, undefined ) {
 			console.log(eventname);
 			EventBus.publishEvent(eventname);
 		};
-		EventBus.waitForAll( "on_ui_userDataFirstLoaded",
-							_getAllEvents("on_ui_userDataFirstLoaded"), this, _AllLoaded );
-		EventBus.waitForAll("on_ui_userDataLoaded",
-							_getAllEvents("on_ui_userDataLoaded"), this, _AllLoaded );
+		EventBus.waitForAll( "on_ui_userDataFirstLoaded", _getAllEvents("on_ui_userDataFirstLoaded"), this, _AllLoaded );
+		EventBus.waitForAll("on_ui_userDataLoaded", _getAllEvents("on_ui_userDataLoaded"), this, _AllLoaded );
+							
+		// initialize controller 0 right away, no need to wait					
 		_controllers[0].controller = new VeraBox(0,'');		// create the main controller
 		_controllers[0].controller.initEngine();
+		
+		// add the extra controllers
+		if (extraController.trim().length>0)
+			$.each(extraController.split(','), function(idx,ipaddr) {
+				_controllers.push({ ip:ipaddr, controller:null });
+			});
+		
+		// initialize controllers that are not yet initialized
 		$.each(_controllers, function(idx,box) {
 			if (box.controller == null) {
 				box.controller = new VeraBox(idx,box.ip);
