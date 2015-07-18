@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.59"
+local version = "v0.60"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -59,39 +59,15 @@ function file_exists(name)
 end
 
 function proxyGet(lul_device,newUrl,resultName)
-	debug(string.format("proxyGet lul_device:%d,newUrl:%s,resultName:%s",lul_device,newUrl,resultName))
-	local result = {}
-	local myheaders = {}
-	local request, code = http.request({
-		url = newUrl,
-		headers = myheaders,
-		sink = ltn12.sink.table(result)
-	})
-	
-	-- fail to connect
-	if (request==nil) then
-		error(string.format("failed to connect to url:%s, http.request returned nil", newUrl))
-		return nil
-	elseif (code==401) then
-		warning(string.format("Access to url:%s requires a user/password: %d", newUrl,code))
-		return "unauthorized"
-	elseif (code~=200) then
-		warning(string.format("http.request to url:%s returned a bad code: %d", newUrl,code))
-		return nil
+	debug(string.format("proxyGet lul_device:%d",lul_device))	
+	local httpcode,data = luup.inet.wget(newUrl,10)
+	if (httpcode~=0) then
+		error(string.format("failed to connect to url:%s, http.request returned %d", newUrl,httpcode))
+		return 0,"";
 	end
-	
-	-- everything looks good
-	local data = table.concat(result)
-	debug(string.format("request:%s",request))	
-	debug(string.format("code:%s",code))	
+	debug(string.format("success httpcode:%s",httpcode))	
 	debug(string.format("data:%s",data))	
-	
-	-- write result in tmp area altui 
-	local file = assert(io.open(tmpprefix..resultName,'w'))
-	local result = file:write(data)
-	file:close()
-
-	return true
+	return 1,data
 end
 
 function setDebugMode(lul_device,newDebugMode)
@@ -547,14 +523,10 @@ local htmlLayout = [[
 </html>
 ]]
 
-
-
 	
 function findALTUIDevice()
-	debug("findALTUIDevice()")
 	for k,v in pairs(luup.devices) do
 		if( v.device_type == devicetype ) then
-			debug(string.format("findALTUIDevice() => %s",k))
 			return k
 		end
 	end
@@ -688,6 +660,14 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				end
 				return "ok", "text/plain"
 			end,
+		["proxyget"] = 
+			function(params)
+				local newUrl = lul_parameters["newUrl"]
+				local resultName = lul_parameters["resultName"]
+				code,result = proxyGet(deviceID,newUrl,resultName)
+				local res = string.format("%d,%s",code,result);
+				return res, "text/plain"
+			end,
 		["readtmp"] = 
 			function(params)
 				-- local command = lul_parameters["oscommand"]
@@ -695,6 +675,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				-- local result = handle:read("*a")
 				-- handle:close()
 				local filename = url_decode( lul_parameters["filename"] )
+				debug("opening file")
 				local file = io.open(tmpprefix..filename,'r')
 				local result = ''
 				if file~=nil then 
@@ -703,6 +684,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				else 
 					result = "0,"
 				end
+				debug("returning result")
 				return result , "text/plain"
 				-- return json.encode( {success=(response==0 or response==true), result=result} ) , "application/json"
 			end,

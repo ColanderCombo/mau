@@ -59,7 +59,7 @@ Localization.init( {
 	"Holiday":"Vacanze",
 	"Wind":"Vento",
 	"Are you sure you want to delete scene ({0})":"xxx",
-	"VERA is busy, be patient. (returned {0})":"VERA is busy, be patient. (returned {0})",
+	"Controller {0} is busy, be patient.":"Controller {0} is busy, be patient.",
 	"Submit":"Submit",
 	"Save Changes":"Save Changes",
 	"Trigger":"Trigger",
@@ -228,5 +228,6 @@ Localization.init( {
 	"Scene History":"Scene History",
 	"Button Label":"Button Label","Color":"Color",
 	"Ran Scene #{0} successfully":"Ran Scene #{0} successfully",
-	"Not used in scenes":"Not used in scenes"
+	"Not used in scenes":"Not used in scenes",
+	"Controller {0} did not respond":"Controller {0} did not respond"
 	});

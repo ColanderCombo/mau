@@ -59,7 +59,7 @@ Localization.init( {
 	"Holiday":"Vacances",
 	"Wind":"Vent",
 	"Are you sure you want to delete scene ({0})":"confirmez vous la destruction de la scène ({0})",
-	"VERA is busy, be patient. (returned {0})":"VERA est occupée, soyez patient. (retour {0})",
+	"Controller {0} is busy, be patient.":"Le Controleur {0} est occupé, patience...",
 	"Submit":"Confirmer",
 	"Save Changes":"Sauvegarder",
 	"Trigger":"Evènement",
@@ -228,5 +228,6 @@ Localization.init( {
 	"Scene History":"Scene History",
 	"Button Label":"Label Bouton","Color":"Couleur",
 	"Ran Scene #{0} successfully":"Exécution avec succès de la Scène #{0}",
-	"Not used in scenes":"Pas d'utilisation dans les scènes"
+	"Not used in scenes":"Pas d'utilisation dans les scènes",
+	"Controller {0} did not respond":"Le Contrôleur {0} ne répond pas"
 });

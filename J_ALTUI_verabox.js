@@ -26,7 +26,8 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 	var _veraidx = veraidx || 0;
 	var _proxyresultarea = "altuictrl"+_veraidx;
 	var _urlhead = (_ipaddr=='') ? window.location.pathname : ("http://{0}/port_3480/data_request".format(ip_addr));
-	var _proxyhead = "/port_3480/data_request?id=action&output_format=json&DeviceNum={0}&serviceId=urn:upnp-org:serviceId:altui1&resultName={1}&action=ProxyGet&newUrl=".format(g_MyDeviceID,_proxyresultarea);
+	// var _proxyhead = "/port_3480/data_request?id=action&output_format=json&DeviceNum={0}&serviceId=urn:upnp-org:serviceId:altui1&resultName={1}&action=ProxyGet&newUrl=".format(g_MyDeviceID,_proxyresultarea);
+	var _proxyhead = "?id=lr_ALTUI_Handler&command=proxyget&resultName=none&newUrl=";
 	var XML_CHAR_MAP = {
 		'<': '&lt;',
 		'>': '&gt;',
@@ -122,30 +123,17 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 				(cbfunc)(data,  textStatus, jqXHR );
 		}
 		else {
-			// var jobid = parseInt(JSON.parse(data)["u:ProxyGetResponse"].JobID);
-			var url = window.location.pathname + "?id=lr_ALTUI_Handler&command=readtmp&filename={0}".format( _proxyresultarea );
-			return $.ajax({
-				url: url,
-				type: "GET"
-			})
-			.done(function(data, textStatus, jqXHR) {
-				var success = (data[0]=="1");
-				if (success) {
-					if ($.isFunction( cbfunc )) {
-						cbfunc(data.substr(2),textStatus,jqXHR);
-					}
+			var success = (data[0]=="1");
+			if (success) {
+				if ($.isFunction( cbfunc )) {
+					cbfunc(data.substr(2),textStatus,jqXHR);
 				}
-				else {
-					setTimeout(function() {
-						_unproxifyResult(data, textStatus, jqXHR, cbfunc);
-					}, 2000);
-				}
-			})
-			.fail(function(jqXHR, textStatus, errorThrown) {
+			}
+			else {
 				if ($.isFunction( cbfunc )) {
 					cbfunc(null,textStatus,jqXHR);
 				}
-			});
+			}
 		}
 	};
 	
@@ -458,7 +446,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		//---------------------------------------------------------
 		// Public  functions
 		//---------------------------------------------------------
-
+		getIpAddr		: function () 	{ return _ipaddr; },
 		reloadEngine	: _reloadEngine,
 		getUrlHead		: _getUrlHead,
 		proxify			: _proxify,		// ( url )
@@ -479,7 +467,6 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		sceneAction 	: _sceneAction,			// (sceneobj)  will be transformed in json
 	};
 });	// not invoked, the object does not exist
-
 
 // url : http://192.168.1.16/port_49451/upnp/control/dev_1
 // POST /port_49451/upnp/control/dev_1 HTTP/1.1
@@ -565,7 +552,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 					});
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
-					PageMessage.message( _T("VERA is busy, be patient. (returned {0})").format(textStatus) , "warning");
+					PageMessage.message( _T("Controller {0} did not respond").format(_upnpHelper.getIpAddr()) , "warning");
 					if ($.isFunction(cbfunc))
 						(cbfunc)(null, textStatus, jqXHR);
 				});
@@ -621,7 +608,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	function _getPower(cbfunc) {
 		var jqxhr = _httpGet("?id=live_energy_usage",{dataType: "text"},cbfunc);
 		jqxhr= jqxhr.fail(function(jqXHR, textStatus) {
-				PageMessage.message( _T("VERA is busy, be patient. (returned {0})").format(textStatus) , "warning");
+				PageMessage.message( _T("Controller {0} is busy, be patient.").format(_upnpHelper.getIpAddr()) , "warning");
 			});
 		return jqxhr;
 	};
@@ -704,7 +691,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 					}
 				} else {
 					_categories = null;
-					PageMessage.message( _T("VERA is busy, be patient. (returned {0})").format(textStatus) , "warning");
+					PageMessage.message( _T("Controller {0} is busy, be patient.").format(_upnpHelper.getIpAddr()) , "warning");
 				}
 			});
 		} else {
@@ -913,7 +900,9 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 
 	function _refreshEngine() {
-		var jqxhr = _httpGet("?id=lu_status2&output_format=json&DataVersion="+_status_data_DataVersion+"&Timeout=60&MinimumDelay=1500",
+		var jqxhr = _httpGet("?id=lu_status2&output_format=json&DataVersion="+_status_data_DataVersion+"&Timeout={0}&MinimumDelay=1500".format(
+				(_uniqID==0 ? 60 : 5 )			// cannot afford to wait 60 sec in the LUA handler for Proxied units
+			),
 			{beforeSend: function(xhr) { xhr.overrideMimeType('text/plain'); }},
 			function(data, textStatus, jqXHR)
 			{
@@ -954,11 +943,11 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 						_initDataEngine();
 					}
 					else {
-						setTimeout( _refreshEngine, 100 );
+						setTimeout( _refreshEngine, (_uniqID==0 ? 100 : 300 ) );
 					}
 				}
 				else {
-						// PageMessage.message( _T("VERA is busy, be patient. (returned {0})").format(textStatus) , "warning");
+						PageMessage.message( _T("Controller {0} is busy, be patient.").format(_upnpHelper.getIpAddr()) , "warning");
 						setTimeout( _refreshEngine, 1000 );
 				}
 			}
@@ -1067,7 +1056,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 				}
 				else {
 					_dataEngine = setTimeout( _initDataEngine, 2000 );
-					PageMessage.message( _T("VERA did not respond") + ": " + textStatus , "danger");
+					PageMessage.message( _T("Controller {0} did not respond").format(_upnpHelper.getIpAddr() ) + ", textStatus: " + textStatus , "danger");
 				}
 			})
 			.always(function() {

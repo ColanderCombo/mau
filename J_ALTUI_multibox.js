@@ -14,7 +14,7 @@ var MultiBox = ( function( window, undefined ) {
 	var _devicetypesDB = {};
 	var _controllers = [
 		{ ip:''			  ,  controller:null },		// no IP = primary box on which we opened the web page
-		// { ip:'192.168.1.5',  controller:null }		// no IP = primary box on which we opened the web page
+		{ ip:'192.168.1.5',  controller:null }		// no IP = primary box on which we opened the web page
 		//http://192.168.1.16:3480/luvd/S_IPhone.xml
 		//http://192.168.1.16:3480/data_request?id=device
 		//http://192.168.1.16/port_3480/data_request?id=action&output_format=json&DeviceNum=162&serviceId=urn:upnp-org:serviceId:altui1&action=ProxyGet&newUrl=http://192.168.1.5/port_3480/data_request?id=lu_status2&output_format=json&DataVersion=1&Timeout=60&MinimumDelay=1500&resultName=alexis
