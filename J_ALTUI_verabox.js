@@ -201,9 +201,9 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 	};
 	function _UPnPGetFile( devicefile, cbfunc )
 	{
-		var mimetype ;
+		var mimetype = "text/plain" ;
 		var lastfour = devicefile.slice(-4);
-		if (lastfour==".xml")
+		if ( (lastfour==".xml") && (_veraidx==0) )
 			mimetype = "text/xml";
 		
 		return _exec( _buildUPnPGetFileUrl( devicefile), function(data,jqXHR) {
