@@ -139,14 +139,19 @@ var MultiBox = ( function( window, undefined ) {
 	function _getRoomsSync() {
 		return _controllers[0].controller.getRoomsSync();
 	};
-	function _getRoomByID( roomid ) {
-		return _controllers[0].controller.getRoomByID( roomid );
+	function _getRoomByID( controllerid, roomid ) {
+		return _controllers[controllerid].controller.getRoomByID( roomid );
 	};
-	function _deleteRoom(id) {
-		return _controllers[0].controller.deleteRoom(id);
+	function _getRoomByAltuiID( altuiid ) {
+		var elems = altuiid.split("-");
+		return _controllers[ elems[0] ].controller.getRoomByID( elems[1] );
 	};
-	function _createRoom(name) {
-		return _controllers[0].controller.createRoom(name);
+	function _deleteRoom(room) {
+		var elems = room.altuiid.split("-");
+		return _controllers[elems[0]].controller.deleteRoom(elems[1]);
+	};
+	function _createRoom(controllerid, name) {
+		return _controllers[controllerid].controller.createRoom(name);
 	};
 	function _createDevice( controllerid, param , cbfunc ) {
 		var id = controllerid || 0;
@@ -405,10 +410,10 @@ var MultiBox = ( function( window, undefined ) {
 	// Rooms
 	getRooms		: _getRooms,		// in the future getRooms could cache the information and only call _getRooms when needed
 	getRoomsSync	: _getRoomsSync,	//()
-	deleteRoom		: _deleteRoom,		//(id)
-	createRoom		: _createRoom,		//(name)
+	deleteRoom		: _deleteRoom,		//(room)
+	createRoom		: _createRoom,		//(controllerid, name)
 	getRoomByID		: _getRoomByID,		//( roomid )
-		
+	getRoomByAltuiID:_getRoomByAltuiID,	//(altuiid)	
 	// Devices
 	createDevice			: _createDevice,			// ( param , cbfunc )
 	deleteDevice			: _deleteDevice,			// id
@@ -424,16 +429,16 @@ var MultiBox = ( function( window, undefined ) {
 	getDeviceDependants		: _getDeviceDependants,		// (device)
 	getDeviceBatteryLevel 	: _getDeviceBatteryLevel,	// ( device )
 	getDeviceVariableHistory : _getDeviceVariableHistory,//( device, varidx, cbfunc) 
-	evaluateConditions 		: _evaluateConditions,		// ( deviceid,devsubcat,conditions ) evaluate a device condition table ( AND between conditions )
+	evaluateConditions 		: _evaluateConditions,		// ( device,devsubcat,conditions ) evaluate a device condition table ( AND between conditions )
 	getStates				: _getStates,
-	getStatus				: _getStatus,				// ( deviceid, service, variable ) 
-	setStatus				: _setStatus,				// ( deviceid, service, variable, value, dynamic )				
+	getStatus				: _getStatus,				// ( device, service, variable ) 
+	setStatus				: _setStatus,				// ( device, service, variable, value, dynamic )				
 	getJobStatus			: _getJobStatus,			// (  jobid , cbfunc )
-	setAttr					: _setAttr,					// ( deviceID, attribute, value,function(result) )
-	runAction				: _runAction,				// (deviceid, service, action, params,cbfunc);
-	runActionByAltuiID		: _runActionByAltuiID,		//
+	setAttr					: _setAttr,					// ( device, attribute, value,function(result) )
+	runAction				: _runAction,				// (device, service, action, params,cbfunc);
+	runActionByAltuiID		: _runActionByAltuiID,		// (altuiid, service, action, params,cbfunc) 
 	isDeviceZwave			: _isDeviceZwave,			// (device)
-	updateNeighbors			: _updateNeighbors,			// (deviceid)
+	updateNeighbors			: _updateNeighbors,			// (device)
 	
 	//Alias
 	setOnOff				: function ( altuiid, onoff) {

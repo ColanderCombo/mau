@@ -4407,7 +4407,7 @@ var UIManager  = ( function( window, undefined ) {
 		var actiondescriptor = (status==1) ? widget.properties.action_off : widget.properties.action_on;
 		if (widget.properties.inverted)
 			status = 1-status;
-		MultiBox.runAction( widget.properties.deviceid, actiondescriptor.service, actiondescriptor.action, actiondescriptor.params);
+		MultiBox.runAction( device, actiondescriptor.service, actiondescriptor.action, actiondescriptor.params);
 	};
 	
 	// ------------------------------------------
@@ -4689,16 +4689,19 @@ var UIManager  = ( function( window, undefined ) {
 
 		var roomListTemplate = "<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>";	
 		MultiBox.getRooms( function( idx, room) {
-			var id = room.id;
+			var id = room.altuiid;
 			var delButtonHtml = smallbuttonTemplate.format( id, 'altui-delroom', deleteGlyph);
 			$(".altui-mainpanel tbody").append( roomListTemplate.format(id,(room!=null) ? room.name : "No Room",delButtonHtml) );
 			
 			// install click handler for buttons
 			$("button.altui-delroom#"+id).click( function(event) {
 				var id = $(this).prop('id');
+				var room = MultiBox.getRoomByAltuiID(id);
+				var tr = $(this).closest("tr");
 				DialogManager.confirmDialog(_T("Are you sure you want to delete room")+" ("+id+")",function(result) {
 					if (result==true) {
-						MultiBox.deleteRoom( id );
+						$(tr).remove();
+						MultiBox.deleteRoom( room );
 					}
 				})
 			});
@@ -4707,7 +4710,7 @@ var UIManager  = ( function( window, undefined ) {
 		// $(".altui-mainpanel").off("click","button#altui-create-room");
 		$(".altui-mainpanel").on("click","button#altui-create-room",function() 
 		{
-			MultiBox.createRoom( $("#altui-create-room-name").val() );
+			MultiBox.createRoom(0,$("#altui-create-room-name").val() );
 		});
 
 	},

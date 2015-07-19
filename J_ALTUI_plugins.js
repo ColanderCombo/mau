@@ -92,7 +92,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	//---------------------------------------------------------
 	function _toggleButton(altuiid, htmlselector, service, variable, cbfunc) {
 		//'#altui-onoffbtn-'+devid
-		var device = MultiBox._getDeviceByAltuiID(altuiid);
+		var device = MultiBox.getDeviceByAltuiID(altuiid);
 		var status = MultiBox.getStatus( device, service, variable );
 		if ($.isNumeric(status))
 		{
@@ -247,7 +247,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		
 		// on off 
 		html += "<script type='text/javascript'>";
-		html += "$('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleOnOffButton({0},'div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
+		html += "$('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleOnOffButton('{0}','div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
 		html += "$('div.altui-dimmable-slider#slider-{0}').slider({ max:100,min:0,value:{1},change:ALTUI_PluginDisplays.onSliderChange });".format(device.altuiid,level);
 		html += "</script>";
 		
@@ -271,7 +271,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			html+= "<div class='altui-lasttrip-text text-muted'>{0} {1}</div>".format( timeGlyph,lasttripdate );
 		}
 		html += "<script type='text/javascript'>";
-		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleDoorLock({0},'div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
+		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleDoorLock('{0}','div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
 		html += "</script>";
 		return html;
 	};
@@ -309,7 +309,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		}
 		// armed
 		html += "<script type='text/javascript'>";
-		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleArmed({0},'div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
+		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleArmed('{0}','div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
 		html += "</script>";
 		return html;
 	};
@@ -329,7 +329,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		html += _createOnOffButton( status,"altui-onoffbtn-"+device.altuiid, _T("OFF,ON") , "pull-right");
 		
 		html += "<script type='text/javascript'>";
-		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleOnOffButton({0},'div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
+		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleOnOffButton('{0}','div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
 		html += "</script>";
 		return html;
 	};

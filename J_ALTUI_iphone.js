@@ -27,7 +27,7 @@ var ALTUI_IPhoneLocator= ( function( window, undefined ) {
 		var html ="";
 		html += ALTUI_PluginDisplays.createOnOffButton( debug,"altui-onoffbtn-"+device.altuiid, _T("Normal,Debug") , "pull-right");
 		html += "<script type='text/javascript'>";
-		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_IPhoneLocator.toggleDebug({0},'div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
+		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_IPhoneLocator.toggleDebug('{0}','div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
 		html += "</script>";
 		
 		return html;
@@ -45,7 +45,7 @@ var ALTUI_IPhoneLocator= ( function( window, undefined ) {
 
 		html += ALTUI_PluginDisplays.createOnOffButton( mute,"altui-onoffbtn-"+device.altuiid, _T("Unmuted,Muted") , "pull-right");
 		html += "<script type='text/javascript'>";
-		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_IPhoneLocator.toggleMute({0},'div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
+		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_IPhoneLocator.toggleMute('{0}','div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
 		html += "</script>";
 		
 		return html;
@@ -60,7 +60,7 @@ var ALTUI_IPhoneLocator= ( function( window, undefined ) {
 			html+=("<div class='altui-canalplus' >{0}</div><span><small>{1}</small></span>".format(channel[1],channel[0]));
 
 		html += "<script type='text/javascript'>";
-		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_IPhoneLocator.toggleCplusOnOff({0},'div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
+		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_IPhoneLocator.toggleCplusOnOff('{0}','div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
 		html += "</script>";
 		return html;
 	};
@@ -117,17 +117,17 @@ html+="<tr><td><button class='altui-cplus-button btn btn-default' id='VOL-'>VOL-
 	// drawControlPanel : _drawControlPanel,
 	toggleDebug : function (devid,htmlid) {
 		ALTUI_PluginDisplays.toggleButton(devid, htmlid, 'urn:upnp-org:serviceId:altui1', 'Debug', function(id,newval) {
-			MultiBox.runAction( devid, 'urn:upnp-org:serviceId:altui1', 'SetDebug', {newDebugMode:newval} );
+			MultiBox.runActionByAltuiID ( devid, 'urn:upnp-org:serviceId:altui1', 'SetDebug', {newDebugMode:newval} );
 		});
 	},
 	toggleMute : function (devid,htmlid) {
 		ALTUI_PluginDisplays.toggleButton(devid, htmlid, 'urn:upnp-org:serviceId:IPhoneLocator1', 'Muted', function(id,newval) {
-			MultiBox.runAction( devid, 'urn:upnp-org:serviceId:IPhoneLocator1', 'SetMute', {newMuteStatus:newval} );
+			MultiBox.runActionByAltuiID( devid, 'urn:upnp-org:serviceId:IPhoneLocator1', 'SetMute', {newMuteStatus:newval} );
 		});
 	},
 	toggleCplusOnOff : function (devid,htmlid) {
 		ALTUI_PluginDisplays.toggleButton(devid, htmlid, 'urn:upnp-org:serviceId:cplus1', 'Present', function(id,newval) {
-			MultiBox.runAction( devid, 'urn:upnp-org:serviceId:cplus1', 'SetPower', {newPowerState:newval} );
+			MultiBox.runActionByAltuiID( devid, 'urn:upnp-org:serviceId:cplus1', 'SetPower', {newPowerState:newval} );
 		});
 	},
 	};

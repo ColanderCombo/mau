@@ -2377,9 +2377,6 @@ var api = {
 		.always(function() {
 		});
 	},
-	getRoomObject: function(roomId) {
-		return _getRoomByID(roomId);
-	},
 	getSceneDescription: function(sceneId, options) {
 		var scene = this.getSceneByID(sceneId);
 		return JSON.stringify(scene);
