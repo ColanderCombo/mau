@@ -215,6 +215,7 @@ var MultiBox = ( function( window, undefined ) {
 		return _controllers[elems[0]].controller.getDeviceActions(device,cbfunc);
 	};
 	function _getDeviceEvents(device) {
+		if (device==null) return [];
 		var elems = device.altuiid.split("-");
 		return _controllers[elems[0]].controller.getDeviceEvents(device);
 	};

@@ -774,7 +774,7 @@ var DialogManager = ( function() {
 	function _dlgAddDevices(dialog, deviceid, cbfunc, filterfunc)
 	{
 		var select = $("<select id='altui-select-device' class='form-control'></select>");
-		select.append("<option value='0' {0}>Select ...</option>".format( deviceid==0? 'selected' : ''));
+		select.append("<option value='0' {0}>Select ...</option>".format( deviceid==NULL_DEVICE ? 'selected' : ''));
 		MultiBox.getDevices( 
 			function(idx,device) {
 				select.append('<option value={0} {2}>{1}</option>'.format( device.altuiid, device.name, deviceid==device.altuiid ? 'selected' : ''));
@@ -797,7 +797,7 @@ var DialogManager = ( function() {
 	function _dlgAddScenes(dialog, widget, cbfunc)
 	{
 		var select = $("<select id='altui-widget-sceneid' class='form-control'></select>");
-		select.append("<option value='0' {0}>Select ...</option>".format( widget.properties.sceneid==0? 'selected' : ''));
+		select.append("<option value='0' {0}>Select ...</option>".format( widget.properties.sceneid==NULL_SCENE ? 'selected' : ''));
 		MultiBox.getScenes( 
 			function(idx, scene) {
 				select.append('<option value={0} {2}>{1}</option>'.format( scene.altuiid, scene.name, widget.properties.sceneid==scene.altuiid ? 'selected' : ''));				
@@ -1125,8 +1125,8 @@ var SceneEditor = function (scene) {
 		var dialog = DialogManager.createPropertyDialog(_T('Trigger'));
 		var device = MultiBox.getDeviceByID( scenecontroller,trigger.device);
 		DialogManager.dlgAddLine( dialog , "TriggerName", _T("TriggerName"), trigger.name, "", {required:''} ); 
-		DialogManager.dlgAddDevices( dialog , device.altuiid, function() {
-			DialogManager.dlgAddEvents( dialog, "Events", "altui-select-events",device.altuiid , trigger.template, trigger.arguments );
+		DialogManager.dlgAddDevices( dialog , device ? device.altuiid : NULL_DEVICE, function() {
+			DialogManager.dlgAddEvents( dialog, "Events", "altui-select-events",device ? device.altuiid : NULL_DEVICE , trigger.template, trigger.arguments );
 			$('div#dialogModal').modal();
 		});
 		
@@ -1457,7 +1457,7 @@ var SceneEditor = function (scene) {
 		
 		var dialog = DialogManager.createPropertyDialog(_T('Action'));
 		var device = MultiBox.getDeviceByID(scenecontroller,action.device);
-		DialogManager.dlgAddDevices( dialog , device.altuiid, function() {
+		DialogManager.dlgAddDevices( dialog , device ? device.altuiid : NULL_DEVICE , function() {
 			var widget = {
 				properties: {
 					deviceid: device.altuiid,
