@@ -7287,7 +7287,7 @@ var UIManager  = ( function( window, undefined ) {
 				
 				var cols = [ 
 					{ name:'id', visible: $.inArray('id',viscols)!=-1, type:'numeric', identifier:true, width:50 },
-					{ name:'altuid', visible: $.inArray('altuid',viscols)!=-1, type:'string', identifier:true, width:80 },
+					{ name:'altuiid', visible: $.inArray('altuiid',viscols)!=-1, type:'string', identifier:true, width:80 },
 					{ name:'altid', visible: $.inArray('altid',viscols)!=-1, type:'string', identifier:true, width:50 },
 					{ name:'id_parent', visible: $.inArray('id_parent',viscols)!=-1, type:'numeric', identifier:true, width:80 },
 					{ name:'manufacturer', visible: $.inArray('manufacturer',viscols)!=-1, type:'string', identifier:true, width:120 },
