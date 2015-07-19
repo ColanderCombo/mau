@@ -564,7 +564,7 @@ var PageManager = (function() {
 var IconDB = ( function (window, undefined) {
 	var _dbIcon = null;
 	
-	function _getIconContent( name , cbfunc ) {
+	function _getIconContent( controllerid, name , cbfunc ) {
 		if (_dbIcon == null) {
 			_dbIcon = MyLocalStorage.get("IconDB");
 			if (_dbIcon==null)
@@ -578,7 +578,7 @@ var IconDB = ( function (window, undefined) {
 		// if undefined and not yet started to fetch, then go fetch it
 		if (_dbIcon[name]==undefined) {
 			_dbIcon[name]="pending"
-			MultiBox.getIcon( name, function(data) {
+			MultiBox.getIcon(controllerid,  name, function(data) {
 				
 				// store in cache and call callback
 				_dbIcon[name]=data;
@@ -593,7 +593,7 @@ var IconDB = ( function (window, undefined) {
 	};
 	
 	return {
-		getIconContent  : _getIconContent,
+		getIconContent  : _getIconContent,	// ( controllerid, name , cbfunc ) 
 		isDB			: function()	{ 	return MyLocalStorage.get("IconDB")!=null;			},
 		saveDB			: function() 	{	MyLocalStorage.set("IconDB", _dbIcon);	  	},
 		resetDB			: function() 	{	MyLocalStorage.clear("IconDB"); _dbIcon = {}; }
@@ -603,7 +603,7 @@ var IconDB = ( function (window, undefined) {
 var FileDB = ( function (window, undefined) {
 	var _dbFile = null;
 	
-	function _getFileContent( name, cbfunc ) {
+	function _getFileContent( controllerid, name, cbfunc ) {
 		AltuiDebug.debug("_getFileContent( {0} )".format(name));
 		if (_dbFile == null) {
 			_dbFile = MyLocalStorage.get("FileDB");
@@ -628,8 +628,8 @@ var FileDB = ( function (window, undefined) {
 			_dbFile[name]="pending";
 			// console.log("getting file "+name);
 			AltuiDebug.debug("_getFileContent( {0} ) ==> asking content to Vera".format(name));
-			MultiBox.getFileContent( name, function(data,jqXHR) {
-				AltuiDebug.debug("_getFileContent( {0} ) ==> returning async content from Vera".format(name));
+			MultiBox.getFileContent( controllerid, name, function(data,jqXHR) {
+				AltuiDebug.debug("_getFileContent( {0} ) ==> returning async content from Controller #{1}".format(name,controllerid));
 				_dbFile[name] = data;
 				cbfunc(data,jqXHR);
 			});
@@ -638,7 +638,7 @@ var FileDB = ( function (window, undefined) {
 	};
 	
 	return {
-		getFileContent  : _getFileContent,
+		getFileContent  : _getFileContent,		// ( controllerid, name, cbfunc )
 		isDB			: function()	{ 	return MyLocalStorage.get("FileDB")!=null;			},
 		saveDB			: function(db) 	{	MyLocalStorage.set("FileDB", _dbFile);	  	},
 		resetDB			: function(db) 	{	MyLocalStorage.clear("FileDB"); _dbFile = {}; }

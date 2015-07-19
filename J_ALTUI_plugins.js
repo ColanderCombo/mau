@@ -90,21 +90,22 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	//---------------------------------------------------------
 	// PRIVATE functions
 	//---------------------------------------------------------
-	function _toggleButton(devid, htmlselector, service, variable, cbfunc) {
+	function _toggleButton(altuiid, htmlselector, service, variable, cbfunc) {
 		//'#altui-onoffbtn-'+devid
-		var status = MultiBox.getStatus( devid, service, variable );
+		var device = MultiBox._getDeviceByAltuiID(altuiid);
+		var status = MultiBox.getStatus( device, service, variable );
 		if ($.isNumeric(status))
 		{
 			status = parseInt( status );
 			if (status>0)		// special case of dimmer
 				status=1;
 			$(htmlselector).removeClass("on").addClass("spinner");
-			cbfunc(devid, 1-status);
+			cbfunc(device, 1-status);
 		}
 	}
 	
 	// return the html string inside the .panel-body of the .altui-device#id panel
-	function _drawCamera(devid, device) {
+	function _drawCamera( device) {
 		var video = MyLocalStorage.getSettings('ShowVideoThumbnail') || "";
 
 		if ( MultiBox.isRemoteAccess() || (video==false) ) {
@@ -117,7 +118,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		} else {
 			var streamurl = "url(http://{0}{1})".format(
 				device.ip,	//ip
-				MultiBox.getStatus( device.id, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" )	//DirectStreamingURL
+				MultiBox.getStatus( device, "urn:micasaverde-com:serviceId:Camera1", "DirectStreamingURL" )	//DirectStreamingURL
 			);
 			var div = $("<div class='altui-camera-picture'></div>")
 				.css({
@@ -134,26 +135,26 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	}
 	
 	// return the html string inside the .panel-body of the .altui-device#id panel
-	function _drawTempSensor(devid, device) {
+	function _drawTempSensor( device) {
 		var html = "";
 		var ws = MultiBox.getWeatherSettings();
 		if (ws.tempFormat==undefined)
 			ws.tempFormat="";
 		
-		var status = parseFloat(MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:TemperatureSensor1', 'CurrentTemperature' )); 
+		var status = parseFloat(MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSensor1', 'CurrentTemperature' )); 
 		html += ("<span class='altui-temperature' >"+status+"&deg;"+ws.tempFormat+"</span>");
 		return html;
 	}
 	
-	function _drawHeater(devid, device) {
+	function _drawHeater( device) {
 		var html = "";
 		var ws = MultiBox.getWeatherSettings();
 		if (ws.tempFormat==undefined)
 			ws.tempFormat="";
 		
-		var status = MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:TemperatureSensor1', 'CurrentTemperature' ); 
-		var heatsetpoint = MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Heat', 'CurrentSetpoint' ); 
-		var coldsetpoint = MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Cool', 'CurrentSetpoint' ); 
+		var status = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSensor1', 'CurrentTemperature' ); 
+		var heatsetpoint = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Heat', 'CurrentSetpoint' ); 
+		var coldsetpoint = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Cool', 'CurrentSetpoint' ); 
 		html += ("<span class='altui-temperature' >"+((status!=null) ? (status+"&deg;"+ws.tempFormat) : "--") +"</span>");
 		if (heatsetpoint!=null) {
 			html += ("<span class='altui-temperature altui-red' > / "+heatsetpoint+"&deg;"+ws.tempFormat+"</span>");
@@ -165,16 +166,16 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	}
 
 	// return the html string inside the .panel-body of the .altui-device#id panel
-	function _drawHumidity(devid, device) {
+	function _drawHumidity( device) {
 		var html = "";
-		var status = parseInt(MultiBox.getStatus( devid, 'urn:micasaverde-com:serviceId:HumiditySensor1', 'CurrentLevel' )); 
+		var status = parseInt(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:HumiditySensor1', 'CurrentLevel' )); 
 		html += ("<span class='altui-humidity' >"+status+" % </span>");
 		return html;
 	};
 	
-	function _drawLight(devid, device) {
+	function _drawLight( device) {
 		var html = "";
-		var status = parseInt(MultiBox.getStatus( devid, 'urn:micasaverde-com:serviceId:LightSensor1', 'CurrentLevel' )); 
+		var status = parseInt(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:LightSensor1', 'CurrentLevel' )); 
 		var unit = (status>100) ? "lux" : "% or lux";
 		html += ("<span class='altui-light' >{0} {1}</span>".format(status,unit));
 		return html;
@@ -185,19 +186,19 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		// http://192.168.1.16/port_3480/data_request?id=action&DeviceNum=26&serviceId=urn:upnp-org:serviceId:WindowCovering1&action=Up
 		// http://192.168.1.16/port_3480/data_request?id=action&DeviceNum=26&serviceId=urn:upnp-org:serviceId:WindowCovering1&action=Down
 		// http://192.168.1.16/port_3480/data_request?id=action&DeviceNum=26&serviceId=urn:upnp-org:serviceId:WindowCovering1&action=Stop
-		var deviceid = e.parent().prop('id').substr("altui-wc-".length);
+		var altuiid = e.closest(".altui-device").data("altuiid");
 		var actionname = e.prop('id').substr("altui-window-".length);
 		if (actionname=="Stop") 
-			MultiBox.runAction( deviceid, "urn:upnp-org:serviceId:WindowCovering1", "Stop", {} );
+			MultiBox.runActionByAltuiID( altuiid, "urn:upnp-org:serviceId:WindowCovering1", "Stop", {} );
 		else
-			MultiBox.runAction( deviceid, "urn:upnp-org:serviceId:Dimming1", "SetLoadLevelTarget", {newLoadlevelTarget: ((actionname=="Up") ? 100 : 0) } );
+			MultiBox.runActionByAltuiID( altuiid, "urn:upnp-org:serviceId:Dimming1", "SetLoadLevelTarget", {newLoadlevelTarget: ((actionname=="Up") ? 100 : 0) } );
 	};
 
-	function _drawWindowCover(devid, device) {
-		var status = MultiBox.getStatus(device.id,"urn:upnp-org:serviceId:Dimming1","LoadLevelStatus");	// 0 - 100
+	function _drawWindowCover( device) {
+		var status = MultiBox.getStatus(device,"urn:upnp-org:serviceId:Dimming1","LoadLevelStatus");	// 0 - 100
 
 		var html = "";
-		html += "<div class='pull-right'><div id='altui-wc-"+device.id+"' class='btn-group altui-windowcover' role='group' aria-label='...'>";
+		html += "<div class='pull-right'><div id='altui-wc-"+device.altuiid+"' class='btn-group altui-windowcover' role='group' aria-label='...'>";
 		html += ("  <button id ='altui-window-Up' type='button' class='altui-window-btn btn btn-default btn-sm {0}'>"+_T("Up")+"</button>").format( (status==100) ? 'active' : '' );
 		html += ("  <button id ='altui-window-Stop' type='button' class='altui-window-btn btn btn-default btn-sm'>"+_T("Stop")+"</button>");
 		html += ("  <button id ='altui-window-Down' type='button' class='altui-window-btn btn btn-default btn-sm {0}'>"+_T("Down")+"</button>").format( (status==0) ? 'active' : '' );
@@ -205,19 +206,19 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		html += "</div>";
 		
 		html += "<script type='text/javascript'>";
-		html += " $('div#altui-wc-{0} button').on('click touchend', function() { ALTUI_PluginDisplays.onClickWindowCoverButton($(this)); } );".format(devid);
+		html += " $('div#altui-wc-{0} button').on('click touchend', function() { ALTUI_PluginDisplays.onClickWindowCoverButton($(this)); } );".format(device.altuiid);
 		html += "</script>";
 		
 		return html;
 	};
 
 	function _onSliderChange(event,ui) {
-		var deviceid = $(ui.handle).parents(".altui-device").prop("id");
-		MultiBox.runAction( deviceid, "urn:upnp-org:serviceId:Dimming1", "SetLoadLevelTarget", {newLoadlevelTarget:ui.value} );
+		var altuiid = $(ui.handle).closest(".altui-device").data("altuiid");
+		MultiBox.runActionByAltuiID ( altuiid, "urn:upnp-org:serviceId:Dimming1", "SetLoadLevelTarget", {newLoadlevelTarget:ui.value} );
 	};
 
 	// return the html string inside the .panel-body of the .altui-device#id panel
-	function _drawDimmable(devid, device) {
+	function _drawDimmable( device) {
 
 		var html = "";
 		var onebody = $(".altui-device-body");
@@ -225,186 +226,183 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var bodywidth=$(".altui-device-body").first().width();
 		
 		// load level
-		var level = parseInt(MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:Dimming1', 'LoadLevelTarget' )); 
+		var level = parseInt(MultiBox.getStatus( device, 'urn:upnp-org:serviceId:Dimming1', 'LoadLevelTarget' )); 
 		if (isNaN(level)==true) 
-			level = parseInt(MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:Dimming1', 'LoadLevelStatus' )); 
+			level = parseInt(MultiBox.getStatus( device, 'urn:upnp-org:serviceId:Dimming1', 'LoadLevelStatus' )); 
 		
-		html += ("<span id='slider-val-"+devid+"' class='altui-dimmable' >"+level+"% </span>");
+		html += ("<span id='slider-val-"+device.altuiid+"' class='altui-dimmable' >"+level+"% </span>");
 
 		// on off button
-		var status = parseInt(MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status' )); 
+		var status = parseInt(MultiBox.getStatus( device, 'urn:upnp-org:serviceId:SwitchPower1', 'Status' )); 
 		// if ( (device.status==1) || (device.status==5) )  {  
 		// if ( level != status )  {  
 		// if ( ( ( device.Jobs != null ) && ( device.Jobs.length>0) ) || (device.status==1) || (device.status==5) ) {  
 		if (_isBusyStatus(device))  {  
 			status = -1;
 		}
-		html += _createOnOffButton( status,"altui-onoffbtn-"+devid , _T("OFF,ON") , "pull-right");
+		html += _createOnOffButton( status,"altui-onoffbtn-"+device.altuiid , _T("OFF,ON") , "pull-right");
 		
 		// dimming
-		html+=("<div id='slider-{0}' class='altui-dimmable-slider' style='width: "+sliderwidth+"px;' ></div>").format(devid);
+		html+=("<div id='slider-{0}' class='altui-dimmable-slider' style='width: "+sliderwidth+"px;' ></div>").format(device.altuiid);
 		
 		// on off 
 		html += "<script type='text/javascript'>";
-		html += "$('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleOnOffButton({0},'div#altui-onoffbtn-{0}'); } );".format(devid);
-		// html += "$('div.altui-dimmable-slider#slider-{0}').slider();".format(devid,level);
-		html += "$('div.altui-dimmable-slider#slider-{0}').slider({ max:100,min:0,value:{1},change:ALTUI_PluginDisplays.onSliderChange });".format(devid,level);
+		html += "$('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleOnOffButton({0},'div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
+		html += "$('div.altui-dimmable-slider#slider-{0}').slider({ max:100,min:0,value:{1},change:ALTUI_PluginDisplays.onSliderChange });".format(device.altuiid,level);
 		html += "</script>";
 		
-		$(".altui-mainpanel").off("slide","#slider-"+devid);
-		$(".altui-mainpanel").on("slide","#slider-"+devid,function( event, ui ){ 
-			// console.log(ui.value);
-			// console.log(devid);
-			$("#slider-val-"+devid).text( ui.value+'%');
+		$(".altui-mainpanel").off("slide","#slider-"+device.altuiid);
+		$(".altui-mainpanel").on("slide","#slider-"+device.altuiid,function( event, ui ){ 
+			$("#slider-val-"+device.altuiid).text( ui.value+'%');
 		});
 		
 		return html;
 	};
 
 	// return the html string inside the .panel-body of the .altui-device#id panel
-	function _drawDoorLock(devid, device) {
-		var status = MultiBox.getStatus( devid, 'urn:micasaverde-com:serviceId:DoorLock1', 'Status' );
+	function _drawDoorLock( device) { 
+		var status = MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:DoorLock1', 'Status' );
 		var html ="";
-		html += ALTUI_PluginDisplays.createOnOffButton( status,"altui-onoffbtn-"+devid, _T("Unlock,Lock") , "pull-right");
+		html += ALTUI_PluginDisplays.createOnOffButton( status,"altui-onoffbtn-"+device.altuiid, _T("Unlock,Lock") , "pull-right");
 		
-		var lasttrip = MultiBox.getStatus( devid, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'LastTrip' );
+		var lasttrip = MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'LastTrip' );
 		if (lasttrip != null) {
 			var lasttripdate = _toIso(new Date(lasttrip*1000),' ');
 			html+= "<div class='altui-lasttrip-text text-muted'>{0} {1}</div>".format( timeGlyph,lasttripdate );
 		}
 		html += "<script type='text/javascript'>";
-		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleDoorLock({0},'div#altui-onoffbtn-{0}'); } );".format(devid);
+		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleDoorLock({0},'div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
 		html += "</script>";
 		return html;
 	};
 	
 	// return the html string inside the .panel-body of the .altui-device#id panel
-	function _drawDoorSensor(devid, device) {
-		return _drawMotion(devid, device);
+	function _drawDoorSensor( device) {
+		return _drawMotion( device);
 	};
 
 	// return the html string inside the .panel-body of the .altui-device#id panel
-	function _drawSmoke(devid, device) {
-		return _drawMotion(devid, device);
+	function _drawSmoke( device) {
+		return _drawMotion( device);
 	};
 	
 	// return the html string inside the .panel-body of the .altui-device#id panel
-	function _drawMotion(devid, device) {
+	function _drawMotion( device) {
 		var html = "";
 		
 		// armed, tripped
-		var tripped = parseInt(MultiBox.getStatus( devid, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Tripped' )); 
+		var tripped = parseInt(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Tripped' )); 
 		html += ("<span class='altui-motion' >{0}</span>".format( (tripped==true) ? "<span class='glyphicon glyphicon-flash text-danger' aria-hidden='true'></span>" : ""));
 
 		// armed button
-		// var status = parseInt(MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status' )); 
+		// var status = parseInt(MultiBox.oldgetStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status' )); 
 		// if ( ( ( device.Jobs != null ) && ( device.Jobs.length>0) ) || (device.status==1) || (device.status==5) ) {  
 			// status = -1;
 		// }
-		var armed = parseInt(MultiBox.getStatus( devid, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Armed' )); 
-		html += _createOnOffButton( armed,"altui-onoffbtn-"+devid, _T("Bypass,Arm"), "pull-right" );
+		var armed = parseInt(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Armed' )); 
+		html += _createOnOffButton( armed,"altui-onoffbtn-"+device.altuiid, _T("Bypass,Arm"), "pull-right" );
 		
-		var lasttrip = MultiBox.getStatus( devid, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'LastTrip' );
+		var lasttrip = MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'LastTrip' );
 		if (lasttrip != null) {
 			var lasttripdate = _toIso(new Date(lasttrip*1000),' ');
 			html+= "<div class='altui-lasttrip-text text-muted'>{0} {1}</div>".format( timeGlyph,lasttripdate );
 		}
 		// armed
 		html += "<script type='text/javascript'>";
-		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleArmed({0},'div#altui-onoffbtn-{0}'); } );".format(devid);
+		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleArmed({0},'div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
 		html += "</script>";
 		return html;
 	};
 	
 	// return the html string inside the .panel-body of the .altui-device#id panel
 	
-	function _drawBinaryLight(devid, device) {
+	function _drawBinaryLight( device) {
 		var html ="";
-		html += UIManager.defaultDeviceDrawWatts(devid, device);
+		html += UIManager.defaultDeviceDrawWatts( device);
 
-		var status = parseInt(MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status' )); 
+		var status = parseInt(MultiBox.getStatus( device, 'urn:upnp-org:serviceId:SwitchPower1', 'Status' )); 
 		// if ( ( ( device.Jobs != null ) && ( device.Jobs.length>0) ) || (device.status==1) || (device.status==5) ) {  
 		// if ( (device.status==1) || (device.status==5))  {  
 		if ( _isBusyStatus(device) )  {  
 			status = -1;
 		}
-		html += _createOnOffButton( status,"altui-onoffbtn-"+devid, _T("OFF,ON") , "pull-right");
+		html += _createOnOffButton( status,"altui-onoffbtn-"+device.altuiid, _T("OFF,ON") , "pull-right");
 		
 		html += "<script type='text/javascript'>";
-		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleOnOffButton({0},'div#altui-onoffbtn-{0}'); } );".format(devid);
+		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleOnOffButton({0},'div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
 		html += "</script>";
 		return html;
 	};
 
-	function _drawPowerMeter(devid, device) {
+	function _drawPowerMeter( device) {
 		var html ="";
 		var wattTemplate = "<div class='altui-watts '>{0} <small>Watts</small></div>";		
-		var watts = parseFloat(MultiBox.getStatus( devid, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'Watts' )); 
+		var watts = parseFloat(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'Watts' )); 
 		if (isNaN(watts)==false) 
 			html += wattTemplate.format(watts);
 		var voltTemplate = "<div class='altui-volts '>{0} <small>Volts</small></div>";
-		var volts = parseFloat(MultiBox.getStatus( devid, 'urn:brultech-com:serviceId:PowerMeter1', 'Volts' ));
+		var volts = parseFloat(MultiBox.getStatus( device, 'urn:brultech-com:serviceId:PowerMeter1', 'Volts' ));
 		if (isNaN(volts)==false) 
 			html += voltTemplate .format(volts);
 		return html;
 	};
 	
-	function _drawCountDown(devid, device) {
+	function _drawCountDown( device) {
 		var html ="";
-		var remaining = parseInt(MultiBox.getStatus( devid, 'urn:futzle-com:serviceId:CountdownTimer1', 'Remaining' ));
-		var duration = parseInt(MultiBox.getStatus( devid, 'urn:futzle-com:serviceId:CountdownTimer1', 'Duration' ));
+		var remaining = parseInt(MultiBox.getStatus( device, 'urn:futzle-com:serviceId:CountdownTimer1', 'Remaining' ));
+		var duration = parseInt(MultiBox.getStatus( device, 'urn:futzle-com:serviceId:CountdownTimer1', 'Duration' ));
 		html+= "<div class='altui-countdown'>{0} / {1}</div>".format( remaining , duration );
 		return html;
 	};
 
-	function _drawVacation(devid, device) {
+	function _drawVacation( device) {
 		var html ="";
-		var status = parseInt( MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status') );
-		var expiryDate =  MultiBox.getStatus( devid, 'urn:futzle-com:serviceId:HolidayVirtualSwitch1', 'OverrideExpiryDate');
+		var status = parseInt( MultiBox.getStatus( device, 'urn:upnp-org:serviceId:SwitchPower1', 'Status') );
+		var expiryDate =  MultiBox.getStatus( device, 'urn:futzle-com:serviceId:HolidayVirtualSwitch1', 'OverrideExpiryDate');
 		html+= "<div class='altui-watts '>{0}</div>".format( (status==1) ? _T("Holiday") : _T("Working") );
 		html+= "<div class=''>{0}</div>".format( expiryDate );
 		return html;
 	};
 
-	function _drawWeather(devid, device) {
+	function _drawWeather( device) {
 		var html ="";
-		var condition = MultiBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'Condition');
-		var wind = MultiBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'WindCondition');
+		var condition = MultiBox.getStatus( device, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'Condition');
+		var wind = MultiBox.getStatus( device, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'WindCondition');
 		html+= "<div class='altui-weather-text'>{0}</div>".format( condition );
 		html+= ("<div class='altui-weather-text'>"+_T("Wind")+": {0}</div>").format( wind );
 		return html;
 	};
 	
-	function _drawWeatherIcon(devid, device) {
+	function _drawWeatherIcon( device) {
 		var html ="";
-		var conditionGroup = MultiBox.getStatus( devid, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'ConditionGroup');
+		var conditionGroup = MultiBox.getStatus( device, 'urn:upnp-micasaverde-com:serviceId:Weather1', 'ConditionGroup');
 		var newsrc = (conditionGroup!=null) ? "http://icons.wxug.com/i/c/i/"+conditionGroup+".gif" : defaultIconSrc;
 		return "<img class='altui-device-icon pull-left img-rounded' src='"+newsrc+"' alt='"+conditionGroup+"' onerror='UIManager.onDeviceIconError("+device.id+")' ></img>";
 	};
 
-	function _drawDataMine(devid, device) {
+	function _drawDataMine( device) {
 		var html ="";
 		var url = window.location.protocol+'//'+window.location.hostname+"/dm/index.html";
-		html+="<button type='button' class='pull-right altui-datamine-open btn btn-default btn-sm '>"+_T("Open")+"</button>" ;
+		html+= ("<button id='{0}' type='button' class='pull-right altui-datamine-open btn btn-default btn-sm ' >{1}</button>" .format( device.altuiid,_T("Open") )) ;
 		html += "<script type='text/javascript'>";
-		html += " $('div.altui-device#{0} button.altui-datamine-open').on('click', function() { window.open('{1}','_blank'); } );".format(devid,url);
+		html += " $('button.altui-datamine-open#{0}').on('click', function() { window.open('{1}','_blank'); } );".format(device.altuiid,url);
 		html += "</script>";
 		return html;
 	};	
 	
-	function _drawInfoViewer(devid, device) {
+	function _drawInfoViewer( device) {
 		var html ="";
-		var pattern = MultiBox.getStatus( devid, 'urn:a-lurker-com:serviceId:InfoViewer1', 'LuaPattern');
+		var pattern = MultiBox.getStatus( device, 'urn:a-lurker-com:serviceId:InfoViewer1', 'LuaPattern');
 		if (pattern!="")
 			html+= "<span class=''>Pattern: {0}</span>".format( pattern.htmlEncode() );
-		html+="<button type='button' class='pull-right altui-infoviewer-log btn btn-default btn-sm '>"+_T("Open")+"</button>" ;
+		html+= ("<button id='{0}' type='button' class='pull-right altui-infoviewer-log btn btn-default btn-sm '>{1}</button>" .format( device.altuiid,_T("Open") )) ;
 		html += "<script type='text/javascript'>";
-		html += " $('div.altui-device#{0} button.altui-infoviewer-log').on('click', function() { window.open('data_request?id=lr_al_info','_blank'); } );".format(devid);
+		html += " $('button.altui-infoviewer-log#{0}').on('click', function() { window.open('data_request?id=lr_al_info','_blank'); } );".format(device.altuiid);
 		html += "</script>";
 		return html;
 	};	
 	
-	function _drawBinLightControlPanel(devid, device, domparent) {
+	function _drawBinLightControlPanel(device, domparent) {
 
 		var html = "Any thing can go here<hr>";
 		html += "<div class='btn-group btn-group-lg' role='group' aria-label='...'>";
@@ -446,19 +444,19 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawInfoViewer  : _drawInfoViewer,
 	drawDataMine 	: _drawDataMine,
 	toggleButton    : _toggleButton,
-	toggleOnOffButton : function (devid,htmlid) {
-		_toggleButton(devid, htmlid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status', function(id,newval) {
-			MultiBox.setOnOff( devid, newval);
+	toggleOnOffButton : function (altuiid,htmlid) {
+		_toggleButton(altuiid, htmlid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status', function(id,newval) {
+			MultiBox.setOnOff( altuiid, newval);
 		});
 	},
-	toggleArmed : function (devid,htmlid) {
-		_toggleButton(devid, htmlid,'urn:micasaverde-com:serviceId:SecuritySensor1', 'Armed', function(id,newval) {
-			MultiBox.setArm( devid, newval);
+	toggleArmed : function (altuiid,htmlid) {
+		_toggleButton(altuiid, htmlid,'urn:micasaverde-com:serviceId:SecuritySensor1', 'Armed', function(id,newval) {
+			MultiBox.setArm( altuiid, newval);
 		});
 	},
-	toggleDoorLock : function (devid, htmlid) {
-		_toggleButton(devid, htmlid,'urn:micasaverde-com:serviceId:DoorLock1', 'Status', function(id,newval) {
-			MultiBox.setDoorLock( devid, newval);
+	toggleDoorLock : function (altuiid, htmlid) {
+		_toggleButton(altuiid, htmlid,'urn:micasaverde-com:serviceId:DoorLock1', 'Status', function(id,newval) {
+			MultiBox.setDoorLock( altuiid, newval);
 		});
 	}
   };

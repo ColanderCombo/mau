@@ -21,8 +21,9 @@ var MultiBox = ( function( window, undefined ) {
 		//http://192.168.1.5/port_3480/data_request?id=lu_status2&output_format=json&DataVersion=1&Timeout=60&MinimumDelay=1500
 	];
 	
-	function _controllerOf(devid) {
-		return _controllers[0].controller;
+	function _controllerOf(altui) {
+		var elems = altui.split("-");
+		return { controller:elems[0] , id:elems[1] };
 	};
 	
 	function _initDB(devicetypes) {
@@ -35,7 +36,7 @@ var MultiBox = ( function( window, undefined ) {
 		};
 		$.extend(true,_devicetypesDB[devtype],obj);
 	};
-	function _updateDeviceTypeUPnpDB( devtype, Dfilename )	{
+	function _updateDeviceTypeUPnpDB( controllerid, devtype, Dfilename )	{
 		if (_devicetypesDB[devtype]==null) 
 			_devicetypesDB[devtype]={};
 		
@@ -44,7 +45,7 @@ var MultiBox = ( function( window, undefined ) {
 			_devicetypesDB[devtype].Dfilename = Dfilename;
 			
 			// get it into the cache ( or get it from the cache )
-			FileDB.getFileContent(Dfilename , function( xmlstr , jqXHR ) {
+			FileDB.getFileContent(controllerid, Dfilename , function( xmlstr , jqXHR ) {
 				try {
 					var doc = jqXHR ? ((jqXHR.responseXML != undefined) ? jqXHR.responseXML : $.parseXML( xmlstr )) : $.parseXML( xmlstr );
 					
@@ -70,7 +71,7 @@ var MultiBox = ( function( window, undefined ) {
 			}  );
 		}
 	};
-	function _updateDeviceTypeUIDB(devtype, ui_definitions)	{
+	function _updateDeviceTypeUIDB(controllerid, devtype, ui_definitions)	{
 		if (_devicetypesDB[devtype]==null) {
 			_devicetypesDB[devtype]={};
 		};
@@ -147,8 +148,11 @@ var MultiBox = ( function( window, undefined ) {
 	function _createRoom(name) {
 		return _controllers[0].controller.createRoom(name);
 	};
-	function _createDevice( param , cbfunc ) {
-		return _controllers[0].controller.createDevice( param , cbfunc );
+	function _createDevice( controllerid, param , cbfunc ) {
+		var id = controllerid || 0;
+		return _controllers[id].controller.createDevice( param , function(newid) {
+			(cbfunc)("{0}-{1}".format(id,newid));
+		});
 	};
 	function _renameDevice( device, newname, roomid ) {
 		return _controllers[0].controller.renameDevice( device, newname, roomid);
@@ -157,19 +161,34 @@ var MultiBox = ( function( window, undefined ) {
 		return _controllers[0].controller.deleteDevice(id);
 	};
 	function _getDevices( func , filterfunc, endfunc ) {
-		return _controllers[0].controller.getDevices( func , filterfunc, endfunc );
+		var arr=[];
+		$.each(_controllers, function( i,c) {
+			arr = arr.concat(c.controller.getDevices( func , filterfunc, null ));
+		});
+		if ($.isFunction(endfunc))
+			(endfunc)( arr );
+		// return _controllers[0].controller.getDevices( func , filterfunc, endfunc );
 	};
 	function _getDevicesSync() {
-		return _controllers[0].controller.getDevicesSync();
+		var arr=[];
+		$.each(_controllers, function( i,c) {
+			arr = arr.concat(c.controller.getDevicesSync());
+		});
+		return arr;
 	};
 	function _getDeviceBatteryLevel(device) {
 		return _controllers[0].controller.getDeviceBatteryLevel(device);
 	};
-	function _getDeviceByID( devid ) {
-		return _controllers[0].controller.getDeviceByID( devid );
+	function _getDeviceByAltuiID( devid ) {
+		var elems = devid.split("-");
+		return _controllers[ elems[0] ].controller.getDeviceByID( elems[1] );
 	};
-	function _getDeviceByAltID( parentdevid , altid ) {
-		return _controllers[0].controller.getDeviceByAltID( parentdevid , altid );
+	function _getDeviceByID( controllerid , devid ) {
+		return _controllers[controllerid].controller._getDeviceByID( devid );
+	};
+	function _getDeviceByAltID( controllerid, parentdevid , altid ) {
+		var id = controllerid || 0;
+		return _controllers[id].controller.getDeviceByAltID( parentdevid , altid );
 	};
 	function _getDeviceByType(str) {
 		return _controllers[0].controller.getDeviceByType(str);
@@ -189,27 +208,37 @@ var MultiBox = ( function( window, undefined ) {
 	function _getStates( deviceid  ) {
 		return _controllers[0].controller.getStates( deviceid  );
 	};
-	function _getStatus( deviceid, service, variable ) {
-		return _controllers[0].controller.getStatus( deviceid, service, variable );
+	function _getStatus( device, service, variable ) {
+		var elems = device.altuiid.split("-");
+		return _controllers[elems[0]].controller.getStatus( elems[1], service, variable );
 	};
 	function _setStatus( deviceid, service, variable, value, dynamic ) {
-		return _controllers[0].controller.setStatus( deviceid, service, variable, value, dynamic );
+		var elems = device.altuiid.split("-");
+		return _controllers[elems[0]].controller.setStatus( elems[1], service, variable, value, dynamic );
 	};
-	function _getJobStatus( jobid , cbfunc )
+	function _getJobStatus( controllerid, jobid , cbfunc )
 	{
-		return _controllers[0].controller.getJobStatus( jobid, cbfunc );
+		return _controllers[controllerid].controller.getJobStatus( jobid, cbfunc );
 	};
-	function _runAction(deviceid, service, action, params,cbfunc) {
-		return _controllers[0].controller.getUPnPHelper().UPnPAction(deviceid, service, action, params,cbfunc);
+	function _runAction(device, service, action, params,cbfunc) {
+		var elems = device.altuiid.split("-");
+		return _controllers[elems[0]].controller.getUPnPHelper().UPnPAction(elems[1], service, action, params,cbfunc);
 	};
-	function _setAttr(deviceid, attribute, value,cbfunc) {
-		return _controllers[0].controller.getUPnPHelper().UPnPSetAttr(deviceid, attribute, value,cbfunc);
+	function _runActionByAltuiID(altuiid, service, action, params,cbfunc) {
+		var elems = altuiid.split("-");
+		return _controllers[elems[0]].controller.getUPnPHelper().UPnPAction(elems[1], service, action, params,cbfunc);
+	};
+	function _setAttr(device, attribute, value,cbfunc) {
+		var elems = device.altuiid.split("-");
+		return _controllers[elems[0]].controller.getUPnPHelper().UPnPSetAttr(elems[1], attribute, value,cbfunc);
 	};
 	function _isDeviceZwave(device) {
-		return _controllers[0].controller.isDeviceZwave(device);
+		var elems = device.altuiid.split("-");
+		return _controllers[elems[0]].controller.isDeviceZwave(device);
 	};
-	function _updateNeighbors(deviceid) {
-		return _controllers[0].controller.updateNeighbors(deviceid);
+	function _updateNeighbors(device) {
+		var elems = device.altuiid.split("-");
+		return _controllers[elems[0]].controller.updateNeighbors(elems[1]);
 	};
 	function _getCategories( cbfunc, filterfunc, endfunc ) {
 		return _controllers[0].controller.getCategories( cbfunc, filterfunc, endfunc );
@@ -217,23 +246,32 @@ var MultiBox = ( function( window, undefined ) {
 	function _getCategoryTitle(catnum) {
 		return _controllers[0].controller.getCategoryTitle(catnum);
 	};
-	function _evaluateConditions(deviceid,devsubcat,conditions) {
-		return _controllers[0].controller.evaluateConditions(deviceid,devsubcat,conditions);
+	function _evaluateConditions(device,devsubcat,conditions) {
+		var elems = device.altuiid.split("-");
+		return _controllers[elems[0]].controller.evaluateConditions(elems[1],devsubcat,conditions);
 	};
 	function _getWeatherSettings() {
 		return _controllers[0].controller.getWeatherSettings();
 	};
-	function _reloadEngine() {
-		return _controllers[0].controller.reloadEngine();
+	function _reloadEngine(controllerid) {
+		var id = controllerid || 0;
+		return _controllers[id].controller.reloadEngine();
 	};
-	function _reboot() {
-		return _controllers[0].controller.reboot();
+	function _reboot(controllerid) {
+		var id = controllerid || 0;
+		return _controllers[id].controller.reboot();
 	};
-	function _deleteScene(id) {
-		return _controllers[0].controller.deleteScene(id);
+	function _deleteScene(scene) {
+		var elems = scene.altuiid.split("-");
+		return _controllers[elems[0]].controller.deleteScene(elems[1]);
 	};
-	function _getNewSceneID() {
-		return _controllers[0].controller.getNewSceneID();
+	function _getNewSceneID(controllerid) {
+		var id = controllerid || 0;
+		var newid= _controllers[id].controller.getNewSceneID();
+		return {
+			id:  		newid,
+			altuiid: 	"{0}-{1}".format(controllerid,newid)
+		};
 	};
 	function _getScenes( func , filterfunc, endfunc ) {
 		return _controllers[0].controller.getScenes( func , filterfunc, endfunc );
@@ -241,68 +279,95 @@ var MultiBox = ( function( window, undefined ) {
 	function _getScenesSync() {
 		return _controllers[0].controller.getScenesSync();
 	};	
-	function _getSceneByID(sceneid) {
-		return _controllers[0].controller.getSceneByID(sceneid)
+	function _getSceneByID(controllerid,sceneid) {
+		return _controllers[controllerid].controller.getSceneByID(sceneid)
 	};
-	function _getSceneHistory( id, cbfunc) {
-		return _controllers[0].controller.getSceneHistory( id, cbfunc);
+	function _getSceneByAltuiID(altuiid) {
+		var elems = altuiid.split("-");
+		return _controllers[elems[0]].controller.getSceneByID(elems[1])
 	};
-	function _editScene(sceneid,scenejson) {
-		return _controllers[0].controller.editScene(sceneid,scenejson);
+	function _getSceneHistory( scene, cbfunc) {
+		var elems = scene.altuiid.split("-");
+		return _controllers[elems[0]].controller.getSceneHistory( elems[1], cbfunc);
 	};
-	function _runScene(id) {
-		return _controllers[0].controller.runScene(id);
+	function _editScene(altuiid,scenejson) {
+		var elems = altuiid.split("-");
+		return _controllers[elems[0]].controller.editScene(elems[1],scenejson);
 	};
-	function _runLua(code, cbfunc) {
-		return _controllers[0].controller.runLua(code, cbfunc);
+	function _runScene(scene) {
+		var elems = scene.altuiid.split("-");
+		return _controllers[elems[0]].controller.runScene(elems[1]);
 	};
-	function _getLuaStartup() {
-		return _controllers[0].controller.getLuaStartup();
+	function _runSceneByAltuiID(altuiid) {
+		var elems = altuiid.split("-");
+		return _controllers[elems[0]].controller.runScene(elems[1]);
 	};
-	function _setStartupCode(code) {
-		return _controllers[0].controller.setStartupCode(code);
+	function _runLua(controllerid, code, cbfunc) {
+		var id = controllerid || 0;
+		return _controllers[id].controller.runLua(code, cbfunc);
 	};
-	function _saveChangeCaches( msgidx ) {
-		return _controllers[0].controller.saveChangeCaches( msgidx );
+	function _getLuaStartup(controllerid) {
+		var id = controllerid || 0;
+		return _controllers[id].controller.getLuaStartup();
 	};
-	function _updateChangeCache( target ) {
-		return _controllers[0].controller.updateChangeCache( target );
+	function _setStartupCode(controllerid,code) {
+		var id = controllerid || 0;
+		return _controllers[id].controller.setStartupCode(code);
+	};
+	function _saveChangeCaches( controllerid,msgidx ) {
+		var id = controllerid || 0;
+		return _controllers[id].controller.saveChangeCaches( msgidx );
+	};
+	function _updateChangeCache( controllerid,target ) {
+		var id = controllerid || 0;
+		return _controllers[id].controller.updateChangeCache( target );
 	};
 	function _getPlugins( func , endfunc ) {
 		return _controllers[0].controller.getPlugins( func , endfunc );
 	};
-	function _deletePlugin( id, cbfunc) {
-		return _controllers[0].controller.getUPnPHelper().UPnPDeletePlugin(id,cbfunc);
+	function _deletePlugin( altuiid, cbfunc) {
+		var elems = altuiid.split("-");
+		return _controllers[elems[0]].controller.getUPnPHelper().UPnPDeletePlugin(elems[1],cbfunc);
 	};
-	function _updatePlugin( id, cbfunc) {
-		return _controllers[0].controller.getUPnPHelper().UPnPUpdatePlugin(id,cbfunc);
+	function _updatePlugin( altuiid, cbfunc) {
+		var elems = altuiid.split("-");
+		return _controllers[elems[0]].controller.getUPnPHelper().UPnPUpdatePlugin(elems[1],cbfunc);
 	};
-	function _updatePluginVersion( id, ver, cbfunc) {
-		return _controllers[0].controller.getUPnPHelper().UPnPUpdatePluginVersion(id,ver,cbfunc);
+	function _updatePluginVersion( altuiid, ver, cbfunc) {
+		var elems = altuiid.split("-");
+		return _controllers[elems[0]].controller.getUPnPHelper().UPnPUpdatePluginVersion(elems[1],ver,cbfunc);
 	};
-	function _getFileContent(filename , cbfunc) {
-		return _controllers[0].controller.getUPnPHelper().UPnPGetFile( filename, cbfunc);
+	function _getFileContent(controllerid, filename , cbfunc) {
+		var id = controllerid || 0;
+		return _controllers[id].controller.getUPnPHelper().UPnPGetFile( filename, cbfunc);
 	};
-	function _osCommand(cmd,cbfunc) {
-		return _controllers[0].controller.osCommand(cmd,cbfunc);
+	function _osCommand(controllerid, cmd,cbfunc) {
+		var id = controllerid || 0;
+		return _controllers[id].controller.osCommand(cmd,cbfunc);
 	};
-	function _getPower(cbfunc) {
-		return _controllers[0].controller.getPower(cbfunc);
+	function _getPower(controllerid,cbfunc) {
+		var id = controllerid || 0;
+		return _controllers[id].controller.getPower(cbfunc);
 	};
 	function _resetPollCounters() {
-		return _controllers[0].controller.resetPollCounters();
+		$.each(_controllers, function(i,c) {
+			c.controller.resetPollCounters();
+		});
 	};
-	function _isUserDataCached() {
-		return _controllers[0].controller.isUserDataCached();
+	function _isUserDataCached(controllerid) {
+		var id = controllerid || 0;
+		return _controllers[id].controller.isUserDataCached();
 	};
-	function _getIcon( imgpath , cbfunc ) {
-		return _controllers[0].controller.getIcon( imgpath , cbfunc );
+	function _getIcon( controllerid, imgpath , cbfunc ) {
+		var id = controllerid || 0;
+		return _controllers[id].controller.getIcon( imgpath , cbfunc );
 	};
 	function _triggerAltUIUpgrade(urlsuffix) {
 		_controllers[0].controller.triggerAltUIUpgrade(urlsuffix);
 	};
-	function _buildUPnPGetFileUrl(name) {
-		return _controllers[0].controller.getUPnPHelper().buildUPnPGetFileUrl(name);
+	function _buildUPnPGetFileUrl(altuid,name) {
+		var elems = altuiid.split("-");
+		return _controllers[elems[0]].controller.getUPnPHelper().buildUPnPGetFileUrl(name);
 	};
 	
   return {
@@ -328,8 +393,8 @@ var MultiBox = ( function( window, undefined ) {
 	// Device Type DB
 	getDeviceTypesDB 		: function() 	{ 	return _devicetypesDB; },
 	addDeviceType 			: _addDeviceType,			// (devtype, obj)				update devitetype plugin function calls ( from LUA )
-	updateDeviceTypeUPnpDB	: _updateDeviceTypeUPnpDB,	//( devtype, Dfilename )		update devicetype UPNP information ( from D_xx S_xx files )
-	updateDeviceTypeUIDB 	: _updateDeviceTypeUIDB,	//(devtype, ui_definitions)		update devicetype UI static infos ( from user_data )
+	updateDeviceTypeUPnpDB	: _updateDeviceTypeUPnpDB,	//( controllerid, devtype, Dfilename )		update devicetype UPNP information ( from D_xx S_xx files )
+	updateDeviceTypeUIDB 	: _updateDeviceTypeUIDB,	//( controllerid, devtype, ui_definitions)		update devicetype UI static infos ( from user_data )
 	
 	// Access & Modes
 	isRemoteAccess	: function() 	{ 	return window.location.origin.indexOf("mios.com")!=-1; /*return true;*/ },
@@ -350,8 +415,9 @@ var MultiBox = ( function( window, undefined ) {
 	renameDevice			: _renameDevice,			// (device, newname )
 	getDevices				: _getDevices, 				// ( func , filterfunc, endfunc )
 	getDevicesSync			: _getDevicesSync,			// ()
-	getDeviceByID			: _getDeviceByID,			// ( devid ) 
+	getDeviceByAltuiID		: _getDeviceByAltuiID,		// ( devid ) 
 	getDeviceByType			: _getDeviceByType,			// ( str )
+	getDeviceByID			: _getDeviceByID,			// ( controller, devid ) 
 	getDeviceByAltID		: _getDeviceByAltID,		// ( parentdevid , altid )
 	getDeviceActions		: _getDeviceActions,		// (device,cbfunc) 
 	getDeviceEvents			: _getDeviceEvents,			// (device)	
@@ -365,18 +431,19 @@ var MultiBox = ( function( window, undefined ) {
 	getJobStatus			: _getJobStatus,			// (  jobid , cbfunc )
 	setAttr					: _setAttr,					// ( deviceID, attribute, value,function(result) )
 	runAction				: _runAction,				// (deviceid, service, action, params,cbfunc);
+	runActionByAltuiID		: _runActionByAltuiID,		//
 	isDeviceZwave			: _isDeviceZwave,			// (device)
 	updateNeighbors			: _updateNeighbors,			// (deviceid)
 	
 	//Alias
-	setOnOff				: function ( deviceID, onoff) {
-								this.runAction( deviceID, 'urn:upnp-org:serviceId:SwitchPower1', 'SetTarget', {'newTargetValue':onoff} );
+	setOnOff				: function ( altuiid, onoff) {
+								MultiBox.runActionByAltuiID( altuiid, 'urn:upnp-org:serviceId:SwitchPower1', 'SetTarget', {'newTargetValue':onoff} );
 							},
-	setArm					: function ( deviceID, armed) {
-								this.runAction( deviceID, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'SetArmed', {'newArmedValue':armed} );
+	setArm					: function ( altuiid, armed) {
+								this.runActionByAltuiID( altuiid, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'SetArmed', {'newArmedValue':armed} );
 							},
-	setDoorLock				: function ( deviceID, armed) {
-								this.runAction( deviceID, 'urn:micasaverde-com:serviceId:DoorLock1', 'SetTarget', {'newTargetValue':armed} );
+	setDoorLock				: function ( altuiid, armed) {
+								this.runActionByAltuiID( altuiid, 'urn:micasaverde-com:serviceId:DoorLock1', 'SetTarget', {'newTargetValue':armed} );
 							},
 		
 	// Categories
@@ -388,10 +455,12 @@ var MultiBox = ( function( window, undefined ) {
 	getNewSceneID		: _getNewSceneID,	//()
 	getScenes			: _getScenes,		//( func , filterfunc, endfunc ) {
 	getSceneByID		: _getSceneByID,	//(sceneid) {	
+	getSceneByAltuiID	: _getSceneByAltuiID, // (altuiid)
 	getSceneHistory		: _getSceneHistory,	//( id, cbfunc) {
 	getScenesSync		: _getScenesSync,	//()
-	editScene			: _editScene,		//(sceneid,scenejson)		
+	editScene			: _editScene,		//(altuiid,scenejson)		
 	runScene			: _runScene,		//(id)
+	runSceneByAltuiID	: _runSceneByAltuiID,
 	
 	// Plugins
 	getPlugins			: _getPlugins,			//( func , endfunc ) 
@@ -412,7 +481,7 @@ var MultiBox = ( function( window, undefined ) {
 	getPower			: _getPower,			//(cbfunc)
 	resetPollCounters	: _resetPollCounters,	//()
 	isUserDataCached	: _isUserDataCached,	//()
-	getIcon				: _getIcon,				//( imgpath , cbfunc )
+	getIcon				: _getIcon,				// ( controllerid, imgpath , cbfunc )
 	buildUPnPGetFileUrl : _buildUPnPGetFileUrl,	// (name)
 	
 	// Upgrade

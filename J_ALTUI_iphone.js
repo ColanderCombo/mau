@@ -21,46 +21,46 @@ var ALTUI_IPhoneLocator= ( function( window, undefined ) {
 	};
 
 
-	function _drawAltUI(devid, device) {
-		var debug = MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:altui1', 'Debug' ); 
+	function _drawAltUI( device) {
+		var debug = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:altui1', 'Debug' ); 
 		
 		var html ="";
-		html += ALTUI_PluginDisplays.createOnOffButton( debug,"altui-onoffbtn-"+devid, _T("Normal,Debug") , "pull-right");
+		html += ALTUI_PluginDisplays.createOnOffButton( debug,"altui-onoffbtn-"+device.altuiid, _T("Normal,Debug") , "pull-right");
 		html += "<script type='text/javascript'>";
-		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_IPhoneLocator.toggleDebug({0},'div#altui-onoffbtn-{0}'); } );".format(devid);
+		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_IPhoneLocator.toggleDebug({0},'div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
 		html += "</script>";
 		
 		return html;
 	};
 	
 	// return the html string inside the .panel-body of the .altui-device#id panel
-	function _drawIPhone(devid, device) {
-		var dist = parseFloat(MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:IPhoneLocator1', 'Distance' )); 
-		var unit = MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:IPhoneLocator1', 'Unit' ); 
-		var mute = MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:IPhoneLocator1', 'Muted' ); 
+	function _drawIPhone( device) {
+		var dist = parseFloat(MultiBox.getStatus( device, 'urn:upnp-org:serviceId:IPhoneLocator1', 'Distance' )); 
+		var unit = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:IPhoneLocator1', 'Unit' ); 
+		var mute = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:IPhoneLocator1', 'Muted' ); 
 		
 		var html ="";
 		html+=("<span class='altui-iphone' > "+dist+" </span>");
 		html+=("<small > "+unit+" </small>");
 
-		html += ALTUI_PluginDisplays.createOnOffButton( mute,"altui-onoffbtn-"+devid, _T("Unmuted,Muted") , "pull-right");
+		html += ALTUI_PluginDisplays.createOnOffButton( mute,"altui-onoffbtn-"+device.altuiid, _T("Unmuted,Muted") , "pull-right");
 		html += "<script type='text/javascript'>";
-		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_IPhoneLocator.toggleMute({0},'div#altui-onoffbtn-{0}'); } );".format(devid);
+		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_IPhoneLocator.toggleMute({0},'div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
 		html += "</script>";
 		
 		return html;
 	};
 	
-	function _drawCanalplus(devid, device) {
-		var channel = MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:cplus1', 'CurrentChannel' ).split(','); 
-		var present = MultiBox.getStatus( devid, 'urn:upnp-org:serviceId:cplus1', 'Present' );
+	function _drawCanalplus( device) {
+		var channel = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:cplus1', 'CurrentChannel' ).split(','); 
+		var present = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:cplus1', 'Present' );
 		var html ="";
-		html += ALTUI_PluginDisplays.createOnOffButton( present,"altui-onoffbtn-"+devid, _T("OFF,ON"), "pull-right" );
+		html += ALTUI_PluginDisplays.createOnOffButton( present,"altui-onoffbtn-"+device.altuiid, _T("OFF,ON"), "pull-right" );
 		if (channel.length>=2)
 			html+=("<div class='altui-canalplus' >{0}</div><span><small>{1}</small></span>".format(channel[1],channel[0]));
 
 		html += "<script type='text/javascript'>";
-		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_IPhoneLocator.toggleCplusOnOff({0},'div#altui-onoffbtn-{0}'); } );".format(devid);
+		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_IPhoneLocator.toggleCplusOnOff({0},'div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
 		html += "</script>";
 		return html;
 	};
@@ -69,7 +69,7 @@ var ALTUI_IPhoneLocator= ( function( window, undefined ) {
 		// $(domparent).append("Hello I am alive, and I am in a custom drawing function!");
 	// };
 
-	function _drawCanaplusControlPanel(devid, device, domparent) {
+	function _drawCanaplusControlPanel( device, domparent) {
 		var html="";
 		html +="<div class=''>";
 		html += "<table id='altui-cplus-keytbl'>";
@@ -99,7 +99,7 @@ html+="<tr><td><button class='altui-cplus-button btn btn-default' id='VOL-'>VOL-
 		
 		$(".altui-cplus-button").click( function() {
 			var id = $(this).prop('id');
-			MultiBox.runAction( devid, 'urn:upnp-org:serviceId:cplus1', 'SendKey', {keyStream:id} );
+			MultiBox.runAction( device, 'urn:upnp-org:serviceId:cplus1', 'SendKey', {keyStream:id} );
 		});
 	};	
 	

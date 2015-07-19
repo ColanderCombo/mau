@@ -12,14 +12,6 @@
 			setDebugMode(lul_device,lul_settings.newDebugMode)
 	  </run>
 	</action>
-    <action>
-	 <serviceId>urn:upnp-org:serviceId:altui1</serviceId>
-	 <name>ProxyGet</name>
-	  <job>
-			proxyGet(lul_device,lul_settings.newUrl,lul_settings.resultName)
-			return 4,0
-	  </job>
-	</action>
 	<action>
 		<serviceId>urn:upnp-org:serviceId:altui1</serviceId>
 		<name>Reset</name>

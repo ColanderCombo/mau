@@ -42,21 +42,6 @@
             </argumentList>
         </action>
         <action>
-            <name>ProxyGet</name>
-            <argumentList>
-                <argument>
-                    <name>newUrl</name>
-                    <direction>in</direction>
-                    <relatedStateVariable>Url</relatedStateVariable>
-                </argument>
-                <argument>
-                    <name>resultName</name>
-                    <direction>in</direction>
-                    <relatedStateVariable>Result</relatedStateVariable>
-                </argument>
-            </argumentList>
-        </action>
-        <action>
             <name>Reset</name>
         </action>
 	</actionList>

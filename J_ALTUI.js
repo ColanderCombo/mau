@@ -139,11 +139,11 @@ function altui_Settings(deviceID) {
 		'<div class="pane" id="pane"> '+ 
 		'<table class="altui_table" id="altui_table">'+
 		'<tr><td>Run</td><td> '+htmltest+' </td></tr>' +
-		'<tr><td>Config</td><td> '+htmlConfig+' </td></tr>' +
 		'<tr><td>Theme</td><td> '+htmlTheme+' </td></tr>' +
 		'<tr><td>Home Page</td><td> '+htmlHome+' </td></tr>' +
 		'<tr><td>url options</td><td><ul><li><b>home</b>=(pageHome , pageRooms , pageDevices , pageScenes , pageSceneEdit , pagePlugins , pageUsePages , pageEditPages , pageCredits , pageLuaTest , pageLuaStart , pageOptions , pageEditor , pageZwave , pageLocalization , pagePower , pageChildren , pageRoutes , pageQuality , pageTblDevices , pageOsCommand)</li><li><b>lang</b>=(en , fr , it)</li></ul></td></tr>' +
 		'<tr><td>Local CDN ?</td><td> '+htmlCDN+' </td></tr>' +
+		'<tr><td>Config</td><td> '+htmlConfig+' </td></tr>' +
 		'<tr><td>Actions</td><td> '+htmlViewJson+htmlSetConfig+htmlResetConfig+' </td></tr>' +
 		'</table>'+
 		'</div>' ;

@@ -788,10 +788,9 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};	
 		
 	function _getStatusObject( deviceid, service, variable, bCreate ) {
-		if (deviceid==0)
-			return null;
 		
-		var states = _getStates( deviceid  );
+		var device = _getDeviceByID( deviceid );
+		var states = device.states;
 		if (states==null)
 			return null;
 		
@@ -813,7 +812,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		
 		return found[0];
 	};
-	
+
 	function _getStatus( deviceid, service, variable )
 	{
 		var state = _getStatusObject( deviceid, service, variable )
@@ -821,7 +820,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			return null;
 		return state.value;
 	};
-	
+
 	function _getJobStatus( jobid , cbfunc ) 
 	{
 		return _upnpHelper.UPnPGetJobStatus(jobid, cbfunc );
@@ -976,23 +975,29 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			if (data.devices)
 				$.each(data.devices, function(idx,device) {
 					device.favorite=Favorites.get('device',device.id);
+					device.altuiid = "{0}-{1}".format(_uniqID,device.id);
 					jsonp.ud.devices.push(device);
 				});
 			if (data.scenes)
 				$.each(data.scenes, function(idx,scene) {
 					scene.favorite=Favorites.get('scene',scene.id);
+					scene.altuiid = "{0}-{1}".format(_uniqID,scene.id);
 					jsonp.ud.scenes.push(scene);
 				});
 			if (data.rooms)
 				$.each(data.rooms, function(idx,room) {
+					room.altuiid = "{0}-{1}".format(_uniqID,room.id);
 					jsonp.ud.rooms.push(room);
 				});
-			
+			if (data.InstalledPlugins2)
+				$.each(data.InstalledPlugins2, function(idx,plugin) {
+					plugin.altuiid = "{0}-{1}".format(_uniqID,plugin.id);
+				});
 			// update the static ui information for the future displays
 			$.each(_user_data.static_data || [], function(idx,ui_static_data) {
 				var dt = ui_static_data.device_type == undefined ? ui_static_data.DeviceType : ui_static_data.device_type;
 				if (dt!=undefined) {
-					MultiBox.updateDeviceTypeUIDB( dt, ui_static_data);				
+					MultiBox.updateDeviceTypeUIDB( _uniqID, dt, ui_static_data);				
 				}
 			});
 			
@@ -1000,7 +1005,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			$.each(_user_data.devices || [], function(idx,device) {
 				var dt = device.device_type;
 				if (dt!=undefined)
-					MultiBox.updateDeviceTypeUPnpDB( dt, device.device_file);	// pass device file so UPNP data can be read
+					MultiBox.updateDeviceTypeUPnpDB( _uniqID, dt, device.device_file);	// pass device file so UPNP data can be read
 				if (device!=null) {	
 					device.dirty=true; 
 					EventBus.publishEvent("on_ui_deviceStatusChanged",device);
@@ -1143,7 +1148,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	function _runLua(code, cbfunc) {
 		_upnpHelper.UPnPRunLua(code, function(result) {
 			var res = "Fail";
-			if (result.indexOf("<OK>OK</OK>") !=-1)
+			if ((result!=null ) && (result.indexOf("<OK>OK</OK>") !=-1))
 				res ="Passed";
 			if ($.isFunction( cbfunc )) 
 				cbfunc(res);
@@ -1375,7 +1380,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 				var that = service.Actions;
 				// if (that.length==0) 	// if actions are not already loaded
 				// {
-					FileDB.getFileContent(service.SFilename , function( xmlstr ) {
+					FileDB.getFileContent(_uniqID,service.SFilename , function( xmlstr ) {
 						var xml = $( $.parseXML( xmlstr ) );
 						$.each(xml.find("action"), function( idx,action) {
 							var name = $(action).find("name").first().text();	// action name is the first one
@@ -1515,7 +1520,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	
 	function _isDeviceZwave(device) {
 		if (device && device.id_parent) {
-			var parent = MultiBox.getDeviceByID( device.id_parent );
+			var parent = _getDeviceByID( device.id_parent );
 			if (parent) {
 				if (parent.device_type == "urn:schemas-micasaverde-com:device:ZWaveNetwork:1")
 					return true;
@@ -1640,7 +1645,8 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 var data_request_url = window.location.pathname+'?';
 var command_url = window.location.pathname.replace('/data_request','');
 function get_device_state(deviceId, serviceId, variable, dynamic) {
-	return MultiBox.getStatus( deviceId, serviceId, variable );
+	var device = MultiBox.getDeviceByID(0,deviceId);
+	return MultiBox.getStatus( device, serviceId, variable );
 };
 
 function set_device_state (deviceId, serviceId, variable, value, dynamic) {
@@ -1649,7 +1655,8 @@ function set_device_state (deviceId, serviceId, variable, value, dynamic) {
 	// 1 : means dynamic, lost at the next restart if not save
 	if (dynamic==undefined)
 		dynamic = 0;
-	MultiBox.setStatus( deviceId, serviceId, variable, value  , dynamic );
+	var device = MultiBox.getDeviceByID(0,deviceId);
+	MultiBox.setStatus( device, serviceId, variable, value  , dynamic );
 	return true;
 };
 
@@ -1781,7 +1788,7 @@ function get_event_definition(DeviceType){
 }
 
 function new_scene_id(){
-	return MultiBox.getNewSceneID();
+	return MultiBox.getNewSceneID(0);
 }
 
 var Ajax = (function(window,undefined) {
@@ -2371,7 +2378,7 @@ var api = {
 		});
 	},
 	getRoomObject: function(roomId) {
-		return MultiBox.getRoomByID(roomId);
+		return _getRoomByID(roomId);
 	},
 	getSceneDescription: function(sceneId, options) {
 		var scene = this.getSceneByID(sceneId);
