@@ -5216,7 +5216,7 @@ var UIManager  = ( function( window, undefined ) {
 		toolbarHtml+="  </button>";			
 		$("#altui-pagetitle").append(toolbarHtml);
 		$("#altui-scene-create").click( function() {
-			UIManager.pageSceneEdit(-1);
+			UIManager.pageSceneEdit(NULL_SCENE);
 		});
 		
 		// on the left, get the rooms
@@ -5232,7 +5232,7 @@ var UIManager  = ( function( window, undefined ) {
 		// Deep copy so we can edit it
 		var info = MultiBox.controllerOf(altuiid);
 		var newid = MultiBox.getNewSceneID( info.controller );
-		var orgscene = (altuiid!=-1) ? MultiBox.getSceneByAltuiID( altuiid ) : { 
+		var orgscene = (altuiid!=NULL_SCENE) ? MultiBox.getSceneByAltuiID( altuiid ) : { 
 				name:"New Scene",
 				id: newid.id,
 				altuiid: newid.altuiid,
