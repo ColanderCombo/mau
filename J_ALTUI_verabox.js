@@ -1259,7 +1259,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 	
 	function _clearData(name, npage, cbfunc) {
-		if (_uniqID!=0);	// only supported on master controller
+		if (_uniqID!=0)	// only supported on master controller
 			return;
 			
 		AltuiDebug.debug("_clearData( {0}, page:{1} )".format(name,npage));
@@ -1289,7 +1289,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 	
 	function _saveDataChunk(name, npage, data, cbfunc) {
-		if (_uniqID!=0);	// only supported on master controller
+		if (_uniqID!=0)	// only supported on master controller
 			return;
 
 		AltuiDebug.debug("_saveDataChunk( {0}, page:{1}, data:{2} chars  )".format(name,npage,data.length));
@@ -1321,9 +1321,11 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 
 	function _saveData( name, data , cbfunc) {
-		if (_uniqID!=0);	// only supported on master controller
+		if (_uniqID!=0)	{
+			// only supported on master controller
+			AltuiDebug.debug("_saveData must only be called on master controller #0");
 			return;
-			
+		}	
 		AltuiDebug.debug("_saveData( {0}, {1} chars )".format(name,data.length));
 
 		// we need a workaround to pass data via a POST but for now, all we have is a Get
@@ -1644,27 +1646,14 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 
 var data_request_url = window.location.pathname+'?';
 var command_url = window.location.pathname.replace('/data_request','');
-function get_device_state(deviceId, serviceId, variable, dynamic) {
-	var device = MultiBox.getDeviceByID(0,deviceId);
-	return MultiBox.getStatus( device, serviceId, variable );
-};
-
-function set_device_state (deviceId, serviceId, variable, value, dynamic) {
-	// -1 : ALTUI mode , triggers a UPNP http save
-	// 0 : means not dynamic, will require a save
-	// 1 : means dynamic, lost at the next restart if not save
-	if (dynamic==undefined)
-		dynamic = 0;
-	var device = MultiBox.getDeviceByID(0,deviceId);
-	MultiBox.setStatus( device, serviceId, variable, value  , dynamic );
-	return true;
-};
 
 var _JSAPI_ctx={};
 function set_JSAPI_context(ctx) {
 	_JSAPI_ctx = $.extend( {
 			set_panel_html_callback: null,
-			deviceid: 0
+			deviceid: 0,
+			altuiid: "0-0",
+			controller: 0
 		}, 
 		ctx
 	);
@@ -1788,8 +1777,24 @@ function get_event_definition(DeviceType){
 }
 
 function new_scene_id(){
-	return MultiBox.getNewSceneID(0);
+	return MultiBox.getNewSceneID(_JSAPI_ctx.controller);
 }
+
+function get_device_state(deviceId, serviceId, variable, dynamic) {
+	var device = MultiBox.getDeviceByID( _JSAPI_ctx.controller , deviceId);
+	return MultiBox.getStatus( device, serviceId, variable );
+};
+
+function set_device_state (deviceId, serviceId, variable, value, dynamic) {
+	// -1 : ALTUI mode , triggers a UPNP http save
+	// 0 : means not dynamic, will require a save
+	// 1 : means dynamic, lost at the next restart if not save
+	if (dynamic==undefined)
+		dynamic = 0;
+	var device = MultiBox.getDeviceByID(_JSAPI_ctx.controller,deviceId);
+	MultiBox.setStatus( device, serviceId, variable, value  , dynamic );
+	return true;
+};
 
 var Ajax = (function(window,undefined) {
 	function Response(data,jqXHR) {

@@ -3109,13 +3109,15 @@ var UIManager  = ( function( window, undefined ) {
 			set_panel_html_callback: function(html) {
 				$(domparent).html(html);
 			},
-			deviceid: device.id
+			deviceid: device.id,
+			altuiid: device.altuiid,
+			controller: MultiBox.controllerOf(device.altuiid).controller
 		});
 		// set_set_panel_html_callback(function(html) {
 			// $(domparent).html(html);
 		// });
 		try {
-			var result = eval( func+"("+devid+")" );
+			var result = eval( func+"("+device.id+")" );	// we need the real VERA box ID here
 		}
 		catch(err) {
 			set_panel_html("an error occurred while displaying the javascript tab. devid: "+devid+" err:"+err.message+" <pre>stack:"+err.stack+"</pre>");
@@ -3583,7 +3585,7 @@ var UIManager  = ( function( window, undefined ) {
 		}
 	};
 
-	function _deviceDrawControlPanel(devid, device, container ) {
+	function _deviceDrawControlPanel( device, container ) {
 		var _devicetypesDB = MultiBox.getDeviceTypesDB();	
 		var controller = MultiBox.controllerOf(device.altuiid).controller;
 		
@@ -3628,7 +3630,7 @@ var UIManager  = ( function( window, undefined ) {
 				var htmlDeleteButton= buttonTemplate.format( device.altuiid, 'btn-xs altui-deldevice pull-right', deleteGlyph,'default');;
 				html ="";
 				html+="<div class='row'>";
-					html +="<div id='altui-device-controlpanel-"+device.altuiid+"' class='col-xs-12 altui-device-controlpanel' data-devid='"+device.altuiid+"'>";
+					html +="<div id='altui-device-controlpanel-"+device.altuiid+"' class='col-xs-12 altui-device-controlpanel' data-altuiid='"+device.altuiid+"'>";
 					html +="	<div class='panel panel-default'>";
 					html +="		<div class='panel-heading form-inline'>";
 					html += htmlDeleteButton;
@@ -3661,8 +3663,8 @@ var UIManager  = ( function( window, undefined ) {
 				_displayActiveDeviceTab(activeTabIdx, device, domparent);
 
 				if (bAsync) {
-					$("#altui-device-attributes-"+devid).toggle(false);		// hide them by default;
-					$("#altui-device-usedin-"+devid).toggle(false);		// hide them by default;
+					$("#altui-device-attributes-"+device.altuiid).toggle(false);		// hide them by default;
+					$("#altui-device-usedin-"+device.altuiid).toggle(false);		// hide them by default;
 					$(".altui-debug-div").toggle(false);					// hide
 				}
 
@@ -4715,18 +4717,19 @@ var UIManager  = ( function( window, undefined ) {
 
 	},
 
-	pageControlPanel: function( devid ) 
+	pageControlPanel: function( altuiid ) 
 	{
 		var rooms = MultiBox.getRoomsSync();
-		var device = MultiBox.getDeviceByID( devid );
+		var device = MultiBox.getDeviceByAltuiID( altuiid );
+		var controllerid = MultiBox.controllerOf(altuiid).controller;
 		var category = MultiBox.getCategoryTitle( device.category_num );
 
-		UIManager.clearPage(_T('Control Panel'),"{0} <small>{1} <small>#{2}</small></small>".format( device.name , category ,devid));
+		UIManager.clearPage(_T('Control Panel'),"{0} <small>{1} <small>#{2}</small></small>".format( device.name , category ,altuiid));
 		
 		var html = "<div class='form-inline col-xs-12'>";
 		html += "<button type='button' class='btn btn-default' id='altui-toggle-attributes' >"+_T("Attributes")+"<span class='caret'></span></button>";
-		html += "<button type='button' class='btn btn-default altui-device-variables' id='"+devid+"'>"+_T("Variables")+"</button>";
-		html += "<button type='button' class='btn btn-default altui-device-actions' id='"+devid+"' >"+_T("Actions")+"</button>";
+		html += "<button type='button' class='btn btn-default altui-device-variables' id='"+altuiid+"'>"+_T("Variables")+"</button>";
+		html += "<button type='button' class='btn btn-default altui-device-actions' id='"+altuiid+"' >"+_T("Actions")+"</button>";
 		html += "<button type='button' class='btn btn-default' id='altui-device-usedin' >"+_T("Used in")+"<span class='caret'></span></button>";
 		if (AltuiDebug.IsDebug())
 			html +=  buttonDebugHtml;
@@ -4736,15 +4739,15 @@ var UIManager  = ( function( window, undefined ) {
 		//
 		// Draw device control panel (attributes+panel+debug)
 		//
-		$(".altui-mainpanel").append( "<div id='altui-device-controlpanel-container-"+devid+"' class='col-xs-12 altui-device-controlpanel-container'></div>" );
-		var container = $("#altui-device-controlpanel-container-"+devid);
-		UIManager.deviceDrawControlPanel(devid, device, container ); 	//devid, device, domparent
+		$(".altui-mainpanel").append( "<div id='altui-device-controlpanel-container-"+altuiid+"' class='col-xs-12 altui-device-controlpanel-container'></div>" );
+		var container = $("#altui-device-controlpanel-container-"+altuiid);
+		UIManager.deviceDrawControlPanel( device, container ); 	//altuiid, device, domparent
 		
 		//
 		// Manage interactions
 		//
-		$("#altui-device-attributes-"+devid).toggle(false);			// hide them by default;
-		$("#altui-device-usedin-"+devid).toggle(false);			// hide them by default;
+		$("#altui-device-attributes-"+altuiid).toggle(false);			// hide them by default;
+		$("#altui-device-usedin-"+altuiid).toggle(false);			// hide them by default;
 		$(".altui-debug-div").toggle(false);						// hide
 		$(container).off('click','.altui-deldevice')
 					.on('click','.altui-deldevice',  function(e) {
@@ -4757,12 +4760,12 @@ var UIManager  = ( function( window, undefined ) {
 					});
 					
 		$("#altui-toggle-attributes").click( function() {
-			$("#altui-device-attributes-"+devid).toggle();		// toogle attribute box
+			$("#altui-device-attributes-"+altuiid).toggle();		// toogle attribute box
 			$("#altui-toggle-attributes span.caret").toggleClass( "caret-reversed" );
 		});
 		
 		$("#altui-device-usedin").click( function() {
-			$("#altui-device-usedin-"+devid).toggle();		// toogle attribute box
+			$("#altui-device-usedin-"+altuiid).toggle();		// toogle attribute box
 			$("#altui-device-usedin span.caret").toggleClass( "caret-reversed" );
 		});
 		
@@ -4780,8 +4783,8 @@ var UIManager  = ( function( window, undefined ) {
 		$(container).off('shown.bs.tab', 'a[data-toggle="tab"]');
 		$(container).on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
 			var controlpanel = $(e.target).closest(".altui-device-controlpanel");
-			var devid = parseInt($(controlpanel).data("devid"));
-			var device = MultiBox.getDeviceByID( devid );
+			var altuiid = $(controlpanel).data("altuiid")
+			var device = MultiBox.getDeviceByAltuiID( altuiid );
 			var activeTabIdx = _getActiveDeviceTabIdx();
 			var domparent  =  $('div#altui-devtab-content-'+activeTabIdx);
 			_displayActiveDeviceTab(activeTabIdx, device, domparent);
@@ -5084,13 +5087,13 @@ var UIManager  = ( function( window, undefined ) {
 			})
 			// .off("click",".altui-device-controlpanelitem")
 			.on("click",".altui-device-controlpanelitem",function(){ 
-				var id = $(this).parents(".altui-device").prop('id');
-				UIManager.pageControlPanel(id);
+				var altuiid = $(this).parents(".altui-device").data('altuiid');
+				UIManager.pageControlPanel(altuiid);
 			})
 			// .off("click",".altui-device-icon")
 			.on("click",".altui-device-icon",function(){ 
-				var id = $(this).parents(".altui-device").prop('id');
-				UIManager.pageControlPanel(id);
+				var altuiid = $(this).parents(".altui-device").data('altuiid');
+				UIManager.pageControlPanel(altuiid);
 			});
 	},
 

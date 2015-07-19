@@ -327,6 +327,9 @@ var MultiBox = ( function( window, undefined ) {
 		var id = controllerid || 0;
 		return _controllers[id].controller.updateChangeCache( target );
 	};
+	function _saveData( name, data , cbfunc) {
+		return _controllers[0].controller.saveData( name, data , cbfunc );
+	};	
 	function _getPlugins( func , endfunc ) {
 		return _controllers[0].controller.getPlugins( func , endfunc );
 	};
@@ -476,7 +479,7 @@ var MultiBox = ( function( window, undefined ) {
 	setStartupCode		: _setStartupCode,		//(code)	
 	saveChangeCaches	: _saveChangeCaches,	//( msgidx ) 
 	updateChangeCache	: _updateChangeCache,	//( target ) 
-
+	saveData			: _saveData,			//( name, data , cbfunc)
 	getFileContent		: _getFileContent,		//(Dfilename , function( xmlstr , jqXHR ) 
 	osCommand			: _osCommand,			//(cmd,cbfunc) 
 	getPower			: _getPower,			//(cbfunc)

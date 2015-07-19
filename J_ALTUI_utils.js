@@ -429,8 +429,7 @@ var PageManager = (function() {
 		AltuiDebug.debug("PageManager.savePages(), pages="+JSON.stringify(_pages));
 		MyLocalStorage.set("Pages",_pages);
 		var names = $.map( _pages, function(page,idx) {	return page.name;	} );
-		var that = this;
-		that.saveData( "CustomPages", JSON.stringify(names), function(data) {
+		MultiBox.saveData( "CustomPages", JSON.stringify(names), function(data) {
 			if (data!="")
 				PageMessage.message("Save Pages success", "success");
 			else
@@ -438,7 +437,7 @@ var PageManager = (function() {
 		});
 		
 		$.each(_pages, function(idx,page) {
-			that.saveData( page.name, JSON.stringify(page), function(data) {
+			MultiBox.saveData( page.name, JSON.stringify(page), function(data) {
 			if (data!="")
 				PageMessage.message("Save for "+page.name+" succeeded.", "success");
 			else

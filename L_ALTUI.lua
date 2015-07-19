@@ -413,16 +413,21 @@ local function getDataFor( deviceID,name )
 	local result = ""
 	
 	-- search for all "Data_xxx_nnn" variables and concatenate them
-	var = luup.variable_get(service, name.."_"..num, deviceID)
-	while( var ~= nil) do
+	-- debug("reading "..name.."_"..num)
+	var = luup.variable_get(service, name.."_"..num, deviceID) or ""
+	-- debug("var =("..var..")")
+	while( var ~= "") do
 		num = num+1
 		result = result .. var
-		var = luup.variable_get(service, name.."_"..num, deviceID)
+		-- debug("reading "..name.."_"..num)
+		var = luup.variable_get(service, name.."_"..num, deviceID) or ""
+		-- debug("var =("..var..")")
 	end
 	
 	if (result=="") then
 		return nil
 	end
+	debug("returning "..result)
 	return result
 end
 
@@ -598,7 +603,11 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 						)
 				end
 				-- debug( json.encode(scripts) )
-				local custompages_tbl = json.decode( getDataFor( deviceID, "CustomPages" ) or "{}" )
+				local pagelist = getDataFor( deviceID, "CustomPages" ) or "{}"
+				if (pagelist=="[]") then
+					pagelist="{}"
+				end
+				local custompages_tbl = json.decode( pagelist )
 				local result_tbl ={}
 				for k,v in pairs(custompages_tbl) do
 					local data = getDataFor( deviceID, v )
@@ -632,15 +641,16 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 			function(params)
 				local name = lul_parameters["name"]
 				local npage = lul_parameters["npage"]
+				local data = lul_parameters["data"]
 				debug(string.format("ALTUI_Handler: save_data( name:%s npage:%s)",name,npage))
 				local variablename = "Data_"..name.."_"..npage
-				if (lul_parameters["data"]=="") then
+				if (data=="") then
 					debug(string.format("ALTUI_Handler: save_data( ) - Empty data",name,npage))
 					luup.variable_set(service, variablename, "", deviceID)
 					return "ok", "text/plain"
 				else
 					debug(string.format("ALTUI_Handler: save_data( ) - Not Empty data",name,npage))
-					local data = url_decode( lul_parameters["data"] )
+					data = url_decode( data )
 					debug(string.format("ALTUI_Handler: save_data( ) - url decoded",name,npage))
 					luup.variable_set(service, variablename, data, deviceID)
 					debug(string.format("ALTUI_Handler: save_data( ) - returns:%s",data))
