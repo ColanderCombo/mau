@@ -5283,7 +5283,7 @@ var UIManager  = ( function( window, undefined ) {
 			html +="  <ul class='dropdown-menu' role='menu'>";
 			if (plugin.Files)
 				$.each(plugin.Files.sort(_sortBySourceName), function(idx,file) {
-					html +="    <li><a class='altui-plugin-file' href='#' data-plugin='{1}'>{0}</a></li>".format(file.SourceName,plugin.altuid);
+					html +="    <li><a class='altui-plugin-file' href='#' data-plugin='{1}'>{0}</a></li>".format(file.SourceName,plugin.altuiid);
 				});
 			html +="  </ul>";
 			html +="</div>";
@@ -5299,7 +5299,7 @@ var UIManager  = ( function( window, undefined ) {
 			var infobutton = smallbuttonTemplate.format( plugin.altuiid, 'altui-plugin-icon altui-plugin-info-sign',  glyphTemplate.format("info-sign","Information",""), "Info");
 			var updatebutton = smallbuttonTemplate.format( plugin.altuiid, 'altui-plugin-icon altui-plugin-update',  glyphTemplate.format("retweet","Update Now",""), "Update");
 			var deletebutton = smallbuttonTemplate.format( plugin.altuiid, 'altui-plugin-icon altui-plugin-uninstall',  glyphTemplate.format("remove","Uninstall",""), "Uninstall");
-			var inputbox = "<input class='form-control input-sm altui-plugin-version' id='altui-plugin-version-{0}' title='{1}'></input>".format( plugin.id,_T("Version number or empty for latest official version"));
+			var inputbox = "<input class='form-control input-sm altui-plugin-version' id='altui-plugin-version-{0}' title='{1}'></input>".format( plugin.altuiid,_T("Version number or empty for latest official version"));
 
 			var pluginTxt = pluginTemplate.format(
 				plugin.Title,
@@ -5323,9 +5323,11 @@ var UIManager  = ( function( window, undefined ) {
 
 			// first aggregate to find manually installed plugin
 			$.each( $.grep(devices,function(d){ return d.id_parent==0  && d.plugin==undefined}) , function(i,d) {
+				var controller = MultiBox.controllerOf(d.altuiid).controller;
 				manual_plugins[d.device_file] = {
 					devtype : d.device_type,
-					files   : []
+					files   : [],
+					devaltuiid : d.altuiid
 				};
 				$.each( [d.device_file,d.device_json,d.impl_file], function(i,filename) {
 					if (filename && filename !="")
@@ -5333,7 +5335,6 @@ var UIManager  = ( function( window, undefined ) {
 				});
 				if (!d.device_json) {
 					// try to get it from the .xml file
-					var controller = MultiBox.controllerOf(d.altuiid).controller;
 					FileDB.getFileContent(controller,d.device_file , function( str ) {
 						var re = /<staticJson>(.*)<\/staticJson>/; 
 						var m; 
@@ -5356,6 +5357,7 @@ var UIManager  = ( function( window, undefined ) {
 				});
 				var plugin = {
 					id:-1,
+					altuiid: value.devaltuiid,		// put the id of the device requesting this file, so that we know the "controller"
 					Files: value.files
 				};
 				var pluginTxt = pluginTemplate.format(
@@ -5381,11 +5383,11 @@ var UIManager  = ( function( window, undefined ) {
 				window.open("http://apps.mios.com/plugin.php?id="+pluginid, '_blank');
 			});
 			$(".altui-plugin-file").click(function() {
-				var altuid = $(this).data("plugin");
-				var controller = MultiBox.controllerOf(altuiid);
+				var altuiid = $(this).data("plugin");
+				var info = MultiBox.controllerOf(altuiid);
 				var name = $(this).text();
-				FileDB.getFileContent(controller,name , function( txt ) {
-					var url = MultiBox.buildUPnPGetFileUrl(altuid,name);
+				FileDB.getFileContent(info.controller,name , function( txt ) {
+					var url = MultiBox.buildUPnPGetFileUrl(altuiid,name);
 					UIManager.pageEditor(name,txt,"Download",function(txt) {
 						$(".altui-mainpanel a[download]")[0].click();
 					});

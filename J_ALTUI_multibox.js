@@ -370,7 +370,7 @@ var MultiBox = ( function( window, undefined ) {
 	function _triggerAltUIUpgrade(urlsuffix) {
 		_controllers[0].controller.triggerAltUIUpgrade(urlsuffix);
 	};
-	function _buildUPnPGetFileUrl(altuid,name) {
+	function _buildUPnPGetFileUrl(altuiid,name) {
 		var elems = altuiid.split("-");
 		return _controllers[elems[0]].controller.getUPnPHelper().buildUPnPGetFileUrl(name);
 	};
@@ -379,11 +379,7 @@ var MultiBox = ( function( window, undefined ) {
 	//---------------------------------------------------------
 	// PUBLIC  functions
 	//---------------------------------------------------------
-	toto: function() {
-		_controllers[1].controller.runLua("return true",function(res) {
-			alert(res);
-		});
-	},
+
 	//static info per device type
 	initDB			 		: _initDB,	// (devicetypes)
 	initEngine				: _initEngine,	
