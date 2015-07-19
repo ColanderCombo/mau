@@ -1652,7 +1652,7 @@ function set_JSAPI_context(ctx) {
 	_JSAPI_ctx = $.extend( {
 			set_panel_html_callback: null,
 			deviceid: 0,
-			altuiid: "0-0",
+			altuiid: NULL_DEVICE,
 			controller: 0
 		}, 
 		ctx

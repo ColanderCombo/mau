@@ -32,6 +32,8 @@ THE SOFTWARE.
 */
 // UIManager.loadScript('https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["corechart","table","gauge"]}]}');
 var AltUI_revision = "$Revision$";
+var NULL_DEVICE = "0-0";
+var NULL_SCENE = "0-0";
 var _HouseModes = [];
 var deviceModalTemplate = "";
 var deviceActionModalTemplate = "";
@@ -2108,13 +2110,13 @@ var UIManager  = ( function( window, undefined ) {
 				widgetdisplay: function(widget,bEdit)	{ 
 					var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
 					return "<p style='color:{1};'>{0}</p>".format( 
-						(widget.properties.deviceid!="0-0") 
+						(widget.properties.deviceid!=NULL_DEVICE) 
 							? (MultiBox.getStatus( device, widget.properties.service, widget.properties.variable ) || '')
 							: 'not defined',
 						widget.properties.color);
 				},
 				properties: {
-					deviceid:"0-0",
+					deviceid:NULL_DEVICE,
 					service:'',
 					variable:'',
 					color:$(".altui-mainpanel").css("color")
@@ -2139,10 +2141,10 @@ var UIManager  = ( function( window, undefined ) {
 				property: _onPropertyIcon, 
 				widgetdisplay: function(widget,bEdit)	{ 
 					var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
-					return (widget.properties.deviceid=="0-0") ? ("<p>"+picGlyph+"</p>") : _deviceIconHtml( device );
+					return (widget.properties.deviceid==NULL_DEVICE) ? ("<p>"+picGlyph+"</p>") : _deviceIconHtml( device );
 				},
 				properties: {
-					deviceid:"0-0"
+					deviceid:NULL_DEVICE
 				} 
 			},
 			{ 	id:50, 
@@ -2154,7 +2156,7 @@ var UIManager  = ( function( window, undefined ) {
 				widgetdisplay: function(widget,bEdit)	{ 
 					var scene = MultiBox.getSceneByAltuiID(widget.properties.sceneid);
 					return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='MultiBox.runSceneByAltuiID({0})' style='{5}'>{4}{2}</button>".format(
-							scene ? scene.altuiid : "0-0",
+							scene ? scene.altuiid : NULL_DEVICE,
 							'altui-widget-runscene-button',
 							runGlyph.replace('glyphicon','pull-right glyphicon'),
 							(bEdit==true)?'disabled':'',
@@ -2163,7 +2165,7 @@ var UIManager  = ( function( window, undefined ) {
 							);
 				},
 				properties: {
-					sceneid:"0-0",
+					sceneid:NULL_SCENE,
 					label:''
 				} 
 			},
@@ -2176,7 +2178,7 @@ var UIManager  = ( function( window, undefined ) {
 				widgetdisplay: function(widget,bEdit)	{ 
 					var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
 					return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='MultiBox.runActionByAltuiID( {0}, \"{4}\", \"{5}\", {6} )' style='{8}' >{7}{2}</button>".format(
-						device ? device.altuiid : "0-0",
+						device ? device.altuiid : NULL_DEVICE,
 						'altui-widget-upnpaction-button',
 						runGlyph.replace('glyphicon','pull-right glyphicon'),
 						(bEdit==true)?'disabled':'',
@@ -2188,7 +2190,7 @@ var UIManager  = ( function( window, undefined ) {
 						);
 				},
 				properties: {	//( deviceID, service, action, params, cbfunc )
-					deviceid:"0-0",
+					deviceid:NULL_DEVICE,
 					label:'',
 					service:'',
 					action:'',
@@ -2232,7 +2234,7 @@ var UIManager  = ( function( window, undefined ) {
 						)+htmlLabels;
 				},
 				properties: {	//( deviceID, service, action, params, cbfunc )
-					deviceid:"0-0",
+					deviceid:NULL_DEVICE,
 					service:'',		// display state service
 					variable:'',	// display state variable
 					inverted:0,	// inverted to that onstate is value 0
@@ -2261,7 +2263,7 @@ var UIManager  = ( function( window, undefined ) {
 					return (device!=null) ? _cameraDraw(device,widget.size) : "<img src='{0}' style='max-height:100%; max-width:100%;'></img>".format(cameraURI);	//"<div class='altui-camera-div'>xxx</div>";
 				},
 				properties: {	//( deviceID, service, action, params, cbfunc )
-					deviceid:"0-0"
+					deviceid:NULL_DEVICE
 				} 
 			}
 			,{ 	id:80, 
@@ -2275,7 +2277,7 @@ var UIManager  = ( function( window, undefined ) {
 				onWidgetDisplay: _onDisplayGauge,
 				properties: {	//( deviceID, service, action, params, cbfunc )
 					label:'',
-					deviceid:"0-0",
+					deviceid:NULL_DEVICE,
 					min:0,
 					max:100,
 					greenfrom:'',
