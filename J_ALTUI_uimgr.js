@@ -3803,7 +3803,7 @@ var UIManager  = ( function( window, undefined ) {
 		
 	function _refreshUIPerDevice(eventname,device) {
 		// refresh device panels
-		$(".altui-device-controlpanel[data-devid='"+device.id+"']").not(".altui-norefresh").each( function(index,element) {			
+		$(".altui-device-controlpanel[data-altuiid='"+device.altuiid+"']").not(".altui-norefresh").each( function(index,element) {			
 			// force a refresh/drawing if needed.
 			// the event handler for the tab SHOW event will take care of the display of the tab
 			var activeTabIdx = _getActiveDeviceTabIdx();

@@ -930,7 +930,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 										}
 									});
 								});
-								EventBus.publishEvent("on_ui_deviceStatusChanged",device);
+								EventBus.publishEvent("on_ui_deviceStatusChanged",_user_data.devices[userdata_device_idx]);
 							}
 						});
 					}
