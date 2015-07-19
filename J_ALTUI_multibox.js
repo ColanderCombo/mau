@@ -210,8 +210,13 @@ var MultiBox = ( function( window, undefined ) {
 	function _getDeviceVariableHistory( device, varidx, cbfunc) {
 		return _controllers[0].controller.getDeviceVariableHistory( device, varidx, cbfunc);
 	};
-	function _getStates( deviceid  ) {
-		return _controllers[0].controller.getStates( deviceid  );
+	function _getStatesByAltuiID(altuiid) {
+		var elems = altuiid.split("-");
+		return _controllers[elems[0]].controller.getStates( elems[1]  );
+	};
+	function _getStates( device ) {
+		var elems = device.altuiid.split("-");
+		return _controllers[elems[0]].controller.getStates( elems[1]  );
 	};
 	function _getStatus( device, service, variable ) {
 		var elems = device.altuiid.split("-");
@@ -429,7 +434,8 @@ var MultiBox = ( function( window, undefined ) {
 	getDeviceBatteryLevel 	: _getDeviceBatteryLevel,	// ( device )
 	getDeviceVariableHistory : _getDeviceVariableHistory,//( device, varidx, cbfunc) 
 	evaluateConditions 		: _evaluateConditions,		// ( device,devsubcat,conditions ) evaluate a device condition table ( AND between conditions )
-	getStates				: _getStates,
+	getStates				: _getStates,				// ( device )
+	getStatesByAltuiID		: _getStatesByAltuiID,		// (altuiid)
 	getStatus				: _getStatus,				// ( device, service, variable ) 
 	setStatus				: _setStatus,				// ( device, service, variable, value, dynamic )				
 	getJobStatus			: _getJobStatus,			// (  jobid , cbfunc )

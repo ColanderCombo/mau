@@ -754,12 +754,12 @@ var DialogManager = ( function() {
 	{
 		$("#altui-select-device").on("change",function() {
 			widget.properties.deviceid = $("#altui-select-device").val();
-			var device = MultiBox.getDeviceByID(0,widget.properties.deviceid);
+			var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
 			$("#altui-select-variable").replaceWith( _getDeviceServiceVariableSelect( device , widget.properties.service, widget.properties.variable ) );
 		});
 		
 		//service & variables
-		var device = MultiBox.getDeviceByID(0,widget.properties.deviceid);
+		var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
 		var propertyline = "";
 		propertyline += "<div class='form-group'>";
 		propertyline += "	<label for='altui-widget-servicevariable'>Variable</label>";
@@ -775,7 +775,7 @@ var DialogManager = ( function() {
 		select.append("<option value='0' {0}>Select ...</option>".format( deviceid==0? 'selected' : ''));
 		MultiBox.getDevices( 
 			function(idx,device) {
-				select.append('<option value={0} {2}>{1}</option>'.format( device.id, device.name, deviceid==device.id ? 'selected' : ''));
+				select.append('<option value={0} {2}>{1}</option>'.format( device.altuiid, device.name, deviceid==device.altuiid ? 'selected' : ''));
 			},
 			$.isFunction(filterfunc) ? filterfunc : null,
 			function () {
@@ -798,7 +798,7 @@ var DialogManager = ( function() {
 		select.append("<option value='0' {0}>Select ...</option>".format( widget.properties.sceneid==0? 'selected' : ''));
 		MultiBox.getScenes( 
 			function(idx, scene) {
-				select.append('<option value={0} {2}>{1}</option>'.format( scene.id, scene.name, widget.properties.sceneid==scene.id ? 'selected' : ''));				
+				select.append('<option value={0} {2}>{1}</option>'.format( scene.altuiid, scene.name, widget.properties.sceneid==scene.altuiid ? 'selected' : ''));				
 			}, 
 			null, 
 			function(scenes) {
@@ -877,7 +877,7 @@ var DialogManager = ( function() {
 			args=[];
 			eventid=0;
 			selected_event = null;
-			var device = MultiBox.getDeviceByID( 0,deviceid );
+			var device = MultiBox.getDeviceByAltuiID( deviceid );
 			var events = MultiBox.getDeviceEvents(device);
 			$("select#"+htmlid).replaceWith( _getSelectForEvents( events ) );
 			$(".altui-arguments").html( _getEventArguments(selected_event, args) );
@@ -887,7 +887,7 @@ var DialogManager = ( function() {
 			args=[];
 			eventid=$(this).val();
 			selected_event = null;
-			var device = MultiBox.getDeviceByID( 0,deviceid );
+			var device = MultiBox.getDeviceByAltuiID( deviceid );
 			var events = MultiBox.getDeviceEvents(device);
 			$.each(events, function(idx,event){
 				if (eventid==event.id) {
@@ -897,7 +897,7 @@ var DialogManager = ( function() {
 			$(".altui-arguments").html( _getEventArguments(selected_event, args) );
 		});
 		
-		var device = MultiBox.getDeviceByID( 0,deviceid );
+		var device = MultiBox.getDeviceByAltuiID( deviceid );
 		var events = MultiBox.getDeviceEvents(device);
 		var propertyline = "";
 		propertyline += "<div class='form-group'>";
@@ -922,7 +922,7 @@ var DialogManager = ( function() {
 			widget.properties.deviceid = $("#altui-select-device").val();
 			_getActionParameterHtml( 
 				id+"-parameters",
-				MultiBox.getDeviceByID(0,widget.properties.deviceid), 
+				MultiBox.getDeviceByAltuiID(widget.properties.deviceid), 
 				actiondescriptor.action, 
 				actiondescriptor, 
 				function(html) {
@@ -937,7 +937,7 @@ var DialogManager = ( function() {
 			actiondescriptor.service = '';
 			actiondescriptor.action = '';
 			$("."+id+"-parameters").remove();
-			var device = MultiBox.getDeviceByID(0,widget.properties.deviceid);
+			var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
 			_getDeviceActionSelect( id, device , actiondescriptor, function (result) {
 				$("#"+id).replaceWith( result );
 				$("#"+id).on("change", _onChangeAction );
@@ -945,7 +945,7 @@ var DialogManager = ( function() {
 		});
 			
 		// get actions for the selected device
-		var device = MultiBox.getDeviceByID(0,widget.properties.deviceid);
+		var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
 		_getDeviceActionSelect( id, device , actiondescriptor, function (result) {
 			//result is a select with all the actions
 			var propertyline = "";
@@ -1017,7 +1017,11 @@ var SceneEditor = function (scene) {
 
 	var scene = scene;
 	var scenealtuiid = scene.altuiid;
-	
+	var scenecontroller = MultiBox.controllerOf(scene.altuiid).controller;
+
+	function _makeAltuiid(controllerid,id) {
+		return controllerid+"-"+id;
+	}
 	// trigger do not have IDs so use array index
 	function _displayTrigger(trigger,idx) {
 		function _findEventFromTriggerTemplate(device,template)
@@ -1046,7 +1050,7 @@ var SceneEditor = function (scene) {
 		
 		var html="";
 		var deviceid = trigger.device;
-		var device = MultiBox.getDeviceByID(0,deviceid);
+		var device = MultiBox.getDeviceByID(scenecontroller,deviceid);
 		var event = _findEventFromTriggerTemplate( device, trigger.template );
 		html +="<tr data-trigger-idx='"+idx+"'>";
 		html +="<td>";
@@ -1117,16 +1121,17 @@ var SceneEditor = function (scene) {
 		};
 		
 		var dialog = DialogManager.createPropertyDialog(_T('Trigger'));
+		var device = MultiBox.getDeviceByID( scenecontroller,trigger.device);
 		DialogManager.dlgAddLine( dialog , "TriggerName", _T("TriggerName"), trigger.name, "", {required:''} ); 
-		DialogManager.dlgAddDevices( dialog , trigger.device, function() {
-			DialogManager.dlgAddEvents( dialog, "Events", "altui-select-events", trigger.device, trigger.template, trigger.arguments );
+		DialogManager.dlgAddDevices( dialog , device.altuiid, function() {
+			DialogManager.dlgAddEvents( dialog, "Events", "altui-select-events",device.altuiid , trigger.template, trigger.arguments );
 			$('div#dialogModal').modal();
 		});
 		
 		$('div#dialogs').on( 'submit',"div#dialogModal form", { button: jqButton }, function( event ) {	
 			trigger.name = $("#altui-widget-TriggerName").val();
 			trigger.enabled = 1;
-			trigger.device = $("#altui-select-device").val();
+			trigger.device = parseInt(MultiBox.controllerOf( $("#altui-select-device").val() ).id) ;
 			trigger.template = $("#altui-select-events").val();
 			trigger.arguments = [];
 			$(".altui-arguments input").each( function(idx,elem)
@@ -1414,8 +1419,8 @@ var SceneEditor = function (scene) {
 	};
 	
 	function _displayDevice(deviceid) {
-		var device = MultiBox.getDeviceByID(0,deviceid);
-		return device.name + "<small class='text-muted'> (#"+deviceid+")</small>";
+		var device = MultiBox.getDeviceByID(scenecontroller,deviceid);
+		return device.name + "<small class='text-muted'> (#"+device.altuiid+")</small>";
 	};
 	
 	function _displayArguments(arguments) {
@@ -1449,10 +1454,11 @@ var SceneEditor = function (scene) {
 		};
 		
 		var dialog = DialogManager.createPropertyDialog(_T('Action'));
-		DialogManager.dlgAddDevices( dialog , action.device, function() {
+		var device = MultiBox.getDeviceByID(scenecontroller,action.device);
+		DialogManager.dlgAddDevices( dialog , device.altuiid, function() {
 			var widget = {
 				properties: {
-					deviceid: action.device,
+					deviceid: device.altuiid,
 					action: {
 						service:action.service,
 						action:action.action,
@@ -1470,7 +1476,7 @@ var SceneEditor = function (scene) {
 			{ scene: scene, button: jqButton },
 			function( event ) {
 				// save for real this time
-				action.device = $("#altui-select-device").val();
+				action.device = parseInt(MultiBox.controllerOf( $("#altui-select-device").val() ).id );
 				action = $.extend(action , DialogManager.getDialogActionValue("altui-select-action") );
 				action.arguments = [];
 				// read params
@@ -2100,7 +2106,7 @@ var UIManager  = ( function( window, undefined ) {
 				html: _toolHtml(infoGlyph,_T("Variable")),
 				property: _onPropertyVariable, 
 				widgetdisplay: function(widget,bEdit)	{ 
-					var device = MultiBox.getDeviceByID(0,widget.properties.deviceid);
+					var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
 					return "<p style='color:{1};'>{0}</p>".format( 
 						(widget.properties.deviceid!=0) 
 							? (MultiBox.getStatus( device, widget.properties.service, widget.properties.variable ) || '')
@@ -2132,7 +2138,7 @@ var UIManager  = ( function( window, undefined ) {
 				html: _toolHtml(picGlyph,_T("Device Icon")),
 				property: _onPropertyIcon, 
 				widgetdisplay: function(widget,bEdit)	{ 
-					var device = MultiBox.getDeviceByID(0,widget.properties.deviceid);
+					var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
 					return (widget.properties.deviceid==0) ? ("<p>"+picGlyph+"</p>") : _deviceIconHtml( device );
 				},
 				properties: {
@@ -2146,15 +2152,15 @@ var UIManager  = ( function( window, undefined ) {
 				property: _onPropertyRunscene, 
 				onWidgetResize: _onResizeStub,
 				widgetdisplay: function(widget,bEdit)	{ 
-				var scene = MultiBox.getSceneByID(0,widget.properties.sceneid);
-				return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='MultiBox.runSceneByAltuiID({0})' style='{5}'>{4}{2}</button>".format(
-						scene.altuiid,
-						'altui-widget-runscene-button',
-						runGlyph.replace('glyphicon','pull-right glyphicon'),
-						(bEdit==true)?'disabled':'',
-						widget.properties.label,
-						"height: 100%; width: 100%;"
-						);
+					var scene = MultiBox.getSceneByAltuiID(widget.properties.sceneid);
+					return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='MultiBox.runSceneByAltuiID({0})' style='{5}'>{4}{2}</button>".format(
+							scene.altuiid,
+							'altui-widget-runscene-button',
+							runGlyph.replace('glyphicon','pull-right glyphicon'),
+							(bEdit==true)?'disabled':'',
+							widget.properties.label,
+							"height: 100%; width: 100%;"
+							);
 				},
 				properties: {
 					sceneid:0,
@@ -2168,7 +2174,7 @@ var UIManager  = ( function( window, undefined ) {
 				property: _onPropertyUpnpAction, 
 				onWidgetResize: _onResizeStub,
 				widgetdisplay: function(widget,bEdit)	{ 
-					var device = MultiBox.getDeviceByID(0,widget.properties.deviceid);
+					var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
 					return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='MultiBox.runActionByAltuiID( {0}, \"{4}\", \"{5}\", {6} )' style='{8}' >{7}{2}</button>".format(
 						device.altuiid,
 						'altui-widget-upnpaction-button',
@@ -2195,7 +2201,7 @@ var UIManager  = ( function( window, undefined ) {
 				property: _onPropertyOnOffButton, 
 				widgetdisplay: function(widget,bEdit)	{
 					var status=0;
-					var device = MultiBox.getDeviceByID(0,widget.properties.deviceid);
+					var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
 					if (widget.properties.deviceid>0)
 					{
 						status = MultiBox.getStatus(device, widget.properties.service, widget.properties.variable);
@@ -2251,7 +2257,7 @@ var UIManager  = ( function( window, undefined ) {
 				aspectRatio: true,
 				property: _onPropertyCamera, 
 				widgetdisplay: function(widget,bEdit)	{ 
-					var device = MultiBox.getDeviceByID(0,widget.properties.deviceid);
+					var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
 					return (device!=null) ? _cameraDraw(device,widget.size) : "<img src='{0}' style='max-height:100%; max-width:100%;'></img>".format(cameraURI);	//"<div class='altui-camera-div'>xxx</div>";
 				},
 				properties: {	//( deviceID, service, action, params, cbfunc )
@@ -4023,7 +4029,7 @@ var UIManager  = ( function( window, undefined ) {
 			// save for real this time
 			real_widget.properties.deviceid = widget.properties.deviceid;
 			real_widget.properties.color = $('#altui-widget-Color').val();
-			var states = MultiBox.getStates( widget.properties.deviceid );
+			var states = MultiBox.getStatesByAltuiID( widget.properties.deviceid );
 			var selected = states[ $("#altui-select-variable").val() ];
 			real_widget.properties.service = selected.service;
 			real_widget.properties.variable = selected.variable;
@@ -4151,7 +4157,7 @@ var UIManager  = ( function( window, undefined ) {
 			real_widget.properties.deviceid = widget.properties.deviceid;
 			real_widget.properties.inverted = $("#altui-widget-Inverted").is(':checked');
 
-			var states = MultiBox.getStates( widget.properties.deviceid );
+			var states = MultiBox.getStatesByAltuiID( widget.properties.deviceid );
 			var selected = states[ $("#altui-select-variable").val() ];
 			real_widget.properties.variable = selected.variable;
 			real_widget.properties.service = selected.service;
@@ -4268,7 +4274,7 @@ var UIManager  = ( function( window, undefined ) {
 			.on( 'submit',"div#dialogModal form", function() {
 			// save for real this time
 			real_widget.properties.deviceid = widget.properties.deviceid;
-			var states = MultiBox.getStates( widget.properties.deviceid );
+			var states = MultiBox.getStatesByAltuiID( widget.properties.deviceid );
 			var selected = states[ $("#altui-select-variable").val() ];
 			real_widget.properties.variable = selected.variable;
 			real_widget.properties.service = selected.service;
@@ -4293,7 +4299,7 @@ var UIManager  = ( function( window, undefined ) {
 	function _onDisplayGauge(page,widgetid,bEdit)
 	{
 		var widget=PageManager.getWidgetByID( page, widgetid );
-		var device = MultiBox.getDeviceByID(0,widget.properties.deviceid)
+		var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
 		var value = parseFloat( MultiBox.getStatus(device, widget.properties.service, widget.properties.variable) || 0 );
 		var data = google.visualization.arrayToDataTable([
 		  ['Label', 'Value'],

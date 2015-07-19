@@ -407,12 +407,28 @@ var PageManager = (function() {
 			// { id:2, name:'page2' },
 		// ];
 
+	function _fixMyPage(page) {
+		$.each(page.children, function(idx,child) {
+			if (child.properties.deviceid) {
+				if (child.properties.deviceid.indexOf('-') == -1) {
+					child.properties.deviceid = "0-"+child.properties.deviceid;
+				}
+			}
+			if (child.properties.sceneid) {
+				if (child.properties.sceneid.indexOf('-') == -1) {
+					child.properties.sceneid = "0-"+child.properties.sceneid;
+				}
+			}
+		});
+	};
+	
 	function _init(pages) {
 		if (_pages==null)	// otherwise, already initialized 
 		{
 			AltuiDebug.debug("PageManager.init(), pages="+JSON.stringify(pages));
 			_pages = [];
 			$.each( pages, function(idx,page) {
+				_fixMyPage(page);	// temporary code to fix the page definition
 				_pages.push( $.extend( true, {id:0, name:'', background:''}, page) );
 			});
 		}
