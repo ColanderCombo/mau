@@ -211,8 +211,13 @@ var MultiBox = ( function( window, undefined ) {
 		return _controllers[0].controller.getDeviceByType(str);
 	};
 	function _getDeviceActions(device,cbfunc) {
-		var elems = device.altuiid.split("-");
-		return _controllers[elems[0]].controller.getDeviceActions(device,cbfunc);
+		if (device==null) 
+			cbfunc([]);
+		else {
+			var elems = device.altuiid.split("-");
+			return _controllers[elems[0]].controller.getDeviceActions(device,cbfunc);
+		}
+		return [];
 	};
 	function _getDeviceEvents(device) {
 		if (device==null) return [];

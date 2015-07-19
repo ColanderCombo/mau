@@ -1460,7 +1460,7 @@ var SceneEditor = function (scene) {
 		DialogManager.dlgAddDevices( dialog , device ? device.altuiid : NULL_DEVICE , function() {
 			var widget = {
 				properties: {
-					deviceid: device.altuiid,
+					deviceid: device ? device.altuiid : NULL_DEVICE,
 					action: {
 						service:action.service,
 						action:action.action,
