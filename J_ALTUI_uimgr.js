@@ -2929,9 +2929,9 @@ var UIManager  = ( function( window, undefined ) {
 		dropdownTemplate += "<span class='caret'></span>";
 		dropdownTemplate += "</button>";
 		dropdownTemplate += "<ul class='dropdown-menu' role='menu'>";
-		dropdownTemplate += "<li><a id='"+device.id+"' class='altui-device-variables' href='#' role='menuitem'>Variables</a></li>";
-		dropdownTemplate += "<li><a id='"+device.id+"' class='altui-device-actions' href='#' role='menuitem'>Actions</a></li>";
-		dropdownTemplate += "<li><a id='"+device.id+"' class='altui-device-controlpanelitem' href='#' role='menuitem'>Control Panel</a></li>";
+		dropdownTemplate += "<li><a id='"+device.altuiid+"' class='altui-device-variables' href='#' role='menuitem'>Variables</a></li>";
+		dropdownTemplate += "<li><a id='"+device.altuiid+"' class='altui-device-actions' href='#' role='menuitem'>Actions</a></li>";
+		dropdownTemplate += "<li><a id='"+device.altuiid+"' class='altui-device-controlpanelitem' href='#' role='menuitem'>Control Panel</a></li>";
 		dropdownTemplate += "</ul></div>";
 		dropdownTemplate += "<div class='pull-right text-muted'><small>#"+device.id+" </small></div>";
 
@@ -7812,14 +7812,13 @@ $(document).ready(function() {
 			$("#altui-debug-btn span.caret").toggleClass( "caret-reversed" );
 		})
 		.on("click",".altui-device-variables",function(){ 
-			// var id = $(this).prop('id');
-			var altui = $(this).closest(".altui-device").data("altuiid");
-			var device = MultiBox.getDeviceByAltuiID(altui);
+			var altuiid = $(this).prop('id');
+			var device = MultiBox.getDeviceByAltuiID(altuiid);
 			UIManager.deviceDrawVariables(device);
 		})
 		.on("click",".altui-device-actions",function(){ 
-			var altui = $(this).closest(".altui-device").data("altuiid");
-			var device = MultiBox.getDeviceByAltuiID(altui);
+			var altuiid = $(this).prop('id');
+			var device = MultiBox.getDeviceByAltuiID(altuiid);
 			UIManager.deviceDrawActions(device);
 		});
 	AltuiDebug.debug("init done");
