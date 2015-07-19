@@ -514,7 +514,7 @@ local htmlLayout = [[
 	<script type='text/javascript' >
 		google.setOnLoadCallback(drawVisualization);
 		function drawVisualization() {
-			console.log('google loaded');
+			//console.log('google loaded');
 		};
 		var g_DeviceTypes =  JSON.parse('@devicetypes@');
 		var g_CustomPages = @custompages@;

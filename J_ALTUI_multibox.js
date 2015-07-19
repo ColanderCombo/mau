@@ -91,7 +91,7 @@ var MultiBox = ( function( window, undefined ) {
 				case "on_ui_userDataFirstLoaded":
 					break;
 			}
-			console.log(eventname);
+			// console.log(eventname);
 			EventBus.publishEvent(eventname);
 		};
 		EventBus.waitForAll( "on_ui_userDataFirstLoaded", _getAllEvents("on_ui_userDataFirstLoaded"), this, _AllLoaded );
@@ -127,9 +127,22 @@ var MultiBox = ( function( window, undefined ) {
 		});
 		return;
 	};
-	function _getBoxInfo(controllerid) {
-		var id = controllerid || 0;
-		return _controllers[id].controller.getBoxInfo();
+	function _getBoxInfo() {
+		var arr=[];
+		$.each(_controllers, function(i,c) {
+			arr.push( c.controller.getBoxInfo() );
+		});
+		return arr;
+	};
+	function _isUI5(controller) {
+		if (controller==0)
+			return (_devicetypesDB["info"].ui7Check == "false" );
+		
+		var info = _controllers[controller].controller.getBoxInfo();
+		return (info.BuildVersion == undefined);
+	};
+	function _initializeJsonp(controller) {
+		return _controllers[controller].controller.initializeJsonp();
 	};
 	function _setHouseMode(newmode,cbfunc) {
 		return _controllers[0].controller.setHouseMode(newmode,cbfunc);
@@ -411,6 +424,10 @@ var MultiBox = ( function( window, undefined ) {
 		var id = controllerid || 0;
 		return _controllers[id].controller.isUserDataCached();
 	};
+	function _getIconPath( controllerid, iconname ) {
+		var id = controllerid || 0;
+		return _controllers[id].controller.getIconPath( iconname );
+	};
 	function _getIcon( controllerid, imgpath , cbfunc ) {
 		var id = controllerid || 0;
 		return _controllers[id].controller.getIcon( imgpath , cbfunc );
@@ -519,6 +536,9 @@ var MultiBox = ( function( window, undefined ) {
 	updatePluginVersion	: _updatePluginVersion,	//(id,ver,function(result)
 
 	// Misc
+	getBoxInfo			: _getBoxInfo,			// ()
+	isUI5				: _isUI5,				// (controller)
+	initializeJsonp		: _initializeJsonp,		// (controller)
 	getWeatherSettings 	: _getWeatherSettings,	// ()
 	runLua				: _runLua,				//(code, cbfunc) 
 	getLuaStartup		: _getLuaStartup,		//()
@@ -531,6 +551,7 @@ var MultiBox = ( function( window, undefined ) {
 	getPower			: _getPower,			//(cbfunc)
 	resetPollCounters	: _resetPollCounters,	//()
 	isUserDataCached	: _isUserDataCached,	//()
+	getIconPath			: _getIconPath,			// (device,str)
 	getIcon				: _getIcon,				// ( controllerid, imgpath , cbfunc )
 	buildUPnPGetFileUrl : _buildUPnPGetFileUrl,	// (name)
 	

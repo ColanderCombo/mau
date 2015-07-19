@@ -367,6 +367,7 @@ var EventBus = ( function (undefined) {
 	};
 
 	function _publishEvent(eventname/*, args */) {
+		// console.log(eventname);
 		if (_subscriptions[eventname]) {
 			// var theArgs = [].slice.call(arguments, 1);	// remove first argument
 			var theArgs = arguments;

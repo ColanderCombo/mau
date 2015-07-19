@@ -2765,6 +2765,7 @@ var UIManager  = ( function( window, undefined ) {
 //_devicetypesDB[ device.device_type ].ui_static_data.default_icon
 	function _getDeviceIconPath(device) {
 		var id = device.altuiid;
+		var controller = MultiBox.controllerOf(id).controller;
 		var _devicetypesDB = MultiBox.getDeviceTypesDB();
 		var icon='';
 		switch( device.device_type ) {
@@ -2855,7 +2856,8 @@ var UIManager  = ( function( window, undefined ) {
 						if ( (str == "icons/generic_sensor.png") || (str == "icons/Light_Sensor.png"))
 							str = defaultIconSrc;
 						else if (str == "icons/Window_Covering.png")
-							str = (_ui7Check==true) ? "../../icons/Window_Covering.png" : "../../../icons/Window_Covering.png";
+							str = (MultiBox.isUI5( controller ) ? "../../../icons/Window_Covering.png" : "../../icons/Window_Covering.png");
+						// //192.168.1.16/cmh/skins/default/img/devices/device_states/../../icons/Window_Covering.png
 						else if (str.substr(0,6) == "icons/")
 							str = "../../../"+str;
 						AltuiDebug.debug("Icon for device id:"+id+"  string after correction:"+str);
@@ -2872,7 +2874,11 @@ var UIManager  = ( function( window, undefined ) {
 					return str;
 				}
 				
-				icon = (str.substring(0,14)=="data:image/png") ? str : ("//{0}/cmh/skins/default/img/devices/device_states/{1}".format(window.location.hostname, str));
+				if (str.substring(0,14)=="data:image/png")
+					icon = str;
+				else 
+					icon = MultiBox.getIconPath(controller, str );
+
 				AltuiDebug.debug("Icon for device id:"+id+"  IconPath:"+icon);
 				break;
 		};
@@ -3119,7 +3125,7 @@ var UIManager  = ( function( window, undefined ) {
 			},
 			deviceid: device.id,
 			altuiid: device.altuiid,
-			controller: MultiBox.controllerOf(device.altuiid).controller
+			controllerid: MultiBox.controllerOf(device.altuiid).controller,
 		});
 		// set_set_panel_html_callback(function(html) {
 			// $(domparent).html(html);
@@ -3762,7 +3768,7 @@ var UIManager  = ( function( window, undefined ) {
 			var m;
 			if ((m = re.exec(AltUI_revision)) !== null) {
 				var jsrevision = m[1];
-				var info = MultiBox.getBoxInfo();
+				var info = MultiBox.getBoxInfo()[0];
 				var infotbl=[];
 				for( var key in info) { infotbl.push( info[key] || "") };
 				$("small#altui-footer").html( "<p>AltUI {0}.{1}, amg0,{2}</p>".format(_version,jsrevision,infotbl.join(", ")));

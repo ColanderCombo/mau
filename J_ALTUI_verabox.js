@@ -16,7 +16,7 @@ jsonp.ud.devices=[];
 jsonp.ud.scenes=[];
 jsonp.ud.rooms=[];
 jsonp.ud.static_data=[];
-var user_changes=0;
+
 
 var UPnPHelper = (function(ip_addr,veraidx) {
 	//---------------------------------------------------------
@@ -506,6 +506,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	var _devices = null;
 	var _categories = null;
 	var _devicetypes = {};
+	var _user_changes=0;
 	var _user_data = {};
 	var _change_cached_user_data = {};
 	var _user_data_DataVersion = 1;
@@ -525,13 +526,23 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			PageMessage.clearMessage(msgidx);
 		});
 		_change_cached_user_data={};
-		user_changes=0;	//UI5 compat
+		_user_changes=0;	//UI5 compat
 	};
 	
 	function _updateChangeCache( target ) {
 		$.extend(true, _change_cached_user_data, target);
 		PageMessage.message("You need to save your changes","info", true );
-		user_changes=1; //UI5 compat
+		_user_changes=1; //UI5 compat
+	};
+	
+	function _initializeJsonp() {
+		jsonp={};
+		jsonp.ud=_user_data;
+		// jsonp.ud.devices=[];
+		// jsonp.ud.scenes=[];
+		// jsonp.ud.rooms=[];
+		// jsonp.ud.static_data=[];
+		return jsonp;
 	};
 	
 	function _httpGet(url,opts,cbfunc) {
@@ -584,7 +595,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 				_scenes = null;
 				_devicetypes = [];
 				_change_cached_user_data={};
-				user_changes=0;	//UI5 compat
+				_user_changes=0;	//UI5 compat
 			}
 		});
 	};
@@ -699,6 +710,11 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		}
 		return _categories;
 	};
+	
+	function _getIconPath(name) {
+		return "//{0}/cmh/skins/default/img/devices/device_states/{1}".format( (_uniqID==0)  ? window.location.hostname : _upnpHelper.getIpAddr(), name);
+	};
+	
 	function _getIcon( imgpath , cbfunc ) {
 		var jqxhr = _httpGet("?id=sdata&output_format=json",{ data: { path: imgpath } },cbfunc);
 		return jqxhr;
@@ -911,6 +927,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 						data=JSON.parse(data);
 					_status_data_DataVersion = data.DataVersion;
 					_status_data_LoadTime = data.LoadTime;
+					// console.log("controller #{0} received  lu_status2 with data.UserData_DataVersion={1} ".format(_uniqID,data.UserData_DataVersion));
 					if (data.devices != undefined)
 					{
 						$.each(data.devices, function( idx, device) {
@@ -939,6 +956,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 					
 					// if user_data has changed, reload it
 					if (_user_data_DataVersion != data.UserData_DataVersion) {
+						// console.log("controller #{0} received  lu_status2 with data.UserData_DataVersion={1} =>requesting new user data".format(_uniqID,data.UserData_DataVersion));
 						_initDataEngine();
 					}
 					else {
@@ -967,27 +985,22 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			_scenes = data.scenes;
 			_devices = data.devices;
 			
-			// UI5 compatibility
-			jsonp.ud.devices=[];
-			jsonp.ud.scenes=[];
-			jsonp.ud.rooms=[];
-			jsonp.ud.static_data=data.static_data;
 			if (data.devices)
 				$.each(data.devices, function(idx,device) {
 					device.favorite=Favorites.get('device',device.id);
 					device.altuiid = "{0}-{1}".format(_uniqID,device.id);
-					jsonp.ud.devices.push(device);
+					// jsonp.ud.devices.push(device);
 				});
 			if (data.scenes)
 				$.each(data.scenes, function(idx,scene) {
 					scene.favorite=Favorites.get('scene',scene.id);
 					scene.altuiid = "{0}-{1}".format(_uniqID,scene.id);
-					jsonp.ud.scenes.push(scene);
+					// jsonp.ud.scenes.push(scene);
 				});
 			if (data.rooms)
 				$.each(data.rooms, function(idx,room) {
 					room.altuiid = "{0}-{1}".format(_uniqID,room.id);
-					jsonp.ud.rooms.push(room);
+					// jsonp.ud.rooms.push(room);
 				});
 			if (data.InstalledPlugins2)
 				$.each(data.InstalledPlugins2, function(idx,plugin) {
@@ -1050,9 +1063,11 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	function _initDataEngine() {
 		_dataEngine = null;
 		AltuiDebug.debug("_initDataEngine()");
+		// console.log("controller #{0} is requesting user_data with _user_data_DataVersion={1}".format(_uniqID,_user_data_DataVersion));
 		var jqxhr = _httpGet( "?id=user_data&output_format=json&DataVersion="+_user_data_DataVersion,
 			{beforeSend: function(xhr) { xhr.overrideMimeType('text/plain'); }},
 			function(data, textStatus, jqXHR) {
+				console.log("controller #{0} received user_data _user_data_DataVersion={1}".format(_uniqID,_user_data_DataVersion));
 				if (data!=null) {
 					_dataEngine = null;
 					_loadUserData(data);
@@ -1561,9 +1576,10 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	//---------------------------------------------------------
 	getUPnPHelper	: _getUPnPHelper,
 	triggerAltUIUpgrade : _triggerAltUIUpgrade,	// (suffix)
+	getIconPath		: _getIconPath,		// ( src )
 	getIcon			: _getIcon, 		// workaround to get image from vera box
 	getWeatherSettings : _getWeatherSettings,
-	getBoxInfo		: _getBoxInfo,
+	getBoxInfo		: _getBoxInfo,		//()
 	getLuaStartup 	: _getLuaStartup,
     getRooms		: _getRooms,		// in the future getRooms could cache the information and only call _getRooms when needed
     getRoomsSync	: function() 		{ return _rooms; },
@@ -1623,10 +1639,11 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	osCommand 		: _osCommand,	//(cmd,cbfunc)		
 	runLua			: _runLua,
 	
-	// caching user data changes and saving them at user request
-	updateChangeCache :_updateChangeCache,
-	saveChangeCaches  :_saveChangeCaches,
-	
+	// UI5 Compatibility mode: caching user data changes and saving them at user request
+	updateChangeCache : _updateChangeCache,
+	saveChangeCaches  : _saveChangeCaches,
+	initializeJsonp	  : _initializeJsonp,
+
 	// save page data into altui plugin device
 	saveData		: _saveData,		//  name, data , cbfunc
 	saveEngine 		: _saveEngine, 
@@ -1648,15 +1665,17 @@ var data_request_url = window.location.pathname+'?';
 var command_url = window.location.pathname.replace('/data_request','');
 
 var _JSAPI_ctx={};
+
 function set_JSAPI_context(ctx) {
 	_JSAPI_ctx = $.extend( {
 			set_panel_html_callback: null,
 			deviceid: 0,
 			altuiid: NULL_DEVICE,
-			controller: 0
-		}, 
-		ctx
-	);
+			controllerid: 0
+		}, ctx );
+
+	// UI5 compatibility
+	jsonp = MultiBox.initializeJsonp(_JSAPI_ctx.controllerid);
 };
 
 // function set_set_panel_html_callback(cb) {
@@ -1777,11 +1796,11 @@ function get_event_definition(DeviceType){
 }
 
 function new_scene_id(){
-	return MultiBox.getNewSceneID(_JSAPI_ctx.controller);
+	return MultiBox.getNewSceneID(_JSAPI_ctx.controllerid);
 }
 
 function get_device_state(deviceId, serviceId, variable, dynamic) {
-	var device = MultiBox.getDeviceByID( _JSAPI_ctx.controller , deviceId);
+	var device = MultiBox.getDeviceByID( _JSAPI_ctx.controllerid , deviceId);
 	return MultiBox.getStatus( device, serviceId, variable );
 };
 
@@ -1791,7 +1810,7 @@ function set_device_state (deviceId, serviceId, variable, value, dynamic) {
 	// 1 : means dynamic, lost at the next restart if not save
 	if (dynamic==undefined)
 		dynamic = 0;
-	var device = MultiBox.getDeviceByID(_JSAPI_ctx.controller,deviceId);
+	var device = MultiBox.getDeviceByID(_JSAPI_ctx.controllerid,deviceId);
 	MultiBox.setStatus( device, serviceId, variable, value  , dynamic );
 	return true;
 };
@@ -2403,7 +2422,10 @@ var api = {
 			onSuccess:null,
 			context:null
 		},options);
-		return _upnpHelper.UPnPAction( deviceId, service, action, options.actionArguments, function(data,jqXHR){
+		
+		// return _upnpHelper.UPnPAction( deviceId, service, action, options.actionArguments, function(data,jqXHR){
+		var device = MultiBox.getDeviceByID( _JSAPI_ctx.controllerid, deviceId );
+		return MultiBox.runAction(device, service, action, options.actionArguments,function(data,jqXHR){
 			if (data==null) {
 				if (options.onFailure)
 					(options.onFailure).call(options.context,{
@@ -2424,7 +2446,8 @@ var api = {
 		return this.performActionOnDevice(deviceId, service, action, options);
 	},
 	runUpnpCode: function(code, options, onSuccess, onFailure, context) {
-		return _upnpHelper.UPnPRunLua(code, function(data) {
+		// return _upnpHelper.UPnPRunLua(code, function(data) {
+		return MultiBox.runLua(_JSAPI_ctx.controllerid, code, function(data) {
 			if (data==null) {
 				if (onFailure)
 					(onFailure).call(context,null);
