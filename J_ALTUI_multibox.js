@@ -219,6 +219,8 @@ var MultiBox = ( function( window, undefined ) {
 		return _controllers[elems[0]].controller.getStates( elems[1]  );
 	};
 	function _getStatus( device, service, variable ) {
+		if (device==null)
+			return null;
 		var elems = device.altuiid.split("-");
 		return _controllers[elems[0]].controller.getStatus( elems[1], service, variable );
 	};

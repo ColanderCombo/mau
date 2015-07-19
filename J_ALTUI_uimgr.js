@@ -2114,7 +2114,7 @@ var UIManager  = ( function( window, undefined ) {
 						widget.properties.color);
 				},
 				properties: {
-					deviceid:0,
+					deviceid:"0-0",
 					service:'',
 					variable:'',
 					color:$(".altui-mainpanel").css("color")
@@ -2163,7 +2163,7 @@ var UIManager  = ( function( window, undefined ) {
 							);
 				},
 				properties: {
-					sceneid:0,
+					sceneid:"0-0",
 					label:''
 				} 
 			},
@@ -2188,7 +2188,7 @@ var UIManager  = ( function( window, undefined ) {
 						);
 				},
 				properties: {	//( deviceID, service, action, params, cbfunc )
-					deviceid:0,
+					deviceid:"0-0",
 					label:'',
 					service:'',
 					action:'',
@@ -2232,7 +2232,7 @@ var UIManager  = ( function( window, undefined ) {
 						)+htmlLabels;
 				},
 				properties: {	//( deviceID, service, action, params, cbfunc )
-					deviceid:0,
+					deviceid:"0-0",
 					service:'',		// display state service
 					variable:'',	// display state variable
 					inverted:0,	// inverted to that onstate is value 0
@@ -2275,7 +2275,7 @@ var UIManager  = ( function( window, undefined ) {
 				onWidgetDisplay: _onDisplayGauge,
 				properties: {	//( deviceID, service, action, params, cbfunc )
 					label:'',
-					deviceid:0,
+					deviceid:"0-0",
 					min:0,
 					max:100,
 					greenfrom:'',
