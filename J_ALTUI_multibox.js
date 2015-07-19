@@ -127,17 +127,26 @@ var MultiBox = ( function( window, undefined ) {
 		});
 		return;
 	};
-	function _getBoxInfo() {
-		return _controllers[0].controller.getBoxInfo();
+	function _getBoxInfo(controllerid) {
+		var id = controllerid || 0;
+		return _controllers[id].controller.getBoxInfo();
 	};
 	function _setHouseMode(newmode,cbfunc) {
 		return _controllers[0].controller.setHouseMode(newmode,cbfunc);
 	};
 	function _getRooms( func , filterfunc) {
-		return _controllers[0].controller.getRooms( func , filterfunc);
+		var arr=[];
+		$.each(_controllers, function( i,c) {
+			arr = arr.concat(c.controller.getRooms( func , filterfunc));
+		});		
+		return arr;
 	};
 	function _getRoomsSync() {
-		return _controllers[0].controller.getRoomsSync();
+		var arr=[];
+		$.each(_controllers, function( i,c) {
+			arr = arr.concat(c.controller.getRoomsSync( ));
+		});		
+		return arr;
 	};
 	function _getRoomByID( controllerid, roomid ) {
 		return _controllers[controllerid].controller.getRoomByID( roomid );
@@ -160,10 +169,12 @@ var MultiBox = ( function( window, undefined ) {
 		});
 	};
 	function _renameDevice( device, newname, roomid ) {
-		return _controllers[0].controller.renameDevice( device, newname, roomid);
+		var elems = device.altuiid.split("-");
+		return _controllers[elems[0]].controller.renameDevice( device, newname, roomid);
 	};
-	function _deleteDevice(id) {
-		return _controllers[0].controller.deleteDevice(id);
+	function _deleteDevice(device) {
+		var elems = device.altuiid.split("-");
+		return _controllers[elems[0]].controller.deleteDevice(elems[1]);
 	};
 	function _getDevices( func , filterfunc, endfunc ) {
 		var arr=[];
@@ -182,7 +193,8 @@ var MultiBox = ( function( window, undefined ) {
 		return arr;
 	};
 	function _getDeviceBatteryLevel(device) {
-		return _controllers[0].controller.getDeviceBatteryLevel(device);
+		var elems = device.altuiid.split("-");
+		return _controllers[elems[0]].controller.getDeviceBatteryLevel(device);
 	};
 	function _getDeviceByAltuiID( devid ) {
 		var elems = devid.split("-");
@@ -199,16 +211,20 @@ var MultiBox = ( function( window, undefined ) {
 		return _controllers[0].controller.getDeviceByType(str);
 	};
 	function _getDeviceActions(device,cbfunc) {
-		return _controllers[0].controller.getDeviceActions(device,cbfunc);
+		var elems = device.altuiid.split("-");
+		return _controllers[elems[0]].controller.getDeviceActions(device,cbfunc);
 	};
 	function _getDeviceEvents(device) {
-		return _controllers[0].controller.getDeviceEvents(device);
+		var elems = device.altuiid.split("-");
+		return _controllers[elems[0]].controller.getDeviceEvents(device);
 	};
 	function _getDeviceDependants(device) {
-		return _controllers[0].controller.getDeviceDependants(device);
+		var elems = device.altuiid.split("-");
+		return _controllers[elems[0]].controller.getDeviceDependants(device);
 	};
 	function _getDeviceVariableHistory( device, varidx, cbfunc) {
-		return _controllers[0].controller.getDeviceVariableHistory( device, varidx, cbfunc);
+		var elems = device.altuiid.split("-");
+		return _controllers[elems[0]].controller.getDeviceVariableHistory( device, varidx, cbfunc);
 	};
 	function _getStatesByAltuiID(altuiid) {
 		var elems = altuiid.split("-");
@@ -224,7 +240,7 @@ var MultiBox = ( function( window, undefined ) {
 		var elems = device.altuiid.split("-");
 		return _controllers[elems[0]].controller.getStatus( elems[1], service, variable );
 	};
-	function _setStatus( deviceid, service, variable, value, dynamic ) {
+	function _setStatus( device, service, variable, value, dynamic ) {
 		var elems = device.altuiid.split("-");
 		return _controllers[elems[0]].controller.setStatus( elems[1], service, variable, value, dynamic );
 	};
@@ -286,10 +302,20 @@ var MultiBox = ( function( window, undefined ) {
 		};
 	};
 	function _getScenes( func , filterfunc, endfunc ) {
-		return _controllers[0].controller.getScenes( func , filterfunc, endfunc );
+		var arr=[];
+		$.each(_controllers, function( i,c) {
+			arr = arr.concat(c.controller.getScenes( func , filterfunc, null ));
+		});
+		if ($.isFunction(endfunc))
+			(endfunc)( arr );		
+		return arr;
 	};
 	function _getScenesSync() {
-		return _controllers[0].controller.getScenesSync();
+		var arr=[];
+		$.each(_controllers, function( i,c) {
+			arr = arr.concat(c.controller.getScenesSync());
+		});	
+		return arr;
 	};	
 	function _getSceneByID(controllerid,sceneid) {
 		return _controllers[controllerid].controller.getSceneByID(sceneid)
@@ -338,7 +364,13 @@ var MultiBox = ( function( window, undefined ) {
 		return _controllers[0].controller.saveData( name, data , cbfunc );
 	};	
 	function _getPlugins( func , endfunc ) {
-		return _controllers[0].controller.getPlugins( func , endfunc );
+		var arr=[];
+		$.each(_controllers, function( i,c) {
+			arr = arr.concat(c.controller.getPlugins( func , null ));
+		});
+		if ($.isFunction(endfunc))
+			(endfunc)( arr );		
+		return arr;
 	};
 	function _deletePlugin( altuiid, cbfunc) {
 		var elems = altuiid.split("-");

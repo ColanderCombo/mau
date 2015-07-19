@@ -2941,7 +2941,7 @@ var UIManager  = ( function( window, undefined ) {
 		dropdownTemplate += "<li><a id='"+device.altuiid+"' class='altui-device-actions' href='#' role='menuitem'>Actions</a></li>";
 		dropdownTemplate += "<li><a id='"+device.altuiid+"' class='altui-device-controlpanelitem' href='#' role='menuitem'>Control Panel</a></li>";
 		dropdownTemplate += "</ul></div>";
-		dropdownTemplate += "<div class='pull-right text-muted'><small>#"+device.id+" </small></div>";
+		dropdownTemplate += "<div class='pull-right text-muted'><small>#"+device.altuiid+" </small></div>";
 
 		var devicecontainerTemplate	= "<div class='panel panel-{4} altui-device' data-altuiid='{5}' id='{0}'>"
 		devicecontainerTemplate	+=		"<div class='panel-heading altui-device-heading'>"+dropdownTemplate+batteryHtml+"<div class='panel-title altui-device-title' data-toggle='tooltip' data-placement='left' title='{2}'>{1}</div></div>";
@@ -4762,7 +4762,7 @@ var UIManager  = ( function( window, undefined ) {
 						var id = $(this).prop('id');
 						DialogManager.confirmDialog(_T("Are you sure you want to delete device ({0})").format(id),function(result) {
 							if (result==true) {
-								MultiBox.deleteDevice(id);
+								MultiBox.deleteDevice(device);
 							}
 						});
 					});
