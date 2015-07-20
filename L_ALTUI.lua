@@ -124,7 +124,7 @@ end
 function proxySoap(lul_device,newUrl,soapaction,envelop,body)
 	debug(string.format("proxySoap lul_device:%d soapaction:%s",lul_device,soapaction))	
 	debug(string.format("body:%s",body))
-	local mybody = string.format(envelop,body)
+	local mybody = string.format(envelop,xml_encode(body))
 	-- local mybody="<s:Envelope xmlns:s='http://schemas.xmlsoap.org/soap/envelope/' s:encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'>   <s:Body>      <u:ModifyUserData xmlns:u='urn:schemas-micasaverde-org:service:HomeAutomationGateway:1'>         <inUserData>		 	{&quot;devices&quot;:{},&quot;scenes&quot;:{&quot;scenes_57&quot;:{&quot;timers&quot;:[],&quot;triggers&quot;:[{&quot;name&quot;:&quot;Below 1km&quot;,&quot;enabled&quot;:1,&quot;template&quot;:&quot;2&quot;,&quot;device&quot;:&quot;94&quot;,&quot;arguments&quot;:[{&quot;id&quot;:&quot;1&quot;,&quot;value&quot;:&quot;1&quot;}],&quot;LastEval&quot;:1,&quot;last_run&quot;:1437379682}],&quot;groups&quot;:[{&quot;delay&quot;:0,&quot;actions&quot;:[]}],&quot;name&quot;:&quot;Alexis 1km&quot;,&quot;lua&quot;:&quot;--- message\nlocal current = os.time()\nlocal message = \&quot;\\nBelow 1km. \\n Heure:\&quot; .. os.date(\&quot;%c\&quot;,current) .. \&quot;\\n\&quot;\npushingbox_notify( message  )\nreturn true&quot;,&quot;id&quot;:57,&quot;room&quot;:&quot;11&quot;,&quot;modeStatus&quot;:&quot;1,2,3,4&quot;,&quot;paused&quot;:0,&quot;favorite&quot;:false,&quot;altuiid&quot;:&quot;0-57&quot;,&quot;last_run&quot;:1437379024,&quot;Timestamp&quot;:1437379040}},&quot;sections&quot;:{},&quot;rooms&quot;:{},&quot;InstalledPlugins&quot;:[],&quot;PluginSettings&quot;:[],&quot;users&quot;:{}}		 	</inUserData>         <DataFormat>json</DataFormat>      </u:ModifyUserData>   </s:Body></s:Envelope>"
 	debug(string.format("mybody:%s",mybody))
 	local result = {}
@@ -143,7 +143,7 @@ function proxySoap(lul_device,newUrl,soapaction,envelop,body)
 			-- ["X-Requested-With"]="XMLHttpRequest",
 			["Accept-Encoding"]="gzip, deflate",
 			["Accept-Language"]= "fr,fr-FR;q=0.8,en;q=0.6,en-US;q=0.4",
-			["SOAPACTION"]="urn:schemas-micasaverde-org:service:HomeAutomationGateway:1#" .. soapaction
+			["SOAPACTION"]="\"urn:schemas-micasaverde-org:service:HomeAutomationGateway:1#" .. soapaction.."\""
 		},
 		sink = ltn12.sink.table(result)
 	})
