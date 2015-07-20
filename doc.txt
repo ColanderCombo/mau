@@ -1,94 +1,97 @@
-An alternative UI for VERA boxes based on UI5 UI7.  
+[u][b]An alternative UI for VERA boxes based on UI5 UI7[/b][/u]
 
-This only requires a single plugin , working on both UI7 and UI5 boxes and with fully responsive design ( working on Phones, tablet etc ). 
-Key features:
-- Just a classical plugin , no extra HW or servers
-- fully featured for room devices scenes plugins
-- scene editor
-- user definable custom synotpic panel pages
-- extensibile design with javascript modules for plugins dashboard & control panels
-- responsive design / all form factors supported 
-- local and remote access via UI7 MMS authentication servers
-- D3JS animated graphs for device parent child , zWave neighbors, routes & quality
-- Plugin management ( install,  updates, deletes )
-- compatibility with most 3rd party plugins
-- display of plugin dynamic custom icons, even in remote access mode
-- localized ( french, english ) , open to other languages as well
+This plugin offers an alternative user interface for your VERA(s) controllers that is more pleasant and works on any kind of device as a web application which will automatically adjust to screen size.
 
-Features:
+It works as a simple plugin and you just need your browser. it supports UI5 and UI7 veras and can aggregate in the same screen the devices from multiple seperate VERA boxes.
+It is not just a re skin of UI5/7, and will offer a number of additional feature
+
+[b]LATEST VERSION[/b] : [glow=red,2,300]V 0.61.436 July 20th 2015[/glow] : 
+
+[b]Extra features not present in UI5 UI7[/b]:
 [list]
-[li]Standalone web page, no server needed besides VERA.[/li]
-[li]Multiple VERA box support ![/li]
-[li]Fully responsive design: phone, tablet, desktop[/li]
-[li]language aware ( FR IT provided ).[/li]
-[li]Skinnable based on bootstrap styles like on https://bootswatch.com/[/li]
-[li]Local or remote access via MMS[/li]
-[li]Extensible architecture ( device dashboard & panel can be extended by a custom JS module ). authors welcome to contact me on how to do this[/li]
-[li]works on UI5 and UI7 boxes[/li]
+[li]Fully responsive design / all form factors supported , no need to install a new application on your mobile [/li]
+[li]works indifferently on UI5 and UI7 boxes and thus offers an enhanced experience even on older boxes without adding load to your controller. it maximizes the power of our modern browser and seldomly relies on the VERA controller[/li]
+[li]works with [b]multiple VERA controllers[/b], you can see & interact with devices and scenes of multiple controllers transparently[/li]
+[li]user defined custom synoptic panels[/li]
+[list]
+[li]made of elements out of your devices ( variables, actions, images, text ) but also cameras,  graphical gauges[/li]
+[li]nice Hi/FI like on/off button[/li]
+[li]nice analog gauges to display a chosen device variable value[/li]
+[li]with a full Wysiwig editor mode for pages[/li]
+[li]drag and drop of control to add/remove and aligns[/li]
+[li]selectable page background with CSS3 property : gradiant, images or even video background if you want ![/li]
+[/list]
+[li]extensible design with javascript modules for plugins dashboard & control panels[/li]
+[li]compatibility with most 3rd party plugins (IPhone locator google map), all but a few custom devices are controllable.[/li]
+[li]all custom icons are displayed , even in remote access mode[/li]
+[li]Complex graphics made with D3JS library, animated graphs for device parent child relationships, zWave neighbors, zWave routes & route quality.[/li]
+[li]Power/Energy consumption graph[/li]
+[li]Parent Child relationship on a force layout d3js map[/li]
+[li]zWave neighborhood map with color based on PollOk % status. Click able node on zWave map[/li]
+[li]zWave Route Quality Chart[/li]
+[li]Table of device with choose able / sortable columns and ability to export[/li]
+[li]trigger remote execution of user chooseable unix OS command and display output.[/li] 
+[li]History button to automatically display Scene last Execution timestamps from the lua log files[/li]
+[li]History button to automatically display Device Variable Changes from the lua log files[/li]
+[li]supports lua log and ANSI color display[/li]
+[li]Auto detection of new version & updates[/li]
+[li]Client device specific Favorite device / scene selection ( your favorites may be different on your phone or your pc)[/li]
+[li]Persistence of settings, preferences, filtering selection in various screens[/li]
+[li]Powerful filter on pages ( by category, room, name, battery )[/li]
+[li]Visible battery status[/li]
+[li]Plugin page: List of installed, direct button to reach the store, update from store, uninstall, to reach help page from the author, direct button to view content/download plugin files [/li]
+[li]Plugin page: plugin files selectio and easy content display in editor[/li]
+[li]Display of manually installed plugin[/li]
+[/list]
+
+[b]Features equivalent to UI5 UI7[/b]:
+[list]
+[li]local and remote access via UI7 MMS authentication servers[/li]
+[li]fully featured for room devices scenes plugins[/li]
 [li]Room: List, Create, Rename[/li]
 [li]Scene: List, Execution, Create, Edit ( triggers, timers, actions, event lua code, time restriction, housemode selection )[/li]
+[li]Trigger time range restriction ( new feature of latest UI7, now in AltUI too )[/li]
+[li]Scene Mode selection  ( UI7 only )[/li]
+[li]Scene Pause feature : in one click[/li]
+[li]Trigger time range restriction ( new feature of latest UI7, now in AltUI too )[/li]
 [li]Device: List, responsive design page, "as you type" Filter by name/category/room[/li]
 [li]Device: small dashboard panels to fit many device on one screen. Dynamic icons as defined by the plugin author in the JSON file[/li]
-[li]Device Variables: List & Edit [/li]
-[li]Device UpnP Actions: List & trigger with parameters [/li]
-[li]Device Control panel: per the static JSON file of the author. Display "flash" and "javascript" tab. In addition it can be customized via a ALTUI plugin.[/li]
-[li]Device Attributes: List / Edit[/li]
+[li]Device: Variables: List & Edit with enhanced display format ( dates shown as dates, url as url )[/li]
+[li]Device: UpnP Actions: List & trigger with parameters [/li]
+[li]Device: Control panel: per the static JSON file of the author. Display "flash" and "javascript" tab. In addition it can be customized via a ALTUI plugin.[/li]
+[li]Device: Attributes: List / Edit[/li]
+[li]Device: UpdateNeighbours feature in device Actions dialog box[/li]
 [li]Camera: live video feed in local mode, images in remote mode[/li]
-[li]Custom pages: Use mode (kiosk) and Edit. User can create its own set of custom pages by drag and drop of widgets like device icon, web images, device action button, device variable/labels, camera picture or google gage. Alignment tools to create nice looking panel, customizable background by css3 ( images, gradiant... ), persistent storage of the pages on the VERA box by the LUA plugin [/li]
+[li]Custom pages: Use mode (kiosk) and Edit. User can create its own set of custom pages by drag and drop of widgets 
+like device icon, web images, device action button, device variable/labels, camera picture or google gage. 
+Alignment tools to create nice looking panel, customizable background by css3 ( images, gradiant... ), persistent storage of the pages on the VERA box by the LUA plugin [/li]
 [li]Lua test code editor / Lua startup code editor[/li]
-[li]Plugins : List of installed, direct button to reach the store, update from store, uninstall, to reach help page from the author, direct button to view content/download plugin files [/li]
-[li]Instantenous Power Consumption Graph[/li]
-[li]zWave neighbourhood map[/li]
-[li]Parent Child relationship map[/li]
+[li]scene editor[/li]
+[li]Plugin management ( install,  updates, deletes )[/li]
+[li]language aware ( EN FR IT provided ) , open design to add other languages as well[/li]
+[li]Compatible with most plugins including those with javascript tabs using the UI5 UI7 javascript API. like the RGBW plugin support[/li]
 [/list]
 
-OFFICIAL VERSION   in Mios store
+[b]Customization[/b]
 [list]
-[li][url=http://apps.mios.com/plugin.php?id=8246]http://apps.mios.com/plugin.php?id=8246[/url][/li]
-[/list]
-
-LATEST VERSION : [glow=red,2,300]V 0.61.436 July 20th 2015[/glow] : 
-[list]
-[li]Multiple VERA box support ![/li]
-[li]trigger remote execution of OS command and display output. supports lua log and ANSI color[/li]
-[li]Autodetection of new version & updates[/li]
-[li]Favorite device / scene feature[/li]
-[li]Table of devices with selectable and sortable columns[/li]
-[li]Trigger timerange restriction ( new feature of latest UI7, now in AltUI too )[/li]
-[li]Scene All Mode behavior fix ( no mode means All modes )[/li]
-[li]Scene Pause feature[/li]
-[li]UpdateNeighbours feature in device Actions dialog box[/li]
-[li]Parent Child Force Layout Chart[/li]
-[li]zWave Route Chart[/li]
-[li]zWave Route Quality Chart[/li]
-[li]Persistent active state for room filter button on scene page[/li]
-[li]Open button for datamine plugin small dashboard[/li]
-[li]UserSuppliedWattage value shown on powerlight dashboard[/li]
-[li]cleaner localization page[/li]
-[li]RGBW plugin support[/li]
-[li]UI7 javascript api style support for device which have a javascript control panel coded in UI7 style ( like the RGBW )[/li]
-[li]zWave map with color based on PollOk % status. Clickable node on zWave map[/li]
-[li]Power/Energy graph[/li]
-[li]Room scene button filter[/li]
-[li]window cover fix for Duewi[/li]
-[li]localizable based on browser language, overidable with lang=xx on the url. FR and IT localization file provided.[/li]
-[li]dashboard device display for Datamine,Infoviewer, Weather, Light sensor, Holiday plugins[/li]
-[li]Device variable dialog: Date editor and clickable URL[/li]
-[li]Plugin page: plugin file content display box[/li]
-[li]Display of manually installed plugin[/li]
+[li]Each device type can have its own custom panel : Datamine, Infoviewer, Weather, Light sensor, Holiday plugins, IPhone Locator, IPX800[/li]
+[li]Simple javascript API to dynamically load custom plugins to display device small panels, 
+device large control panels, device icons. ask me for details, but basically you do not need to master lots of things as long as 
+you know how to use jquery and to write HTML elements in a parent container. I will integrate your contributions[/li]
 [li]Display of Watts & last trip date on device dashboards[/li]
-[li]couple of bug fixes, like display of google map for IPhoneLocator[/li]
+[li]Skinnable based on bootstrap styles you can find on https://bootswatch.com/[/li]
+[li]Extensible architecture ( device dashboard & panel can be extended by a custom JS module ). [u]developpers are welcomed to contact me on how to do this[/u][/li]
+[li]Selectable home page by a url parameter ( home= )[/li]
+[li]Selectable language by a url parameter ( lang= )[/li]
+[li]language list extensible by a simple javascript, [u]ask me & contribute if you want[/u][/li]
 [/list]
 
-INSTALL
+[b]Prerequisite requirements[/b]
 [list]
-[li]official version : by the store or the UI7 "Apps' menu[/li]
-[li]latest version : accept the autoupdate dialog box proposal , or install by opening this link in your browser  [url=http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28126]http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28126[/url]
-ignore error messages displayed by this page and wait until your unit reloads...[/li]
+[li]Just a classical plugin , no extra HW or servers[/li]
 [/list]
 
-
-ACCESS
+[b]HOW TO USE / LOCAL and REMOTE ACCESS[/b]
 [list]
 [li]UI5 & UI7 local access: http://<yourip>/port_3480/data_request?id=lr_ALTUI_Handler&command=home#[/li]
 [li]optional parameter:  lang=ll for language ( fr,en,it ) , home=xx where xx is one of pageHome, pageUsePages, pageDevices, pageScenes to force a start page[/li]
@@ -97,23 +100,48 @@ ACCESS
 [/li]
 [/list]
 
+[b]OFFICIAL VERSION   in Mios store[/b]
+[list]
+[li][url=http://apps.mios.com/plugin.php?id=8246]http://apps.mios.com/plugin.php?id=8246[/url][/li]
+[/list]
 
+[b]INSTALL[/b]
+[list]
+[li]official version : by the store or the UI7 "Apps' menu[/li]
+[li]latest version : accept the autoupdate dialog box proposal , or install by opening this link in your browser  
+[url=http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28126]http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28126[/url]
+ignore error messages displayed by this page and wait until your unit reloads...[/li]
+[/list]
 
-Some DOCs in French
+[b]ALTUI Device VARIABLES[/b]
+[list]
+[li][b]PluginConfig [/b]: JSON structure to configure ALTUI optional modules.[/li]
+[li][b]RemoteAccess [/b]: remote access url for MMS login[/li]
+[li][b]ThemeCSS [/b]: a full url to download a CSS skin for ALTUI[/li]
+[li][b]UI7Check [/b]: true if running on UI7[/li]
+[li][b]Version [/b]: the LUA plugin version[/li]
+[li][b]LocalCDN [/b]: a full path name from VERA root '/' where the necessary files for ALTUI are stored. can be left empty and ALTUI will get files from the internet but this option enables an internet free operation of ALTUI[/li]
+[li][b]ExtraController [/b]: a optional , comma seperated list of additional VERA controllers to use. the main controller must not be listed and this variable can be left emtpy if you use only one VERA with ALTUI[/li]
+[li][b]Debug [/b]: 1 for extra debugging logs[/li]
+[li][b]Data_xx_xx[/b] variables : internal storage for ALTUI user pages definitions[/li]
+[li][b]Data_CustomPages_0[/b] : JSON array of user custom page names[/li]
+[/list]
+
+[b]Some DOCs in French[/b]
 [list]
 [li]Generic Introduction & Tutorial : [url=http://code.mios.com/trac/mios_alternate_ui/export/100/Doc%20FR%20ALTUI%20-%20Part1.docx]http://code.mios.com/trac/mios_alternate_ui/export/100/Doc%20FR%20ALTUI%20-%20Part1.docx[/url][/li]
 [li]Custom Page Tutorial : [url=http://code.mios.com/trac/mios_alternate_ui/export/100/Doc%20FR%20ALTUI%20-%20Part2.docx]http://code.mios.com/trac/mios_alternate_ui/export/100/Doc%20FR%20ALTUI%20-%20Part2.docx[/url][/li]
 [li]Extension coding tutorial : [url=http://code.mios.com/trac/mios_alternate_ui/export/100/Doc%20FR%20ALTUI%20-%20Part3.docx]http://code.mios.com/trac/mios_alternate_ui/export/100/Doc%20FR%20ALTUI%20-%20Part3.docx[/url][/li]
 [/list]
 
-Overall DOC in English : 
+[b]Overall DOC in English[/b] : 
 [list]
 [li][url=http://code.mios.com/trac/mios_alternate_ui/export/245/doc.docx]http://code.mios.com/trac/mios_alternate_ui/export/245/doc.docx[/url]
 [/li]
 [li][url=http://code.mios.com/trac/mios_alternate_ui/export/245/doc.pdf]http://code.mios.com/trac/mios_alternate_ui/export/245/doc.pdf[/url][/li]
 [/list]
 
-BLOG & Web Magazine
+[b]BLOG & Web Magazine[/b]
 [list]
 [li]AltUI, an introduction: [url=http://www.domotique-info.fr/2015/04/altui-pour-vera-une-alternative-ui5-ou-ui7/]http://www.domotique-info.fr/2015/04/altui-pour-vera-une-alternative-ui5-ou-ui7/[/url][/li]
 [li]
@@ -121,9 +149,19 @@ Custom Page tutorial: [url=http://www.touteladomotique.com/index.php?option=com_
 [li]Extensibility for programmers : [url=http://www.touteladomotique.com/index.php?option=com_content&view=article&id=1445:altuin-user-interface-alternative-pour-vera-extensions&catid=5:domotique&Itemid=89#.VTi-C1Xtmko]http://www.touteladomotique.com/index.php?option=com_content&view=article&id=1445:altuin-user-interface-alternative-pour-vera-extensions&catid=5:domotique&Itemid=89#.VTi-C1Xtmko[/url][/li]
 [/list]
 
-SOURCE code: [url=http://code.mios.com/trac/mios_alternate_ui/browser]http://code.mios.com/trac/mios_alternate_ui/browser[/url]
+[b]SOURCE code[/b]: 
+Read only access to everybody on [url=http://code.mios.com/trac/mios_alternate_ui/browser]http://code.mios.com/trac/mios_alternate_ui/browser[/url] but for non commercial use.
 
+[b]COST[/b]
+[list]
+[li]Free for non commercial use but please consider the option to:[/li]
+[list]
+[li]Donate via the paypal button to support the effort[/li]
+[li]Rank the app in the app store[/li]
+[li]Make noise in the forum:)[/li]
+[/list]
+[/list]
 
 Feedbacks & Help more than welcomed.
-Please rate the app on the store !
 thx !
+amg0.
