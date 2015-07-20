@@ -134,6 +134,14 @@ var MultiBox = ( function( window, undefined ) {
 		});
 		return arr;
 	};
+	function _getUrlHead(altuiid) {
+		var elems = altuiid.split("-");
+		return _controllers[elems[0]].controller.getUrlHead();
+	};
+	function _getIpAddr(altuiid) {
+		var elems = altuiid.split("-");
+		return _controllers[elems[0]].controller.getIpAddr();
+	};	
 	function _isUI5(controller) {
 		if (controller==0)
 			return (_devicetypesDB["info"].ui7Check == "false" );
@@ -537,6 +545,8 @@ var MultiBox = ( function( window, undefined ) {
 
 	// Misc
 	getBoxInfo			: _getBoxInfo,			// ()
+	getUrlHead			: _getUrlHead,			// ()
+	getIpAddr			: _getIpAddr,			// ()
 	isUI5				: _isUI5,				// (controller)
 	initializeJsonp		: _initializeJsonp,		// (controller)
 	getWeatherSettings 	: _getWeatherSettings,	// ()

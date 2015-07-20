@@ -58,18 +58,6 @@ function file_exists(name)
    if f~=nil then io.close(f) return true else return false end
 end
 
-function proxyGet(lul_device,newUrl,resultName)
-	debug(string.format("proxyGet lul_device:%d",lul_device))	
-	local httpcode,data = luup.inet.wget(newUrl,10)
-	if (httpcode~=0) then
-		error(string.format("failed to connect to url:%s, http.request returned %d", newUrl,httpcode))
-		return 0,"";
-	end
-	debug(string.format("success httpcode:%s",httpcode))	
-	debug(string.format("data:%s",data))	
-	return 1,data
-end
-
 function setDebugMode(lul_device,newDebugMode)
 	lul_device = tonumber(lul_device)
 	newDebugMode = tonumber(newDebugMode) or 0
@@ -112,6 +100,68 @@ function url_decode(str)
       function(h) return string.char(tonumber(h,16)) end)
   str = string.gsub (str, "\r\n", "\n")
   return str
+end
+
+function proxyGet(lul_device,newUrl,resultName)
+	debug(string.format("proxyGet lul_device:%d",lul_device))	
+	local httpcode,data = luup.inet.wget(newUrl,10)
+	if (httpcode~=0) then
+		error(string.format("failed to connect to url:%s, http.request returned %d", newUrl,httpcode))
+		return 0,"";
+	end
+	debug(string.format("success httpcode:%s",httpcode))	
+	debug(string.format("data:%s",data))	
+	return 1,data
+end
+
+-- <s:Envelope xmlns:s='http://schemas.xmlsoap.org/soap/envelope/' s:encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'>   <s:Body>      <u:ModifyUserData xmlns:u='urn:schemas-micasaverde-org:service:HomeAutomationGateway:1'>         <inUserData>		 	{&quot;devices&quot;:{},&quot;scenes&quot;:{&quot;scenes_57&quot;:{&quot;timers&quot;:[],&quot;triggers&quot;:[{&quot;name&quot;:&quot;Below 1km&quot;,&quot;enabled&quot;:1,&quot;template&quot;:&quot;2&quot;,&quot;device&quot;:&quot;94&quot;,&quot;arguments&quot;:[{&quot;id&quot;:&quot;1&quot;,&quot;value&quot;:&quot;1&quot;}],&quot;LastEval&quot;:1,&quot;last_run&quot;:1437377298}],&quot;groups&quot;:[{&quot;delay&quot;:0,&quot;actions&quot;:[]}],&quot;name&quot;:&quot;Alexis 1km&quot;,&quot;lua&quot;:&quot;--- message\nlocal current = os.time()\nlocal message = \&quot;\\nBelow 1km. \\n Heure:\&quot; .. os.date(\&quot;%c\&quot;,current) .. \&quot;\\n\&quot;\npushingbox_notify( message  )\nreturn true&quot;,&quot;id&quot;:57,&quot;room&quot;:&quot;11&quot;,&quot;modeStatus&quot;:&quot;1,2,3,4&quot;,&quot;paused&quot;:0,&quot;favorite&quot;:false,&quot;altuiid&quot;:&quot;0-57&quot;,&quot;last_run&quot;:1437376224,&quot;Timestamp&quot;:1437377258}},&quot;sections&quot;:{},&quot;rooms&quot;:{},&quot;InstalledPlugins&quot;:[],&quot;PluginSettings&quot;:[],&quot;users&quot;:{}}		 	</inUserData>         <DataFormat>json</DataFormat>      </u:ModifyUserData>   </s:Body></s:Envelope>
+-- <s:Envelope xmlns:s='http://schemas.xmlsoap.org/soap/envelope/' s:encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'>   <s:Body>      <u:ModifyUserData xmlns:u='urn:schemas-micasaverde-org:service:HomeAutomationGateway:1'>         <inUserData>		 	{&quot;devices&quot;:{},&quot;scenes&quot;:{&quot;scenes_57&quot;:{&quot;timers&quot;:[],&quot;triggers&quot;:[{&quot;name&quot;:&quot;Below 1km&quot;,&quot;enabled&quot;:1,&quot;template&quot;:&quot;2&quot;,&quot;device&quot;:&quot;94&quot;,&quot;arguments&quot;:[{&quot;id&quot;:&quot;1&quot;,&quot;value&quot;:&quot;1&quot;}],&quot;LastEval&quot;:1,&quot;last_run&quot;:1437379023}],&quot;groups&quot;:[{&quot;delay&quot;:0,&quot;actions&quot;:[]}],&quot;name&quot;:&quot;Alexis 1km&quot;,&quot;lua&quot;:&quot;--- message\nlocal current = os.time()\nlocal message = \&quot;\\nBelow 1km. \\n Heure:\&quot; .. os.date(\&quot;%c\&quot;,current) .. \&quot;\\n\&quot;\npushingbox_notify( message  )\nreturn true&quot;,&quot;id&quot;:57,&quot;room&quot;:&quot;11&quot;,&quot;modeStatus&quot;:&quot;1,2,3,4&quot;,&quot;paused&quot;:1,&quot;favorite&quot;:false,&quot;altuiid&quot;:&quot;0-57&quot;,&quot;Timestamp&quot;:1437378982,&quot;last_run&quot;:1437379024}},&quot;sections&quot;:{},&quot;rooms&quot;:{},&quot;InstalledPlugins&quot;:[],&quot;PluginSettings&quot;:[],&quot;users&quot;:{}}		 	</inUserData>         <DataFormat>json</DataFormat>      </u:ModifyUserData>   </s:Body></s:Envelope>
+
+function proxySoap(lul_device,newUrl,soapaction,envelop,body)
+	debug(string.format("proxySoap lul_device:%d soapaction:%s",lul_device,soapaction))	
+	debug(string.format("body:%s",body))
+	local mybody = string.format(envelop,body)
+	-- local mybody="<s:Envelope xmlns:s='http://schemas.xmlsoap.org/soap/envelope/' s:encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'>   <s:Body>      <u:ModifyUserData xmlns:u='urn:schemas-micasaverde-org:service:HomeAutomationGateway:1'>         <inUserData>		 	{&quot;devices&quot;:{},&quot;scenes&quot;:{&quot;scenes_57&quot;:{&quot;timers&quot;:[],&quot;triggers&quot;:[{&quot;name&quot;:&quot;Below 1km&quot;,&quot;enabled&quot;:1,&quot;template&quot;:&quot;2&quot;,&quot;device&quot;:&quot;94&quot;,&quot;arguments&quot;:[{&quot;id&quot;:&quot;1&quot;,&quot;value&quot;:&quot;1&quot;}],&quot;LastEval&quot;:1,&quot;last_run&quot;:1437379682}],&quot;groups&quot;:[{&quot;delay&quot;:0,&quot;actions&quot;:[]}],&quot;name&quot;:&quot;Alexis 1km&quot;,&quot;lua&quot;:&quot;--- message\nlocal current = os.time()\nlocal message = \&quot;\\nBelow 1km. \\n Heure:\&quot; .. os.date(\&quot;%c\&quot;,current) .. \&quot;\\n\&quot;\npushingbox_notify( message  )\nreturn true&quot;,&quot;id&quot;:57,&quot;room&quot;:&quot;11&quot;,&quot;modeStatus&quot;:&quot;1,2,3,4&quot;,&quot;paused&quot;:0,&quot;favorite&quot;:false,&quot;altuiid&quot;:&quot;0-57&quot;,&quot;last_run&quot;:1437379024,&quot;Timestamp&quot;:1437379040}},&quot;sections&quot;:{},&quot;rooms&quot;:{},&quot;InstalledPlugins&quot;:[],&quot;PluginSettings&quot;:[],&quot;users&quot;:{}}		 	</inUserData>         <DataFormat>json</DataFormat>      </u:ModifyUserData>   </s:Body></s:Envelope>"
+	debug(string.format("mybody:%s",mybody))
+	local result = {}
+	local request, code = http.request({
+		method="POST",
+		url = newUrl,
+		source= ltn12.source.string(mybody),
+		headers = {
+			-- ["Host"]="192.168.1.5",
+			["Connection"]= "keep-alive",
+			["Content-Length"] = mybody:len(),
+			-- ["Origin"]="http://192.168.1.5",
+			-- ["User-Agent"]="Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.134 Safari/537.36",
+			["Content-Type"] = "text/xml;charset=UTF-8",
+			["Accept"]="text/plain, */*; q=0.01",
+			-- ["X-Requested-With"]="XMLHttpRequest",
+			["Accept-Encoding"]="gzip, deflate",
+			["Accept-Language"]= "fr,fr-FR;q=0.8,en;q=0.6,en-US;q=0.4",
+			["SOAPACTION"]="urn:schemas-micasaverde-org:service:HomeAutomationGateway:1#" .. soapaction
+		},
+		sink = ltn12.sink.table(result)
+	})
+	
+		-- fail to connect
+	if (request==nil) then
+		error(string.format("failed to connect to %s, http.request returned nil", newUrl))
+		return 0,""
+	elseif (code==401) then
+		warning(string.format("Access requires a user/password: %d", code))
+		return 0,""
+	elseif (code~=200) then
+		warning(string.format("http.request returned a bad code: %d", code))
+		return 0,""
+	end
+
+	-- everything looks good
+	local data = table.concat(result)
+	debug(string.format("request:%s",request))	
+	debug(string.format("code:%s",code))	
+	
+	return 1,data
 end
 
 --
@@ -671,6 +721,16 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 					var = luup.variable_get(service, variablename,  deviceID)
 				end
 				return "ok", "text/plain"
+			end,
+		["proxysoap"] = 
+			function(params)
+				local newUrl = lul_parameters["newUrl"]
+				local soapaction = lul_parameters["action"]
+				local envelop= lul_parameters["envelop"]
+				local body = lul_parameters["body"]
+				code,result = proxySoap(deviceID,newUrl,soapaction,envelop,body)
+				local res = string.format("%d,%s",code,result);
+				return res, "text/plain"
 			end,
 		["proxyget"] = 
 			function(params)

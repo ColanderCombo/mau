@@ -49,6 +49,11 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		return url;
 	}
 	
+	function _proxifySoap(url) {
+		var url = (_ipaddr=='') ? url : "?id=lr_ALTUI_Handler&command=proxysoap&action={0}&newUrl={1}&envelop={2}&body={3}";
+		return url;
+	}
+	
 	function _getUrlHead() {
 		return _urlhead;	// ALTUI device for proxy if needed (secondary vera)
 	}
@@ -113,8 +118,12 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 	
 	function _buildHAGSoapUrl()
 	{
-		var url = window.location.protocol+'//'+window.location.hostname+"/port_49451/upnp/control/hag";
-		return _proxify(url);
+		var url = '';
+		if (_ipaddr=='')
+			url = window.location.protocol+'//'+window.location.hostname+"/port_49451/upnp/control/hag";
+		else
+			url = window.location.protocol+'//'+_ipaddr+"/port_49451/upnp/control/hag";
+		return url;
 	}
 	
 	function _unproxifyResult(data, textStatus, jqXHR, cbfunc) {
@@ -396,27 +405,56 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 
 		$.extend( target, user_data );
 		var url = _buildHAGSoapUrl();
-		return $.ajax({
-			url: url,
-			type: "POST",
-			dataType: "text",
-			contentType: "text/xml;charset=UTF-8",
-			processData: false,
-			data:  xml.format( escapeXml(JSON.stringify(target)) ),
-			headers: {
-				"SOAPACTION":'"urn:schemas-micasaverde-org:service:HomeAutomationGateway:1#ModifyUserData"'
-			},
-		})
-		.done(function(data, textStatus, jqXHR) {
-			_unproxifyResult(data, textStatus, jqXHR, function(data,textStatus,jqXHR) {
+		if (_ipaddr=='') {
+			// local mode
+			return $.ajax({
+				url: url,
+				type: "POST",
+				dataType: "text",
+				contentType: "text/xml;charset=UTF-8",
+				processData: false,
+				data:  xml.format( escapeXml(JSON.stringify(target)) ),
+				headers: {
+					"SOAPACTION":'"urn:schemas-micasaverde-org:service:HomeAutomationGateway:1#ModifyUserData"'
+				},
+			})
+			.done(function(data, textStatus, jqXHR) {
+				_unproxifyResult(data, textStatus, jqXHR, function(data,textStatus,jqXHR) {
+					if ($.isFunction( cbfunc ))
+						cbfunc(data);
+				});
+			})
+			.fail(function(jqXHR, textStatus, errorThrown) {
 				if ($.isFunction( cbfunc ))
-					cbfunc(data);
+					cbfunc(null);
 			});
-		})
-		.fail(function(jqXHR, textStatus, errorThrown) {
-			if ($.isFunction( cbfunc ))
-				cbfunc(null);
-		});
+		} else {
+			// proxy mode
+			url2 = _proxifySoap(url).format(
+				"ModifyUserData",							// action
+				encodeURIComponent(url),					// url
+				encodeURIComponent(xml.format("%s")),			// envelop with a %s
+				encodeURIComponent( escapeXml(JSON.stringify(target)) )  // body
+				);
+				
+			return $.ajax({
+				url: url2,
+				type: "GET",
+				dataType: "text",
+				contentType: "text/xml;charset=UTF-8",
+				processData: false,
+			})
+			.done(function(data, textStatus, jqXHR) {
+				_unproxifyResult(data, textStatus, jqXHR, function(data,textStatus,jqXHR) {
+					if ($.isFunction( cbfunc ))
+						cbfunc(data);
+				});
+			})
+			.fail(function(jqXHR, textStatus, errorThrown) {
+				if ($.isFunction( cbfunc ))
+					cbfunc(null);
+			});
+		}
 	};
 	
 	function _sceneAction( sceneobj ) {
@@ -1067,7 +1105,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		var jqxhr = _httpGet( "?id=user_data&output_format=json&DataVersion="+_user_data_DataVersion,
 			{beforeSend: function(xhr) { xhr.overrideMimeType('text/plain'); }},
 			function(data, textStatus, jqXHR) {
-				console.log("controller #{0} received user_data _user_data_DataVersion={1}".format(_uniqID,_user_data_DataVersion));
+				// console.log("controller #{0} received user_data _user_data_DataVersion={1}".format(_uniqID,_user_data_DataVersion));
 				if (data!=null) {
 					_dataEngine = null;
 					_loadUserData(data);
@@ -1569,12 +1607,20 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	function _getUPnPHelper()	{
 		return _upnpHelper;
 	};
+	function _getUrlHead() {
+		return _upnpHelper.getUrlHead();
+	};
+	function _getIpAddr() {
+		return _upnpHelper.getIpAddr();
+	};
   // explicitly return public methods when this object is instantiated
   return {
 	//---------------------------------------------------------
 	// PUBLIC  functions
 	//---------------------------------------------------------
 	getUPnPHelper	: _getUPnPHelper,
+	getIpAddr		: _getIpAddr,
+	getUrlHead		: _getUrlHead,
 	triggerAltUIUpgrade : _triggerAltUIUpgrade,	// (suffix)
 	getIconPath		: _getIconPath,		// ( src )
 	getIcon			: _getIcon, 		// workaround to get image from vera box

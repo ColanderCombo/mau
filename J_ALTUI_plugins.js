@@ -248,7 +248,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		// on off 
 		html += "<script type='text/javascript'>";
 		html += "$('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleOnOffButton('{0}','div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
-		html += "$('div.altui-dimmable-slider#slider-{0}').slider({ max:100,min:0,value:{1},change:ALTUI_PluginDisplays.onSliderChange });".format(device.altuiid,level);
+		html += "$('div#slider-{0}.altui-dimmable-slider').slider({ max:100,min:0,value:{1},change:ALTUI_PluginDisplays.onSliderChange });".format(device.altuiid,level);
 		html += "</script>";
 		
 		$(".altui-mainpanel").off("slide","#slider-"+device.altuiid);
@@ -382,10 +382,10 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 
 	function _drawDataMine( device) {
 		var html ="";
-		var url = window.location.protocol+'//'+window.location.hostname+"/dm/index.html";
+		var url = window.location.protocol+'//'+MultiBox.getIpAddr(device.altuiid)+"/dm/index.html";
 		html+= ("<button id='{0}' type='button' class='pull-right altui-datamine-open btn btn-default btn-sm ' >{1}</button>" .format( device.altuiid,_T("Open") )) ;
 		html += "<script type='text/javascript'>";
-		html += " $('button.altui-datamine-open#{0}').on('click', function() { window.open('{1}','_blank'); } );".format(device.altuiid,url);
+		html += " $('button#{0}.altui-datamine-open').on('click', function() { window.open('{1}','_blank'); } );".format(device.altuiid,url);
 		html += "</script>";
 		return html;
 	};	
@@ -393,11 +393,12 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	function _drawInfoViewer( device) {
 		var html ="";
 		var pattern = MultiBox.getStatus( device, 'urn:a-lurker-com:serviceId:InfoViewer1', 'LuaPattern');
+		var urlhead = MultiBox.getUrlHead(device.altuiid);
 		if (pattern!="")
 			html+= "<span class=''>Pattern: {0}</span>".format( pattern.htmlEncode() );
 		html+= ("<button id='{0}' type='button' class='pull-right altui-infoviewer-log btn btn-default btn-sm '>{1}</button>" .format( device.altuiid,_T("Open") )) ;
 		html += "<script type='text/javascript'>";
-		html += " $('button.altui-infoviewer-log#{0}').on('click', function() { window.open('data_request?id=lr_al_info','_blank'); } );".format(device.altuiid);
+		html += " $('button#{0}.altui-infoviewer-log').on('click', function() { window.open('{1}?id=lr_al_info','_blank'); } );".format(device.altuiid,urlhead);
 		html += "</script>";
 		return html;
 	};	
