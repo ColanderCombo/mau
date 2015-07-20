@@ -7389,7 +7389,7 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pageOptions: function() {
 		var _checkOptions = [
-			{ id:'ShowVideoThumbnail', label:_T("Show Video Thumbnail in Local mode")  },
+			{ id:'ShowVideoThumbnail', label:_T("Show Video Thumbnail in Local mode") , default:1 },
 		];
 		UIManager.clearPage(_T('Options'),_T("Options"));
 
@@ -7413,7 +7413,7 @@ var UIManager  = ( function( window, undefined ) {
 		html +="  <div class='panel-body'>";
 		html += "<div class='row'>";
 			$.each(_checkOptions, function(id,check) {
-				var init =  MyLocalStorage.getSettings(check.id) || "";
+				var init =  MyLocalStorage.getSettings(check.id) || check.default;
 				html += "<div class='col-sm-6'>";
 					html +="<label class='checkbox-inline'>";
 					html +=("  <input type='checkbox' id='altui-"+check.id+"' " + ( (init==true) ? 'checked' : '') +" value='"+init+"' title='"+check.id+"'>"+check.label);
