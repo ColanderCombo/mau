@@ -18,6 +18,7 @@ Key features:
 Features:
 [list]
 [li]Standalone web page, no server needed besides VERA.[/li]
+[li]Multiple VERA box support ![/li]
 [li]Fully responsive design: phone, tablet, desktop[/li]
 [li]language aware ( FR IT provided ).[/li]
 [li]Skinnable based on bootstrap styles like on https://bootswatch.com/[/li]
@@ -46,8 +47,9 @@ OFFICIAL VERSION   in Mios store
 [li][url=http://apps.mios.com/plugin.php?id=8246]http://apps.mios.com/plugin.php?id=8246[/url][/li]
 [/list]
 
-LATEST VERSION : [glow=red,2,300]V 0.54.354 July 11th 2015[/glow] : 
+LATEST VERSION : [glow=red,2,300]V 0.61.436 July 20th 2015[/glow] : 
 [list]
+[li]Multiple VERA box support ![/li]
 [li]trigger remote execution of OS command and display output. supports lua log and ANSI color[/li]
 [li]Autodetection of new version & updates[/li]
 [li]Favorite device / scene feature[/li]
@@ -81,7 +83,7 @@ LATEST VERSION : [glow=red,2,300]V 0.54.354 July 11th 2015[/glow] :
 INSTALL
 [list]
 [li]official version : by the store or the UI7 "Apps' menu[/li]
-[li]latest version : accept the autoupdate dialog box proposal , or install by opening this link in your browser  [url=http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28016]http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28016[/url]
+[li]latest version : accept the autoupdate dialog box proposal , or install by opening this link in your browser  [url=http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28126]http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28126[/url]
 ignore error messages displayed by this page and wait until your unit reloads...[/li]
 [/list]
 
