@@ -24,7 +24,7 @@ It is not just a re skin of UI5/7, and will offer a number of additional feature
 [/list]
 [li]extensible design with javascript modules for plugins dashboard & control panels[/li]
 [li]compatibility with most 3rd party plugins (IPhone locator google map), all but a few custom devices are controllable.[/li]
-[li]all custom icons are displayed , even in remote access mode[/li]
+[li]all custom icons are displayed , [glow=red,2,300]even in remote access[/glow] mode[/li]
 [li]Complex graphics made with D3JS library, animated graphs for device parent child relationships, zWave neighbors, zWave routes & route quality.[/li]
 [li]Power/Energy consumption graph[/li]
 [li]Parent Child relationship on a force layout d3js map[/li]
@@ -33,6 +33,8 @@ It is not just a re skin of UI5/7, and will offer a number of additional feature
 [li]Table of device with choose able / sortable columns and ability to export[/li]
 [li]trigger remote execution of user chooseable unix OS command and display output.[/li] 
 [li]History button to automatically display Scene last Execution timestamps from the lua log files[/li]
+[li]Device: Variables displayed ordered alphabetically and with enhanced display format ( dates shown as dates, url as url )[/li]
+[li]Device: Variables just click and edit, no messy checkbox to edit variable even to enter JSON or special characters[/li]
 [li]History button to automatically display Device Variable Changes from the lua log files[/li]
 [li]supports lua log and ANSI color display[/li]
 [li]Auto detection of new version & updates[/li]
@@ -43,6 +45,7 @@ It is not just a re skin of UI5/7, and will offer a number of additional feature
 [li]Plugin page: List of installed, direct button to reach the store, update from store, uninstall, to reach help page from the author, direct button to view content/download plugin files [/li]
 [li]Plugin page: plugin files selectio and easy content display in editor[/li]
 [li]Display of manually installed plugin[/li]
+[li]Camera: live video feed in local mode, images in remote mode[/li]
 [/list]
 
 [b]Features equivalent to UI5 UI7[/b]:
@@ -51,7 +54,6 @@ It is not just a re skin of UI5/7, and will offer a number of additional feature
 [li]fully featured for room devices scenes plugins[/li]
 [li]Room: List, Create, Rename[/li]
 [li]Scene: List, Execution, Create, Edit ( triggers, timers, actions, event lua code, time restriction, housemode selection )[/li]
-[li]Trigger time range restriction ( new feature of latest UI7, now in AltUI too )[/li]
 [li]Scene Mode selection  ( UI7 only )[/li]
 [li]Scene Pause feature : in one click[/li]
 [li]Trigger time range restriction ( new feature of latest UI7, now in AltUI too )[/li]
@@ -62,7 +64,6 @@ It is not just a re skin of UI5/7, and will offer a number of additional feature
 [li]Device: Control panel: per the static JSON file of the author. Display "flash" and "javascript" tab. In addition it can be customized via a ALTUI plugin.[/li]
 [li]Device: Attributes: List / Edit[/li]
 [li]Device: UpdateNeighbours feature in device Actions dialog box[/li]
-[li]Camera: live video feed in local mode, images in remote mode[/li]
 [li]Custom pages: Use mode (kiosk) and Edit. User can create its own set of custom pages by drag and drop of widgets 
 like device icon, web images, device action button, device variable/labels, camera picture or google gage. 
 Alignment tools to create nice looking panel, customizable background by css3 ( images, gradiant... ), persistent storage of the pages on the VERA box by the LUA plugin [/li]
