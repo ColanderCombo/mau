@@ -79,10 +79,9 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		var url = _getUrlHead()+'?id=jobstatus&job='+jobID;
 		return _proxify(url);
 	}
-	function _buildSceneCreateUrl()
+	function _buildSceneCreateUrl(scenejson)
 	{
-		//http://ip_address:3480/data_request?id=scene&action=create&json=
-		var url = _getUrlHead()+'?id=scene&action=create';
+		var url = _getUrlHead()+'?id=scene&action=create&json='+encodeURIComponent(scenejson);
 		return _proxify(url);
 	}	
 	function _buildUPnPGetFileUrl( file )
@@ -457,27 +456,41 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		}
 	};
 	
-	function _sceneAction( sceneobj ) {
-		var id = sceneobj.id;	
-		var target = {
-			"devices":{},
-			"scenes":{},
-			"sections":{},
-			"rooms":{},
-			"InstalledPlugins":[],
-			"PluginSettings":[],
-			"users":{}
-		};
-		target.scenes["scenes_"+id]=sceneobj;
-		// console.log( JSON.stringify(target));
-		_ModifyUserData( target, function(result) {
-			if (result==null) {
-				PageMessage.message( "Scene action failed!", "warning" );				
-			}
-			else {
-				PageMessage.message( "Scene action succeeded! a LUUP reload will happen now, be patient", "success" );			
-			}
-		});
+	function _sceneAction( sceneobj, cbfunc ) {
+		// prevent VERA from storing this
+		var newscene = $.extend(true,{},sceneobj);
+		delete newscene['altuiid'];
+		
+		// if (_ipaddr=='') {
+		if (0) {
+			// Local mode
+			var id = newscene.id;	
+			var target = {
+				"devices":{},
+				"scenes":{},
+				"sections":{},
+				"rooms":{},
+				"InstalledPlugins":[],
+				"PluginSettings":[],
+				"users":{}
+			};
+			target.scenes["scenes_"+id]=newscene;
+			// console.log( JSON.stringify(target));
+			_ModifyUserData( target, function(result) {
+				if (result==null) {
+					PageMessage.message( "Scene action failed!", "warning" );				
+				}
+				else {
+					PageMessage.message( "Scene action succeeded! a LUUP reload will happen now, be patient", "success" );			
+				}
+			});		
+		} else {
+			var jq = _exec( _buildSceneCreateUrl(JSON.stringify(newscene)), function(data,jqXHR) {
+				if ($.isFunction(cbfunc))
+					(cbfunc)(data,jqXHR);
+			});
+			return jq;
+		}
 	};
 	
 	return {
@@ -1286,8 +1299,19 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		return (found !=undefined) ? found : '';
 	};
 	
+	function _updateSceneUserData(scene)
+	{
+		if (_user_data.scenes)
+			$.each(_user_data.scenes, function(i,s) {
+				if (s.id == scene.id) {
+					_user_data.scenes[i] = scene;
+					return false;
+				}
+			})
+	}
 	function _editScene(sceneid,scenejson)
 	{
+		_updateSceneUserData( scenejson );
 		_upnpHelper.sceneAction(scenejson);
 	};
 

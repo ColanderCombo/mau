@@ -1017,7 +1017,6 @@ var SceneEditor = function (scene) {
 		{value:"{0}T",text:_T('After sunset')}
 	];
 
-	var scene = scene;
 	var scenealtuiid = scene.altuiid;
 	var scenecontroller = MultiBox.controllerOf(scene.altuiid).controller;
 
@@ -1736,6 +1735,11 @@ var SceneEditor = function (scene) {
 		});
 		
 		$(".altui-mainpanel")
+			.on("change","#altui-luascene",function(){ 
+				if ( $("#altui-luascene").val() != scene.lua ) {
+					_showSaveNeeded(false);
+				}
+			})
 			.on("click",".altui-scene-editbutton",function(){ 
 				scene.lua = $("#altui-luascene").val();
 				scene.name = $("#altui-scene-name-input").val();
