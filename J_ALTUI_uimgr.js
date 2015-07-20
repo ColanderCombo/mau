@@ -5150,8 +5150,8 @@ var UIManager  = ( function( window, undefined ) {
 				.on("click",".altui-pausescene",function() {
 					var altuiid = $(this).closest(".altui-scene").data('altuiid');
 					var scene = MultiBox.getSceneByAltuiID(altuiid);
-					scene.paused = (scene.paused==1) ? 0 : 1;
-					MultiBox.editScene( altuiid , scene);
+					scene.paused = (scene.paused==1) ? 0 : 1; 
+					MultiBox.editScene( altuiid , scene );
 				})
 				// .off("click",".altui-runscene")
 				.on("click",".altui-runscene",function() {

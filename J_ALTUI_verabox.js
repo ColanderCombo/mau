@@ -515,7 +515,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		ModifyUserData	: _ModifyUserData,
 		renameDevice 	: _renameDevice,		// ( device, newname, roomid )
 		createDevice	: _createDevice,
-		sceneAction 	: _sceneAction,			// (sceneobj)  will be transformed in json
+		sceneAction 	: _sceneAction,			// (scene,cbfunc) 
 	};
 });	// not invoked, the object does not exist
 
@@ -1309,10 +1309,15 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 				}
 			})
 	}
-	function _editScene(sceneid,scenejson)
+	function _editScene(sceneid,scene,cbfunc)
 	{
-		_updateSceneUserData( scenejson );
-		_upnpHelper.sceneAction(scenejson);
+		show_loading();
+		_updateSceneUserData( scene );
+		_upnpHelper.sceneAction(scene,function(data) {
+			hide_loading();
+			if ($.isFunction(cbfunc))
+				(cbfunc)(data);
+		});
 	};
 
 

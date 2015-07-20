@@ -355,9 +355,9 @@ var MultiBox = ( function( window, undefined ) {
 		var elems = scene.altuiid.split("-");
 		return _controllers[elems[0]].controller.getSceneHistory( elems[1], cbfunc);
 	};
-	function _editScene(altuiid,scenejson) {
+	function _editScene(altuiid,scenejson,cbfunc) {
 		var elems = altuiid.split("-");
-		return _controllers[elems[0]].controller.editScene(elems[1],scenejson);
+		return _controllers[elems[0]].controller.editScene(elems[1],scenejson,cbfunc);
 	};
 	function _runScene(scene) {
 		var elems = scene.altuiid.split("-");
@@ -533,7 +533,7 @@ var MultiBox = ( function( window, undefined ) {
 	getSceneByAltuiID	: _getSceneByAltuiID, // (altuiid)
 	getSceneHistory		: _getSceneHistory,	//( id, cbfunc) {
 	getScenesSync		: _getScenesSync,	//()
-	editScene			: _editScene,		//(altuiid,scenejson)		
+	editScene			: _editScene,		//(altuiid,scenejson, function(result)	
 	runScene			: _runScene,		//(id)
 	runSceneByAltuiID	: _runSceneByAltuiID,
 	
