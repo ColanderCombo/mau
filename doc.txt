@@ -15,6 +15,7 @@ It is not just a re skin of UI5/7, and will offer a number of additional feature
 [li]user defined custom synoptic panels[/li]
 [list]
 [li]made of elements out of your devices ( variables, actions, images, text ) but also cameras,  graphical gauges[/li]
+[li]can mix and match devices from multiple VERA controllers[/li]
 [li]nice Hi/FI like on/off button[/li]
 [li]nice analog gauges to display a chosen device variable value[/li]
 [li]with a full Wysiwig editor mode for pages[/li]

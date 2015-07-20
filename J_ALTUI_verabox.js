@@ -767,7 +767,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 	
 	function _getIcon( imgpath , cbfunc ) {
-		var jqxhr = _httpGet("?id=sdata&output_format=json",{ data: { path: imgpath } },cbfunc);
+		var jqxhr = _httpGet("?id=lr_ALTUI_Handler&command=image",{ data: { path: imgpath } },cbfunc);
 		return jqxhr;
 	};
 	
