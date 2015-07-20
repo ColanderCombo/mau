@@ -2500,22 +2500,24 @@ var api = {
 		
 		// return _upnpHelper.UPnPAction( deviceId, service, action, options.actionArguments, function(data,jqXHR){
 		var device = MultiBox.getDeviceByID( _JSAPI_ctx.controllerid, deviceId );
-		return MultiBox.runAction(device, service, action, options.actionArguments,function(data,jqXHR){
-			if (data==null) {
-				if (options.onFailure)
-					(options.onFailure).call(options.context,{
-						responseText: jqXHR.responseText,
-						status: jqXHR.status
-					});
+		return MultiBox.runAction(device, service, action, options.actionArguments,
+			function(data,jqXHR){
+				if (data==null) {
+					if (options.onFailure)
+						(options.onFailure).call(options.context,{
+							responseText: jqXHR.responseText,
+							status: jqXHR.status
+						});
+				}
+				else {
+					if (options.onSuccess)
+						(options.onSuccess).call(options.context,{
+							responseText: data,
+							status: jqXHR.status
+						});
+				}
 			}
-			else {
-				if (options.onSuccess)
-					(options.onSuccess).call(options.context,{
-						responseText: jqXHR.responseText,
-						status: jqXHR.status
-					});
-			}
-		});
+		);
 	},
 	performLuActionOnDevice: function(deviceId, service, action, options) {
 		return this.performActionOnDevice(deviceId, service, action, options);
