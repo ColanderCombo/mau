@@ -2767,6 +2767,10 @@ var UIManager  = ( function( window, undefined ) {
 // icons http://192.168.1.16/cmh/skins/default/img/devices/device_states/binary_light_default.png
 //_devicetypesDB[ device.device_type ].ui_static_data.flashicon
 //_devicetypesDB[ device.device_type ].ui_static_data.default_icon
+//
+//192.168.1.5/cmh/skins/default/img/devices/device_states/../../../icons/intro.png
+//192.168.1.16/cmh/skins/default/img/devices/device_states/../../../icons/intro.png
+//192.168.1.16/cmh/skins/default/img/icons/intro.png
 	function _getDeviceIconPath(device) {
 		var id = device.altuiid;
 		var controller = MultiBox.controllerOf(id).controller;
@@ -2863,7 +2867,7 @@ var UIManager  = ( function( window, undefined ) {
 							str = (MultiBox.isUI5( controller ) ? "../../../icons/Window_Covering.png" : "../../icons/Window_Covering.png");
 						// //192.168.1.16/cmh/skins/default/img/devices/device_states/../../icons/Window_Covering.png
 						else if (str.substr(0,6) == "icons/")
-							str = "../../../"+str;
+							str = "../../../" +str;
 						AltuiDebug.debug("Icon for device id:"+id+"  string after correction:"+str);
 					}	
 				}
