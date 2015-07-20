@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("436,Remote Controller Fixes;Remote mode Scene Editor fix;Remote Camera Thumbnail;Infoviewer/Datamine button fix,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28126")
+UIManager.checkAltuiUpdate("441,Remote Controller Fixes;Remote mode Scene Editor fix;Remote Camera Thumbnail;Infoviewer/Datamine button fix;fix for Icons in remote access,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28130")
