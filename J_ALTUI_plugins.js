@@ -105,12 +105,12 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	}
 	
 	// return the html string inside the .panel-body of the .altui-device#id panel
-	function _drawCamera( device) {
+	function _drawCamera( device ) {
 		var video = MyLocalStorage.getSettings('ShowVideoThumbnail') || "";
-
+		var urlHead = MultiBox.getUrlHead(device.altuiid) 
 		if ( MultiBox.isRemoteAccess() || (video==false) ) {
 			var img = $("<img class='altui-camera-picture'></img>")
-				.attr('src',"data_request?id=request_image&res=low&cam="+device.id+"&t="+ new Date().getTime())
+				.attr('src',urlHead+"?id=request_image&res=low&cam="+device.id+"&t="+ new Date().getTime())
 				.height(50)
 				.width(66);
 
