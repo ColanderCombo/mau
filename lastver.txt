@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("425,LocalCDN variable (d3js);ExtraController variable (Multibox setup);Multibox Architecture,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28101")
+UIManager.checkAltuiUpdate("434,Remote Controller Fixes;Remote mode Scene Editor fix;Remote Camera Thumbnail;Infoviewer/Datamine button fix,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28118")
