@@ -2169,7 +2169,7 @@ var UIManager  = ( function( window, undefined ) {
 				onWidgetResize: _onResizeStub,
 				widgetdisplay: function(widget,bEdit)	{ 
 					var scene = MultiBox.getSceneByAltuiID(widget.properties.sceneid);
-					return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='MultiBox.runSceneByAltuiID({0})' style='{5}'>{4}{2}</button>".format(
+					return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='MultiBox.runSceneByAltuiID('{0}')' style='{5}'>{4}{2}</button>".format(
 							scene ? scene.altuiid : NULL_DEVICE,
 							'altui-widget-runscene-button',
 							runGlyph.replace('glyphicon','pull-right glyphicon'),
@@ -2191,7 +2191,7 @@ var UIManager  = ( function( window, undefined ) {
 				onWidgetResize: _onResizeStub,
 				widgetdisplay: function(widget,bEdit)	{ 
 					var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
-					return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='MultiBox.runActionByAltuiID( {0}, \"{4}\", \"{5}\", {6} )' style='{8}' >{7}{2}</button>".format(
+					return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='MultiBox.runActionByAltuiID('{0}', \"{4}\", \"{5}\", {6} )' style='{8}' >{7}{2}</button>".format(
 						device ? device.altuiid : NULL_DEVICE,
 						'altui-widget-upnpaction-button',
 						runGlyph.replace('glyphicon','pull-right glyphicon'),
