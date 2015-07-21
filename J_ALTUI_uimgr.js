@@ -4683,8 +4683,10 @@ var UIManager  = ( function( window, undefined ) {
 			});
 		}
 
-		MultiBox.getRooms( function( id, room) {
-			$(".altui-leftnav").append( leftNavButtonTemplate.format( room.id, (room!=null) ? room.name : "No Room") );	
+		MultiBox.getRooms( null,null,function( rooms ) {
+			$.each(rooms, function(i,room) {
+				$(".altui-leftnav").append( leftNavButtonTemplate.format( room.id, (room!=null) ? room.name : "No Room") );	
+			})
 		});
 	},
 

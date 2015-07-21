@@ -155,19 +155,35 @@ var MultiBox = ( function( window, undefined ) {
 	function _setHouseMode(newmode,cbfunc) {
 		return _controllers[0].controller.setHouseMode(newmode,cbfunc);
 	};
-	function _getRooms( func , filterfunc) {
+	function _getRooms( func , filterfunc, endfunc) {
 		var arr=[];
+		var answers=0;
 		$.each(_controllers, function( i,c) {
-			arr = arr.concat(c.controller.getRooms( func , filterfunc));
+			c.controller.getRooms( 
+				function( idx, room) {
+					var index = arr.length;
+					arr.push(room);
+					if ($.isFunction(func))
+						(func)(index,room);
+				} ,
+				filterfunc,
+				function(rooms) {
+					answers++;
+					if (answers == _controllers.length) {
+						if ($.isFunction(endfunc))
+							(endfunc)(arr.sort(altuiSortByName));
+					}
+				}
+			);
 		});		
-		return arr;
+		return _getRoomsSync();
 	};
 	function _getRoomsSync() {
 		var arr=[];
 		$.each(_controllers, function( i,c) {
 			arr = arr.concat(c.controller.getRoomsSync( ));
 		});		
-		return arr;
+		return arr.sort(altuiSortByName);
 	};
 	function _getRoomByID( controllerid, roomid ) {
 		return _controllers[controllerid].controller.getRoomByID( roomid );
@@ -312,7 +328,7 @@ var MultiBox = ( function( window, undefined ) {
 					answers++;
 					if (answers == _controllers.length) {
 						if ($.isFunction(endfunc))
-							(endfunc)(arr);
+							(endfunc)(arr.sort(altuiSortByName));
 					}
 				} );
 		});

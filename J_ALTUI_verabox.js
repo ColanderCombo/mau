@@ -683,9 +683,9 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	}
 	
 	// Get Rooms  , call a callback function asynchronously, or return array of rooms
-	function _getRooms( func , filterfunc) {
+	function _getRooms( func , filterfunc, endfunc) {
 		if (_rooms)
-			_asyncResponse( _rooms.sort(_sortByName), func , filterfunc)
+			_asyncResponse( _rooms.sort(altuiSortByName), func , filterfunc, endfunc)
 		return _rooms;
 	};
 	
@@ -702,19 +702,10 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		return room;
 	};
 	
-	function _sortByName(a,b)
-	{
-		if (a.name < b.name)
-			return -1;
-		if (a.name > b.name)
-			return 1;
-		return 0;
-	};
-
 	// Get Rooms  , call a callback function asynchronously, or return array of rooms
 	function _getScenes( func , filterfunc, endfunc ) {
 		if (_scenes != null )
-			_asyncResponse( _scenes.sort(_sortByName), func , filterfunc, endfunc);
+			_asyncResponse( _scenes.sort(altuiSortByName), func , filterfunc, endfunc);
 		return _scenes;
 	};
 
@@ -737,7 +728,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	
 	function _getDevices( func , filterfunc, endfunc ) {
 		if (_devices !=null)
-			_asyncResponse( _devices.sort(_sortByName), func, filterfunc, endfunc )
+			_asyncResponse( _devices.sort(altuiSortByName), func, filterfunc, endfunc )
 		return _devices;
 	};
 	function _getCategories( cbfunc, filterfunc, endfunc )
@@ -749,7 +740,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 					var arr = JSON.parse(data);
 					_categories = arr.categories;
 					if ( $.isFunction( cbfunc ) )  {
-						_asyncResponse( _categories.sort(_sortByName), cbfunc, filterfunc, endfunc );
+						_asyncResponse( _categories.sort(altuiSortByName), cbfunc, filterfunc, endfunc );
 					}
 				} else {
 					_categories = null;
@@ -757,7 +748,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 				}
 			});
 		} else {
-			_asyncResponse( _categories.sort(_sortByName), cbfunc, filterfunc, endfunc );
+			_asyncResponse( _categories.sort(altuiSortByName), cbfunc, filterfunc, endfunc );
 		}
 		return _categories;
 	};
@@ -1823,7 +1814,6 @@ function hide_loading() {
 	_spinDialog.modal('hide');
 };
 
-
 //
 // PLEG uses this from cpanel
 //
@@ -1832,6 +1822,7 @@ function sortByName(a, b) {
     var y = b.name.toLowerCase();
     return ((x < y) ? -1 : ((x > y) ? 1 : 0));
 };
+var altuiSortByName=sortByName;
 
 function get_device_obj(deviceID){
 
