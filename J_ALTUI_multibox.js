@@ -296,10 +296,30 @@ var MultiBox = ( function( window, undefined ) {
 		return _controllers[elems[0]].controller.updateNeighbors(elems[1]);
 	};
 	function _getCategories( cbfunc, filterfunc, endfunc ) {
-		return _controllers[0].controller.getCategories( cbfunc, filterfunc, endfunc );
+		var arr=[];
+		var answers = 0;
+		$.each(_controllers, function( idx,c) {
+			var index = idx;
+			c.controller.getCategories(
+				function (idx,cat) {
+					var index = arr.length;
+					arr.push(cat);
+					if ($.isFunction(cbfunc))
+						(cbfunc)(index,cat);
+				},
+				filterfunc,
+				function (categories) {
+					answers++;
+					if (answers == _controllers.length) {
+						if ($.isFunction(endfunc))
+							(endfunc)(arr);
+					}
+				} );
+		});
+		return arr;
 	};
 	function _getCategoryTitle(catnum) {
-		return _controllers[0].controller.getCategoryTitle(catnum);
+		return _controllers[0].controller.getCategoryTitle(catnum);	//returns (found !=undefined) ? found : '';
 	};
 	function _evaluateConditions(device,devsubcat,conditions) {
 		var elems = device.altuiid.split("-");
