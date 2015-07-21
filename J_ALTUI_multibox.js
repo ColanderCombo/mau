@@ -319,18 +319,22 @@ var MultiBox = ( function( window, undefined ) {
 			c.controller.getCategories(
 				function (idx,cat) {
 					var index = arr.length;
-					arr.push(cat);
-					if ($.isFunction(cbfunc))
-						(cbfunc)(index,cat);
+					if ($.inArray(cat.name,$.map(arr,function(e){ return e.name }))==-1)
+						arr.push(cat);
 				},
 				filterfunc,
 				function (categories) {
 					answers++;
 					if (answers == _controllers.length) {
+						var arr2 = arr.sort(altuiSortByName);
+						if ($.isFunction(cbfunc))
+							$.each(arr2, cbfunc);
+
 						if ($.isFunction(endfunc))
-							(endfunc)(arr.sort(altuiSortByName));
+							(endfunc)(arr2);
 					}
-				} );
+				}
+			);
 		});
 		return arr;
 	};
