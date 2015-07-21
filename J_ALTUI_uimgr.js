@@ -2218,7 +2218,7 @@ var UIManager  = ( function( window, undefined ) {
 				widgetdisplay: function(widget,bEdit)	{
 					var status=0;
 					var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
-					if (widget.properties.deviceid>0)
+					if (widget.properties.deviceid!= NULL_DEVICE)
 					{
 						status = MultiBox.getStatus(device, widget.properties.service, widget.properties.variable);
 						if  ((status==undefined) || (status==null) ||(status==false) || (status=='0') )
@@ -4431,7 +4431,7 @@ var UIManager  = ( function( window, undefined ) {
 		var page = PageManager.getPageFromName( pagename );
 		var widget=PageManager.getWidgetByID( page, widgetid );
 		// find the device
-		var device= MultiBox.getDeviceByID( 0,widget.properties.deviceid);
+		var device= MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
 		// trigger the right action
 		var status = MultiBox.getStatus(device, widget.properties.service, widget.properties.variable);
 		if  ((status==undefined) || (status==false) || (status=='0') )
