@@ -21,8 +21,8 @@ var MultiBox = ( function( window, undefined ) {
 		//http://192.168.1.5/port_3480/data_request?id=lu_status2&output_format=json&DataVersion=1&Timeout=60&MinimumDelay=1500
 	];
 	
-	function _controllerOf(altui) {
-		var elems = altui.split("-");
+	function _controllerOf(altuiid) {
+		var elems = altuiid.split("-");
 		return { controller:elems[0] , id:elems[1] };
 	};
 	

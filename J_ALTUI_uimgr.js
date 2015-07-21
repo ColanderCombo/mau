@@ -777,7 +777,7 @@ var DialogManager = ( function() {
 		select.append("<option value='0' {0}>Select ...</option>".format( deviceid==NULL_DEVICE ? 'selected' : ''));
 		MultiBox.getDevices( 
 			function(idx,device) {
-				select.append('<option value={0} {2}>{1}</option>'.format( device.altuiid, device.name, deviceid==device.altuiid ? 'selected' : ''));
+				select.append('<option value={0} {3}>{1} -- #{2}</option>'.format( device.altuiid, device.name, device.altuiid, deviceid==device.altuiid ? 'selected' : ''));
 			},
 			$.isFunction(filterfunc) ? filterfunc : null,
 			function () {
@@ -1124,10 +1124,15 @@ var SceneEditor = function (scene) {
 		var dialog = DialogManager.createPropertyDialog(_T('Trigger'));
 		var device = MultiBox.getDeviceByID( scenecontroller,trigger.device);
 		DialogManager.dlgAddLine( dialog , "TriggerName", _T("TriggerName"), trigger.name, "", {required:''} ); 
-		DialogManager.dlgAddDevices( dialog , device ? device.altuiid : NULL_DEVICE, function() {
-			DialogManager.dlgAddEvents( dialog, "Events", "altui-select-events",device ? device.altuiid : NULL_DEVICE , trigger.template, trigger.arguments );
-			$('div#dialogModal').modal();
-		});
+		DialogManager.dlgAddDevices( dialog , device ? device.altuiid : NULL_DEVICE, 
+			function() {			// callback
+				DialogManager.dlgAddEvents( dialog, "Events", "altui-select-events",device ? device.altuiid : NULL_DEVICE , trigger.template, trigger.arguments );
+				$('div#dialogModal').modal();
+			},
+			function( device ) {	// filter
+				return (MultiBox.controllerOf(device.altuiid).controller == scenecontroller);
+			}
+		);
 		
 		$('div#dialogs').on( 'submit',"div#dialogModal form", { button: jqButton }, function( event ) {	
 			trigger.name = $("#altui-widget-TriggerName").val();
@@ -1456,21 +1461,26 @@ var SceneEditor = function (scene) {
 		
 		var dialog = DialogManager.createPropertyDialog(_T('Action'));
 		var device = MultiBox.getDeviceByID(scenecontroller,action.device);
-		DialogManager.dlgAddDevices( dialog , device ? device.altuiid : NULL_DEVICE , function() {
-			var widget = {
-				properties: {
-					deviceid: device ? device.altuiid : NULL_DEVICE,
-					action: {
-						service:action.service,
-						action:action.action,
-						params:_translateArgumentsToTbl(action.arguments)
+		DialogManager.dlgAddDevices( dialog , device ? device.altuiid : NULL_DEVICE , 
+			function() {		// callback 
+				var widget = {
+					properties: {
+						deviceid: device ? device.altuiid : NULL_DEVICE,
+						action: {
+							service:action.service,
+							action:action.action,
+							params:_translateArgumentsToTbl(action.arguments)
+						}
 					}
-				}
-			};
-			DialogManager.dlgAddActions("altui-select-action",dialog, widget, widget.properties.action, _T('Action'), function() {
-				$('div#dialogModal').modal();
-			});
-		});
+				};
+				DialogManager.dlgAddActions("altui-select-action",dialog, widget, widget.properties.action, _T('Action'), function() {
+					$('div#dialogModal').modal();
+				});
+			},
+			function( device ) {		// filter
+				return (MultiBox.controllerOf(device.altuiid).controller == scenecontroller);
+			}
+		);
 		
 		$('div#dialogs')
 			.on( 'submit',"div#dialogModal form", 
