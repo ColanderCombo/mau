@@ -6236,10 +6236,10 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pageZwave: function() 
 	{
-		function _nodename(d)		{ return "{0}, #{1}".format(d.name, d.id); }
-		function _commQuality(id) {
+		function _nodename(d)		{ return "{0}, #{1}".format(d.name, d.altuiid); }
+		function _commQuality(altuiid) {
 			//PollOk/(PollOk+PollNoReply)
-			var device = MultiBox.getDeviceByID(0,id);
+			var device = MultiBox.getDeviceByAltuiID(altuiid);
 			var service="urn:micasaverde-com:serviceId:ZWaveDevice1"
 			var PollNoReply = parseInt(MultiBox.getStatus(device,service,"PollNoReply"));
 			var PollOk = parseInt(MultiBox.getStatus(device,service,"PollOk"));
@@ -6259,12 +6259,13 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		function _NeighborsOf(device)	{ 
 			var result = [];
+			var controllerid = MultiBox.controllerOf(device.altuiid).controller;
 			$.each( device.states, function(i,s) {
 				if (s.variable=="Neighbors") {
 					result = s.value.split(',');
 					$.each(result, function(i,r) {
-						var device = MultiBox.getDeviceByAltID( 0, 1, r );	// 1=zWave controller, r=altid
-						result[i] = (device) ? device.id : null;
+						var device = MultiBox.getDeviceByAltID( controllerid, 1, r );	// 1=zWave controller, r=altid
+						result[i] = (device) ? device.altuiid : null;
 					});
 					return false;
 				}
@@ -6272,11 +6273,11 @@ var UIManager  = ( function( window, undefined ) {
 			return result;
 		};
 		var width=0, height=0, chart=null, orders=null;
-		var data = $.grep( MultiBox.getDevicesSync() , function(d) {return (MultiBox.controllerOf(d.altuiid).controller==0) && (d.id_parent==1);} );
+		var data = $.grep( MultiBox.getDevicesSync() , function(d) {return /*(MultiBox.controllerOf(d.altuiid).controller==0) &&*/ (d.id_parent==1);} );
 		orders = {
-			id:$.map( data.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function(d) { return d.id; }),
-			name: $.map( data.sort( sortByName ), function(d) { return d.id; }),
-			mesh:$.map( data.sort(function(a, b){return _countNeighbors(b)-_countNeighbors(a)}), function(d) { return d.id; })
+			id:$.map( data.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function(d) { return d.altuiid; }),
+			name: $.map( data.sort( sortByName ), function(d) { return d.altuiid; }),
+			mesh:$.map( data.sort(function(a, b){return _countNeighbors(b)-_countNeighbors(a)}), function(d) { return d.altuiid; })
 		};
 
 		UIManager.clearPage(_T('ZWave'),_T("zWave Network"));
@@ -6340,7 +6341,7 @@ var UIManager  = ( function( window, undefined ) {
 			row.enter()
 				.append("g")
 					.attr("class","ligne")
-					.attr("transform",function(d,i) { return "translate(0,"+y(d.id)+")"; } )
+					.attr("transform",function(d,i) { return "translate(0,"+y(d.altuiid)+")"; } )
 					.append("text")
 					  .attr("x", -6)
 					  .attr("y", x.rangeBand() / 2)
@@ -6354,7 +6355,7 @@ var UIManager  = ( function( window, undefined ) {
 							d3.select(this).classed("active", false);						
 						})
 						.on('click',function(d,i) {
-							var device = MultiBox.getDeviceByID(0,d.id);
+							var device = MultiBox.getDeviceByAltuiID(d.altuiid);
 							UIManager.deviceDrawVariables(device);
 						});
 					
@@ -6379,19 +6380,19 @@ var UIManager  = ( function( window, undefined ) {
 					.attr("height",y.rangeBand())
 					// .style("fill",c(_commQuality(d)))
 					.style("fill",function(d) { 
-						return c(_commQuality(d3.select(this.parentNode).datum().id));
+						return c(_commQuality(d3.select(this.parentNode).datum().altuiid));
 						})
 					.on("mouseover", function(p) {
 						var lignedatum = d3.select(this.parentNode).datum();
-						d3.selectAll(".ligne text").classed("active", function(d, i) { return d.id == lignedatum.id; });
-						d3.selectAll(".colonne text").classed("active", function(d, i) { return d.id == p; });						
+						d3.selectAll(".ligne text").classed("active", function(d, i) { return d.altuiid == lignedatum.altuiid; });
+						d3.selectAll(".colonne text").classed("active", function(d, i) { return d.altuiid == p; });						
 					})
 					.on("mouseout", function(p) {
 						d3.selectAll("text").classed("active", false);						
 					})
 					.on('click',function(d,i) {
 						var lignedatum = d3.select(this.parentNode).datum();
-						var device = MultiBox.getDeviceByID(0,lignedatum.id);
+						var device = MultiBox.getDeviceByAltuiID(lignedatum.altuiid);
 						UIManager.deviceDrawVariables(device);
 					});
 		
@@ -6402,7 +6403,7 @@ var UIManager  = ( function( window, undefined ) {
 			col.enter()
 				.append("g")
 					.attr("class","colonne")
-					.attr("transform",function(d,i) { return "translate("+x(d.id)+",0) rotate(-90)"; } )
+					.attr("transform",function(d,i) { return "translate("+x(d.altuiid)+",0) rotate(-90)"; } )
 					.append("text")
 					  .attr("x", 6)
 					  .attr("y", x.rangeBand() / 2)
@@ -6469,14 +6470,14 @@ var UIManager  = ( function( window, undefined ) {
 				.rangeBands([0, height]);
 			var t= chart.transition().duration(2000)	
 			var row = t.selectAll(".ligne")
-					.delay(function(d, i) { return y(d.id) * 4; })
-					.attr("transform",function(d,i) { return "translate(0,"+y(d.id)+")"; } )
+					.delay(function(d, i) { return y(d.altuiid) * 4; })
+					.attr("transform",function(d,i) { return "translate(0,"+y(d.altuiid)+")"; } )
 				.selectAll(".cellule")
 					.delay(function(d, i) { return x(d) * 4; })
 					.attr("x", function(d) { return x(d); } )
 			var col = t.selectAll(".colonne")
-					.delay(function(d, i) { return x(d.id) * 4; })
-					.attr("transform",function(d,i) { return "translate("+x(d.id)+",0) rotate(-90)"; } )
+					.delay(function(d, i) { return x(d.altuiid) * 4; })
+					.attr("transform",function(d,i) { return "translate("+x(d.altuiid)+",0) rotate(-90)"; } )
 		});
 		$( window )
 			.off( "resize", _drawzWavechart )
