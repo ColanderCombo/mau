@@ -382,7 +382,9 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 
 	function _drawDataMine( device) {
 		var html ="";
-		var url = window.location.protocol+'//'+MultiBox.getIpAddr(device.altuiid)+"/dm/index.html";
+		var ipaddr = MultiBox.getIpAddr(device.altuiid);
+		var hostname = (ipaddr=='') ? window.location.hostname : ipaddr;
+		var url = window.location.protocol+'//'+hostname+"/dm/index.html";
 		html+= ("<button id='{0}' type='button' class='pull-right altui-datamine-open btn btn-default btn-sm ' >{1}</button>" .format( device.altuiid,_T("Open") )) ;
 		html += "<script type='text/javascript'>";
 		html += " $('button#{0}.altui-datamine-open').on('click', function() { window.open('{1}','_blank'); } );".format(device.altuiid,url);
