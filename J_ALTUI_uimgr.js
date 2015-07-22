@@ -6130,7 +6130,7 @@ var UIManager  = ( function( window, undefined ) {
 		function _refreshPowerChart() {
 			if ($(".altui-energy-d3chart").length==0)
 				return;	// stop refreshing
-			MultiBox.getPower( 0,function(res) {
+			MultiBox.getPower( function(res) {
 				var data = _processEnergyData(res);
 				var x = d3.scale.linear()
 						.range([0, width])
@@ -6165,7 +6165,7 @@ var UIManager  = ( function( window, undefined ) {
 			if ($(".altui-energy-d3chart").length==0)
 				return;	// stop refreshing
 
-			MultiBox.getPower( 0,function(res) {
+			MultiBox.getPower( function(res) {
 				// prepare data
 				var data = _processEnergyData(res);
 				
@@ -7095,7 +7095,7 @@ var UIManager  = ( function( window, undefined ) {
 				data = { root:[], nodes:[] , links:[] };
 				var color = {};
 				var nColor = 0;
-				var devices = $.grep( MultiBox.getDevicesSync() , function(d) {return (MultiBox.controllerOf(d.altuiid).controller==0) ;} );
+				var devices = $.grep( MultiBox.getDevicesSync() , function(d) {return (MultiBox.controllerOf(d.altuiid).controller==$("#altui-controller-select").val());} );
 
 				data.root={ id:0, zwid:0, name:"root", children:[] };
 				if (devices) {
@@ -7117,7 +7117,13 @@ var UIManager  = ( function( window, undefined ) {
 							var AutoRoute = MultiBox.getStatus(device,"urn:micasaverde-com:serviceId:ZWaveDevice1","AutoRoute");
 							if ( ManualRoute || AutoRoute)
 							{
-								var route = ( ManualRoute && (ManualRoute!="undefined")) ? ManualRoute : AutoRoute;
+								var route ="";
+								var bManual = false;
+								if ( ManualRoute && (ManualRoute!="undefined")) {
+									route = ManualRoute; bManual = true;
+								}
+								else
+									route = AutoRoute;
 								if (color[device.device_type]==undefined)
 									color[device.device_type]=nColor++;
 								data.nodes.push({ 
@@ -7129,7 +7135,8 @@ var UIManager  = ( function( window, undefined ) {
 									children: [],
 									color:color[device.device_type] ,
 									id_parent:device.id_parent || 0,
-									routes: route.split(",")
+									routes: route.split(","),
+									manual_route: bManual
 								});
 							}
 						});
@@ -7163,7 +7170,8 @@ var UIManager  = ( function( window, undefined ) {
 												target: targetnode,
 												linkquality: parseInt(linkquality),
 												nroute: nroute,
-												broken: (linkquality.slice(-1)=="x")
+												broken: (linkquality.slice(-1)=="x"),
+												manual_route: node.manual_route
 											});
 											srcnode = targetnode;
 											nroute++;
@@ -7259,6 +7267,7 @@ var UIManager  = ( function( window, undefined ) {
 					.insert("line", ".node")		// so that node allways hide links
 					.attr("class", "link")
 					.style("stroke", function(d) { return (d.broken==true) ? "red": ((d.nroute>1)?"yellow":"") ; } )
+					.style("stroke-dasharray", function(d) { return (d.manual_route)  ? "10,10" : null; } )
 					.style("stroke-width", 1 )
 					.attr("x1", function(d) { return d.source.x; })
 					.attr("y1", function(d) { return d.source.y; })
@@ -7297,6 +7306,21 @@ var UIManager  = ( function( window, undefined ) {
 		UIManager.clearPage(_T('zWaveRoutes'),_T("zWave Routes"));
 		PageMessage.message(_T("Drag and Drop to fix the position of a node. Simple Click to open or collapse a parent node, Shift Click to free a fixed node"),"info");
 		var html="";
+		html += "<form class='form-inline'>";
+			html += "<div class='form-group'>";
+				html += "<label class='control-label ' for='altui-controller-select' >"+_T("Controller")+":</label>";
+				html += "<select id='altui-controller-select' class='form-control'>";
+				$.each(MultiBox.getControllers(), function( idx, controller) {
+					html += "<option value='{0}'>{1}</option>".format( idx , controller.ip=='' ? window.location.hostname : controller.ip  );
+				});
+				html += "</select>";
+			html += "</div>";
+		html += "</form>";
+		$(".altui-mainpanel").append(html);
+		$("#altui-controller-select").change(function() {
+			$(".altui-route-d3chart").html("");
+			_drawChartRoutes();
+		});
 		$(".altui-mainpanel")
 			.append(
 				"<style>					\
@@ -7333,7 +7357,7 @@ var UIManager  = ( function( window, undefined ) {
 					stroke-opacity: .8;		\
 				}							\
 				</style>" )
-			.append(html+"<div class='altui-children-d3chart-container'><svg class='altui-children-d3chart'></svg></div>")
+			.append("<div class='altui-children-d3chart-container'><svg class='altui-children-d3chart'></svg></div>")
 		UIManager.loadD3Script( _drawChartRoutes );
 	},
 	

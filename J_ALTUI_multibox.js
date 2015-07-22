@@ -464,9 +464,21 @@ var MultiBox = ( function( window, undefined ) {
 		var id = controllerid || 0;
 		return _controllers[id].controller.osCommand(cmd,cbfunc);
 	};
-	function _getPower(controllerid,cbfunc) {
-		var id = controllerid || 0;
-		return _controllers[id].controller.getPower(cbfunc);
+	function _getPower(cbfunc) {
+		var lines=[];
+		var todo = _controllers.length;
+		$.each(_controllers, function( idx,c) {
+			var idx = idx;
+			c.controller.getPower(function(data) {
+				if (data != "No devices") 
+					$.each(data.split('\n'), function(i,line) {
+						lines.push( idx+"-"+line );
+					});
+				todo--;
+				if ((todo==0) && ($.isFunction(cbfunc)))
+					(cbfunc)(lines.join('\n'));
+			});
+		});
 	};
 	function _resetPollCounters() {
 		$.each(_controllers, function(i,c) {
