@@ -6554,7 +6554,8 @@ var UIManager  = ( function( window, undefined ) {
 									quality:routequality,
 									broken:(split[1].slice(-1)=="x"),
 									source: source,
-									target: dest
+									target: dest,
+									manual_route: node.manual_routes
 								});
 								source = dest;	// skip to next segment
 							}
@@ -6567,7 +6568,7 @@ var UIManager  = ( function( window, undefined ) {
 				data = { nodes:[] , links:[] };
 				var color = {};
 				var nColor = 0;
-				var devices = $.grep(MultiBox.getDevicesSync(),function(d) {	return MultiBox.controllerOf(d.altuiid).controller==0; });
+				var devices = $.grep(MultiBox.getDevicesSync(),function(d) {	return MultiBox.controllerOf(d.altuiid).controller==parseInt($("#altui-controller-select").val()); });
 
 				// data.root={ id:0, zwid:0, name:"root", children:[] };
 				if (devices) {
@@ -6590,7 +6591,13 @@ var UIManager  = ( function( window, undefined ) {
 							var AutoRoute = MultiBox.getStatus(device,"urn:micasaverde-com:serviceId:ZWaveDevice1","AutoRoute");
 							if ( ManualRoute || AutoRoute)
 							{
-								var route = ( ManualRoute && (ManualRoute!="undefined")) ? ManualRoute : AutoRoute;
+								var route = "";
+								var bManual = false;
+								if ( ManualRoute && (ManualRoute!="undefined")) {
+									route = ManualRoute; bManual = true;
+								}
+								else
+									route = AutoRoute;
 								if (color[device.device_type]==undefined)
 									color[device.device_type]=nColor++;
 								// like this: "2-20x,7-59x,2.7-78"
@@ -6605,7 +6612,8 @@ var UIManager  = ( function( window, undefined ) {
 									name:device.name+':'+device.id+'#'+device.altid, 
 									color:color[device.device_type] ,
 									group: group,
-									routes: routes
+									routes: routes,
+									manual_routes: bManual
 								});
 								y+=ygap;
 							}
@@ -6670,6 +6678,7 @@ var UIManager  = ( function( window, undefined ) {
 						// return draw_curve(d.source.x, d.source.y, d.target.x, d.target.y, M);
 					// })
 					.style("stroke-opacity", 0)
+					.style("stroke-dasharray", function(d) { return (d.manual_route)  ? "10,10" : null; } )
 					.style("stroke", function(d) { return d.broken ? "red" : linkcolor(d.quality);} );
 
 				var transition = links.transition().duration(1000)
@@ -6719,6 +6728,22 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		
 		UIManager.clearPage(_T('Quality'),_T("Network Quality"));
+		var html = "";
+		html += "<form class='form-inline'>";
+			html += "<div class='form-group'>";
+				html += "<label class='control-label ' for='altui-controller-select' >"+_T("Controller")+":</label>";
+				html += "<select id='altui-controller-select' class='form-control'>";
+				$.each(MultiBox.getControllers(), function( idx, controller) {
+					html += "<option value='{0}'>{1}</option>".format( idx , controller.ip=='' ? window.location.hostname : controller.ip  );
+				});
+				html += "</select>";
+			html += "</div>";
+		html += "</form>";
+		$(".altui-mainpanel").append(html);
+		$("#altui-controller-select").change(function() {
+			$(".altui-route-d3chart").html("");
+			_drawChart();
+		});
 		$(".altui-mainpanel")
 			.append(
 				"<style>					\
