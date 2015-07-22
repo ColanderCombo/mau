@@ -25,7 +25,12 @@ var MultiBox = ( function( window, undefined ) {
 		var elems = altuiid.split("-");
 		return { controller:elems[0] , id:elems[1] };
 	};
-	
+	function _makeAltuiid(ctrlid, devid) {
+		return "{0}-{1}".format(ctrlid,devid);
+	};
+	function _getControllers() {
+		return $.map(_controllers,function(c) { return {	ip:c.ip	} });
+	};	
 	function _initDB(devicetypes) {
 		$.extend(true,_devicetypesDB,devicetypes); 
 		return _devicetypesDB; 
@@ -503,6 +508,8 @@ var MultiBox = ( function( window, undefined ) {
 	
 	// controller selection
 	controllerOf : _controllerOf,	//(deviceid)
+	makeAltuiid	 : _makeAltuiid,
+	getControllers : _getControllers,	
 	
 	// Device Type DB
 	getDeviceTypesDB 		: function() 	{ 	return _devicetypesDB; },
@@ -523,6 +530,7 @@ var MultiBox = ( function( window, undefined ) {
 	createRoom		: _createRoom,		//(controllerid, name)
 	getRoomByID		: _getRoomByID,		//( roomid )
 	getRoomByAltuiID:_getRoomByAltuiID,	//(altuiid)	
+	
 	// Devices
 	createDevice			: _createDevice,			// ( param , cbfunc )
 	deleteDevice			: _deleteDevice,			// id

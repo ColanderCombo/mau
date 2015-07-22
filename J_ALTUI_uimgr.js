@@ -6779,30 +6779,63 @@ var UIManager  = ( function( window, undefined ) {
 		function _addNode( node ) {
 			var parent = _findNode( data.root, node.id_parent );
 			if (parent==null){	
-				PageMessage.message("Error building node hierarchy","danger");
-				return;
+				parent = _findNode( data.wait, node.id_parent );
+				if (parent==null) {
+					data.wait.push(node);
+					return;
+				} 
+				// PageMessage.message("Error building node hierarchy","danger");
+				// return;
 			}
 			parent.children.push( node );
+			// search in wait list
+			var childidxs=[]
+			$.each(data.wait , function(idx,waitnode) {
+				if (waitnode.id_parent == node.id) {
+					childidxs.unshift(idx);		// insert in head
+				}
+			});
+			$.each(childidxs, function(i,idx){
+				var child = data.wait.splice(idx,idx);
+				node.children.push( child );				
+			});
 		};
 		
 		function _prepareDataParents(  ) {
-			data = { root:[], nodes:[] , links:[] };
-			var color = {};
-			var nColor = 0;
-			var devices = $.grep( MultiBox.getDevicesSync() , function(d) {return (MultiBox.controllerOf(d.altuiid).controller==0) } );
+			data = { root:[], nodes:[] , links:[] , wait:[] };
+			var color = { "ctrl": 0 };
+			var nColor = 1;
+			// var devices = $.grep( MultiBox.getDevicesSync() , function(d) {return (MultiBox.controllerOf(d.altuiid).controller==0) } );
+			var devices =  MultiBox.getDevicesSync() ;
 
-			data.root={ id:0, zwid:0, name:"root", children:[] };
+			data.root={ id:"0-0", name:"Main Controller", color:color["ctrl"], children:[] };
+			$.each( MultiBox.getControllers(), function (idx,c) {
+				if (idx>0) {					
+					_addNode({ 
+						id:"{0}-{1}".format(idx,0),
+						name:"Controller "+c.ip, 
+						color:color["ctrl"] ,
+						id_parent: "0-0",
+						children: []
+					});
+				}
+			});
+
 			if (devices) {
-				$.each( devices.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function( idx,device ) {
+				$.each( devices /*.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)})*/, function( idx,device ) {
 					if (color[device.device_type]==undefined)
 						color[device.device_type]=nColor++;
+					var controllerid = MultiBox.controllerOf(device.altuiid).controller;
 					_addNode({ 
-						id:device.id, 
+						id:device.altuiid, 
 						name:device.name, 
 						color:color[device.device_type] ,
-						id_parent:device.id_parent || 0,
+						id_parent: "{0}-{1}".format(controllerid,device.id_parent || 0),
 						children: []
 						});
+				});
+				$.each(data.wait, function(i, node) {
+					console.log( node.altuiid );
 				});
 			}
 			return data;
@@ -6894,6 +6927,13 @@ var UIManager  = ( function( window, undefined ) {
 				d3.select(this).classed("fixed", d.fixed = true);
 			};				
 			function _updateChart(data) {			
+				function _countChildren(d) {
+					var s = 0;
+					$.each(d.children, function(i,child) {
+						s += ( 1 + _countChildren(child));
+					})
+					return s;
+				};
 				_updateDataParents();
 				force
 					.nodes( data.nodes )
@@ -6929,7 +6969,8 @@ var UIManager  = ( function( window, undefined ) {
 							.call( drag );
 					groups.append("circle")					
 						.attr("r", function(d) { 
-							return 8+ (d.children ? d.children.length/2 : 0);
+							return 8+ ( Math.sqrt(_countChildren(d)) ) ;
+							// return 8+ (d.children ? d.children.length/2 : 0);
 						} )
 						.style("fill", function (d) {
 							return color(d._children ? "#3182bd" : d.color);
