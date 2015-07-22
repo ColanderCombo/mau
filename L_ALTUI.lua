@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.61"
+local version = "v0.62"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -1011,6 +1011,25 @@ function resetDevice(lul_device,norepeat)
 	debug(string.format("Reseting ALTUI config to %s",default))
 end
 
+function registerPlugin(lul_device,newDeviceType,newScriptFile,newDeviceDrawFunc,newStyleFunc,newDeviceIconFunc,newControlPanelFunc)
+	log(string.format("registerPlugin(%d,%s,%s,%s,%s,%s,%s)",lul_device,newDeviceType,newScriptFile,newDeviceDrawFunc,newStyleFunc,newDeviceIconFunc,newControlPanelFunc))
+	if (newDeviceType ~= "") then
+		local tbljson = getSetVariable(service, "PluginConfig", lul_device, json.encode( getDefaultConfig() ) )
+		local tbl = json.decode(tbljson)
+		if (tbl[newDeviceType] == nil) then
+			tbl[newDeviceType]={}
+		end
+		for k,v  in pairs({ ["newScriptFile"]=newScriptFile,["newDeviceDrawFunc"]=newDeviceDrawFunc,["newStyleFunc"]=newStyleFunc,["newDeviceIconFunc"]=newDeviceIconFunc,["newControlPanelFunc"]=newControlPanelFunc}) do
+			if (v~="") then
+				tbl[newDeviceType][k]=v
+			end
+		end
+		setVariableIfChanged(service, "PluginConfig", json.encode( tbl ), lul_device)
+	else
+		debug("Ignored, empty device type")
+	end
+end
+
 ------------------------------------------------
 -- STARTUP Sequence
 ------------------------------------------------
@@ -1037,17 +1056,28 @@ function startupDeferred(lul_device)
 	end
 	
 	local major,minor = 0,0
+	local tbl={}
+	
 	if (oldversion~=nil) then
 		major,minor = string.match(oldversion,"v(%d+)%.(%d+)")
 		major,minor = tonumber(major),tonumber(minor)
 		debug ("Plugin version: "..version.." Device's Version is major:"..major.." minor:"..minor)
+
+		newmajor,newminor = string.match(version,"v(%d+)%.(%d+)")
+		newmajor,newminor = tonumber(newmajor),tonumber(newminor)
+		
+		-- init the configuration table with a valid default if needed
+		local defconfigjson = json.encode( getDefaultConfig() )
+		local config = getSetVariable(service, "PluginConfig", lul_device, defconfigjson )
+		
+		-- force the default in case of upgrade
+		if ( (newmajor>major) or ( (newmajor==major) and (newminor>minor) ) ) then
+			log ("Version upgrade => Reseting Plugin config to default")
+			setVariableIfChanged(service, "PluginConfig", defconfigjson, lul_device)		
+		end
+		
 		luup.variable_set(service, "Version", version, lul_device)
 	end	
-
-	-- init the configuration table with a valid default
-	local tbl = getDefaultConfig()
-	local default = json.encode( tbl )
-	setVariableIfChanged(service, "PluginConfig", default, lul_device)
 	
 	-- NOTHING to start 
 	if( luup.version_branch == 1 and luup.version_major == 7) then

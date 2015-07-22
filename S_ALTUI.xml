@@ -29,6 +29,42 @@
             <defaultValue></defaultValue>
             <shortCode>result</shortCode>
         </stateVariable>
+        <stateVariable sendEvents="no">
+            <name>DeviceType</name>
+            <dataType>string</dataType>
+            <defaultValue></defaultValue>
+            <shortCode>devicetype</shortCode>
+        </stateVariable>
+        <stateVariable sendEvents="no">
+            <name>ScriptFile</name>
+            <dataType>string</dataType>
+            <defaultValue></defaultValue>
+            <shortCode>scriptfile</shortCode>
+        </stateVariable>
+        <stateVariable sendEvents="no">
+            <name>DeviceDrawFunc</name>
+            <dataType>string</dataType>
+            <defaultValue></defaultValue>
+            <shortCode>devicedrawfunc</shortCode>
+        </stateVariable>
+        <stateVariable sendEvents="no">
+            <name>StyleFunc</name>
+            <dataType>string</dataType>
+            <defaultValue></defaultValue>
+            <shortCode>stylefunc</shortCode>
+        </stateVariable>
+        <stateVariable sendEvents="no">
+            <name>DeviceIconFunc</name>
+            <dataType>string</dataType>
+            <defaultValue></defaultValue>
+            <shortCode>deviceiconfunc</shortCode>
+        </stateVariable>
+        <stateVariable sendEvents="no">
+            <name>ControlPanelFunc</name>
+            <dataType>string</dataType>
+            <defaultValue></defaultValue>
+            <shortCode>controlpanelfunc</shortCode>
+        </stateVariable>
 	</serviceStateTable>
     <actionList>
         <action>
@@ -38,6 +74,41 @@
                     <name>newDebugMode</name>
                     <direction>in</direction>
                     <relatedStateVariable>Debug</relatedStateVariable>
+                </argument>
+            </argumentList>
+        </action>
+        <action>
+            <name>RegisterPlugin</name>
+            <argumentList>
+                <argument>
+                    <name>newDeviceType</name>
+                    <direction>in</direction>
+                    <relatedStateVariable>deviceType</relatedStateVariable>
+                </argument>
+                <argument>
+                    <name>newScriptFile</name>
+                    <direction>in</direction>
+                    <relatedStateVariable>ScriptFile</relatedStateVariable>
+                </argument>
+                <argument>
+                    <name>newDeviceDrawFunc</name>
+                    <direction>in</direction>
+                    <relatedStateVariable>DeviceDrawFunc</relatedStateVariable>
+                </argument>
+                <argument>
+                    <name>newStyleFunc</name>
+                    <direction>in</direction>
+                    <relatedStateVariable>StyleFunc</relatedStateVariable>
+                </argument>
+                <argument>
+                    <name>newDeviceIconFunc</name>
+                    <direction>in</direction>
+                    <relatedStateVariable>DeviceIconFunc</relatedStateVariable>
+                </argument>
+                <argument>
+                    <name>newControlPanelFunc</name>
+                    <direction>in</direction>
+                    <relatedStateVariable>ControlPanelFunc</relatedStateVariable>
                 </argument>
             </argumentList>
         </action>
