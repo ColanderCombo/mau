@@ -2572,7 +2572,7 @@ var UIManager  = ( function( window, undefined ) {
 						html +="</thead>";
 						html +="<tbody>";
 						$.each(history.lines, function(i,e) {
-							html += ("<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>".format(e.date,_enhanceValue(e.old),_enhanceValue(e.new)));
+							html += ("<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>".format(e.date,_enhanceValue(e.oldv),_enhanceValue(e.newv)));
 						});
 						html +="</tbody>";
 						html +="</table>";
@@ -7447,7 +7447,7 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pageOptions: function() {
 		var _checkOptions = [
-			{ id:'ShowVideoThumbnail', label:_T("Show Video Thumbnail in Local mode") , default:1 },
+			{ id:'ShowVideoThumbnail', label:_T("Show Video Thumbnail in Local mode"), _default:1 },
 		];
 		UIManager.clearPage(_T('Options'),_T("Options"));
 
@@ -7471,7 +7471,7 @@ var UIManager  = ( function( window, undefined ) {
 		html +="  <div class='panel-body'>";
 		html += "<div class='row'>";
 			$.each(_checkOptions, function(id,check) {
-				var init =  MyLocalStorage.getSettings(check.id) || check.default;
+				var init =  MyLocalStorage.getSettings(check.id) || check._default;
 				html += "<div class='col-sm-6'>";
 					html +="<label class='checkbox-inline'>";
 					html +=("  <input type='checkbox' id='altui-"+check.id+"' " + ( (init==true) ? 'checked' : '') +" value='"+init+"' title='"+check.id+"'>"+check.label);
@@ -7807,7 +7807,7 @@ $(document).ready(function() {
 			EventBus.publishEvent("on_ui_initFinished");
 		});
 	};
-	
+
 	AltuiDebug.SetDebug( g_DeviceTypes.info["debug"] ) ;
 	AltuiDebug.debug("starting engines");
 	AltuiDebug.debug("Configuration: "+JSON.stringify(g_DeviceTypes));

@@ -1540,7 +1540,11 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 					}
 					// View your result using the m-variable.
 					// eg m[0] etc.
-					result.lines.push({date:m[1], old:m[2], new:m[3]});
+					result.lines.push({
+						date:m[1], 
+						oldv:m[2], 
+						newv:m[3]
+						});
 				}
 				(cbfunc)(result);
 			})

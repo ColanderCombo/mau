@@ -552,12 +552,27 @@ local htmlLayout = [[
 </head>
 
 <body role="document">
+	<script type='text/javascript' >
+		// BROWSER DETECTION
+		var userAgent = navigator.userAgent.toLowerCase();
+		var mybrowser = {
+		   version: (userAgent.match( /.+(?:rv|it|ra|ie|me)[\/: ]([\d.]+)/ ) || [])[1],
+		   chrome: /chrome/.test( userAgent ),
+		   safari: /webkit/.test( userAgent ) && !/chrome/.test( userAgent ),
+		   opera: /opera/.test( userAgent ),
+		   msie: /msie/.test( userAgent ) && !/opera/.test( userAgent ),
+		   mozilla: /mozilla/.test( userAgent ) && !/(compatible|webkit)/.test( userAgent )
+		};
 
-	
+		if ( (mybrowser['msie']==true)  && (parseFloat(mybrowser['version']) <=9)) 
+		{
+			document.writeln('<span>Sorry !! Your Browser is too old, you need to upgrade to a recent browser supporting <b>HTML5</b> like:<ul><li>Chrome</li><li>Firefox</li><li>IE 10,11,...</li></ul></span>');
+		}
+	</script>
+
     <!-- Bootstrap core JavaScript    ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
 	<!-- Latest compiled and minified JavaScript -->
-	
 	@mandatory_scripts@
 	
 	<script src="J_ALTUI_jquery.ui.touch-punch.min.js"></script>
@@ -566,6 +581,7 @@ local htmlLayout = [[
 	<script src="J_ALTUI_verabox.js" ></script>
 	<script src="J_ALTUI_multibox.js" ></script>
 	<script type='text/javascript' >
+
 		google.setOnLoadCallback(drawVisualization);
 		function drawVisualization() {
 			//console.log('google loaded');
