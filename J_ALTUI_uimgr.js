@@ -49,10 +49,10 @@ var invisibleGlyph = "<span class='glyphicon glyphicon-ban-circle' aria-hidden='
 var timeGlyph="<span class='glyphicon glyphicon-time' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='time'></span>";
 var okGlyph="<span class='glyphicon glyphicon-ok' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='OK'></span>";
 var wrenchGlyph="<span class='glyphicon glyphicon-wrench' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Settings'></span>";
-var optHorGlyph="<span class='glyphicon glyphicon-option-horizontal' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Time'></span>";
 var plusGlyph="<span class='glyphicon glyphicon-plus' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Add'></span>";
 var saveGlyph="<span class='glyphicon glyphicon-save' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Save'></span>";
 var labelGlyph="<span class='glyphicon glyphicon-font' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Label'></span>";
+var optHorGlyph="";
 var refreshGlyph="";
 var calendarGlyph="";
 var searchGlyph = "";
@@ -2750,10 +2750,19 @@ var UIManager  = ( function( window, undefined ) {
 		}
 		return html;
 	};
-	
+	function _defaultDeviceDrawAltuiStrings(device) {
+		html ="";
+		$.each( ['DisplayLine1','DisplayLine2'],function(i,v) {
+			var dl1 = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:altui1', v ); 
+			if (dl1 != null) 
+				html += "<div class='altui-{1}'>{0}</div>".format(dl1,v);
+		});
+		return html!="" ? html : optHorGlyph;
+	};
 	function _defaultDeviceDraw( device ) {
 		var html = _defaultDeviceDrawWatts(device);
-		return html+optHorGlyph ;
+		html += _defaultDeviceDrawAltuiStrings(device);
+		return html;
 	};
 
 	function _isObject(obj)
@@ -2909,7 +2918,7 @@ var UIManager  = ( function( window, undefined ) {
 		var controller = MultiBox.controllerOf(device.altuiid).controller;
 
 		if (device==null)
-			return "<img class='altui-device-icon pull-left img-rounded' data-org-src='/err' src='"+defaultIconSrc+"' alt='_todo_' onerror='UIManager.onDeviceIconError("+deviceid+")' ></img>";
+			return "<img class='altui-device-icon pull-left img-rounded' data-org-src='/err' src='"+defaultIconSrc+"' alt='_todo_' onerror='UIManager.onDeviceIconError(\""+device.altuiid+"\")' ></img>";
 		
 		// if there is a custom function, use it
 		if (_devicetypesDB[ device.device_type ]!=null && _devicetypesDB[ device.device_type ].DeviceIconFunc!=null) {
@@ -2926,11 +2935,11 @@ var UIManager  = ( function( window, undefined ) {
 		}
 		else
 			iconDataSrc = iconPath;
-		return "<img class='altui-device-icon pull-left img-rounded' data-org-src='"+iconPath+"' src='"+iconDataSrc+"' alt='_todo_' onerror='UIManager.onDeviceIconError("+device.id+")' ></img>";
+		return "<img class='altui-device-icon pull-left img-rounded' data-org-src='"+iconPath+"' src='"+iconDataSrc+"' alt='_todo_' onerror='UIManager.onDeviceIconError(\""+device.altuiid+"\")' ></img>";
 	}
 	
 	function _deviceDraw(device) {
-		var id = device.id;
+		var id = device.altuiid;
 		var iconHtml = _deviceIconHtml( device );
 		var batteryHtml ="";
 		var batteryLevel = MultiBox.getDeviceBatteryLevel(device);
@@ -2976,7 +2985,7 @@ var UIManager  = ( function( window, undefined ) {
 		devicecontainerTemplate	+= 	  "</div>";
 		
 		var deviceHtml ="";
-		if ( (id) /*&& ( (device.invisible == undefined) || (device.invisible ==false) )*/ ) 
+		if ( id /*&& ( (device.invisible == undefined) || (device.invisible ==false) )*/ ) 
 		{
 			var tooltip=[];
 			$.each( device, function(key,val) {
@@ -4825,8 +4834,8 @@ var UIManager  = ( function( window, undefined ) {
 		});
 	},
 	
-	onDeviceIconError : function( deviceid ) {
-		$("div.altui-device#"+deviceid+" img").attr('src',defaultIconSrc);
+	onDeviceIconError : function( altuiid ) {
+		$("div.altui-device[data-altuiid="+altuiid+"] img").attr('src',defaultIconSrc);
 	},
 	
 	pageDevices : function ()
@@ -7750,6 +7759,7 @@ $(document).ready(function() {
 		starGlyph = glyphTemplate.format( "star", _T("Favorite"), "altui-favorite text-warning" );
 		questionGlyph=glyphTemplate.format( "question-sign", _T("Question"), "text-warning" );
 		searchGlyph=glyphTemplate.format( "search", _T("Search"), "" );
+		optHorGlyph=glyphTemplate.format( "option-horizontal", _T("Option"), "pull-left" );
 		calendarGlyph=glyphTemplate.format( "calendar", _T("History"), "" );
 		refreshGlyph=glyphTemplate.format( "refresh", _T("Refresh"), "text-warning" );
 		removeGlyph=glyphTemplate.format( "remove", _T("Remove"), "" );
