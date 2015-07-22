@@ -88,6 +88,19 @@ you know how to use jquery and to write HTML elements in a parent container. I w
 [li]language list extensible by a simple javascript, [u]ask me & contribute if you want[/u][/li]
 [/list]
 
+Although the prefered way to customize the display of a device in ALTUI is to write a small javascript plugin, 
+ALTUI provides a fast and easy customization of display of a device by the mean of 2 reserved service/variables 
+that can be added manually by the user to any device. ID = 'urn:upnp-org:serviceId:altui1' , Variable = 'DisplayLine1' and 'DisplayLine2'
+[list type=decimal]
+[li]you add the variables to the device.[/li]
+[li]if no drawing plugin is specified , then altui will look for these variables, if found, it will display one ( or both ) 
+per line. each variable text content is included in a <div> which has a CSS class called altui-DisplayLine1 or 
+altui-DisplayLine2 for possible theming if needed. Variable content will be HTML encoded so that HTML injection is not possible[/li]
+[li]if no drawing plugin is specified and if ALTUI does not find these one of these 2 variables, it will display the default 
+ellipsis glyph , signifying "default drawing"[/li]
+[/list]
+
+
 [b]Prerequisite requirements[/b]
 [list]
 [li]Just a classical plugin , no extra HW or servers[/li]
