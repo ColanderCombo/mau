@@ -2755,7 +2755,7 @@ var UIManager  = ( function( window, undefined ) {
 		$.each( ['DisplayLine1','DisplayLine2'],function(i,v) {
 			var dl1 = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:altui1', v ); 
 			if (dl1 != null) 
-				html += "<div class='altui-{1}'>{0}</div>".format(dl1,v);
+				html += $("<div class='altui-"+v+"'></div>").text(dl1).wrap( "<div></div>" ).parent().html()
 		});
 		return html!="" ? html : optHorGlyph;
 	};
