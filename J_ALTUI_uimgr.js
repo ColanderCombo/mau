@@ -6954,9 +6954,10 @@ var UIManager  = ( function( window, undefined ) {
 			function _updateChart(data) {			
 				function _countChildren(d) {
 					var s = 0;
-					$.each(d.children, function(i,child) {
-						s += ( 1 + _countChildren(child));
-					})
+					if (d && d.children) 
+						$.each(d.children, function(i,child) {
+							s += ( 1 + _countChildren(child));
+						})
 					return s;
 				};
 				_updateDataParents();
