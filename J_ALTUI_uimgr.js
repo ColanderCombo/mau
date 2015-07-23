@@ -3536,75 +3536,7 @@ var UIManager  = ( function( window, undefined ) {
 			}
 		}
 	};
-
-
-	function _deviceDrawDeviceUsedIn( device, container ) {
-		var usedin_objects = MultiBox.getDeviceDependants(device);
-		var html ="";
-		html +="<div class='row'>";
-		html += "<div id='altui-device-usedin-"+device.altuiid+"' class='col-xs-12 altui-device-usedin'>"
-		html += "<ul>";
-		if (usedin_objects.length>0)
-			$.each(usedin_objects, function(idx,obj) {
-				html += "<li>{0} '{2}' in scene #{1} '{3}'</li>".format(obj.type, obj.scene, obj.trigger ? obj.trigger.name : obj.action.action ,obj.name);
-			});
-		else
-			html += "<li>{0}</li>".format(_T("Not used in scenes"));
-		html += "</ul>";
-		// html +=  "<span><pre>{0}</pre></span>".format( JSON.stringify(usedin_objects) );
-		html += "</div>";
-		html += "</div>";	// row
-		$(container).append( html );
-	};
 	
-	function _deviceDrawControlPanelAttributes(device, container ) {
-		var devid = device.altuiid;
-		// Draw hidding attribute panel
-		var html ="";
-		html+="<div class='row'>";
-		html += "<div id='altui-device-attributes-"+devid+"' class='col-xs-12 altui-device-attributes'>"
-		html += "<form class='form'>";
-		$.each( device, function(key,val) {
-			var typ = Object.prototype.toString.call(val);
-			if ((typ!="[object Object]") && (typ!="[object Array]")){
-				html += "<div class='col-sm-6 col-md-4 col-lg-3'>";
-				html += "<div class='form-group'>";
-				html += "<label for='"+key+"'>"+key+"</label>";
-				html += "<input id='"+key+"' data-altuiid='"+devid+"' class='form-control' value='"+val+"'></input>";
-				html += "</div>"
-				html += "</div>"
-			}
-		});
-		html += "</form>";
-		html += "</div>";
-		html += "</div>";	// row
-		$(container).append( html );
-
-		$(".altui-device-attributes input").change( function( event ) {
-			var altuiid = $(this).data('altuiid');
-			var device = MultiBox.getDeviceByAltuiID(altuiid);
-			var attribute = $(this).prop('id');
-			var oldval = device[attribute];
-			var value = $(this).val();
-			var input = $(this);
-			DialogManager.confirmDialog(_T("Are you sure you want to modify this attribute"),function(result) {
-				if (result==true) {
-					MultiBox.setAttr(device, attribute, value,function(result) {
-						if (result==null) {
-							PageMessage.message( "Set Attribute action failed!", "warning" );				
-						}
-						else {
-							PageMessage.message( "Set Attribute succeeded! a LUUP reload will happen now, be patient", "success" );			
-						}
-					});
-				}
-				else {
-					$(input).val(oldval);
-				}
-			});
-		});
-	};
-		
 	function _setActiveDeviceTabIdx( idx) {
 		$("#altui-devtab-tabs li").removeClass('active');
 		if (idx!=null)
@@ -3631,35 +3563,75 @@ var UIManager  = ( function( window, undefined ) {
 	function _deviceDrawControlPanel( device, container ) {
 		var _devicetypesDB = MultiBox.getDeviceTypesDB();	
 		var controller = MultiBox.controllerOf(device.altuiid).controller;
+
+		function _deviceDrawDeviceUsedIn( device, container ) {
+			var usedin_objects = MultiBox.getDeviceDependants(device);
+			var html ="";
+			html +="<div class='row'>";
+			html += "<div id='altui-device-usedin-"+device.altuiid+"' class='col-xs-12 altui-device-usedin'>"
+			html += "<ul>";
+			if (usedin_objects.length>0)
+				$.each(usedin_objects, function(idx,obj) {
+					html += "<li>{0} '{2}' in scene #{1} '{3}'</li>".format(obj.type, obj.scene, obj.trigger ? obj.trigger.name : obj.action.action ,obj.name);
+				});
+			else
+				html += "<li>{0}</li>".format(_T("Not used in scenes"));
+			html += "</ul>";
+			// html +=  "<span><pre>{0}</pre></span>".format( JSON.stringify(usedin_objects) );
+			html += "</div>";
+			html += "</div>";	// row
+			$(container).append( html );
+		};
 		
-		function _defereddisplay(bAsync) {
-			function _createDeviceTabs( device, bExtraTab, tabs ) {
-				var lines= [];
-				lines.push("<ul class='nav nav-tabs' id='altui-devtab-tabs' role='tablist'>");
-				if (bExtraTab) {
-					lines.push( "<li id='altui-devtab-0' role='presentation' ><a href='#altui-devtab-content-0' aria-controls='{0}' role='tab' data-toggle='tab'>{0}</a></li>".format("AltUI") );
+		function _deviceDrawControlPanelAttributes(device, container ) {
+			var devid = device.altuiid;
+			// Draw hidding attribute panel
+			var html ="";
+			html+="<div class='row'>";
+			html += "<div id='altui-device-attributes-"+devid+"' class='col-xs-12 altui-device-attributes'>"
+			html += "<form class='form'>";
+			$.each( device, function(key,val) {
+				var typ = Object.prototype.toString.call(val);
+				if ((typ!="[object Object]") && (typ!="[object Array]")){
+					html += "<div class='col-sm-6 col-md-4 col-lg-3'>";
+					html += "<div class='form-group'>";
+					html += "<label for='"+key+"'>"+key+"</label>";
+					html += "<input id='"+key+"' data-altuiid='"+devid+"' class='form-control' value='"+val+"'></input>";
+					html += "</div>"
+					html += "</div>"
 				}
-				$.each( tabs, function( idx,tab) {
-					if ((tab.TabType!="javascript") || (tab.ScriptName!="shared.js")) {
-						lines.push( "<li id='altui-devtab-{1}' role='presentation' ><a href='#altui-devtab-content-{1}' aria-controls='{0}' role='tab' data-toggle='tab'>{0}</a></li>".format(tab.Label.text,idx+1) );
+			});
+			html += "</form>";
+			html += "</div>";
+			html += "</div>";	// row
+			$(container).append( html );
+
+			$(".altui-device-attributes input").change( function( event ) {
+				var altuiid = $(this).data('altuiid');
+				var device = MultiBox.getDeviceByAltuiID(altuiid);
+				var attribute = $(this).prop('id');
+				var oldval = device[attribute];
+				var value = $(this).val();
+				var input = $(this);
+				DialogManager.confirmDialog(_T("Are you sure you want to modify this attribute"),function(result) {
+					if (result==true) {
+						MultiBox.setAttr(device, attribute, value,function(result) {
+							if (result==null) {
+								PageMessage.message( "Set Attribute action failed!", "warning" );				
+							}
+							else {
+								PageMessage.message( "Set Attribute succeeded! a LUUP reload will happen now, be patient", "success" );			
+							}
+						});
+					}
+					else {
+						$(input).val(oldval);
 					}
 				});
-				lines.push("</ul>");
-				var html = "<div class='tab-content {0}'>".format( (UIManager.UI7Check()==true) ? '' : 'altui-tabcontent-fix');
-				if (bExtraTab) {
-					html += "<div id='altui-devtab-content-0' class='tab-pane bg-info altui-devtab-content'>";
-					html += "</div>";
-				}
-				$.each( tabs, function( idx,tab) {
-					if ((tab.TabType!="javascript") || (tab.ScriptName!="shared.js")) {
-						html += "<div id='altui-devtab-content-{0}' class='tab-pane bg-info altui-devtab-content'>".format(idx+1);
-						html += "</div>";
-					}
-				});
-				html += "</div>";
-				return lines.join('')+html;
-			};
-			function _deviceDrawWireFrame( device,container) {
+			});
+		};
+		
+		function _deviceDrawWireFrame( device,container) {
 				var rooms = MultiBox.getRoomsSync();
 				var htmlRoomSelect = "<select id='altui-room-list' class='form-control input-sm'>";
 				if (rooms)
@@ -3688,11 +3660,37 @@ var UIManager  = ( function( window, undefined ) {
 				$("#altui-room-list").change( function() {
 					MultiBox.renameDevice(device, device.name, $(this).val() );
 				});
+		};
+			
+		function _defereddisplay(bAsync) {
+			function _createDeviceTabs( device, bExtraTab, tabs ) {
+				var lines= [];
+				lines.push("<ul class='nav nav-tabs' id='altui-devtab-tabs' role='tablist'>");
+				if (bExtraTab) {
+					lines.push( "<li id='altui-devtab-0' role='presentation' ><a href='#altui-devtab-content-0' aria-controls='{0}' role='tab' data-toggle='tab'>{0}</a></li>".format("AltUI") );
+				}
+				$.each( tabs, function( idx,tab) {
+					if ((tab.TabType!="javascript") || (tab.ScriptName!="shared.js")) {
+						lines.push( "<li id='altui-devtab-{1}' role='presentation' ><a href='#altui-devtab-content-{1}' aria-controls='{0}' role='tab' data-toggle='tab'>{0}</a></li>".format(tab.Label.text,idx+1) );
+					}
+				});
+				lines.push("</ul>");
+				var html = "<div class='tab-content {0}'>".format( (UIManager.UI7Check()==true) ? '' : 'altui-tabcontent-fix');
+				if (bExtraTab) {
+					html += "<div id='altui-devtab-content-0' class='tab-pane bg-info altui-devtab-content'>";
+					html += "</div>";
+				}
+				$.each( tabs, function( idx,tab) {
+					if ((tab.TabType!="javascript") || (tab.ScriptName!="shared.js")) {
+						html += "<div id='altui-devtab-content-{0}' class='tab-pane bg-info altui-devtab-content'>".format(idx+1);
+						html += "</div>";
+					}
+				});
+				html += "</div>";
+				return lines.join('')+html;
 			};
+
 			if (_toLoad==0) {
-				_deviceDrawControlPanelAttributes( device, container ); 				// row for attributes
-				_deviceDrawDeviceUsedIn( device, container );							// row for device 'used in' info
-				_deviceDrawWireFrame(device,container);
 				$(container).append( "<div class='row'><div class='altui-debug-div'></div></div>" );	// Draw hidden debug panel
 
 				container = container.find(".panel-body");						
@@ -3719,6 +3717,10 @@ var UIManager  = ( function( window, undefined ) {
 		};
 
 		var _toLoad = 0;
+		_deviceDrawControlPanelAttributes( device, container ); 				// row for attributes
+		_deviceDrawDeviceUsedIn( device, container );							// row for device 'used in' info
+		_deviceDrawWireFrame(device,container);
+				
 		var dt = _devicetypesDB[ device.device_type ];
 		if ((dt != undefined) && (dt.ui_static_data!=undefined)) {
 			// load scripts
@@ -4649,25 +4651,56 @@ var UIManager  = ( function( window, undefined ) {
 	},
 	
 	// pages
-	clearPage : function(breadcrumb,title)
+	oneColumnLayout: function(title)
 	{
+		var body="";
+		body+="	<div class='altui-layout row'>";
+		body+="		<div class='col-xs-12 col-sm-push-1 col-sm-10'>";
+		body+="			<h1 id='altui-pagetitle' >"+title+"</h1>";
+		body+="			<div class='altui-mainpanel row'>";
+		body+="			</div>";
+		body+="		</div>";
+		body+="	</div>";
+		return body;
+	},
+	twoColumnLayout: function(title)
+	{
+		var body="";
+		body+="	<div class='altui-layout row'>";
+		body+="		<div class='col-sm-10 col-sm-push-2'>";
+		body+="			<h1 id='altui-pagetitle' >"+title+"</h1>";
+		body+="			<div class='altui-mainpanel row'>";
+		body+="			</div>";
+		body+="		</div>";
+		body+="		<div class='col-sm-2 col-sm-pull-10 hidden-xs '>";
+		body+="			<div class='altui-leftnav btn-group-vertical' role='group' aria-label='...'>";
+		body+="				<!--";
+		body+="				<button type='button' class='btn btn-default'>One</button>";
+		body+="				<button type='button' class='btn btn-default'>Deux</button>";
+		body+="				<button type='button' class='btn btn-default'>Trois</button>";
+		body+="				-->";
+		body+="			</div>";
+		body+="		</div>";
+		body+="	</div>";
+		return body;
+	},
+	
+	clearPage : function(breadcrumb,title,layout)
+	{
+		var layoutfunc = layout || UIManager.twoColumnLayout;
+		
 		UIManager.stoprefreshModes();
-		PageMessage.clear();
 		$(".navbar-collapse").collapse('hide');
-		$(".altui-breadcrumb").remove();
-		$(".altui-pagefilter").remove();
-		// $("#altui-device-name-filter").remove();
-		if (title) {
-			$("#altui-pagetitle").html( title );
-			$("#altui-toggle-messages").before ( UIManager.breadCrumb( breadcrumb ) );
-		}
-		else
-			$("#altui-pagetitle").empty();
-		$(".altui-mainpanel").off().empty();
-		$(".altui-leftnav").empty();
-		$(".altui-device-toolbar").remove();
-		$("#dialogs").off().empty();
+		$(".altui-layout").remove();
 
+		var body = (layoutfunc)(title || '' );
+		$("div[role=main]").append(body);
+		PageMessage.init();
+		$("#altui-toggle-messages").before ( UIManager.breadCrumb( breadcrumb ) );
+
+
+		// elements outside of the layout
+		$("#dialogs").off().empty();
 		$(".altui-scripts").remove();
 		$("body").append("<div class='altui-scripts'></div>");
 	},
@@ -4675,7 +4708,7 @@ var UIManager  = ( function( window, undefined ) {
 	//window.open("data_request?id=lr_ALTUI_Handler&command=home","_self");
 	pageHome : function()
 	{
-		UIManager.clearPage(_T('Home'),_T("Welcome to VERA Alternate UI"));
+		UIManager.clearPage(_T('Home'),_T("Welcome to VERA Alternate UI"),UIManager.oneColumnLayout);
 		UIManager.drawHouseMode();
 	},
 	
@@ -4717,7 +4750,7 @@ var UIManager  = ( function( window, undefined ) {
 	// ===========================
 	pageRooms : function ()
 	{
-		UIManager.clearPage(_T('Rooms'),_T("Rooms"));
+		UIManager.clearPage(_T('Rooms'),_T("Rooms"),UIManager.oneColumnLayout);
 		var formHtml="";
 		formHtml+=" <div class='input-group col-sm-6'>";
 		formHtml+="       <input id='altui-create-room-name' type='text' class='form-control' placeholder='Room name...'>";
@@ -4770,7 +4803,7 @@ var UIManager  = ( function( window, undefined ) {
 		var controllerid = MultiBox.controllerOf(altuiid).controller;
 		var category = MultiBox.getCategoryTitle( device.category_num );
 
-		UIManager.clearPage(_T('Control Panel'),"{0} <small>{1} <small>#{2}</small></small>".format( device.name , category ,altuiid));
+		UIManager.clearPage(_T('Control Panel'),"{0} <small>{1} <small>#{2}</small></small>".format( device.name , category ,altuiid),UIManager.oneColumnLayout);
 		
 		var html = "<div class='form-inline col-xs-12'>";
 		html += "<button type='button' class='btn btn-default' id='altui-toggle-attributes' >"+_T("Attributes")+"<span class='caret'></span></button>";
@@ -5277,7 +5310,7 @@ var UIManager  = ( function( window, undefined ) {
 		var scene = jQuery.extend(true, {timers:[], triggers:[], groups:[] }, orgscene);
 
 		// clear page
-		UIManager.clearPage(_T('Scene Edit'),altuiid!=undefined ? "Edit Scene #"+scene.altuiid : "Create Scene");
+		UIManager.clearPage(_T('Scene Edit'),altuiid!=undefined ? "Edit Scene #"+scene.altuiid : "Create Scene",UIManager.oneColumnLayout);
 
 		var editor = SceneEditor( scene );
 		var html = "<div class='col-xs-12'>" ;
@@ -5301,7 +5334,7 @@ var UIManager  = ( function( window, undefined ) {
 			return 0;
 		};
 		
-		UIManager.clearPage(_T('Plugins'),_T("Plugins"));
+		UIManager.clearPage(_T('Plugins'),_T("Plugins"),UIManager.oneColumnLayout);
 
 		function _getScriptFileList(devicetype) {
 			var dtdb = MultiBox.getDeviceTypesDB();
@@ -5484,7 +5517,7 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		// var pages = g_CustomPages;
 		// PageManager.init(g_CustomPages);
-		UIManager.clearPage(_T('Custom Pages'));
+		UIManager.clearPage(_T('Custom Pages'),"",UIManager.oneColumnLayout);
 		// $("#altui-pagetitle").text("Your Custom Pages");
 
 		var pageTabs = _createPageTabsHtml();
@@ -5698,7 +5731,7 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		
 		// draw page & toolbox
-		UIManager.clearPage(_T('Edit Pages'),_T("Custom Pages Editor"));
+		UIManager.clearPage(_T('Edit Pages'),_T("Custom Pages Editor"),UIManager.oneColumnLayout);
 		PageMessage.message(_T("Drag and Drop to add/move/delete controls. use Ctrl+Click or lasso to select multiple controls"),"info");
 
 		// Get and draw the HTML areas
@@ -5871,7 +5904,7 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pageEditor: function (filename,txt,button,cbfunc)
 	{
-		UIManager.clearPage(_T('Editor'), filename);
+		UIManager.clearPage(_T('Editor'), filename,UIManager.oneColumnLayout);
 		$(".altui-mainpanel").append("<p> </p>");
 		UIManager.pageEditorForm(filename,txt,button,function(newtxt) {
 			if ($.isFunction(cbfunc)) 
@@ -5881,7 +5914,7 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pageLuaTest: function ()
 	{
-		UIManager.clearPage(_T('LuaTest'),_T("LUA Code Test"));
+		UIManager.clearPage(_T('LuaTest'),_T("LUA Code Test"),UIManager.oneColumnLayout);
 		$(".altui-mainpanel").append("<p>This test code will succeed if it is syntactically correct and does not return false. an error in the code or a return false will trigger a failure</p>");
 		UIManager.pageEditorForm("Lua Test Code","return true",_T("Submit"),function(lua) {
 			MultiBox.runLua(0,lua, function(result) {
@@ -5977,7 +6010,7 @@ var UIManager  = ( function( window, undefined ) {
 			return str;
 		};
 		
-		UIManager.clearPage(_T('OsCommand'),_T("OS Command"));
+		UIManager.clearPage(_T('OsCommand'),_T("OS Command"),UIManager.oneColumnLayout);
 		
 		var editButtonHtml = buttonTemplate.format( 'altui-editoscmd-0', 'altui-editoscmd', wrenchGlyph,'default');
 		var html = "";
@@ -6082,7 +6115,7 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pageLuaStart: function ()
 	{
-		UIManager.clearPage(_T('LuaStart'),_T("LUA Startup"));
+		UIManager.clearPage(_T('LuaStart'),_T("LUA Startup"),UIManager.oneColumnLayout);
 		var lua = MultiBox.getLuaStartup(0);
 		UIManager.pageEditorForm("Lua Startup Code",lua,"Submit",function(newlua) {
 			if (newlua!=lua) {
@@ -6097,7 +6130,7 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pagePower: function() 
 	{
-		UIManager.clearPage(_T('Power'),_T("Power Chart"));
+		UIManager.clearPage(_T('Power'),_T("Power Chart"),UIManager.oneColumnLayout);
 		
 		// prepare and load D3 then draw the chart
 		$(".altui-mainpanel")
@@ -6292,7 +6325,7 @@ var UIManager  = ( function( window, undefined ) {
 			mesh:$.map( data.sort(function(a, b){return _countNeighbors(b)-_countNeighbors(a)}), function(d) { return d.altuiid; })
 		};
 
-		UIManager.clearPage(_T('ZWave'),_T("zWave Network"));
+		UIManager.clearPage(_T('ZWave'),_T("zWave Network"),UIManager.oneColumnLayout);
 		// $("div#dialogs").append(deviceModalTemplate.format( '', '', 0 ));
 		DialogManager.registerDialog('deviceModal',deviceModalTemplate.format( '', '', 0 ));
 		var html = "";
@@ -6739,7 +6772,7 @@ var UIManager  = ( function( window, undefined ) {
 			_updateChartRoutes2(data);
 		};
 		
-		UIManager.clearPage(_T('Quality'),_T("Network Quality"));
+		UIManager.clearPage(_T('Quality'),_T("Network Quality"),UIManager.oneColumnLayout);
 		var html = "";
 		html += "<form class='form-inline'>";
 			html += "<div class='form-group'>";
@@ -6816,13 +6849,8 @@ var UIManager  = ( function( window, undefined ) {
 		function _addNode( node ) {
 			var parent = _findNode( data.root, node.id_parent );
 			if (parent==null){	
-				parent = _findNode( data.wait, node.id_parent );
-				if (parent==null) {
-					data.wait.push(node);
-					return;
-				} 
-				// PageMessage.message("Error building node hierarchy","danger");
-				// return;
+				data.wait.push(node);
+				return;
 			}
 			parent.children.push( node );
 			// search in wait list
@@ -6872,7 +6900,7 @@ var UIManager  = ( function( window, undefined ) {
 						});
 				});
 				$.each(data.wait, function(i, node) {
-					console.log( node.altuiid );
+					console.log( node.id );
 				});
 			}
 			return data;
@@ -7023,7 +7051,7 @@ var UIManager  = ( function( window, undefined ) {
 		
 		
 		// prepare and load D3 then draw the chart
-		UIManager.clearPage(_T('Parent/Child'),_T("Parent/Child Network"));
+		UIManager.clearPage(_T('Parent/Child'),_T("Parent/Child Network"),UIManager.oneColumnLayout);
 		PageMessage.message(_T("Drag and Drop to fix the position of a node. Simple Click to open or collapse a parent node, Shift Click to free a fixed node"),"info");
 		var html="";
 		$(".altui-mainpanel")
@@ -7316,7 +7344,7 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		
 		// prepare and load D3 then draw the chart
-		UIManager.clearPage(_T('zWaveRoutes'),_T("zWave Routes"));
+		UIManager.clearPage(_T('zWaveRoutes'),_T("zWave Routes"),UIManager.oneColumnLayout);
 		PageMessage.message(_T("Drag and Drop to fix the position of a node. Simple Click to open or collapse a parent node, Shift Click to free a fixed node"),"info");
 		var html="";
 		html += "<form class='form-inline'>";
@@ -7412,7 +7440,7 @@ var UIManager  = ( function( window, undefined ) {
 
 	},
 	pageLocalization: function() {
-		UIManager.clearPage(_T('Localize'),_T("Localizations"));
+		UIManager.clearPage(_T('Localize'),_T("Localizations"),UIManager.oneColumnLayout);
 		Localization.dump();
 	},
 	pageDebug: function() {
@@ -7480,7 +7508,7 @@ var UIManager  = ( function( window, undefined ) {
 			$("#altui-oscommand-result").text(JSON.stringify(devices,null,2));
 		};
 
-		UIManager.clearPage(_T('Debug'),_T("Debug Tools"));
+		UIManager.clearPage(_T('Debug'),_T("Debug Tools"),UIManager.oneColumnLayout);
 		var html = "";
 		html += "<div class='col-xs-12'>";
 			html +="<div class='panel panel-default'>";
@@ -7516,7 +7544,7 @@ var UIManager  = ( function( window, undefined ) {
 		});
 	},
 	pageTblDevices : function() {
-		UIManager.clearPage(_T('TblDevices'),_T("Table Devices"));
+		UIManager.clearPage(_T('TblDevices'),_T("Table Devices"),UIManager.oneColumnLayout);
 
 		MultiBox.getDevices( 
 			null,	// per device callback not useful here
@@ -7609,7 +7637,7 @@ var UIManager  = ( function( window, undefined ) {
 		var _checkOptions = [
 			{ id:'ShowVideoThumbnail', label:_T("Show Video Thumbnail in Local mode"), _default:1 },
 		];
-		UIManager.clearPage(_T('Options'),_T("Options"));
+		UIManager.clearPage(_T('Options'),_T("Options"),UIManager.oneColumnLayout);
 
 		var color = IconDB.isDB() ? "text-success" : "text-danger";
 		var okGlyph = glyphTemplate.format( "ok-sign", "OK" , color );
@@ -7943,25 +7971,8 @@ $(document).ready(function() {
 		body+="  </div>";
 		body+="</nav>";
 		body+="<div class='container-fluid theme-showcase' role='main'>";
-		body+="	<div class='row'>";
-		body+="		<div class='col-sm-10 col-sm-push-2'>";
-		body+="			<h1 id='altui-pagetitle' >"+_T("Welcome to VERA Alternate UI")+"</h1>";
-		body+="			<div class='altui-mainpanel row'>";
-		body+="			</div>";
-		body+="		</div>";
-		body+="		<div class='col-sm-2 col-sm-pull-10 hidden-xs '>";
-		body+="			<div class='altui-leftnav btn-group-vertical' role='group' aria-label='...'>";
-		body+="				<!--";
-		body+="				<button type='button' class='btn btn-default'>One</button>";
-		body+="				<button type='button' class='btn btn-default'>Deux</button>";
-		body+="				<button type='button' class='btn btn-default'>Trois</button>";
-		body+="				-->";
-		body+="			</div>";
-		body+="		</div>";
-		body+="	</div>";
 		body+="</div> <!-- /container -->";
 		$("body").prepend(body);
-		PageMessage.init();
 		
 		UIManager.initEngine(styles.format(window.location.hostname), g_DeviceTypes, g_CustomTheme, function() {
 			UIManager.initCustomPages(g_CustomPages);	

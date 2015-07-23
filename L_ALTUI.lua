@@ -581,7 +581,6 @@ local htmlLayout = [[
 	<script src="J_ALTUI_verabox.js" ></script>
 	<script src="J_ALTUI_multibox.js" ></script>
 	<script type='text/javascript' >
-
 		google.setOnLoadCallback(drawVisualization);
 		function drawVisualization() {
 			//console.log('google loaded');
