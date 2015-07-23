@@ -46,6 +46,7 @@ It is not just a re skin of UI5/7, and will offer a number of additional feature
 [li]Plugin page: plugin files selectio and easy content display in editor[/li]
 [li]Display of manually installed plugin[/li]
 [li]Camera: live video feed in local mode, images in remote mode[/li]
+[li]Debug tool screen enabling to get all device information, to get one device / all variable info, to search all devices for a given variable name (pattern matching), or to call a javascript piece of code, including the ALTUI object apis[/li]
 [/list]
 
 [b]Features equivalent to UI5 UI7[/b]:
