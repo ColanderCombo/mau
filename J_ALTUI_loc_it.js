@@ -229,5 +229,16 @@ Localization.init( {
 	"Button Label":"Button Label","Color":"Color",
 	"Ran Scene #{0} successfully":"Ran Scene #{0} successfully",
 	"Not used in scenes":"Not used in scenes",
-	"Controller {0} did not respond":"Controller {0} did not respond"
+	"Controller {0} did not respond":"Controller {0} did not respond",
+	"Option":"Option",
+	"Debug":"Debug",
+	"All devices":"All devices",
+	"One Device's States":"One Device's States",
+	"Variable search":"Variable search",
+	"Javascript code":"Javascript code",
+	"Debug Tools":"Debug Tools",
+	"Debug Actions":"Debug Actions",
+	"Altui ID":"Altui ID",
+	"Variable Name Pattern":"Variable Name Pattern",
+	"an error happened during the execution":"an error happened during the execution"
 	});

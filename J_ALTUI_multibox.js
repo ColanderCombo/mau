@@ -627,6 +627,8 @@ var MultiBox = ( function( window, undefined ) {
 	
 	// Upgrade
 	triggerAltUIUpgrade	: _triggerAltUIUpgrade,		//(url suffix)
+
+	// DEBUG
 	
   };
 } )( window );

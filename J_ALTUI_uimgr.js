@@ -4609,12 +4609,13 @@ var UIManager  = ( function( window, undefined ) {
 			{ id:15, title:_T('Editor'), onclick:'UIManager.pageEditor()', parent:8 },
 			{ id:16, title:_T('ZWave'), onclick:'UIManager.pageZwave()', parent:0 },
 			{ id:17, title:_T('Localize'), onclick:'UIManager.pageLocalization()', parent:0 },
-			{ id:18, title:_T('Power'), onclick:'UIManager.pagePower()', parent:0 },
-			{ id:19, title:_T('Parent/Child'), onclick:'UIManager.pageChildren()', parent:0 },
-			{ id:20, title:_T('zWaveRoutes'), onclick:'UIManager.pageRoutes()', parent:0 },
-			{ id:21, title:_T('Quality'), onclick:'UIManager.pageQuality()', parent:0 },
-			{ id:22, title:_T('TblDevices'), onclick:'UIManager.pageTblDevices()', parent:0 },
-			{ id:23, title:_T('OsCommand'), onclick:'UIManager.pageOsCommand()', parent:0 },
+			{ id:18, title:_T('Debug'), onclick:'UIManager.pageDebug()', parent:0 },
+			{ id:19, title:_T('Power'), onclick:'UIManager.pagePower()', parent:0 },
+			{ id:20, title:_T('Parent/Child'), onclick:'UIManager.pageChildren()', parent:0 },
+			{ id:21, title:_T('zWaveRoutes'), onclick:'UIManager.pageRoutes()', parent:0 },
+			{ id:22, title:_T('Quality'), onclick:'UIManager.pageQuality()', parent:0 },
+			{ id:23, title:_T('TblDevices'), onclick:'UIManager.pageTblDevices()', parent:0 },
+			{ id:24, title:_T('OsCommand'), onclick:'UIManager.pageOsCommand()', parent:0 },
 		];
 
 		function _parentsOf(child) {
@@ -7122,7 +7123,7 @@ var UIManager  = ( function( window, undefined ) {
 							id_parent:null,
 							routes: []
 							});
-						$.each( devices.sort(function(a, b){return parseInt(a.id)-parseInt(b.id)}), function( idx,device ) {
+						$.each( devices, function( idx,device ) {
 							var ManualRoute = MultiBox.getStatus(device,"urn:micasaverde-com:serviceId:ZWaveDevice1","ManualRoute");
 							var AutoRoute = MultiBox.getStatus(device,"urn:micasaverde-com:serviceId:ZWaveDevice1","AutoRoute");
 							if ( ManualRoute || AutoRoute)
@@ -7408,12 +7409,110 @@ var UIManager  = ( function( window, undefined ) {
 		});
 
 	},
-	
 	pageLocalization: function() {
 		UIManager.clearPage(_T('Localize'),_T("Localizations"));
 		Localization.dump();
 	},
-	
+	pageDebug: function() {
+		var actions = [
+			{title:_T("All devices"), id:"altui-debug-alldevices", onclick: onClickAllDevices},
+			{title:_T("One Device's States"), id:"altui-debug-onedevices", onclick: onClickOneDevice},
+			{title:_T("Variable search"), id:"altui-debug-searchvariable", onclick: onClickSearchVariable},
+			{title:_T("Javascript code"), id:"altui-debug-javascript", onclick: onClickJavascript}
+		];
+		
+		function _getParameter(name,label,cbfunc) {
+			var dialog = DialogManager.registerDialog('dialogModal',
+							defaultDialogModalTemplate.format( 
+							_T('Command Parameters'),		// title
+							"<form></form>"					// body
+						));
+
+			DialogManager.dlgAddLine(dialog, name, label, "","", {required:''} );
+			DialogManager.dlgAddDialogButton(dialog, true, _T("Run"));
+			$('div#dialogModal').modal();
+			$('div#dialogs')
+				.off('submit',"div#dialogModal")
+				.on( 'submit',"div#dialogModal", function() {
+					$('div#dialogModal').modal('hide');
+					if ($.isFunction(cbfunc))
+						(cbfunc)( $("#altui-widget-"+name).val() );
+				});
+		};
+		
+		function onClickJavascript() {
+			_getParameter('javascriptcode', _T('Javascript code'),function(code){
+				var result =_T("an error happened during the execution");
+				try {
+					result = eval(code);
+				}
+				catch(err) { }
+				$("#altui-oscommand-result").text(JSON.stringify(result,null,2));
+			});
+		};
+		
+		function onClickSearchVariable() {
+			_getParameter('varnamepattern', _T('Variable Name Pattern'),function(name){
+				var result=[];
+				var pattern = new RegExp(name);
+				var devices = MultiBox.getDevicesSync();
+				$.each(devices, function(i,device){
+					var states  = $.grep( MultiBox.getStatesByAltuiID(device.altuiid),function(state) {
+						return pattern.test(state.variable);
+					});
+					$.each(states,function(i,state) {
+						result.push({device:device.altuiid, name:device.name, state:state});
+					});
+				});
+				$("#altui-oscommand-result").text(JSON.stringify(result,null,2));
+			});			
+		};
+		function onClickOneDevice() {
+			_getParameter('devaltuiid', _T('Altui ID'),function(altuiid){
+				var states  = MultiBox.getStatesByAltuiID(altuiid);
+				$("#altui-oscommand-result").text(JSON.stringify(states,null,2));
+			});
+		};
+		function onClickAllDevices() {
+			var devices = MultiBox.getDevicesSync();
+			$("#altui-oscommand-result").text(JSON.stringify(devices,null,2));
+		};
+
+		UIManager.clearPage(_T('Debug'),_T("Debug Tools"));
+		var html = "";
+		html += "<div class='col-xs-12'>";
+			html +="<div class='panel panel-default'>";
+				html +="  <div class='panel-heading'>"+_T("Debug Actions")+"</div>";
+				html +="  <div class='panel-body'>";
+					$.each(actions, function(idx,action) {
+						html +="<div class='btn-group' role='group' aria-label='Debug Tools'>";
+						html += "<button class='btn btn-default {1}' type='button' >{0}</button>".format(action.title,action.id);
+						html += "</div>";
+					});
+				html += "</div>";
+			html +="  </div>";
+		html +="</div>";
+		html += "<div class='col-xs-12'>";
+			html+="<h3>"+_T("Output");
+			var glyph = glyphTemplate.format('save',_T("Copy to clipboard"), '');
+			html += buttonTemplate.format( 'altui-debug-clipboard', 'altui-copy-clipboard', glyph,'default');
+				// html += "<button class='btn btn-default altui-json-viewer' type='button' >{0}</button>".format(_T("Json Viewer"));
+			html+="</h3>";
+			html+="<pre id='altui-oscommand-result' class='pre-scrollable'></pre>";
+		html +="</div>";
+		
+		// append HTML
+		$(".altui-mainpanel").append(html);
+		$("#altui-debug-clipboard").click( function() {
+			Altui_SelectText( "altui-oscommand-result" );
+			document.execCommand('copy');
+		});
+		
+		// register callbacks
+		$.each(actions, function(idx,action) {
+			$("."+action.id).click( action.onclick );
+		});
+	},
 	pageTblDevices : function() {
 		UIManager.clearPage(_T('TblDevices'),_T("Table Devices"));
 
@@ -7830,6 +7929,7 @@ $(document).ready(function() {
 		body+="			<li class='dropdown-header'>Admin</li>";
 		body+="			<li><a id='altui-optimize' href='#'>"+_T("Options")+"</a></li>";
 		body+="			<li><a id='altui-localize' href='#'>"+_T("Localization")+"</a></li>";
+		body+="			<li><a id='altui-debugtools' href='#'>"+_T("Debug")+"</a></li>";
 		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>About</li>";
 		body+="			<li><a id='altui-credits' href='#'>"+_T("Credits")+"</a></li>";
@@ -7943,6 +8043,7 @@ $(document).ready(function() {
 		.on( "click", "#altui-tbl-device", UIManager.pageTblDevices )
 		.on( "click", "#altui-optimize", UIManager.pageOptions )
 		.on( "click", "#altui-localize", UIManager.pageLocalization  )
+		.on( "click", "#altui-debugtools", UIManager.pageDebug  )
 		.on( "click", "#altui-debug-btn", function() {
 			$(".altui-debug-div").toggle();
 			$("#altui-debug-btn span.caret").toggleClass( "caret-reversed" );
