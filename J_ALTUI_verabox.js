@@ -654,15 +654,14 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	
 	// process the async response function
 	function _asyncResponse( arr, func , filterfunc, endfunc ) {
-		if ( $.isFunction( func ) && (arr!=null) ) 
-		{
-			$.each( arr , function( idx, obj ) {				
-				if (( ($.isFunction( filterfunc )==false) || (filterfunc(obj)==true) ) && (obj!=null)) {
+		if (arr!=null) {
+			if ($.isFunction(filterfunc))
+				arr = $.grep( arr, filterfunc );
+			if ($.isFunction( func ))
+				$.each(arr,function(idx,obj){
 					func(idx+1,obj);	// device id in LUA is idx+1
-				}
-			});
-		} 
-			
+				});
+		};
 		if ( $.isFunction( endfunc ) )  {
 			endfunc(arr);			
 		}

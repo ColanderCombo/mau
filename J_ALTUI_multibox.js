@@ -221,12 +221,17 @@ var MultiBox = ( function( window, undefined ) {
 	};
 	function _getDevices( func , filterfunc, endfunc ) {
 		var arr=[];
+		var answers = 0;
 		$.each(_controllers, function( i,c) {
-			arr = arr.concat(c.controller.getDevices( func , filterfunc, null ));
+			c.controller.getDevices( func , filterfunc, function(devices){
+				arr = arr.concat(devices);
+				answers++;
+				if ((answers == _controllers.length) && ($.isFunction(endfunc)) ){
+					(endfunc)( arr );
+				};
+			});
 		});
-		if ($.isFunction(endfunc))
-			(endfunc)( arr );
-		// return _controllers[0].controller.getDevices( func , filterfunc, endfunc );
+		return arr;
 	};
 	function _getDevicesSync() {
 		var arr=[];
@@ -473,7 +478,8 @@ var MultiBox = ( function( window, undefined ) {
 			c.controller.getPower(function(data) {
 				if (data != "No devices") 
 					$.each(data.split('\n'), function(i,line) {
-						lines.push( idx+"-"+line );
+						if (line.length>0)
+							lines.push( idx+"-"+line );
 					});
 				todo--;
 				if ((todo==0) && ($.isFunction(cbfunc)))

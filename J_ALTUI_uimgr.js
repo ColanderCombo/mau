@@ -6547,6 +6547,7 @@ var UIManager  = ( function( window, undefined ) {
 		var margin = {top: 20, right: 10, bottom: 10, left: 20};
 		var ygap = 30;
 		var filtered = false;
+		var devices = null;
 		
 		//http://stackoverflow.com/questions/25595387/d3-js-how-to-convert-edges-from-lines-to-curved-paths-in-a-network-visualizatio
 		function draw_curve(Ax, Ay, Bx, By, M) {
@@ -6613,7 +6614,7 @@ var UIManager  = ( function( window, undefined ) {
 				data = { nodes:[] , links:[] };
 				var color = {};
 				var nColor = 0;
-				var devices = $.grep(MultiBox.getDevicesSync(),function(d) {	return MultiBox.controllerOf(d.altuiid).controller==parseInt($("#altui-controller-select").val()); });
+				// var devices = $.grep(MultiBox.getDevicesSync(),function(d) {	return MultiBox.controllerOf(d.altuiid).controller==parseInt($("#altui-controller-select").val()); });
 
 				// data.root={ id:0, zwid:0, name:"root", children:[] };
 				if (devices) {
@@ -6787,7 +6788,10 @@ var UIManager  = ( function( window, undefined ) {
 		$(".altui-mainpanel").append(html);
 		$("#altui-controller-select").change(function() {
 			$(".altui-route-d3chart").html("");
-			_drawChart();
+			MultiBox.getDevices(null,function(d) {	return MultiBox.controllerOf(d.altuiid).controller==parseInt($("#altui-controller-select").val()); },function(arr) {
+				devices = arr;
+				_drawChart();
+			})
 		});
 		$(".altui-mainpanel")
 			.append(
@@ -6815,12 +6819,18 @@ var UIManager  = ( function( window, undefined ) {
 		var available_height = $(window).height() - $("#altui-pagemessage").outerHeight() - $("#altui-pagetitle").outerHeight() - $("#altui-zwavechart-order").outerHeight() - $("footer").outerHeight();
 		width = $(".altui-route-d3chart-container").innerWidth() - margin.left - margin.right-30;
 		height = Math.max(300,Math.min(width,available_height - margin.top - margin.bottom));
-		UIManager.loadD3Script( _drawChart );
+		UIManager.loadD3Script( function() {
+			MultiBox.getDevices(null,function(d) {	return MultiBox.controllerOf(d.altuiid).controller==parseInt($("#altui-controller-select").val()); },function(arr) {
+				devices = arr;
+				_drawChart();
+			})
+		});
 	},
 	
 	pageChildren: function() {
 		var height = null, width = null;
 		var data = { root:[], nodes:[] , links:[] };
+		var devices = null;
 		
 		// Returns a list of all nodes under the root.
 		function _flatten(root) {
@@ -6846,33 +6856,39 @@ var UIManager  = ( function( window, undefined ) {
 			return found;
 		};
 		
+		function _addChildrenFromWaitList( node) {
+			// search in wait list
+			var children=[]
+			// console.log("searching wait list for childs of {0}".format(node.id));
+			for ( var i = data.wait.length-1; i>=0 ; i--) {
+				if (data.wait[i].id_parent == node.id) {
+					var child = data.wait.splice(i,1)[0];
+					// console.log("found node :"+child.id);
+					node.children.push(child);
+					children.push(child);
+				}
+			}
+			$.each(children, function(i,child) {
+				_addChildrenFromWaitList( child);
+			});
+		};
+		
 		function _addNode( node ) {
 			var parent = _findNode( data.root, node.id_parent );
 			if (parent==null){	
+				// console.log("could not find parent, putting in wait list");
 				data.wait.push(node);
 				return;
 			}
 			parent.children.push( node );
-			// search in wait list
-			var childidxs=[]
-			$.each(data.wait , function(idx,waitnode) {
-				if (waitnode.id_parent == node.id) {
-					childidxs.unshift(idx);		// insert in head
-				}
-			});
-			$.each(childidxs, function(i,idx){
-				var child = data.wait.splice(idx,idx);
-				node.children.push( child );				
-			});
+			_addChildrenFromWaitList(node);
 		};
 		
-		function _prepareDataParents(  ) {
+		function _prepareDataParents( ) {
 			data = { root:[], nodes:[] , links:[] , wait:[] };
 			var color = { "ctrl": 0 };
 			var nColor = 1;
 			// var devices = $.grep( MultiBox.getDevicesSync() , function(d) {return (MultiBox.controllerOf(d.altuiid).controller==0) } );
-			var devices =  MultiBox.getDevicesSync() ;
-
 			data.root={ id:"0-0", name:"Main Controller", color:color["ctrl"], children:[] };
 			$.each( MultiBox.getControllers(), function (idx,c) {
 				if (idx>0) {					
@@ -6891,6 +6907,7 @@ var UIManager  = ( function( window, undefined ) {
 					if (color[device.device_type]==undefined)
 						color[device.device_type]=nColor++;
 					var controllerid = MultiBox.controllerOf(device.altuiid).controller;
+					// console.log("device {0},{1} id_parent:{2}-{3}".format(device.name, device.altuiid,controllerid,device.id_parent));
 					_addNode({ 
 						id:device.altuiid, 
 						name:device.name, 
@@ -6899,9 +6916,9 @@ var UIManager  = ( function( window, undefined ) {
 						children: []
 						});
 				});
-				$.each(data.wait, function(i, node) {
-					console.log( node.id );
-				});
+				// $.each(data.wait, function(i, node) {
+					// console.log( node.id );
+				// });
 			}
 			return data;
 		};
@@ -7091,12 +7108,19 @@ var UIManager  = ( function( window, undefined ) {
 				}							\
 				</style>" )
 			.append(html+"<div class='altui-children-d3chart-container'><svg class='altui-children-d3chart'></svg></div>")
-		UIManager.loadD3Script( _drawChartParents );
+		UIManager.loadD3Script( function() {
+			MultiBox.getDevices(null,null,function(arr) {
+				// console.log("received {0} devices:".format(arr.length));
+				devices = arr;
+				_drawChartParents();
+			});
+		});
 	},
 	
 	pageRoutes: function() {
 		var height = null, width = null;
 		var data = { root:[], nodes:[] , links:[] };
+		var devices = null;
 		
 		// Returns a list of all nodes under the root.
 		function _flatten(root) {
@@ -7360,7 +7384,14 @@ var UIManager  = ( function( window, undefined ) {
 		$(".altui-mainpanel").append(html);
 		$("#altui-controller-select").change(function() {
 			$(".altui-route-d3chart").html("");
-			_drawChartRoutes();
+			MultiBox.getDevices(
+				null,
+				function(d) {	return MultiBox.controllerOf(d.altuiid).controller==parseInt($("#altui-controller-select").val()); },
+				function(arr) {
+					devices = arr;
+					_drawChartRoutes();
+				}
+			);
 		});
 		$(".altui-mainpanel")
 			.append(
@@ -7399,7 +7430,16 @@ var UIManager  = ( function( window, undefined ) {
 				}							\
 				</style>" )
 			.append("<div class='altui-children-d3chart-container'><svg class='altui-children-d3chart'></svg></div>")
-		UIManager.loadD3Script( _drawChartRoutes );
+		UIManager.loadD3Script( function() { 			
+			MultiBox.getDevices(
+				null,
+				function(d) {	return MultiBox.controllerOf(d.altuiid).controller==parseInt($("#altui-controller-select").val()); },
+				function(arr) {
+					devices = arr;
+					_drawChartRoutes();
+				}
+			);
+		});
 	},
 	
 	drawHouseMode: function ()
