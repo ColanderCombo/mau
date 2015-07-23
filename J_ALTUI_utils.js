@@ -1,5 +1,5 @@
 //# sourceURL=J_ALTUI_utils.js
-"use strict";
+// "use strict";
 // http://192.168.1.16:3480/data_request?id=lr_ALTUI_Handler&command=home
 // This program is free software: you can redistribute it and/or modify
 // it under the condition that it is for private or home useage and 
