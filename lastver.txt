@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("471,d3charts multi controller version;browser check;new UPNP action registerPlugin;DataMine button fix,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28184")
+UIManager.checkAltuiUpdate("478,d3charts fixes;one column layout on some pages;Debug tools page;various bug fixes,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28190")
