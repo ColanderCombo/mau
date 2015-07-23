@@ -5751,7 +5751,7 @@ var UIManager  = ( function( window, undefined ) {
 					
 					// update the children position for each selected children
 					$.each(selected, function (idx,elem) {
-						widgetid = $(elem).prop('id');
+						var widgetid = $(elem).prop('id');
 						PageManager.updateChildrenInPage( page, widgetid, $(elem).position() , $(elem).size() );
 						_showSavePageNeeded(true);
 					});
