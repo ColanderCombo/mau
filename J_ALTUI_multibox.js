@@ -1,4 +1,5 @@
 //# sourceURL=J_ALTUI_multibox.js
+"use strict";
 // http://192.168.1.16:3480/data_request?id=lr_ALTUI_Handler&command=home
 // This program is free software: you can redistribute it and/or modify
 // it under the condition that it is for private or home useage and 
@@ -23,7 +24,7 @@ var MultiBox = ( function( window, undefined ) {
 	
 	function _controllerOf(altuiid) {
 		var elems = altuiid.split("-");
-		return { controller:elems[0] , id:elems[1] };
+		return { controller:parseInt(elems[0]) , id:elems[1] };
 	};
 	function _makeAltuiid(ctrlid, devid) {
 		return "{0}-{1}".format(ctrlid,devid);

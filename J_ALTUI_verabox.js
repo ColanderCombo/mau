@@ -1,4 +1,5 @@
 //# sourceURL=J_ALTUI_verabox.js
+"use strict";
 // http://192.168.1.16:3480/data_request?id=lr_ALTUI_Handler&command=home
 // This program is free software: you can redistribute it and/or modify
 // it under the condition that it is for private or home useage and 
@@ -973,7 +974,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 					if (data.devices != undefined)
 					{
 						$.each(data.devices, function( idx, device) {
-							userdata_device_idx = _findDeviceIdxByID(device.id);
+							var userdata_device_idx = _findDeviceIdxByID(device.id);
 							_user_data.devices[userdata_device_idx].status = device.status;
 							_user_data.devices[userdata_device_idx].Jobs = device.Jobs;
 							_user_data.devices[userdata_device_idx].dirty = true;
@@ -1523,7 +1524,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		var state = device.states[varidx];
 		if ($.isFunction(cbfunc)) {
 			// var cmd = "cat /var/log/cmh/LuaUPnP.log | grep \"Device_Variable::m_szValue_set device: {0}.*;1m{1}\"".format(device.id,state.variable);
-			var cmd = "cat /var/log/cmh/LuaUPnP.log | grep 'Device_Variable::m_szValue_set device: {0}.*;1m{1}\033'".format(device.id,state.variable);
+			var cmd = "cat /var/log/cmh/LuaUPnP.log | grep 'Device_Variable::m_szValue_set device: {0}.*;1m{1}\x1B'".format(device.id,state.variable);
 			// var cmd = "cat /var/log/cmh/LuaUPnP.log | grep $'Device_Variable::m_szValue_set device: {0}.*\033\[35;1m{1}\033\[0m'".format(device.id,state.variable);
 			// var cmd = "cat /var/log/cmh/LuaUPnP.log | grep $'\033\[35;1m{1}\033\[0m'".format(device.id,state.variable);
 

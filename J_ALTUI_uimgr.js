@@ -1,4 +1,5 @@
 //#  sourceURL=J_ALTUI_uimgr.js
+"use strict";
 // http://192.168.1.16:3480/data_request?id=lr_ALTUI_Handler&command=home
 // ALTUI: This program is free software: you can redistribute it and/or modify
 // it under the condition that it is for private or home useage and 
@@ -54,6 +55,7 @@ var saveGlyph="<span class='glyphicon glyphicon-save' aria-hidden='true' data-to
 var labelGlyph="<span class='glyphicon glyphicon-font' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Label'></span>";
 var optHorGlyph="";
 var refreshGlyph="";
+var removeGlyph="";
 var calendarGlyph="";
 var searchGlyph = "";
 var questionGlyph = "";
@@ -1429,10 +1431,10 @@ var SceneEditor = function (scene) {
 		return device.name + "<small class='text-muted'> (#"+device.altuiid+")</small>";
 	};
 	
-	function _displayArguments(arguments) {
+	function _displayArguments(Thearguments) {
 		var html=[];
-		$.each(arguments, function(idx,argument) {
-			html.push("{0}: {1}".format( argument.name, argument.value));
+		$.each(Thearguments, function(idx,arg) {
+			html.push("{0}: {1}".format( arg.name, arg.value));
 		});
 		return "<small>"+html.join(',')+"</small>";
 	};
@@ -1453,9 +1455,9 @@ var SceneEditor = function (scene) {
 	};
 	
 	function _editAction(scene, action, ida, idg, jqButton) {
-		function _translateArgumentsToTbl( arguments ) {
+		function _translateArgumentsToTbl( Thearguments ) {
 			var res = [];
-			$.each(arguments, function(idx,arg) { res[arg.name] = arg.value; } );
+			$.each(Thearguments, function(idx,arg) { res[arg.name] = arg.value; } );
 			return res;
 		};
 		
@@ -2320,7 +2322,7 @@ var UIManager  = ( function( window, undefined ) {
 		var head = document.getElementsByTagName('head')[0];
 		var style = document.createElement('style');
 		style.type = 'text/css';
-		css = _executeFunctionByName(styleFunctionName, window);
+		var css = _executeFunctionByName(styleFunctionName, window);
 		style.appendChild(document.createTextNode(css));
 		head.appendChild(style);
 	};
@@ -2348,7 +2350,7 @@ var UIManager  = ( function( window, undefined ) {
 	function _loadD3Script( drawfunc ) {
 		var altuidevice = MultiBox.getDeviceByID( 0, g_MyDeviceID );
 		var localcdn = ( MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "LocalCDN" ).trim() || "");
-		scriptname = (localcdn=="") ? "//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js" : (localcdn+"/d3.min.js");	//supports https
+		var scriptname = (localcdn=="") ? "//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js" : (localcdn+"/d3.min.js");	//supports https
 		var len = $('script[src="'+scriptname+'"]').length;
 		if (len==0) {				// not loaded yet
 			UIManager.loadScript(scriptname,function() {
@@ -2739,7 +2741,7 @@ var UIManager  = ( function( window, undefined ) {
 	}
 	
 	function _defaultDeviceDrawWatts( device ) {
-		html ="";
+		var html ="";
 		var watts = parseInt(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'Watts' )); 
 		if (isNaN(watts)==false) 
 			html += wattTemplate.format(watts);
@@ -2751,7 +2753,7 @@ var UIManager  = ( function( window, undefined ) {
 		return html;
 	};
 	function _defaultDeviceDrawAltuiStrings(device) {
-		html ="";
+		var html ="";
 		$.each( ['DisplayLine1','DisplayLine2'],function(i,v) {
 			var dl1 = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:altui1', v ); 
 			if (dl1 != null) 
@@ -2772,7 +2774,7 @@ var UIManager  = ( function( window, undefined ) {
 	
 	function _hasObjectProperty( obj )
 	{
-		bFound = false;
+		var bFound = false;
 		$.each( obj, function(key,val) {
 			if ( _isObject(val) )
 			{
@@ -3669,7 +3671,7 @@ var UIManager  = ( function( window, undefined ) {
 				htmlRoomSelect 	  += "</select>";
 		
 				var htmlDeleteButton= buttonTemplate.format( device.altuiid, 'btn-xs altui-deldevice pull-right', deleteGlyph,'default');;
-				html ="";
+				var html ="";
 				html+="<div class='row'>";
 					html +="<div id='altui-device-controlpanel-"+device.altuiid+"' class='col-xs-12 altui-device-controlpanel' data-altuiid='"+device.altuiid+"'>";
 					html +="	<div class='panel panel-default'>";
@@ -6508,7 +6510,7 @@ var UIManager  = ( function( window, undefined ) {
 	pageQuality: function()  {
 		var data = { nodes:[] , links:[] };
 		var linkcolor, color, svg;
-		var height = width = null;
+		var height = null, width = null;
 		var margin = {top: 20, right: 10, bottom: 10, left: 20};
 		var ygap = 30;
 		var filtered = false;
@@ -6784,7 +6786,7 @@ var UIManager  = ( function( window, undefined ) {
 	},
 	
 	pageChildren: function() {
-		var height = width = null;
+		var height = null, width = null;
 		var data = { root:[], nodes:[] , links:[] };
 		
 		// Returns a list of all nodes under the root.
@@ -7065,7 +7067,7 @@ var UIManager  = ( function( window, undefined ) {
 	},
 	
 	pageRoutes: function() {
-		var height = width = null;
+		var height = null, width = null;
 		var data = { root:[], nodes:[] , links:[] };
 		
 		// Returns a list of all nodes under the root.

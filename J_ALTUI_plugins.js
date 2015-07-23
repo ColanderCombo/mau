@@ -1,4 +1,6 @@
 //# sourceURL=J_ALTUI_plugins.js
+"use strict";
+
 // This program is free software: you can redistribute it and/or modify
 // it under the condition that it is for private or home useage and 
 // this whole comment is reproduced in the source code file.

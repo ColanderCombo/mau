@@ -1,4 +1,5 @@
 //# sourceURL=J_ALTUI_utils.js
+"use strict";
 // http://192.168.1.16:3480/data_request?id=lr_ALTUI_Handler&command=home
 // This program is free software: you can redistribute it and/or modify
 // it under the condition that it is for private or home useage and 
@@ -38,7 +39,7 @@ var Localization = ( function (undefined) {
 	var _unknown_terms = {};
 	var _terms = {};
 	
-	__T =  function(t) {
+	var __T =  function(t) {
 		var v =_terms[t]
 		if (v)
 			return v;
@@ -46,12 +47,12 @@ var Localization = ( function (undefined) {
 		return t;
 	};
 	
-	_initTerms = function(terms) {
+	var _initTerms = function(terms) {
 		_terms = $.extend({},terms);
 		_unknown_terms = {};
 	};
 	
-	_dumpTerms = function() {
+	var _dumpTerms = function() {
 		if (AltuiDebug.IsDebug()) {
 			console.log( JSON.stringify(_unknown_terms) );
 			console.log( JSON.stringify(_terms) );
@@ -74,7 +75,7 @@ var Localization = ( function (undefined) {
 	}
 })();
 
-_T = Localization._T;
+var _T = Localization._T;
 
 if (typeof RegExp.escape == 'undefined') {
 	RegExp.escape = function(string) {
