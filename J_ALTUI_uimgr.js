@@ -84,6 +84,11 @@ var defaultIconSrc="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAA
 
 var styles ="					\
 	#altui-background {			\
+		position:fixed;			\
+		top:0;					\
+		left:0;					\
+		width:100%;				\
+		height:100%;				\
 	}							\
 	.ui-resizable-helper { border: 2px dotted #00F; }	\
 	.altui-variable-value-history td:first-child {	\
@@ -4681,7 +4686,7 @@ var UIManager  = ( function( window, undefined ) {
 		body+="			<div class='altui-mainpanel row'>";
 		body+="			</div>";
 		body+="		</div>";
-		body+="		<div class='col-sm-2 col-sm-pull-10 hidden-xs '>";
+		body+="		<div class='col-sm-2 col-sm-pull-10 hidden-xs affix'>";
 		body+="			<div class='altui-leftnav btn-group-vertical' role='group' aria-label='...'>";
 		body+="				<!--";
 		body+="				<button type='button' class='btn btn-default'>One</button>";
