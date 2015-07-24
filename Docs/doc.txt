@@ -5,11 +5,12 @@ This plugin offers an alternative user interface for your VERA(s) controllers th
 It works as a simple plugin and you just need your browser. it supports UI5 and UI7 veras and can aggregate in the same screen the devices from multiple seperate VERA boxes.
 It is not just a re skin of UI5/7, and will offer a number of additional feature
 
-[b]LATEST VERSION[/b] : [glow=red,2,300]V 0.62.471 July 23rd 2015[/glow] : 
+[b]LATEST VERSION[/b] : [glow=red,2,300]V 0.62.489 July 23rd 2015[/glow] : 
 
 [b]Extra features not present in UI5 UI7[/b]:
 [list]
 [li]Fully responsive design / all form factors supported , no need to install a new application on your mobile [/li]
+[li]Fully skinable based on bootstrap 3 css. fixed background image / transparency[/li]
 [li]works indifferently on UI5 and UI7 boxes and thus offers an enhanced experience even on older boxes without adding load to your controller. it maximizes the power of our modern browser and seldomly relies on the VERA controller[/li]
 [li]works with [b]multiple VERA controllers[/b], you can see & interact with devices and scenes of multiple controllers transparently[/li]
 [li]user defined custom synoptic panels[/li]
@@ -87,6 +88,17 @@ you know how to use jquery and to write HTML elements in a parent container. I w
 [li]Selectable home page by a url parameter ( home= )[/li]
 [li]Selectable language by a url parameter ( lang= )[/li]
 [li]language list extensible by a simple javascript, [u]ask me & contribute if you want[/u][/li]
+[li]Themes & Styling[/li]
+[list]
+[li]you can take a bootstrap CSS from any bootstrap 3 CSS web sites out there providing template, or you can start from the default[/li]
+[li]you then create your own CSS file which is incremental to that initial base[/li]
+[li]you put that CSS file somewhere ( I put mines on my google drive ) , you can put it on your vera under /www and point to it if you are concerned about working without internet dependency.[/li]
+[li]if your css file points to a bitmap, you will also need to put these bitmap file somewhere, note the url and make your CSS point to it. your CSS typically include things like : 
+background-image: url(http://ssssssss/mycss.css);[/li]
+[li]you declare the path of that CSS into the variable [b]ThemeCSS[/b] of your ALTUI device[/li]
+[li]you reload ALTUI/refresh browser[/li]
+[li][u][b]Example [/b][/u]: I provided the working example of fixed wood texture background with transparency in the "Styling" folder in the code.mios.com repository that you can access : http://code.mios.com/trac/mios_alternate_ui/browser [/li]
+[/list]
 [/list]
 
 Although the prefered way to customize the display of a device in ALTUI is to write a small javascript plugin, 
@@ -123,9 +135,9 @@ ellipsis glyph , signifying "default drawing"[/li]
 
 [b]INSTALL[/b]
 [list]
-[li]official version : by the store or the UI7 "Apps' menu[/li]
+[li]official version : by the store or the UI7 "Apps' menu.[/li]
 [li]latest version : accept the autoupdate dialog box proposal , or install by opening this link in your browser  
-[url=http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28172]http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28172[/url]
+[url=http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28208]http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28208[/url]
 ignore error messages displayed by this page and wait until your unit reloads...[/li]
 [/list]
 
