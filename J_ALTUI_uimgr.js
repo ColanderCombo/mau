@@ -31,6 +31,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
 THE SOFTWARE.
 */
+
+// Black : //docs.google.com/uc?authuser=0&id=0B6TVdm2A9rnNLWlIeEZDN1ZGU0k&export=download    
+// Transparent : //drive.google.com/uc?id=0B6TVdm2A9rnNMkx5M0FsLWk2djg&authuser=0&export=download
+
 // UIManager.loadScript('https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["corechart","table","gauge"]}]}');
 var AltUI_revision = "$Revision$";
 var NULL_DEVICE = "0-0";
@@ -293,7 +297,10 @@ var styles ="					\
 		width: 100%;		\
 	}		\
 	.altui-breadcrumb {		\
-		display: inline-block;		\
+		display: inline-block;	\
+		margin-right: 10px;		\
+		padding-top: 6px;		\
+		padding-bottom: 6px;	\
 	}		\
 	.on-off-device {		\
 	  width: 70px;		\
@@ -5731,7 +5738,7 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		
 		// draw page & toolbox
-		UIManager.clearPage(_T('Edit Pages'),_T("Custom Pages Editor"),UIManager.oneColumnLayout);
+		UIManager.clearPage(_T('Edit Pages'),_T("Custom Pages Editor"),UIManager.twoColumnLayout);
 		PageMessage.message(_T("Drag and Drop to add/move/delete controls. use Ctrl+Click or lasso to select multiple controls"),"info");
 
 		// Get and draw the HTML areas
