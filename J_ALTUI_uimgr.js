@@ -88,7 +88,8 @@ var styles ="					\
 		top:0;					\
 		left:0;					\
 		width:100%;				\
-		height:100%;				\
+		height:100%;			\
+		z-index: -1;			\
 	}							\
 	.ui-resizable-helper { border: 2px dotted #00F; }	\
 	.altui-variable-value-history td:first-child {	\
@@ -7962,7 +7963,6 @@ $(document).ready(function() {
 	
 		var body = "";
 		body+="<!-- Fixed navbar -->";
-		body+="<div id='altui-background'></div>";
 		body+="<div id='dialogs'></div>";
 		body+="<nav class='navbar navbar-default navbar-fixed-top'>";
 		body+=" <div class='container'>";
@@ -8027,6 +8027,7 @@ $(document).ready(function() {
 		body+="</nav>";
 		body+="<div class='container-fluid theme-showcase' role='main'>";
 		body+="</div> <!-- /container -->";
+		body+="<div id='altui-background'>COUCOU</div>";
 		$("body").prepend(body);
 		
 		UIManager.initEngine(styles.format(window.location.hostname), g_DeviceTypes, g_CustomTheme, function() {
