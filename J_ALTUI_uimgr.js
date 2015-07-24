@@ -7539,16 +7539,18 @@ var UIManager  = ( function( window, undefined ) {
 							_T('Command Parameters'),		// title
 							"<form></form>"					// body
 						));
-
-			DialogManager.dlgAddLine(dialog, name, label, "","", {required:''} );
+			var lastOne = MyLocalStorage.getSettings("LastOne_"+name) || "";
+			DialogManager.dlgAddLine(dialog, name, label, lastOne,"", {required:''} );
 			DialogManager.dlgAddDialogButton(dialog, true, _T("Run"));
 			$('div#dialogModal').modal();
 			$('div#dialogs')
 				.off('submit',"div#dialogModal")
 				.on( 'submit',"div#dialogModal", function() {
 					$('div#dialogModal').modal('hide');
+					var val = $("#altui-widget-"+name).val();
+					MyLocalStorage.setSettings("LastOne_"+name,val);
 					if ($.isFunction(cbfunc))
-						(cbfunc)( $("#altui-widget-"+name).val() );
+						(cbfunc)( val );
 				});
 		};
 		
