@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("478,d3charts fixes;one column layout on some pages;Debug tools page;various bug fixes,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28190")
+UIManager.checkAltuiUpdate("483,d3charts fixes;one column layout on some pages;Debug tools page;various bug fixes;transparent background styling support (not on ipad),?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28190")
