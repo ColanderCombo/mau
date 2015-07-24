@@ -372,8 +372,11 @@ var styles ="					\
 		width: 50px;		\
 	}						\
 	.altui-oscommand-configtbl th {		\
-	text-transform: capitalize;			\
-}										\
+		text-transform: capitalize;		\
+	}									\
+	.table .table {					\
+	background-color:transparent;	\
+	}								\
 ";		
 
 
