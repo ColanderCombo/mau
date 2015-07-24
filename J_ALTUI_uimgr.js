@@ -6094,18 +6094,20 @@ var UIManager  = ( function( window, undefined ) {
 								_T('Command Parameters'),		// title
 								"<form></form>"					// body
 							));
-
-				DialogManager.dlgAddLine(dialog, 'param0', _T('Parameter'), "","", {required:''} );
+				var lastOne = MyLocalStorage.getSettings("LastOne_"+'param0') || "";
+				DialogManager.dlgAddLine(dialog, 'param0', _T('Parameter'), lastOne,"", {required:''} );
 				DialogManager.dlgAddDialogButton(dialog, true, _T("Run"));
 				$('div#dialogModal').modal();
 				$('div#dialogs')
 					.off('submit',"div#dialogModal")
 					.on( 'submit',"div#dialogModal", function() {
 							$('div#dialogModal').modal('hide');
-							oscmd = oscmd.format( $("#altui-widget-param0").val() );
+							var val = $("#altui-widget-param0").val();
+							MyLocalStorage.setSettings("LastOne_"+'param0'+name,val);
+							oscmd = oscmd.format( val );
 							$("#oscommand").val( oscmd );
 							setTimeout(function() {
-								_execCmd($("#oscommand").val( ));
+								_execCmd(oscmd);
 							}, 300 );
 						});
 			}
