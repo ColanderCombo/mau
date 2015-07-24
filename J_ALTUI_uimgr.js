@@ -213,7 +213,7 @@ var styles ="					\
 		padding-left: 5px;\
 	}\
 	div.altui-scene-body {\
-		height:50px;\
+		height:80px;\
 		padding-top: 5px;\
 		padding-right: 5px;\
 		padding-bottom: 5px;\
@@ -237,10 +237,25 @@ var styles ="					\
 	.form-inline > * {	\
 		margin:5px 3px;	\
 	}					\
-	div.altui-scene-body button {\
+	div.altui-scene-body button {	\
 		margin-left:1px;			\
 		margin-right:1px;			\
 	}\
+	.altui-scene-history {	\
+		clear: left;	\
+	}						\
+	.altui-editscene {		\
+		clear: left;	\
+	}						\
+	.altui-runscene {		\
+		height:66px;\
+	}						\
+	.altui-scene-date{		\
+		clear: right;		\
+	}						\
+	.altui-pausescene {		\
+		padding-right: 3px;	\
+	}				\
 	img.altui-plugin-icon { 			\
 		font-size: 1.5em;			\
 		height: 35px;				\
@@ -331,9 +346,6 @@ var styles ="					\
 	  text-transform: uppercase;	\
 	  font-size: 11px;			\
 	}							\
-	.altui-pausescene {		\
-		padding-right: 3px;	\
-	}				\
 	.altui-favorite  {		\
 		padding-right: 3px;	\
 	}				\
@@ -3067,13 +3079,25 @@ var UIManager  = ( function( window, undefined ) {
 		var scenecontainerTemplate = "";
 		scenecontainerTemplate	+=  "<div class='panel panel-default altui-scene "+((norefresh==true) ? 'altui-norefresh': '') +"' id='{0}' data-altuiid='{0}'>"
 		scenecontainerTemplate	+=	"<div class='panel-heading altui-scene-heading'>"+delButtonHtml +idDisplay+" <span class='panel-title altui-scene-title' data-toggle='tooltip' data-placement='left' title='{2}'>"+pauseButtonHtml+favoriteHtml+"<small>{1}</small></span></div>";
-		scenecontainerTemplate	+=  "<div class='panel-body altui-scene-body'>{3} <small class='text-muted pull-right'>{4}</small><small style='clear: right;' class='text-info pull-right'>{5}</small></div>";
+		scenecontainerTemplate	+=  "<div class='panel-body altui-scene-body'>";
+		scenecontainerTemplate	+=  "<small class='altui-scene-date text-muted pull-right'>{6}</small><small class='altui-scene-date text-info pull-right'>{7}</small>";
+			scenecontainerTemplate	+=  "<table>";
+				scenecontainerTemplate	+=  "<tbody>";
+				scenecontainerTemplate	+=  "<tr>";
+					scenecontainerTemplate	+=  "<td>{3}</td>";
+					scenecontainerTemplate	+=  "<td>";
+						scenecontainerTemplate	+=  "{4}{5}";
+					scenecontainerTemplate	+=  "</td>";
+				scenecontainerTemplate	+=  "</tr>";
+				scenecontainerTemplate	+=  "</tbody>";
+			scenecontainerTemplate	+=  "</table>";
+		scenecontainerTemplate	+=  "</div>";
 		scenecontainerTemplate	+=  "</div>";
 
-		var runButtonHtml = buttonTemplate.format( scene.altuiid, 'altui-runscene pull-left', _T("Run")+"&nbsp;"+runGlyph,'primary');
+		var runButtonHtml = buttonTemplate.format( scene.altuiid, 'altui-runscene', _T("Run")+"&nbsp;"+runGlyph,'primary');
 		var editButtonHtml = buttonTemplate.format( scene.altuiid, 'altui-editscene pull-left', wrenchGlyph,'default');
 		var calendarHtml = buttonTemplate.format( scene.altuiid, 'altui-scene-history pull-left', calendarGlyph,'default');
-		return scenecontainerTemplate.format(scene.altuiid, label, 'tooltip', runButtonHtml + editButtonHtml + calendarHtml , lastrun, nextrun);
+		return scenecontainerTemplate.format(scene.altuiid, label, 'tooltip', runButtonHtml , editButtonHtml , calendarHtml , lastrun, nextrun);
 	};
 	
 	function _cameraDraw(device,size) // size:1,2,3,... 1=220px
@@ -5206,7 +5230,7 @@ var UIManager  = ( function( window, undefined ) {
 		
 		function sceneDraw(idx, scene) {
 			var html = UIManager.sceneDraw(scene);
-			var scenecontainerTemplate="<div class=' col-sm-6  col-lg-4 '>";
+			var scenecontainerTemplate="<div class=' col-sm-6  col-lg-4'>";
 			scenecontainerTemplate	+= 	html;
 			scenecontainerTemplate	+= 	"</div>";		
 			var domPanel = $(".altui-mainpanel");
