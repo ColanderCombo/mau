@@ -6634,15 +6634,15 @@ var UIManager  = ( function( window, undefined ) {
 					$.each(node.routes, function(idx,route) {
 						source = node;
 						var split = route.split("-");
-						var routequality = parseInt(split[1]);
+						var routequality = (split[1] || '0');
 						var nodes = split[0].split(".");
 						$.each(nodes, function(idx,zwid) {
 							var dest = UIManager._findNodeByZwID(data,zwid);
 							if (dest!=null) {
 								data.links.push( {
 									id:source.zwid+"-"+dest.zwid,
-									quality:routequality,
-									broken:(split[1].slice(-1)=="x"),
+									quality:parseInt(routequality),
+									broken:(routequality.slice(-1)=="x"),
 									source: source,
 									target: dest,
 									manual_route: node.manual_routes
@@ -7265,7 +7265,7 @@ var UIManager  = ( function( window, undefined ) {
 						$.each(node.routes, function( idx,route) {
 							var srcnode = node;
 							var splits = route.split("-");
-							var linkquality = splits[1];
+							var linkquality = splits[1] || '0';
 							if (splits[0]) {
 								var path = splits[0].split(".");
 								var nroute = 1;
