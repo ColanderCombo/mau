@@ -2616,6 +2616,11 @@ var UIManager  = ( function( window, undefined ) {
 						// html += ("<pre id='{0}' style='max-width:"+width+"px;' class='altui-variable-history-text pre-scrollable'>{1}</pre>").format(varidx,lines.join('\n'));
 						html += "</td></tr>";
 						tr.after(html);
+						$("table#"+varidx).bootgrid({
+							caseSensitive: false,
+							statusMapping: {}
+						})
+				
 					});
 				}
 				else
