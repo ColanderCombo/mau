@@ -1635,8 +1635,8 @@ var SceneEditor = function (scene) {
 			$('div#dialogModal').modal();
 		};
 		
-	function _showSaveNeeded( bNormal ) {
-		if (bNormal == true)
+	function _showSaveNeeded( bNoSaveNeeded ) {
+		if (bNoSaveNeeded == true)
 			$(".altui-scene-editbutton").removeClass("btn-danger").addClass("btn-default");
 		else
 			$(".altui-scene-editbutton").removeClass("btn-default").addClass("btn-danger");

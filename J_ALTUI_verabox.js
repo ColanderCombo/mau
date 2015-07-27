@@ -1255,7 +1255,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	{
 		var jqxhr = _httpGet( "?id=scene&action=delete&scene="+id, {}, function(data, textStatus, jqXHR) {
 			if ( (data!=null) && (data!="ERROR") ) {
-				PageMessage.message(_T("Deleted Scene {0} successfully ").format(id), "success", true);
+				PageMessage.message(_T("Deleted Scene {0} successfully ").format(id), "success");
 			}
 			else {
 				PageMessage.message(_T("Could not delete Scene {0}").format(id), "warning");
@@ -1312,6 +1312,14 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			hide_loading();
 			if ($.isFunction(cbfunc))
 				(cbfunc)(data);
+			else {
+				if ( (data!=null) && (data!="ERROR") ) {
+					PageMessage.message(_T("Edited Scene {0} successfully ").format(sceneid), "success");
+				}
+				else {
+					PageMessage.message(_T("Could not edit Scene {0}").format(sceneid), "warning");
+				}
+			}
 		});
 	};
 
@@ -1557,7 +1565,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 
 	function _getDeviceActions(device,cbfunc) {
-		if (device) {
+		if (device && device.id!=0) {
 			var _devicetypesDB = MultiBox.getDeviceTypesDB();
 			var dt = _devicetypesDB[device.device_type];
 			_loadDeviceActions(dt,cbfunc);
@@ -1591,7 +1599,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 	
 	function _getDeviceEvents(device) {
-		if (device) {
+		if (device && device.id!=0) {
 			var _devicetypesDB = MultiBox.getDeviceTypesDB();
 			var dt = _devicetypesDB[device.device_type];
 			if  ((dt.ui_static_data == undefined) || (dt.ui_static_data.eventList2==undefined))
@@ -2480,7 +2488,7 @@ var api = {
 	},
 	getDisplayedDeviceName: function(deviceId) {
 		var device = this.getDeviceObject(deviceId);
-		if (device)
+		if (device && device.id!=0)
 			return device.name;
 		return 'unnamed device';
 	},
