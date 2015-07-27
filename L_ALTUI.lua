@@ -1062,7 +1062,7 @@ function startupDeferred(lul_device)
 	local extraController= getSetVariable(service, "ExtraController", lul_device, "")
 	
 	-- clean tmp area from our files
-	os.execute('rm /tmp/altui_*');
+	-- os.execute('rm /tmp/altui_*');
 	
 	if (debugmode=="1") then
 		DEBUG_MODE = true
