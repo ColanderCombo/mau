@@ -84,7 +84,7 @@ device large control panels, device icons. ask me for details, but basically you
 you know how to use jquery and to write HTML elements in a parent container. I will integrate your contributions[/li]
 [li]Display of Watts & last trip date on device dashboards[/li]
 [li]Skinnable based on bootstrap styles you can find on https://bootswatch.com/[/li]
-[li]Extensible architecture ( device dashboard & panel can be extended by a custom JS module ). [u]developpers are welcomed to contact me on how to do this[/u][/li]
+[li]Extensible architecture ( device dashboard & panel can be extended by a custom JS module ). developpers are welcomed to contact me on how to do this.  There is a UPNP action called [u]registerPlugin()[/u] for plugins to dynamically register with ALTUI, @reneboer used it and explained here : http://forum.micasaverde.com/index.php/topic,30310.msg242498.html#msg242498[/li]
 [li]Selectable home page by a url parameter ( home= )[/li]
 [li]Selectable language by a url parameter ( lang= )[/li]
 [li]language list extensible by a simple javascript, [u]ask me & contribute if you want[/u][/li]
@@ -154,6 +154,13 @@ ignore error messages displayed by this page and wait until your unit reloads...
 [li][b]Data_xx_xx[/b] variables : internal storage for ALTUI user pages definitions[/li]
 [li][b]Data_CustomPages_0[/b] : JSON array of user custom page names[/li]
 [/list]
+
+[b]UPNP ACTIONS[/b]
+[list]
+[li]registerPlugin(newDeviceType,newScriptFile,newDeviceDrawFunc,newStyleFunc,newDeviceIconFunc,newControlPanelFunc)/li]
+[/list]
+
+
 
 [b]Some DOCs in French[/b]
 [list]
