@@ -1962,6 +1962,13 @@ var Ajax = (function(window,undefined) {
 // J_Harmony , J_Harmony_UI7.ss
 var Utils = ( function (undefined) {
 	return {
+		logDebug: function (message) {
+			if ($.isPlainObject(window.AltuiDebug)) {
+				AltuiDebug.debug(message);
+			} else {
+				//console.info(message);
+			}
+		},
 		logError : function(s) 			{ PageMessage.message(s,"error"); AltuiDebug.debug("Utils.logError: "+s);},
 		isValidIp: function(ip) 		{
 			var reg = new RegExp('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(:\\d{1,5})?$', 'i');
@@ -1976,6 +1983,7 @@ var Interface = function (undefined) {
 		showMessagePopup: function(msg,code) { PageMessage.message(msg,"success"); },
 		showMessagePopupError: function(msg) { PageMessage.message(msg,"error"); },
 		showStartupModalLoading	: function() {	show_loading(); },
+		showModalLoading		: function() {	show_loading(); },
 		hideModalLoading		: function() {	hide_loading(); }
 	}
 };
