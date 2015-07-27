@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.62"
+local version = "v0.63"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -1011,6 +1011,11 @@ function resetDevice(lul_device,norepeat)
 end
 
 function registerPlugin(lul_device,newDeviceType,newScriptFile,newDeviceDrawFunc,newStyleFunc,newDeviceIconFunc,newControlPanelFunc)
+	newScriptFile = newScriptFile or ""
+	newDeviceDrawFunc = newDeviceDrawFunc or ""
+	newStyleFunc = newStyleFunc or ""
+	newDeviceIconFunc = newDeviceIconFunc or ""
+	newControlPanelFunc = newControlPanelFunc or ""
 	log(string.format("registerPlugin(%d,%s,%s,%s,%s,%s,%s)",lul_device,newDeviceType,newScriptFile,newDeviceDrawFunc,newStyleFunc,newDeviceIconFunc,newControlPanelFunc))
 	if (newDeviceType ~= "") then
 		local tbljson = getSetVariable(service, "PluginConfig", lul_device, json.encode( getDefaultConfig() ) )
@@ -1018,7 +1023,7 @@ function registerPlugin(lul_device,newDeviceType,newScriptFile,newDeviceDrawFunc
 		if (tbl[newDeviceType] == nil) then
 			tbl[newDeviceType]={}
 		end
-		for k,v  in pairs({ ["newScriptFile"]=newScriptFile,["newDeviceDrawFunc"]=newDeviceDrawFunc,["newStyleFunc"]=newStyleFunc,["newDeviceIconFunc"]=newDeviceIconFunc,["newControlPanelFunc"]=newControlPanelFunc}) do
+		for k,v  in pairs({ ["ScriptFile"]=newScriptFile,["DeviceDrawFunc"]=newDeviceDrawFunc,["StyleFunc"]=newStyleFunc,["DeviceIconFunc"]=newDeviceIconFunc,["ControlPanelFunc"]=newControlPanelFunc}) do
 			if (v~="") then
 				tbl[newDeviceType][k]=v
 			end

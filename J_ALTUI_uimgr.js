@@ -213,7 +213,7 @@ var styles ="					\
 		padding-left: 5px;\
 	}\
 	div.altui-scene-body {\
-		height:80px;\
+		height:85px;\
 		padding-top: 5px;\
 		padding-right: 5px;\
 		padding-bottom: 5px;\
@@ -248,7 +248,7 @@ var styles ="					\
 		clear: left;	\
 	}						\
 	.altui-runscene {		\
-		height:66px;\
+		height:76px;\
 	}						\
 	.altui-scene-date{		\
 		clear: right;		\
@@ -2603,6 +2603,7 @@ var UIManager  = ( function( window, undefined ) {
 						html += ("<tr><th>{0}</th><th>{1}</th><th>{2}</th></tr>".format(_T("Date"),_T("Old"),_T("New")));
 						html +="</thead>";
 						html +="<tbody>";
+						history.lines.reverse();
 						$.each(history.lines, function(i,e) {
 							html += ("<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>".format(e.date,_enhanceValue(e.oldv),_enhanceValue(e.newv)));
 						});
@@ -2616,10 +2617,10 @@ var UIManager  = ( function( window, undefined ) {
 						// html += ("<pre id='{0}' style='max-width:"+width+"px;' class='altui-variable-history-text pre-scrollable'>{1}</pre>").format(varidx,lines.join('\n'));
 						html += "</td></tr>";
 						tr.after(html);
-						$("table#"+varidx).bootgrid({
-							caseSensitive: false,
-							statusMapping: {}
-						})
+						// $("table#"+varidx).bootgrid({
+							// caseSensitive: false,
+							// statusMapping: {}
+						// })
 				
 					});
 				}
@@ -5289,6 +5290,7 @@ var UIManager  = ( function( window, undefined ) {
 						html += ("<tr><th>{0}</th><th>{1}</th></tr>".format(_T("Date"),_T("Name")));
 						html +="</thead>";
 						html +="<tbody>";
+						history.lines.reverse();
 						$.each(history.lines, function(i,e) {
 							html += ("<tr><td>{0}</td><td>{1}</td></tr>".format( e.date, e.name) );
 						});
