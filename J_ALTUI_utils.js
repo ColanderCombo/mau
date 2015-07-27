@@ -418,7 +418,6 @@ var EventBus = ( function (undefined) {
 //on_ui_initFinished
 // EventBus.registerEventHandler("on_ui_deviceStatusChanged",window,"myFunc");
 
-
 var PageManager = (function() {
 	var _pages = null;
 			// var pages = [

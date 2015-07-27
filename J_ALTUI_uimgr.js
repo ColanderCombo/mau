@@ -5249,7 +5249,7 @@ var UIManager  = ( function( window, undefined ) {
 				.on("click",".altui-delscene",function() {
 					var altuiid = $(this).closest(".altui-scene").data('altuiid');
 					var scene = MultiBox.getSceneByAltuiID(altuiid);
-					DialogManager.confirmDialog(_T("Are you sure you want to delete scene ({0})").format(sceneid),function(result) {
+					DialogManager.confirmDialog(_T("Are you sure you want to delete scene ({0})").format(altuiid),function(result) {
 						if (result==true) {
 							MultiBox.deleteScene( scene );
 						}

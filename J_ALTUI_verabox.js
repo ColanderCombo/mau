@@ -550,8 +550,9 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
   //---------------------------------------------------------
   // private functions
   //---------------------------------------------------------
-	var _upnpHelper = new UPnPHelper(ip_addr,uniq_id);	// for common UPNP ajax
 	var _uniqID = uniq_id;								// assigned by Multibox, unique, can be used for Settings & other things
+	var _hagdevice = { id: 0, altuiid:"{0}-0".format(_uniqID) };							// special device for HAG, service=S_HomeAutomationGateway1.xml
+	var _upnpHelper = new UPnPHelper(ip_addr,uniq_id);	// for common UPNP ajax
 	var _dataEngine = null;
 	var _rooms = null;
 	var _scenes = null;
@@ -808,6 +809,9 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 	
 	function _getDeviceByID( devid ) {
+		if (devid==0)
+			return _hagdevice;
+		
 		var idx = _findDeviceIdxByID(devid);
 		if (idx!=-1) {
 			return _user_data.devices[idx];
@@ -1828,8 +1832,16 @@ function sortByName(a, b) {
 };
 var altuiSortByName=sortByName;
 
-function get_device_obj(deviceID){
+function get_device_index(deviceID){
+    var devicesCount=jsonp.ud.devices.length;
+    for(var i=0;i<devicesCount;i++){
+        if(jsonp.ud.devices[i] && jsonp.ud.devices[i].id==deviceID){
+            return i;
+        }
+    }
+};
 
+function get_device_obj(deviceID){
     var devicesCount=jsonp.ud.devices.length;
     for(var i=0;i<devicesCount;i++){
         if(jsonp.ud.devices[i] && jsonp.ud.devices[i].id==deviceID){
@@ -1938,6 +1950,41 @@ var Ajax = (function(window,undefined) {
 		}
 	};
 })();
+
+// J_Harmony , J_Harmony_UI7.ss
+var Utils = ( function (undefined) {
+	return {
+		logError : function(s) 			{ PageMessage.message(s,"error"); AltuiDebug.debug("Utils.logError: "+s);},
+		isValidIp: function(ip) 		{
+			var reg = new RegExp('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(:\\d{1,5})?$', 'i');
+			return(reg.test(ip));
+		},
+		getLangString: function(s1,s2)	{ return _T(s2);}	// returned localized version of the string
+	}
+})();
+
+var Interface = function (undefined) {
+	return {
+		showMessagePopup: function(msg,code) { PageMessage.message(msg,"success"); },
+		showMessagePopupError: function(msg) { PageMessage.message(msg,"error"); },
+		showStartupModalLoading	: function() {	show_loading(); },
+		hideModalLoading		: function() {	hide_loading(); }
+	}
+};
+var myInterface = new Interface();
+
+var DOMPurify = (function(undefined) {
+	return {
+		sanitize: function(str)	{return str;}
+	}
+})();
+
+var application = (function(undefined) {
+	return {
+		sendCommandSaveUserData: function(bSilent)	{ }
+	}
+})();
+
 
 // extract from constant.js
 var DEVICETYPE_HOME_AUTO_GATEWAY = "urn:schemas-micasaverde-com:device:HomeAutomationGateway:1";
@@ -2349,6 +2396,16 @@ var ALARM_PARTITION_DISARMED='Disarmed';
 var ALARM_PARTITION_BREACH='Breach';
 var api = {
 	version: "UI7",
+	ui: {
+		updateDevice: function(deviceId,value,txt) 	{
+			if (txt && txt.length>=2) {
+				var device = MultiBox.getDeviceByID( _JSAPI_ctx.controllerid , deviceId);
+				var name = txt.substring( txt.lastIndexOf('.')+1 );
+				MultiBox.setAttr(device, "ip", value,null);
+			}
+		},
+		startupShowModalLoading:  function() {	show_loading(); }
+	},
 	cloneObject: function (obj) {
 		return cloneObject(obj);
 	},
@@ -2413,7 +2470,7 @@ var api = {
 		set_panel_html(html);
 	},
 	getDeviceStateVariable: function (deviceId, service, variable, options) {
-		return get_device_state(deviceId, service, variable, (options.dynamic === true ? 1: 0));
+		return get_device_state(deviceId, service, variable, ( ( options && options.dynamic === true ) ? 1: 0));
 	},
 	getDeviceState: function (deviceId, service, variable, options) {
 		return this.getDeviceStateVariable(deviceId, service, variable, options);
@@ -2435,7 +2492,14 @@ var api = {
 		return dt.ui_static_data.eventList2;
 	},
 	setDeviceStateVariable: function (deviceId, service, variable, value, options) {
-		set_device_state(deviceId, service, variable, value, (options.dynamic === true ? 1: 0));
+		set_device_state(deviceId, service, variable, value, (options && (options.dynamic === true)) ? 1: 0);
+	},
+	setDeviceAttribute: function(deviceId, attributeName, attributeValue, options) {
+		var device = MultiBox.getDeviceByID( _JSAPI_ctx.controllerid, deviceId );
+		MultiBox.setAttr( device, attributeName, attributeValue,function(result) {
+			if ( options && $.isFunction(options.callback) )
+				(options.callback)();
+		});
 	},
 	setDeviceState:function(deviceId, service, variable, value, options) {
 		return this.setDeviceStateVariable(deviceId, service, variable, value, options);
@@ -2447,7 +2511,7 @@ var api = {
 		return this.setDeviceStateVariablePersistent(deviceId, service, variable, value, options);
 	},
 	getListOfSupportedEvents: function() {
-		return [];
+		return EventBus.getEventSupported();
 	},
 	getLuSdata: function(onSuccess, onFailure, context) {
 		var url = "data_request?id=sdata&output_format=json";
@@ -2473,7 +2537,18 @@ var api = {
 	},
 	getSceneDescription: function(sceneId, options) {
 		var scene = this.getSceneByID(sceneId);
-		return JSON.stringify(scene);
+		var clone = cloneObject(scene);
+		if (options) {
+			if (options.hideTriggers == true)
+				delete clone["triggers"];
+			if (options.hideSchedules == true)
+				delete clone["timers"];
+			if (options.hideActions == true)
+				delete clone["groups"];
+			// if (options.hideNotifications == true)
+				// delete clone["???"];
+		}
+		return JSON.stringify(clone);
 	},
 	registerEventHandler: function(eventName, object, functionName) {
 		EventBus.registerEventHandler(eventName, window, function( /*args*/ ) {
