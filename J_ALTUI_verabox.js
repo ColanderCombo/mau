@@ -670,9 +670,9 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 
 	function _getPower(cbfunc) {
 		var jqxhr = _httpGet("?id=live_energy_usage",{dataType: "text"},cbfunc);
-		jqxhr= jqxhr.fail(function(jqXHR, textStatus) {
-				PageMessage.message( _T("Controller {0} is busy, be patient.").format(_upnpHelper.getIpAddr()) , "warning");
-			});
+		// jqxhr= jqxhr.fail(function(jqXHR, textStatus) {
+				// PageMessage.message( _T("Controller {0} is busy, be patient.").format(_upnpHelper.getIpAddr()) , "warning");
+			// });
 		return jqxhr;
 	};
 	
@@ -745,7 +745,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 					}
 				} else {
 					_categories = null;
-					PageMessage.message( _T("Controller {0} is busy, be patient.").format(_upnpHelper.getIpAddr()) , "warning");
+					// PageMessage.message( _T("Controller {0} is busy, be patient.").format(_upnpHelper.getIpAddr()) , "warning");
 				}
 			});
 		} else {
@@ -1010,7 +1010,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 					}
 				}
 				else {
-						PageMessage.message( _T("Controller {0} is busy, be patient.").format(_upnpHelper.getIpAddr()) , "warning");
+						// PageMessage.message( _T("Controller {0} is busy, be patient.").format(_upnpHelper.getIpAddr()) , "warning");
 						setTimeout( _refreshEngine, 1000 );
 				}
 			}
@@ -1122,7 +1122,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 				}
 				else {
 					_dataEngine = setTimeout( _initDataEngine, 2000 );
-					PageMessage.message( _T("Controller {0} did not respond").format(_upnpHelper.getIpAddr() ) + ", textStatus: " + textStatus , "danger");
+					// PageMessage.message( _T("Controller {0} did not respond").format(_upnpHelper.getIpAddr() ) + ", textStatus: " + textStatus , "danger");
 				}
 			})
 			.always(function() {

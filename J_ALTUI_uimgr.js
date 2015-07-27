@@ -252,6 +252,8 @@ var styles ="					\
 	}						\
 	.altui-scene-date{		\
 		clear: right;		\
+		width: 80px;		\
+		text-align: right;	\
 	}						\
 	.altui-pausescene {		\
 		padding-right: 3px;	\
@@ -5236,7 +5238,7 @@ var UIManager  = ( function( window, undefined ) {
 		
 		function sceneDraw(idx, scene) {
 			var html = UIManager.sceneDraw(scene);
-			var scenecontainerTemplate="<div class=' col-sm-6  col-lg-4'>";
+			var scenecontainerTemplate="<div class=' col-sm-6 col-md-4 col-lg-3'>";
 			scenecontainerTemplate	+= 	html;
 			scenecontainerTemplate	+= 	"</div>";		
 			var domPanel = $(".altui-mainpanel");
