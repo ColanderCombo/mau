@@ -781,24 +781,34 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 			end,
 		["oscommand"] = 
 			function(params)
-				-- local command = lul_parameters["oscommand"]
-				-- local handle = io.popen(command)
+				local resultcode=""
+				local result = ""
+				local command = url_decode( lul_parameters["oscommand"] )
+				local file = io.popen(command)
+				if file then
+					result = file:read("*a")
+					file:close()
+					resultcode = "1,"
+				else
+					resultcode = "0,"
+				end
 				-- local result = handle:read("*a")
 				-- handle:close()
-				local command = url_decode( lul_parameters["oscommand"] ) .. '> /tmp/oscommand.log'
-				local response = os.execute(command)
-				local file = io.open('/tmp/oscommand.log','r')
-				local result = file:read("*a")
-				local resultcode = ""
-				file:close()
-				if (response==0 or response==true) then
-					resultcode="1,"
-				else
-					resultcode="0,"
-				end
+				
+				-- local command = url_decode( lul_parameters["oscommand"] ) .. '> /tmp/oscommand.log'
+				-- local response = os.execute(command)
+				-- local file = io.open('/tmp/oscommand.log','r')
+				-- local result = file:read("*a")
+				-- local resultcode = ""
+				-- file:close()
+				-- if (response==0 or response==true) then
+					-- resultcode="1,"
+				-- else
+					-- resultcode="0,"
+				-- end
 				return resultcode..result , "text/plain"
-				-- return json.encode( {success=(response==0 or response==true), result=result} ) , "application/json"
 			end,
+				-- return json.encode( {success=(response==0 or response==true), result=result} ) , "application/json"
 		["rooms"] = 
 			function(params)
 				return json.encode( luup.rooms ) , "application/json"

@@ -1193,7 +1193,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 				if (success)
 					PageMessage.message(_T("Os Command execution succeeded"), "success");
 				else
-					PageMessage.message( _T("Os Command execution on vera failed.") , "danger");
+					PageMessage.message( _T("Os Command execution on vera failed.")+"({0})".format(data) , "danger");
 				if ($.isFunction( cbfunc )) 
 					cbfunc({success:success, result:data.substr(2)},jqXHR);
 			}
