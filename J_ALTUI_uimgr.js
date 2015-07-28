@@ -1645,9 +1645,12 @@ var SceneEditor = function (scene) {
 	};
 
 	function _sceneEditDraw() {
+		var controller
 		var htmlSceneEditButton = "  <button type='submit' class='btn btn-default altui-scene-editbutton'>"+_T("Submit")+"</button>";
 		var htmlSceneAddButtonTmpl = "  <button type='submit' class='btn btn-default {0}'>"+plusGlyph+"</button>";
-		var rooms = MultiBox.getRoomsSync();
+		var rooms = $.grep( MultiBox.getRoomsSync(), function(room,idx) {
+			return ( MultiBox.controllerOf(room.altuiid).controller == scenecontroller );
+		});
 		
 		var htmlRoomSelect = "<select id='altui-room-list' class='form-control'>";
 		if (rooms)
@@ -3682,7 +3685,11 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		
 		function _deviceDrawWireFrame( device,container) {
-				var rooms = MultiBox.getRoomsSync();
+				var devicecontroller = MultiBox.controllerOf(device.altuiid).controller;
+				var rooms = $.grep( MultiBox.getRoomsSync(), function(room,idx) {
+					return ( MultiBox.controllerOf(room.altuiid).controller == devicecontroller );
+				});
+
 				var htmlRoomSelect = "<select id='altui-room-list' class='form-control input-sm'>";
 				if (rooms)
 						htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format("No Room",0,'');
