@@ -4617,6 +4617,21 @@ var UIManager  = ( function( window, undefined ) {
 		});	
 	};
 	
+	function _createControllerSelect(htmlid) {
+		var html = "";
+		html += "<form class='form-inline'>";
+			html += "<div class='form-group'>";
+				html += "<label class='control-label ' for='altui-controller-select' >"+_T("Controller")+":</label>";
+				html += "<select id='"+htmlid+"' class='form-control'>";
+				$.each(MultiBox.getControllers(), function( idx, controller) {
+					html += "<option value='{0}'>{1}</option>".format( idx , controller.ip=='' ? window.location.hostname : controller.ip  );
+				});
+				html += "</select>";
+			html += "</div>";
+		html += "</form>";
+		return html;
+	};
+
 	var bUIReady = false;
 	var bEngineReady = false;
 
@@ -6119,7 +6134,9 @@ var UIManager  = ( function( window, undefined ) {
 		UIManager.clearPage(_T('OsCommand'),_T("OS Command"),UIManager.oneColumnLayout);
 		
 		var editButtonHtml = buttonTemplate.format( 'altui-editoscmd-0', 'altui-editoscmd', wrenchGlyph,'default');
-		var html = "";
+		$(".altui-mainpanel").append( _createControllerSelect('altui-controller-select'));
+
+		var html = "<hr>";
 		html+="<div class='col-xs-12'><form>";
 		html+=	"<p>"+_T("Enter a Vera OS ( Unix ) command, the stdout will be returned and displayed below")+"</p>";
 		html += _drawFrequentCommandBar(commands);
@@ -6145,7 +6162,7 @@ var UIManager  = ( function( window, undefined ) {
 		$(".altui-mainpanel").on("click","#altui-oscommand-exec-button",function(e){ 
 			function _execCmd(cmd) {
 				show_loading();
-				MultiBox.osCommand(0,oscmd,function(res) {
+				MultiBox.osCommand( parseInt($("#altui-controller-select").val()), oscmd, function(res) {
 					hide_loading();
 					$('#altui-oscommand-result').html( (res.success==true) ? _replaceANSI(res.result) : _T("failed to execute"));
 				});
@@ -6722,9 +6739,6 @@ var UIManager  = ( function( window, undefined ) {
 				data = { nodes:[] , links:[] };
 				var color = {};
 				var nColor = 0;
-				// var devices = $.grep(MultiBox.getDevicesSync(),function(d) {	return MultiBox.controllerOf(d.altuiid).controller==parseInt($("#altui-controller-select").val()); });
-
-				// data.root={ id:0, zwid:0, name:"root", children:[] };
 				if (devices) {
 					var zwavenet = MultiBox.getDeviceByType("urn:schemas-micasaverde-com:device:ZWaveNetwork:1");
 					if (zwavenet) {
@@ -6882,18 +6896,8 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		
 		UIManager.clearPage(_T('Quality'),_T("Network Quality"),UIManager.oneColumnLayout);
-		var html = "";
-		html += "<form class='form-inline'>";
-			html += "<div class='form-group'>";
-				html += "<label class='control-label ' for='altui-controller-select' >"+_T("Controller")+":</label>";
-				html += "<select id='altui-controller-select' class='form-control'>";
-				$.each(MultiBox.getControllers(), function( idx, controller) {
-					html += "<option value='{0}'>{1}</option>".format( idx , controller.ip=='' ? window.location.hostname : controller.ip  );
-				});
-				html += "</select>";
-			html += "</div>";
-		html += "</form>";
-		$(".altui-mainpanel").append(html);
+		
+		$(".altui-mainpanel").append( _createControllerSelect('altui-controller-select'));
 		$("#altui-controller-select").change(function() {
 			$(".altui-route-d3chart").html("");
 			MultiBox.getDevices(null,function(d) {	return MultiBox.controllerOf(d.altuiid).controller==parseInt($("#altui-controller-select").val()); },function(arr) {
@@ -7478,18 +7482,8 @@ var UIManager  = ( function( window, undefined ) {
 		// prepare and load D3 then draw the chart
 		UIManager.clearPage(_T('zWaveRoutes'),_T("zWave Routes"),UIManager.oneColumnLayout);
 		PageMessage.message(_T("Drag and Drop to fix the position of a node. Simple Click to open or collapse a parent node, Shift Click to free a fixed node"),"info");
-		var html="";
-		html += "<form class='form-inline'>";
-			html += "<div class='form-group'>";
-				html += "<label class='control-label ' for='altui-controller-select' >"+_T("Controller")+":</label>";
-				html += "<select id='altui-controller-select' class='form-control'>";
-				$.each(MultiBox.getControllers(), function( idx, controller) {
-					html += "<option value='{0}'>{1}</option>".format( idx , controller.ip=='' ? window.location.hostname : controller.ip  );
-				});
-				html += "</select>";
-			html += "</div>";
-		html += "</form>";
-		$(".altui-mainpanel").append(html);
+
+		$(".altui-mainpanel").append( _createControllerSelect('altui-controller-select'));
 		$("#altui-controller-select").change(function() {
 			$(".altui-route-d3chart").html("");
 			MultiBox.getDevices(
