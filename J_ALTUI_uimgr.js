@@ -6608,7 +6608,7 @@ var UIManager  = ( function( window, undefined ) {
 		UIManager.loadD3Script( _drawzWavechart );
 		
 		$("#altui-reset-pollcounters").click(function() {
-			MultiBox.resetPollCounters(0);
+			MultiBox.resetPollCounters();
 		});
 		
 		$("#altui-zwavechart-order").change( function() {
