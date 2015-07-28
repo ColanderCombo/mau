@@ -4818,6 +4818,15 @@ var UIManager  = ( function( window, undefined ) {
 	// ===========================
 	pageRooms : function ()
 	{
+		function _roomSummary(room) {
+			var rcontroller = MultiBox.controllerOf(room.altuiid).controller;
+			var devices = $.grep( MultiBox.getDevicesSync(), function(d) {
+				var dcontroller = MultiBox.controllerOf(d.altuiid).controller;
+				return (d.room == room.id) && ( dcontroller==rcontroller);
+			});
+			return devices.length;
+		};
+		
 		UIManager.clearPage(_T('Rooms'),_T("Rooms"),UIManager.oneColumnLayout);
 		var formHtml="";
 		formHtml+=" <div class='input-group col-sm-6'>";
@@ -4834,26 +4843,30 @@ var UIManager  = ( function( window, undefined ) {
 		// table of rooms
 		$(".altui-mainpanel")
 			.append(formHtml)
-			.append($("<div class='col-xs-12'><table id='table' class='table table-condensed'><thead><tr><th>ID</th><th>Name</th><th>Actions</th></tr></thead><tbody></tbody></table></div>"));
+			.append($("<div class='col-xs-12'><table id='table' class='table table-condensed'><thead><tr><th>ID</th><th>Name</th><th>Devices</th><th>Actions</th></tr></thead><tbody></tbody></table></div>"));
 
-		var roomListTemplate = "<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>";	
-		MultiBox.getRooms( function( idx, room) {
-			var id = room.altuiid;
-			var delButtonHtml = smallbuttonTemplate.format( id, 'altui-delroom', deleteGlyph);
-			$(".altui-mainpanel tbody").append( roomListTemplate.format(id,(room!=null) ? room.name : "No Room",delButtonHtml) );
-			
-			// install click handler for buttons
-			$("button.altui-delroom#"+id).click( function(event) {
-				var id = $(this).prop('id');
-				var room = MultiBox.getRoomByAltuiID(id);
-				var tr = $(this).closest("tr");
-				DialogManager.confirmDialog(_T("Are you sure you want to delete room")+" ("+id+")",function(result) {
-					if (result==true) {
-						$(tr).remove();
-						MultiBox.deleteRoom( room );
-					}
-				})
-			});
+		var roomListTemplate = "<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td></tr>";	
+		MultiBox.getRooms( null,null,function( rooms) {
+			if (rooms) {
+				$.each(rooms.sort(sortByName), function(idx,room) {
+					var id = room.altuiid;
+					var delButtonHtml = smallbuttonTemplate.format( id, 'altui-delroom', deleteGlyph);
+					$(".altui-mainpanel tbody").append( roomListTemplate.format(id,(room!=null) ? room.name : "No Room",_roomSummary(room),delButtonHtml) );
+				});
+				// install click handler for buttons
+				$("button.altui-delroom").click( function(event) {
+					var id = $(this).prop('id');
+					var room = MultiBox.getRoomByAltuiID(id);
+					var tr = $(this).closest("tr");
+					DialogManager.confirmDialog(_T("Are you sure you want to delete room")+" ("+id+")",function(result) {
+						if (result==true) {
+							$(tr).remove();
+							MultiBox.deleteRoom( room );
+						}
+					})
+				});
+				
+			}
 		});
 		
 		// $(".altui-mainpanel").off("click","button#altui-create-room");
