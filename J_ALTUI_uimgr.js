@@ -1062,7 +1062,7 @@ var SceneEditor = function (scene) {
 		function _findEventFromTriggerTemplate(device,template)
 		{
 			var devtype = device.device_type;
-			var _devicetypesDB = MultiBox.getDeviceTypesDB();
+			var _devicetypesDB = MultiBox.getDeviceTypesDB(scenecontroller);
 			var event = null;
 			$.each( _devicetypesDB[devtype].ui_static_data.eventList2, function( idx,e) {
 				if (e.id == template) {
@@ -2478,7 +2478,7 @@ var UIManager  = ( function( window, undefined ) {
 			(cbfunc)();
 		});
 		
-		var _devicetypesDB = MultiBox.initDB(devicetypes);
+		var _devicetypesDB = MultiBox.initDB(devicetypes).getALTUITypesDB();
 		_ui7Check = (_devicetypesDB["info"].ui7Check == "true" );
 		_version = _devicetypesDB["info"].PluginVersion;
 		_remoteAccessUrl =_devicetypesDB["info"].RemoteAccess;
@@ -2836,7 +2836,7 @@ var UIManager  = ( function( window, undefined ) {
 	function _getDeviceIconPath(device) {
 		var id = device.altuiid;
 		var controller = MultiBox.controllerOf(id).controller;
-		var _devicetypesDB = MultiBox.getDeviceTypesDB();
+		var _devicetypesDB = MultiBox.getDeviceTypesDB(controller);
 		var icon='';
 		switch( device.device_type ) {
 			case 'urn:schemas-futzle-com:device:CountdownTimer:1': 
@@ -2957,9 +2957,12 @@ var UIManager  = ( function( window, undefined ) {
 
 	function _deviceIconHtml( device )	// deviceid if device is null
 	{
-		var _devicetypesDB = MultiBox.getDeviceTypesDB();
 		var controller = MultiBox.controllerOf(device.altuiid).controller;
-
+		//
+		// get ALTUI plugin definition to see if we have a custom icon drawing , so allways on master controller => 0!
+		//
+		var _devicetypesDB = MultiBox.getALTUITypesDB();	// master controller
+		
 		if (device==null)
 			return "<img class='altui-device-icon pull-left img-rounded' data-org-src='/err' src='"+defaultIconSrc+"' alt='_todo_' onerror='UIManager.onDeviceIconError(\""+device.altuiid+"\")' ></img>";
 		
@@ -3043,7 +3046,12 @@ var UIManager  = ( function( window, undefined ) {
 			// if not, defaults to _defaultDeviceDraw()
 			
 			var devicebodyHtml = "";
-			var _devicetypesDB = MultiBox.getDeviceTypesDB();
+			var controller = MultiBox.controllerOf(device.altuiid).controller;
+
+			//
+			// get ALTUI plugins definition, this is allways on master controller, so controller 0 !
+			//
+			var _devicetypesDB = MultiBox.getALTUITypesDB();	// master controller / Plugin information
 			if (_devicetypesDB[ device.device_type ]!=null && _devicetypesDB[ device.device_type ].DeviceDrawFunc!=null) {
 				//drawfunction = eval( _devicetypesDB[ device.device_type ].DeviceDrawFunc );
 				devicebodyHtml+= _executeFunctionByName(_devicetypesDB[ device.device_type ].DeviceDrawFunc, window, device);
@@ -3572,13 +3580,19 @@ var UIManager  = ( function( window, undefined ) {
 	};
 	
 	function _deviceDrawControlPanelOneTabContent(device, parent, tabidx ) {
-		var _devicetypesDB = MultiBox.getDeviceTypesDB();
-		var dt = _devicetypesDB[device.device_type];
+		// Allways master controller for customer javascript functions, so 0!
+		var _altuitypesDB = MultiBox.getALTUITypesDB();	// Master controller
+		var dt = _altuitypesDB[device.device_type];
 		if (dt!=null && dt.ControlPanelFunc!=null && (tabidx==0)) {
 			_executeFunctionByName(dt.ControlPanelFunc, window, device, parent);
 			_fixHeight( parent );
 		}
 		else if (tabidx>0) {
+			// on the contrary, UI5/7 static definition file is part of the controller specific device type DB 
+			// so real controller this time
+			var controller = MultiBox.controllerOf(device.altuiid).controller;
+			var _devicetypesDB = MultiBox.getDeviceTypesDB(controller);	// Master controller
+			var dt = _devicetypesDB[device.device_type];
 			var tab = dt.ui_static_data.Tabs[tabidx-1];
 			if ((tab.TabType!="javascript") || (tab.ScriptName!="shared.js")) {
 				if ( tab.TabType=="flash") {
@@ -3614,8 +3628,8 @@ var UIManager  = ( function( window, undefined ) {
 	};
 
 	function _deviceDrawControlPanel( device, container ) {
-		var _devicetypesDB = MultiBox.getDeviceTypesDB();	
 		var controller = MultiBox.controllerOf(device.altuiid).controller;
+		var _devicetypesDB = MultiBox.getDeviceTypesDB(controller);		// for MCV display info
 
 		function _deviceDrawDeviceUsedIn( device, container ) {
 			var usedin_objects = MultiBox.getDeviceDependants(device);
@@ -3750,9 +3764,10 @@ var UIManager  = ( function( window, undefined ) {
 			if (_toLoad==0) {
 				$(container).append( "<div class='row'><div class='altui-debug-div'></div></div>" );	// Draw hidden debug panel
 
-				container = container.find(".panel-body");						
+				container = container.find(".panel-body");	
+				var _altuitypesDB = MultiBox.getALTUITypesDB();					// for ALTUI plugin info
 				var dt = _devicetypesDB[device.device_type];
-				var bExtraTab = (dt.ControlPanelFunc!=null);
+				var bExtraTab = (_altuitypesDB[device.device_type] && _altuitypesDB[device.device_type].ControlPanelFunc!=null);
 				$(container).append( "<div class='row'>" + _createDeviceTabs( device, bExtraTab, dt.ui_static_data.Tabs ) + "</div>" );
 
 				$(container).find("li a").first().tab('show');	// activate first tab
@@ -5038,9 +5053,9 @@ var UIManager  = ( function( window, undefined ) {
 			_drawDeviceToolbar();
 			UIManager.refreshUI(true,false);
 			$.each(devices, function(idx,device){
-				var controller = MultiBox.controllerOf(device.altuiid);
+				var controller = MultiBox.controllerOf(device.altuiid).controller;
 				if (parseInt(device.room)!=0)
-					_deviceID2RoomName[ device.altuiid ] = _roomID2Name["{0}-{1}".format(controller.controller,device.room)];
+					_deviceID2RoomName[ device.altuiid ] = _roomID2Name["{0}-{1}".format(controller,device.room)];
 			})
 		};
 		
@@ -5309,8 +5324,8 @@ var UIManager  = ( function( window, undefined ) {
 		
 		function afterSceneListDraw(scenes) {
 			$.each(scenes, function(idx,scene){
-				var controller = MultiBox.controllerOf(scene.altuiid);
-				_sceneID2RoomName[scene.altuiid] = _roomID2Name["{0}-{1}".format(controller.controller,scene.room)];
+				var controller = MultiBox.controllerOf(scene.altuiid).controller;
+				_sceneID2RoomName[scene.altuiid] = _roomID2Name["{0}-{1}".format(controller,scene.room)];
 			});
 			$(".altui-mainpanel")
 				// .off("click",".altui-delscene")
@@ -5446,7 +5461,6 @@ var UIManager  = ( function( window, undefined ) {
 
 	pagePlugins: function ()
 	{
-			
 		function _sortBySourceName(a,b)
 		{
 			if (a.SourceName < b.SourceName)
@@ -5458,8 +5472,8 @@ var UIManager  = ( function( window, undefined ) {
 		
 		UIManager.clearPage(_T('Plugins'),_T("Plugins"),UIManager.oneColumnLayout);
 
-		function _getScriptFileList(devicetype) {
-			var dtdb = MultiBox.getDeviceTypesDB();
+		function _getScriptFileList(controller,devicetype) {
+			var dtdb = MultiBox.getDeviceTypesDB(controller);
 			var dt = dtdb[devicetype];
 			var scripts = {};
 			if ( dt.ui_static_data && dt.ui_static_data.Tabs )
@@ -5555,7 +5569,8 @@ var UIManager  = ( function( window, undefined ) {
 			// for each, create a virtual plugin structure so we can display
 			$.each(manual_plugins, function( key,value) {
 				// add also the JS files used for the tabs for such device type
-				var scripts = _getScriptFileList( value.devtype ); 
+				var controller = MultiBox.controllerOf(value.devaltuiid).controller;
+				var scripts = _getScriptFileList( controller,value.devtype ); 
 				$.each(scripts, function(key,script) {
 					value.files.push({SourceName:key});
 				});
@@ -7912,7 +7927,7 @@ var UIManager  = ( function( window, undefined ) {
 	},
 	reloadEngine: function() {
 		MultiBox.reloadEngine(0).done(function(){
-			alert('reload done');
+			PageMessage.message(_T("Reload is done"),"success");
 		})
 	},
 	reboot: function() {

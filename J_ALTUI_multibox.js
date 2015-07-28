@@ -13,6 +13,7 @@
 
 var MultiBox = ( function( window, undefined ) {
 	var _devicetypesDB = {};
+	_devicetypesDB[0] = {};
 	var _controllers = [
 		{ ip:''			  ,  controller:null },		// no IP = primary box on which we opened the web page
 		// { ip:'192.168.1.5',  controller:null }		// no IP = primary box on which we opened the web page
@@ -33,37 +34,46 @@ var MultiBox = ( function( window, undefined ) {
 		return $.map(_controllers,function(c) { return {	ip:c.ip	} });
 	};	
 	function _initDB(devicetypes) {
-		$.extend(true,_devicetypesDB,devicetypes); 
-		return _devicetypesDB; 
+		$.extend(true,_devicetypesDB[0],devicetypes); 	// data received initially comes from ctrl 0
+		return this; 
 	};
-	function _addDeviceType(devtype, obj) {
-		if (_devicetypesDB[devtype]==null) {
-			_devicetypesDB[devtype]={};
+	function _getALTUITypesDB() {
+		return _devicetypesDB[0];
+	}
+	function _getDeviceTypesDB(controllerid) {
+		var id = controllerid || 0;
+		return _devicetypesDB[controllerid];
+	}
+	function _addDeviceType(controllerid,devtype, obj) {
+		var id = controllerid || 0;
+		if (_devicetypesDB[id][devtype]==null) {
+			_devicetypesDB[id][devtype]={};
 		};
-		$.extend(true,_devicetypesDB[devtype],obj);
+		return $.extend(true,_devicetypesDB[id][devtype],obj);
 	};
 	function _updateDeviceTypeUPnpDB( controllerid, devtype, Dfilename )	{
-		if (_devicetypesDB[devtype]==null) 
-			_devicetypesDB[devtype]={};
+		var id = controllerid || 0;
+		if (_devicetypesDB[id][devtype]==null) 
+			_devicetypesDB[id][devtype]={};
 		
 		// only try to load if not loaded or in the process of loading it
-		if (_devicetypesDB[devtype].Dfilename == undefined) {
-			_devicetypesDB[devtype].Dfilename = Dfilename;
+		if (_devicetypesDB[id][devtype].Dfilename == undefined) {
+			_devicetypesDB[id][devtype].Dfilename = Dfilename;
 			
 			// get it into the cache ( or get it from the cache )
-			FileDB.getFileContent(controllerid, Dfilename , function( xmlstr , jqXHR ) {
+			FileDB.getFileContent(id, Dfilename , function( xmlstr , jqXHR ) {
 				try {
 					var doc = jqXHR ? ((jqXHR.responseXML != undefined) ? jqXHR.responseXML : $.parseXML( xmlstr )) : $.parseXML( xmlstr );
 					
 					var xml = $( doc );
 					var imp = xml.find("implementationFile");
-					_devicetypesDB[devtype].Ifilename= imp.text();
-					_devicetypesDB[devtype].Services = [];
+					_devicetypesDB[id][devtype].Ifilename= imp.text();
+					_devicetypesDB[id][devtype].Services = [];
 					var serviceIDs = xml.find("serviceId");
 					var Sfilenames = xml.find("SCPDURL");
 					xml.find("serviceId").each( function (index,value) {
 						// get all services files name, but do not get content, will be fetched on demand
-						_devicetypesDB[devtype].Services.push({
+						_devicetypesDB[id][devtype].Services.push({
 							ServiceId : $(value).text(),
 							SFilename : $(Sfilenames[index]).text(),
 							Actions : []
@@ -74,14 +84,16 @@ var MultiBox = ( function( window, undefined ) {
 					console.log("error in xml parsing, Dfile:"+Dfilename);
 					console.log("xmlstr"+xmlstr);
 				}
-			}  );
+			});
 		}
 	};
 	function _updateDeviceTypeUIDB(controllerid, devtype, ui_definitions)	{
-		if (_devicetypesDB[devtype]==null) {
-			_devicetypesDB[devtype]={};
+		if (_devicetypesDB[controllerid]==null)
+			_devicetypesDB[controllerid]={};
+		if (_devicetypesDB[controllerid][devtype]==null) {
+			_devicetypesDB[controllerid][devtype]={};
 		};
-		_devicetypesDB[devtype].ui_static_data = ui_definitions;
+		_devicetypesDB[controllerid][devtype].ui_static_data = ui_definitions;
 	};
 
 	function  _getAllEvents(name) {
@@ -115,6 +127,9 @@ var MultiBox = ( function( window, undefined ) {
 		
 		// initialize controllers that are not yet initialized
 		$.each(_controllers, function(idx,box) {
+			// init device type DB for that controller
+			if (_devicetypesDB[idx]==null)
+				_devicetypesDB[idx]={};
 			if (box.controller == null) {
 				box.controller = new VeraBox(idx,box.ip);
 				box.controller.initEngine();		// will raise("on_ui_userDataFirstLoaded_"+_uniqID) ("on_ui_userDataLoaded_"+_uniqID)
@@ -542,7 +557,8 @@ var MultiBox = ( function( window, undefined ) {
 	getControllers : _getControllers,	
 	
 	// Device Type DB
-	getDeviceTypesDB 		: function() 	{ 	return _devicetypesDB; },
+	getALTUITypesDB			: _getALTUITypesDB,			// no param
+	getDeviceTypesDB 		: _getDeviceTypesDB,		// ( controllerid )
 	addDeviceType 			: _addDeviceType,			// (devtype, obj)				update devitetype plugin function calls ( from LUA )
 	updateDeviceTypeUPnpDB	: _updateDeviceTypeUPnpDB,	//( controllerid, devtype, Dfilename )		update devicetype UPNP information ( from D_xx S_xx files )
 	updateDeviceTypeUIDB 	: _updateDeviceTypeUIDB,	//( controllerid, devtype, ui_definitions)		update devicetype UI static infos ( from user_data )

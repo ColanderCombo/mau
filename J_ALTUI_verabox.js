@@ -1,5 +1,5 @@
 //# sourceURL=J_ALTUI_verabox.js
-"use strict";
+// "use strict";
 // http://192.168.1.16:3480/data_request?id=lr_ALTUI_Handler&command=home
 // This program is free software: you can redistribute it and/or modify
 // it under the condition that it is for private or home useage and 
@@ -17,6 +17,8 @@ jsonp.ud.devices=[];
 jsonp.ud.scenes=[];
 jsonp.ud.rooms=[];
 jsonp.ud.static_data=[];
+
+var user_changes=0;		// for PLEG
 
 
 var UPnPHelper = (function(ip_addr,veraidx) {
@@ -559,7 +561,6 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	var _devices = null;
 	var _categories = null;
 	var _devicetypes = {};
-	var _user_changes=0;
 	var _user_data = {};
 	var _change_cached_user_data = {};
 	var _user_data_DataVersion = 1;
@@ -579,14 +580,14 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			PageMessage.clearMessage(msgidx);
 		});
 		_change_cached_user_data={};
-		_user_changes=0;	//UI5 compat
+		user_changes=0;	//UI5 compat
 		return promise;
 	};
 	
 	function _updateChangeCache( target ) {
 		$.extend(true, _change_cached_user_data, target);
 		PageMessage.message("You need to save your changes","info", true );
-		_user_changes=1; //UI5 compat
+		user_changes=1; //UI5 compat
 	};
 	
 	function _initializeJsonp() {
@@ -649,7 +650,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 				_scenes = null;
 				_devicetypes = [];
 				_change_cached_user_data={};
-				_user_changes=0;	//UI5 compat
+				user_changes=0;	//UI5 compat
 			}
 		});
 	};
@@ -1569,7 +1570,8 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 
 	function _getDeviceActions(device,cbfunc) {
 		if (device && device.id!=0) {
-			var _devicetypesDB = MultiBox.getDeviceTypesDB();
+			var controller = MultiBox.controllerOf(device.altuiid).controller;
+			var _devicetypesDB = MultiBox.getDeviceTypesDB(controller);
 			var dt = _devicetypesDB[device.device_type];
 			_loadDeviceActions(dt,cbfunc);
 		}
@@ -1603,7 +1605,8 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	
 	function _getDeviceEvents(device) {
 		if (device && device.id!=0) {
-			var _devicetypesDB = MultiBox.getDeviceTypesDB();
+			var controller = MultiBox.controllerOf(device.altuiid).controller;
+			var _devicetypesDB = MultiBox.getDeviceTypesDB(controller);
 			var dt = _devicetypesDB[device.device_type];
 			if  ((dt.ui_static_data == undefined) || (dt.ui_static_data.eventList2==undefined))
 				return [];
@@ -2508,7 +2511,7 @@ var api = {
 		return 'unnamed device';
 	},
 	getEventDefinition: function(deviceType) {
-		var _devicetypesDB = MultiBox.getDeviceTypesDB();
+		var _devicetypesDB = MultiBox.getDeviceTypesDB(_JSAPI_ctx.controllerid);
 		var dt = _devicetypesDB[deviceType];
 		if  ((dt.ui_static_data == undefined) || (dt.ui_static_data.eventList2==undefined))
 			return [];

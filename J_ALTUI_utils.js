@@ -637,7 +637,7 @@ var FileDB = ( function (window, undefined) {
 	var _dbFile = null;
 	
 	function _getFileContent( controllerid, name, cbfunc ) {
-		AltuiDebug.debug("_getFileContent( {0} )".format(name));
+		AltuiDebug.debug("_getFileContent( {0},{1} )".format(controllerid,name));
 		if (_dbFile == null) {
 			_dbFile = MyLocalStorage.get("FileDB");
 			if (_dbFile==null)
@@ -651,7 +651,7 @@ var FileDB = ( function (window, undefined) {
 			if (_dbFile[name]=="pending")
 			{
 				AltuiDebug.debug("_getFileContent( {0} ) ==> not yet here, defered in 200ms".format(name));
-				setTimeout( FileDB.getFileContent, 200, name,cbfunc );
+				setTimeout( FileDB.getFileContent, 200, controllerid,name,cbfunc );
 			}
 			else {
 				AltuiDebug.debug("_getFileContent( {0} ) ==> returning content from cache".format(name));
