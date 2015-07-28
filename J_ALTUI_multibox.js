@@ -165,7 +165,7 @@ var MultiBox = ( function( window, undefined ) {
 	};	
 	function _isUI5(controller) {
 		if (controller==0)
-			return (_devicetypesDB["info"].ui7Check == "false" );	// we were told by LUA plugin
+			return (_devicetypesDB[0]["info"].ui7Check == "false" );	// we were told by LUA plugin
 		return _controllers[controller].controller.isUI5();
 	};
 	function _initializeJsonp(controller) {
