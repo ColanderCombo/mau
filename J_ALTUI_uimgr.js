@@ -4634,7 +4634,7 @@ var UIManager  = ( function( window, undefined ) {
 	
 	function _createControllerSelect(htmlid) {
 		var html = "";
-		html += "<form class='form-inline'>";
+		html += "<form class='form-inline col-xs-12'>";
 			html += "<div class='form-group'>";
 				html += "<label class='control-label ' for='altui-controller-select' >"+_T("Controller")+":</label>";
 				html += "<select id='"+htmlid+"' class='form-control'>";
@@ -4859,12 +4859,14 @@ var UIManager  = ( function( window, undefined ) {
 		
 		UIManager.clearPage(_T('Rooms'),_T("Rooms"),UIManager.oneColumnLayout);
 		var formHtml="";
-		formHtml+=" <div class='input-group col-sm-6'>";
+		formHtml+=" <div class='form-group '>";
+		formHtml+=" <div class='input-group '>";
 		formHtml+="       <input id='altui-create-room-name' type='text' class='form-control' placeholder='Room name...'>";
 		formHtml+="       <span class='input-group-btn'>";
 		formHtml+="         <button id='altui-create-room' class='btn btn-default' type='button'>"+plusGlyph+"&nbsp;"+_T("Create")+"</button>";
 		formHtml+="       </span>";
 		formHtml+="     </div><!-- /input-group -->";
+		formHtml+="     </div><!-- /form-group -->";
 	
 		// on the left nav
 		// nothing
@@ -4873,9 +4875,9 @@ var UIManager  = ( function( window, undefined ) {
 		// table of rooms
 		$(".altui-mainpanel")
 			.append( _createControllerSelect('altui-controller-select'))
-			.append(formHtml)
 			.append($("<div class='col-xs-12'><table id='table' class='table table-condensed'><thead><tr><th>ID</th><th>Name</th><th>Devices</th><th>Actions</th></tr></thead><tbody></tbody></table></div>"));
-
+		$(".form-inline").append(formHtml);
+		
 		var roomListTemplate = "<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td></tr>";	
 		MultiBox.getRooms( null,null,function( rooms) {
 			if (rooms) {
@@ -6150,12 +6152,12 @@ var UIManager  = ( function( window, undefined ) {
 		UIManager.clearPage(_T('OsCommand'),_T("OS Command"),UIManager.oneColumnLayout);
 		
 		var editButtonHtml = buttonTemplate.format( 'altui-editoscmd-0', 'altui-editoscmd', wrenchGlyph,'default');
-		$(".altui-mainpanel").append( _createControllerSelect('altui-controller-select'));
 
-		var html = "<hr>";
+		var html = "";
 		html+="<div class='col-xs-12'><form>";
 		html+=	"<p>"+_T("Enter a Vera OS ( Unix ) command, the stdout will be returned and displayed below")+"</p>";
 		html += _drawFrequentCommandBar(commands);
+		html += _createControllerSelect('altui-controller-select');
 		html+="  <div class='form-group'>";
 		html+="    <label for='oscommand'>"+_T("OS Command")+"</label>";
 		html+="    <input type='text' class='form-control' id='oscommand' placeholder='Type your OS command like: df '>";
