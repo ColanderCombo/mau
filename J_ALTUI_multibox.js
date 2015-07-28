@@ -426,7 +426,13 @@ var MultiBox = ( function( window, undefined ) {
 	};
 	function _setStartupCode(controllerid,code) {
 		var id = controllerid || 0;
-		return _controllers[id].controller.setStartupCode(code);
+		if (id==0)
+			return _controllers[id].controller.setStartupCode(code);
+		else {
+			var dfd = $.Deferred();
+			dfd.reject();
+			return dfd.promise();
+		}
 	};
 	function _saveChangeCaches( controllerid,msgidx ) {
 		var id = controllerid || 0;

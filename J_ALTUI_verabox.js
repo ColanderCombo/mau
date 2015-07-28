@@ -430,7 +430,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 			});
 		} else {
 			// proxy mode
-			url2 = _proxifySoap(url).format(
+			var url2 = _proxifySoap(url).format(
 				"ModifyUserData",								// action
 				encodeURIComponent(url),						// url
 				encodeURIComponent(xml.format("%s")),			// envelop with a %s

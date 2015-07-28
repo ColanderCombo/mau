@@ -6010,7 +6010,7 @@ var UIManager  = ( function( window, undefined ) {
 
 	pageEditorForm: function (title,txt,button,onClickCB) {
 		var html = "";
-		html +="<form class='col-sm-11' role='form' action='javascript:void(0);'>";
+		html +="<form class='altui-editor-form col-sm-11' role='form' action='javascript:void(0);'>";
 		html +="  <div class='form-group'>";
 		html +="    <label for='altui-editor-text'>"+title+":</label>";
 		html +="    <textarea id='altui-editor-text' rows='20' class='form-control' placeholder='xxx'>"+txt.htmlEncode()+"</textarea>";
@@ -6241,17 +6241,35 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pageLuaStart: function ()
 	{
+		function _prepareUI( ctrlid ) {
+			var lua = MultiBox.getLuaStartup(ctrlid );
+			UIManager.pageEditorForm("Lua Startup Code",lua,"Submit",function(newlua) {
+				if (newlua!=lua) {
+					DialogManager.confirmDialog(_T("do you want to change lua startup code ? if yes, it will generate a LUA reload, be patient..."),function(result) {
+						if (result==true) {
+							MultiBox.setStartupCode(ctrlid,newlua)
+								.done( function(){
+									PageMessage.message(_T("Lua Startup code has been modified"),"success");
+								})
+								.fail(function(){
+									PageMessage.message(_T("Lua Startup can only be modified on controller 0"),"danger");
+								});
+						}
+					});
+				}
+			});
+		}
+
 		UIManager.clearPage(_T('LuaStart'),_T("LUA Startup"),UIManager.oneColumnLayout);
-		var lua = MultiBox.getLuaStartup(0);
-		UIManager.pageEditorForm("Lua Startup Code",lua,"Submit",function(newlua) {
-			if (newlua!=lua) {
-				DialogManager.confirmDialog(_T("do you want to change lua startup code ? if yes, it will generate a LUA reload, be patient..."),function(result) {
-					if (result==true) {
-						MultiBox.setStartupCode(0,newlua);
-					}
-				});
-			}
+		
+		// DOES NOT WORK on other ctrl as the url gets too long
+		
+		$(".altui-mainpanel").append( _createControllerSelect('altui-controller-select'));
+		$("#altui-controller-select").change(function(){
+			$(".altui-editor-form").remove();
+			_prepareUI( parseInt($("#altui-controller-select").val()) );
 		});
+		_prepareUI( 0 );
 	},
 	
 	pagePower: function() 
