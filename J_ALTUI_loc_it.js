@@ -242,5 +242,8 @@ Localization.init( {
 	"Variable Name Pattern":"Variable Name Pattern",
 	"an error happened during the execution":"an error happened during the execution",
 	"Controller":"Controller",
-	"Counters have been reset properly":"Counters have been reset properly"
+	"Counters have been reset properly":"Counters have been reset properly",
+	"do you want to change lua startup code ? if yes, it will generate a LUA reload, be patient...":"do you want to change lua startup code ? if yes, it will generate a LUA reload, be patient...",
+	"Lua Startup code has been modified":"Lua Startup code has been modified"
+
 	});
