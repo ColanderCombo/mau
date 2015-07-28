@@ -1146,7 +1146,9 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			Country_description: _user_data.Country_description
 		};
 	};
-	
+	function _isUI5() {
+		return (_getBoxInfo().BuildVersion==undefined);
+	};
 	function _getLuaStartup() {
 		return _user_data.StartupCode;
 	};
@@ -1162,7 +1164,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		if (name && (name.length>0)) {
 			jqxhr = _httpGet( "?id=room&action=create&name="+name, {}, function(data, textStatus, jqXHR) {
 				if ((data!=null) && (data!="ERROR")) 
-					PageMessage.message(_T("Create Room succeeded for")+": "+name, "success", true);
+					PageMessage.message(_T("Create Room succeeded for")+": "+name, "success", _isUI5() );	// need user_data reload on UI5
 				else 
 					PageMessage.message(_T("Could not create Room")+": "+name, "warning");
 				if ($.isFunction(cbfunc)){
@@ -1177,7 +1179,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	{	
 		var jqxhr = _httpGet( "?id=room&action=delete&room="+id, {}, function(data, textStatus, jqXHR) {
 			if ((data!=null) && (data!="ERROR")) 
-				PageMessage.message(_T("Deleted Room")+" "+id, "success", true);
+				PageMessage.message(_T("Deleted Room")+" "+id, "success", _isUI5());	// need user_data reload on UI5
 			else 
 				PageMessage.message(_T("Could not delete Room")+" "+id, "warning");
 		});
@@ -1665,6 +1667,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	getIconPath		: _getIconPath,		// ( src )
 	getIcon			: _getIcon, 		// workaround to get image from vera box
 	getWeatherSettings : _getWeatherSettings,
+	isUI5			: _isUI5,				
 	getBoxInfo		: _getBoxInfo,		//()
 	getLuaStartup 	: _getLuaStartup,
     getRooms		: _getRooms,		// in the future getRooms could cache the information and only call _getRooms when needed

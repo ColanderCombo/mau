@@ -150,10 +150,8 @@ var MultiBox = ( function( window, undefined ) {
 	};	
 	function _isUI5(controller) {
 		if (controller==0)
-			return (_devicetypesDB["info"].ui7Check == "false" );
-		
-		var info = _controllers[controller].controller.getBoxInfo();
-		return (info.BuildVersion == undefined);
+			return (_devicetypesDB["info"].ui7Check == "false" );	// we were told by LUA plugin
+		return _controllers[controller].controller.isUI5();
 	};
 	function _initializeJsonp(controller) {
 		return _controllers[controller].controller.initializeJsonp();
