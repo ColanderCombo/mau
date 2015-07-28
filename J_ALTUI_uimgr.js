@@ -46,7 +46,7 @@ var defaultDialogModalTemplate = "";
 var wattTemplate = "<span class='altui-watts '>{0} <small>Watts</small></span>";
 // 0:modeid 1:modetext 2:modeclss for bitmap 3:preset_unselected or preset_selected
 var houseModeButtonTemplate = "  <button type='button' class='btn btn-default altui-housemode'><div>{1}</div><div id='altui-mode{0}' class='{2} {3} housemode'></div></button>";							
-var leftNavButtonTemplate = "<button id='{0}' type='button' class='altui-leftbutton btn btn-default'>{1}</button>";
+var leftNavButtonTemplate = "<button id='{0}' data-altuiid='{1}' type='button' class='altui-leftbutton btn btn-default'>{2}</button>";
 var deleteGlyph = "<span class='glyphicon glyphicon-trash text-danger' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Delete'></span>";
 var glyphTemplate = "<span class='glyphicon glyphicon-{0} {2}' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='{1}' ></span>";
 var hiddenGlyph = "<span class='glyphicon glyphicon-eye-close' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Hidden'></span>";
@@ -3878,10 +3878,14 @@ var UIManager  = ( function( window, undefined ) {
 			toolbarHtml+="  <ul class='dropdown-menu' role='menu'>";
 				var rooms = MultiBox.getRoomsSync();
 				$.each([{id:-1,name:_T('All')},{id:0,name:_T('No Room')}], function( idx, room) {
-					toolbarHtml+="<li><a href='#' id='{1}'>{0}</a></li>".format(room.name,room.id);
+					toolbarHtml+="<li><a href='#' id='{1}' data-altuiid='{2}'>{0}</a></li>".format(room.name,room.id,"");
 				});
-				$.each(rooms, function( idx, room) {
-					toolbarHtml+="<li><a href='#' id='{1}'>{0}</a></li>".format(room.name,room.id);
+				var namearray = $.map(rooms, function(r) { return r.name;} );
+				var filteredrooms = $.grep(rooms, function(room, idx) {
+					return $.inArray(room.name ,namearray) == idx;
+				});
+				$.each(filteredrooms, function( idx, room) {
+					toolbarHtml+="<li><a href='#' id='{1}' data-altuiid='{2}'>{0}</a></li>".format(room.name,room.id,room.altuiid);
 				});
 				toolbarHtml+="  </ul>";
 		toolbarHtml+="</div>";			
@@ -4772,26 +4776,33 @@ var UIManager  = ( function( window, undefined ) {
 	// ===========================
 
 
-	leftnavRooms : function ( clickFunction )
+	leftnavRooms : function ( clickFunction , roomLoadedFunction)
 	{
 		$("body").off("click",".altui-leftbutton");
-		$(".altui-leftnav").append( leftNavButtonTemplate.format( -1, _T("All")) );
-		$(".altui-leftnav").append( leftNavButtonTemplate.format( -2, starGlyph+' '+_T("Favorites")) );
-		$(".altui-leftnav").append( leftNavButtonTemplate.format( 0, _T("No Room")) );
+		$(".altui-leftnav").append( leftNavButtonTemplate.format( -1, "", _T("All")) );
+		$(".altui-leftnav").append( leftNavButtonTemplate.format( -2, "", starGlyph+' '+_T("Favorites")) );
+		$(".altui-leftnav").append( leftNavButtonTemplate.format( 0, "", _T("No Room")) );
 		// install a click handler on button
 		if ($.isFunction( clickFunction ))  {
 			$("body").off("click",".altui-leftbutton");
 			$("body").on("click",".altui-leftbutton",function() {
 				$(this).parent().children().removeClass("active")
 				$(this).addClass("active");
-				clickFunction.apply($(this), arguments);
+				clickFunction.apply($(this), [$(this).prop('id'), $(this).data('altuiid')]);
 			});
 		}
 
 		MultiBox.getRooms( null,null,function( rooms ) {
-			$.each(rooms, function(i,room) {
-				$(".altui-leftnav").append( leftNavButtonTemplate.format( room.id, (room!=null) ? room.name : "No Room") );	
+			var namearray = $.map(rooms, function(r) { return r.name;} );
+			var filteredrooms = $.grep(rooms, function(room,idx) {
+				return $.inArray(room.name ,namearray) == idx;
+			});
+
+			$.each(filteredrooms, function(i,room) {
+				$(".altui-leftnav").append( leftNavButtonTemplate.format( room.id, room.altuiid, (room!=null) ? room.name : "No Room") );	
 			})
+			if ($.isFunction(roomLoadedFunction))
+				(roomLoadedFunction)(rooms);
 		});
 	},
 
@@ -4926,6 +4937,8 @@ var UIManager  = ( function( window, undefined ) {
 	
 	pageDevices : function ()
 	{
+		var _roomID2Name = {};
+		var _deviceID2RoomName = {};
 		var _deviceDisplayFilter = {
 			filterformvisible 	: false,
 			room			: -1,
@@ -4940,7 +4953,7 @@ var UIManager  = ( function( window, undefined ) {
 		function deviceFilter(device) {
 			var batteryLevel = MultiBox.getDeviceBatteryLevel(device);
 			var regexp = new RegExp(RegExp.escape(_deviceDisplayFilter.filtername),"i")
-			return ( (_deviceDisplayFilter.room <0) || (device!=null && device.room == _deviceDisplayFilter.room) ) 
+			return ( (parseInt(_deviceDisplayFilter.room) <0) || (device!=null &&  _deviceID2RoomName[device.altuiid] == _roomID2Name[_deviceDisplayFilter.room]) ) 
 				&& ( (_deviceDisplayFilter.invisible == true) || (device.invisible != "1") )	
 				&& ( (_deviceDisplayFilter.category == 0) || (device.category_num == _deviceDisplayFilter.category) ) 
 				&& ( ((_deviceDisplayFilter.favorites == false) && (_deviceDisplayFilter.room!=-2) ) || (device.favorite == true) ) 
@@ -4985,9 +4998,14 @@ var UIManager  = ( function( window, undefined ) {
 			return deviceCreateModalTemplate;
 		}
 		
-		function endDrawDevice() {
+		function endDrawDevice(devices) {
 			_drawDeviceToolbar();
 			UIManager.refreshUI(true,false);
+			$.each(devices, function(idx,device){
+				var controller = MultiBox.controllerOf(device.altuiid);
+				if (parseInt(device.room)!=0)
+					_deviceID2RoomName[ device.altuiid ] = _roomID2Name["{0}-{1}".format(controller.controller,device.room)];
+			})
 		};
 		
 		function drawDeviceContainer(idx, device) {
@@ -5144,7 +5162,7 @@ var UIManager  = ( function( window, undefined ) {
 					$("#altui-device-room-filter a").click( function() {
 						$(this).closest(".dropdown-menu").find("li.active").removeClass("active");
 						$(this).parent().addClass("active");
-						_onClickRoomButton( $(this).prop('id') );
+						_onClickRoomButton( $(this).prop('id') , $(this).data('altuiid') );
 					});
 					$("#altui-device-category-filter a").click( function() {
 						$(this).closest(".dropdown-menu").find("li.active").removeClass("active");
@@ -5163,10 +5181,10 @@ var UIManager  = ( function( window, undefined ) {
 			MultiBox.getDevices( drawDeviceContainer , filterfunc, endDrawDevice);
 		};
 		
-		function _onClickRoomButton(roomid)
+		function _onClickRoomButton(htmlid,altuiid)
 		{
 			// var roomid = $(this).prop('id');
-			_deviceDisplayFilter.room = roomid;	
+			_deviceDisplayFilter.room = (altuiid !="") ? altuiid : htmlid;	
 			_drawDevices(deviceFilter);
 			
 		};
@@ -5180,9 +5198,14 @@ var UIManager  = ( function( window, undefined ) {
 		
 		// on the left, get the rooms
 		$(".altui-leftnav").empty();
-		UIManager.leftnavRooms( function() {
-			_onClickRoomButton( $(this).prop('id') ); 
-		});
+		UIManager.leftnavRooms( 
+			_onClickRoomButton,		// click button callback
+			function(rooms) {		// all rooms loaded callback
+				$.each(rooms, function(idx,room) {
+					_roomID2Name[ room.altuiid ] = room.name;
+				})
+			}
+		);
 
 		_drawDevices(deviceFilter);
 
@@ -5228,10 +5251,13 @@ var UIManager  = ( function( window, undefined ) {
 
 	pageScenes: function ()
 	{
-		function _onClickRoomButton(roomid) {
+		var _roomID2Name={};
+		var _sceneID2RoomName={};
+		
+		function _onClickRoomButton(htmlid,altuiid) {
 			function _sceneInThisRoom(scene) {
-				return ( (roomid<0) || (scene!=null && scene.room==roomid) ) 
-						&& ( (roomid!=-2) || (scene.favorite==true) );
+				return ( (htmlid<0) || (scene!=null && _sceneID2RoomName[scene.altuiid]==_roomID2Name[altuiid]) ) 
+						&& ( (htmlid!=-2) || (scene.favorite==true) );
 			}
 			_drawScenes( _sceneInThisRoom );
 		};
@@ -5245,7 +5271,11 @@ var UIManager  = ( function( window, undefined ) {
 			domPanel.append(scenecontainerTemplate.format(scene.id));	
 		};
 		
-		function afterSceneListDraw() {
+		function afterSceneListDraw(scenes) {
+			$.each(scenes, function(idx,scene){
+				var controller = MultiBox.controllerOf(scene.altuiid);
+				_sceneID2RoomName[scene.altuiid] = _roomID2Name["{0}-{1}".format(controller.controller,scene.room)];
+			});
 			$(".altui-mainpanel")
 				// .off("click",".altui-delscene")
 				.on("click",".altui-delscene",function() {
@@ -5314,7 +5344,7 @@ var UIManager  = ( function( window, undefined ) {
 			$("#altui-device-room-filter a").click( function() {
 				$(this).closest(".dropdown-menu").find("li.active").removeClass("active");
 				$(this).parent().addClass("active");
-				_onClickRoomButton( $(this).prop('id') );
+				_onClickRoomButton( $(this).prop('id'), $(this).data("altuiid") );
 			});
 		};
 		
@@ -5336,9 +5366,14 @@ var UIManager  = ( function( window, undefined ) {
 		});
 		
 		// on the left, get the rooms
-		UIManager.leftnavRooms( function() {
-			_onClickRoomButton( $(this).prop('id') ); 
-		});
+		UIManager.leftnavRooms( 
+			_onClickRoomButton,		// click button callback
+			function(rooms) {		// all rooms loaded callback
+				$.each(rooms, function(idx,room) {
+					_roomID2Name[ room.altuiid ] = room.name;
+				})
+			}
+		);
 		
 		_drawScenes( null );
 	},
