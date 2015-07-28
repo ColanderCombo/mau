@@ -574,12 +574,13 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	function _setDevices(arr) 		{	_devices = arr;		};
 	
 	function _saveChangeCaches( msgidx ) {
-		_upnpHelper.ModifyUserData( _change_cached_user_data, function() {
+		var promise = _upnpHelper.ModifyUserData( _change_cached_user_data, function() {
 			PageMessage.message("ModifyUserData called & returned, a restart will occur now","success");
 			PageMessage.clearMessage(msgidx);
 		});
 		_change_cached_user_data={};
 		_user_changes=0;	//UI5 compat
+		return promise;
 	};
 	
 	function _updateChangeCache( target ) {
@@ -631,7 +632,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	
 	function _reboot()
 	{
-		this.runLua("os.execute('reboot')", function(result) {
+		return this.runLua("os.execute('reboot')", function(result) {
 			if ( result == "Passed")
 				PageMessage.message( "Reboot request succeeded", "success");
 			else
@@ -640,7 +641,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 	function _reloadEngine()
 	{
-		_upnpHelper.reloadEngine( function(data) {
+		return _upnpHelper.reloadEngine( function(data) {
 			if (data!=null) {
 				// reload worked,  reset all cache
 				_rooms = null;
@@ -666,6 +667,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		if ( $.isFunction( endfunc ) )  {
 			endfunc(arr);			
 		}
+		return arr;
 	};
 
 	function _getPower(cbfunc) {
@@ -769,9 +771,11 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 
 	function _setHouseMode(newmode,cbfunc) {
+		var promise = null;
 		if ((newmode<=4) && (newmode>=1)) {
-			_upnpHelper.UPnPAction( 0, 'urn:micasaverde-com:serviceId:HomeAutomationGateway1', 'SetHouseMode', { Mode:newmode },cbfunc );
+			promise = _upnpHelper.UPnPAction( 0, 'urn:micasaverde-com:serviceId:HomeAutomationGateway1', 'SetHouseMode', { Mode:newmode },cbfunc );
 		}
+		return promise;
 	};
 	
 	function _findDeviceIdxByID(devid)
@@ -893,6 +897,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	// 1 : means dynamic, lost at the next restart if not save
 	function _setStatus( deviceid, service, variable, value, dynamic ) {
 		// update local cache
+		var promise = null;
 		var statusobj= _getStatusObject( deviceid, service, variable , true ) //bCreate==true
 
 		if (dynamic >= 0 )  {
@@ -912,8 +917,9 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		}
 		else {
 			// update vera
-			_upnpHelper.UPnPSet( deviceid, service, variable, value );
+			promise =  _upnpHelper.UPnPSet( deviceid, service, variable, value );
 		}
+		return promise;
 	};
 	
 	function _evaluateConditions(deviceid,devsubcat,conditions) {
@@ -1150,14 +1156,20 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		return _upnpHelper.createDevice( target.descr, target.dfile, target.ifile, target.roomnum , cbfunc );
 	};
 	
-	function _createRoom(name)
-	{	
-		var jqxhr = _httpGet( "?id=room&action=create&name="+name, {}, function(data, textStatus, jqXHR) {
+	function _createRoom(name,cbfunc)
+	{		
+		var jqxhr =null;
+		if (name && (name.length>0)) {
+			jqxhr = _httpGet( "?id=room&action=create&name="+name, {}, function(data, textStatus, jqXHR) {
 				if ((data!=null) && (data!="ERROR")) 
 					PageMessage.message(_T("Create Room succeeded for")+": "+name, "success", true);
 				else 
 					PageMessage.message(_T("Could not create Room")+": "+name, "warning");
+				if ($.isFunction(cbfunc)){
+					(cbfunc)(data);
+				};
 			});
+		}
 		return jqxhr;
 	};
 
@@ -1207,7 +1219,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 	
 	function _runLua(code, cbfunc) {
-		_upnpHelper.UPnPRunLua(code, function(result) {
+		return _upnpHelper.UPnPRunLua(code, function(result) {
 			var res = "Fail";
 			if ((result!=null ) && (result.indexOf("<OK>OK</OK>") !=-1))
 				res ="Passed";
@@ -1241,7 +1253,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		
 		var params={};
 		params[ "Device" ] = deviceid;
-		_upnpHelper.UPnPAction( zwavenet.id, "urn:micasaverde-com:serviceId:ZWaveNetwork1", "UpdateNeighbors", params, function(data) {
+		return upnpHelper.UPnPAction( zwavenet.id, "urn:micasaverde-com:serviceId:ZWaveNetwork1", "UpdateNeighbors", params, function(data) {
 			if (data!=null) {
 				PageMessage.message(_T("Update Neighbors succeeded"));
 			}
@@ -1268,16 +1280,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	{
 		return (newlua != undefined) ? _upnpHelper.ModifyUserData( { "StartupCode":newlua } ) : null;
 	};
-/*    "categories": [
-        {
-            "name": "Dimmable Switch",
-            "id": 2
-        },
-        {
-            "name": "On/Off Switch",
-            "id": 3
-        },
-*/	
+
 	function _getCategoryTitle(catnum)
 	{
 		if (catnum==undefined)
@@ -1308,7 +1311,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	{
 		show_loading();
 		_updateSceneUserData( scene );
-		_upnpHelper.sceneAction(scene,function(data) {
+		return _upnpHelper.sceneAction(scene,function(data) {
 			hide_loading();
 			if ($.isFunction(cbfunc))
 				(cbfunc)(data);
@@ -1507,60 +1510,58 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 		
 	function _getSceneHistory( id, cbfunc) {
-		if ($.isFunction(cbfunc)) {
-			// var cmd = "cat /var/log/cmh/LuaUPnP.log | grep \"Device_Variable::m_szValue_set device: {0}.*;1m{1}\"".format(device.id,state.variable);
-			var cmd = "cat /var/log/cmh/LuaUPnP.log | grep 'Scene::RunScene running {0}'".format(id);
-			_osCommand(cmd,function(str) {
-				var result = {
-					lines:[],
-					result:str
-				};
-				var re = /\d*\t(\d*\/\d*\/\d*\s\d*:\d*:\d*.\d*).*Scene::RunScene running \d+ (.*) <.*/g; 
-				var m;
-				while ((m = re.exec(str.result)) !== null) {
-					if (m.index === re.lastIndex) {
-						re.lastIndex++;
-					}
-					// View your result using the m-variable.
-					// eg m[0] etc.
-					result.lines.push({date:m[1], name:m[2]});
+		// var cmd = "cat /var/log/cmh/LuaUPnP.log | grep \"Device_Variable::m_szValue_set device: {0}.*;1m{1}\"".format(device.id,state.variable);
+		var cmd = "cat /var/log/cmh/LuaUPnP.log | grep 'Scene::RunScene running {0}'".format(id);
+		return _osCommand(cmd,function(str) {
+			var result = {
+				lines:[],
+				result:str
+			};
+			var re = /\d*\t(\d*\/\d*\/\d*\s\d*:\d*:\d*.\d*).*Scene::RunScene running \d+ (.*) <.*/g; 
+			var m;
+			while ((m = re.exec(str.result)) !== null) {
+				if (m.index === re.lastIndex) {
+					re.lastIndex++;
 				}
+				// View your result using the m-variable.
+				// eg m[0] etc.
+				result.lines.push({date:m[1], name:m[2]});
+			}
+			if ($.isFunction(cbfunc)) 
 				(cbfunc)(result);
-			})
-		}
+		});
 	};
 	
 	function _getDeviceVariableHistory( device, varidx, cbfunc) {
 		var id = device.id;
 		var state = device.states[varidx];
-		if ($.isFunction(cbfunc)) {
-			// var cmd = "cat /var/log/cmh/LuaUPnP.log | grep \"Device_Variable::m_szValue_set device: {0}.*;1m{1}\"".format(device.id,state.variable);
-			var cmd = "cat /var/log/cmh/LuaUPnP.log | grep 'Device_Variable::m_szValue_set device: {0}.*;1m{1}\x1B'".format(device.id,state.variable);
-			// var cmd = "cat /var/log/cmh/LuaUPnP.log | grep $'Device_Variable::m_szValue_set device: {0}.*\033\[35;1m{1}\033\[0m'".format(device.id,state.variable);
-			// var cmd = "cat /var/log/cmh/LuaUPnP.log | grep $'\033\[35;1m{1}\033\[0m'".format(device.id,state.variable);
+		// var cmd = "cat /var/log/cmh/LuaUPnP.log | grep \"Device_Variable::m_szValue_set device: {0}.*;1m{1}\"".format(device.id,state.variable);
+		// var cmd = "cat /var/log/cmh/LuaUPnP.log | grep $'Device_Variable::m_szValue_set device: {0}.*\033\[35;1m{1}\033\[0m'".format(device.id,state.variable);
+		// var cmd = "cat /var/log/cmh/LuaUPnP.log | grep $'\033\[35;1m{1}\033\[0m'".format(device.id,state.variable);
+		var cmd = "cat /var/log/cmh/LuaUPnP.log | grep 'Device_Variable::m_szValue_set device: {0}.*;1m{1}\x1B'".format(device.id,state.variable);
 
-			_osCommand(cmd,function(str) {
-				var result = {
-					lines:[],
-					result:str
-				};
-				var re = /\d*\t(\d*\/\d*\/\d*\s\d*:\d*:\d*.\d*).*was: (.*) now: (.*) #.*/g; 
-				var m;
-				while ((m = re.exec(str.result)) !== null) {
-					if (m.index === re.lastIndex) {
-						re.lastIndex++;
-					}
-					// View your result using the m-variable.
-					// eg m[0] etc.
-					result.lines.push({
-						date:m[1], 
-						oldv:m[2], 
-						newv:m[3]
-						});
+		return _osCommand(cmd,function(str) {
+			var result = {
+				lines:[],
+				result:str
+			};
+			var re = /\d*\t(\d*\/\d*\/\d*\s\d*:\d*:\d*.\d*).*was: (.*) now: (.*) #.*/g; 
+			var m;
+			while ((m = re.exec(str.result)) !== null) {
+				if (m.index === re.lastIndex) {
+					re.lastIndex++;
 				}
+				// View your result using the m-variable.
+				// eg m[0] etc.
+				result.lines.push({
+					date:m[1], 
+					oldv:m[2], 
+					newv:m[3]
+					});
+			}
+			if ($.isFunction(cbfunc))
 				(cbfunc)(result);
-			})
-		}
+		})
 		return;
 	};
 
@@ -1620,8 +1621,8 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		return false;
 	};
 	
-	function _resetPollCounters() {
-		this.getDevices( 
+	function _resetPollCounters( cbfunc ) {
+		return this.getDevices( 
 			function(luaid,device) {
 				var id = device.id;
 				var service="urn:micasaverde-com:serviceId:ZWaveDevice1"
@@ -1637,7 +1638,10 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			function(device) {
 				return (device.id_parent==1);
 			}, 
-			null 
+			function(devices) {
+				if ($.isFunction(cbfunc))
+					(cbfunc)();
+			} 
 		);		
 	};
 	function _getUPnPHelper()	{

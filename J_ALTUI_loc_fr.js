@@ -240,5 +240,7 @@ Localization.init( {
 	"Debug Actions":"Actions de Debug",
 	"Altui ID":"Altui ID",
 	"Variable Name Pattern":"Pattern de Nom de Variable",
-	"an error happened during the execution":"Une erreur est intervenue pendant l'exécution"
+	"an error happened during the execution":"Une erreur est intervenue pendant l'exécution",
+	"Controller":"Controller",
+	"Counters have been reset properly":"Les compteurs ont été remis a zéro"
 });

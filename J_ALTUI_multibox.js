@@ -202,8 +202,8 @@ var MultiBox = ( function( window, undefined ) {
 		var elems = room.altuiid.split("-");
 		return _controllers[elems[0]].controller.deleteRoom(elems[1]);
 	};
-	function _createRoom(controllerid, name) {
-		return _controllers[controllerid].controller.createRoom(name);
+	function _createRoom(controllerid, name, cbfunc ) {
+		return _controllers[controllerid].controller.createRoom(name, cbfunc);
 	};
 	function _createDevice( controllerid, param , cbfunc ) {
 		var id = controllerid || 0;
@@ -488,9 +488,16 @@ var MultiBox = ( function( window, undefined ) {
 		});
 	};
 	function _resetPollCounters() {
+		var dfd = $.Deferred();
+		var todo  = _controllers.length;
 		$.each(_controllers, function(i,c) {
-			c.controller.resetPollCounters();
+			c.controller.resetPollCounters(function() {
+				todo--;
+				if (todo==0)
+					dfd.resolve();
+			});
 		});
+		return dfd.promise();
 	};
 	function _isUserDataCached(controllerid) {
 		var id = controllerid || 0;
@@ -505,7 +512,7 @@ var MultiBox = ( function( window, undefined ) {
 		return _controllers[id].controller.getIcon( imgpath , cbfunc );
 	};
 	function _triggerAltUIUpgrade(urlsuffix) {
-		_controllers[0].controller.triggerAltUIUpgrade(urlsuffix);
+		return _controllers[0].controller.triggerAltUIUpgrade(urlsuffix);
 	};
 	function _buildUPnPGetFileUrl(altuiid,name) {
 		var elems = altuiid.split("-");
@@ -546,7 +553,7 @@ var MultiBox = ( function( window, undefined ) {
 	getRooms		: _getRooms,		// in the future getRooms could cache the information and only call _getRooms when needed
 	getRoomsSync	: _getRoomsSync,	//()
 	deleteRoom		: _deleteRoom,		//(room)
-	createRoom		: _createRoom,		//(controllerid, name)
+	createRoom		: _createRoom,		//(controllerid, name, cbfunc )
 	getRoomByID		: _getRoomByID,		//( roomid )
 	getRoomByAltuiID:_getRoomByAltuiID,	//(altuiid)	
 	
@@ -626,7 +633,7 @@ var MultiBox = ( function( window, undefined ) {
 	getFileContent		: _getFileContent,		//(Dfilename , function( xmlstr , jqXHR ) 
 	osCommand			: _osCommand,			//(cmd,cbfunc) 
 	getPower			: _getPower,			//(cbfunc)
-	resetPollCounters	: _resetPollCounters,	//()
+	resetPollCounters	: _resetPollCounters,	//()	!  promise API
 	isUserDataCached	: _isUserDataCached,	//()
 	getIconPath			: _getIconPath,			// (device,str)
 	getIcon				: _getIcon,				// ( controllerid, imgpath , cbfunc )

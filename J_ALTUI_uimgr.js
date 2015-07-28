@@ -4857,6 +4857,7 @@ var UIManager  = ( function( window, undefined ) {
 		// on the main panel
 		// table of rooms
 		$(".altui-mainpanel")
+			.append( _createControllerSelect('altui-controller-select'))
 			.append(formHtml)
 			.append($("<div class='col-xs-12'><table id='table' class='table table-condensed'><thead><tr><th>ID</th><th>Name</th><th>Devices</th><th>Actions</th></tr></thead><tbody></tbody></table></div>"));
 
@@ -4887,7 +4888,7 @@ var UIManager  = ( function( window, undefined ) {
 		// $(".altui-mainpanel").off("click","button#altui-create-room");
 		$(".altui-mainpanel").on("click","button#altui-create-room",function() 
 		{
-			MultiBox.createRoom(0,$("#altui-create-room-name").val() );
+			MultiBox.createRoom(parseInt($("#altui-controller-select").val()),$("#altui-create-room-name").val() );
 		});
 
 	},
@@ -6625,7 +6626,9 @@ var UIManager  = ( function( window, undefined ) {
 		UIManager.loadD3Script( _drawzWavechart );
 		
 		$("#altui-reset-pollcounters").click(function() {
-			MultiBox.resetPollCounters();
+			MultiBox.resetPollCounters().done(function(){
+				PageMessage.message(_T("Counters have been reset properly"),"success");
+			});
 		});
 		
 		$("#altui-zwavechart-order").change( function() {
@@ -7890,7 +7893,9 @@ var UIManager  = ( function( window, undefined ) {
 		});
 	},
 	reloadEngine: function() {
-		MultiBox.reloadEngine(0)
+		MultiBox.reloadEngine(0).done(function(){
+			alert('reload done');
+		})
 	},
 	reboot: function() {
 		MultiBox.reboot(0)
