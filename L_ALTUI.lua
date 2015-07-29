@@ -659,7 +659,8 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 					end
 				end
 				if ( (lul_parameters["lang"]~=nil) and (lul_parameters["lang"]~="en") ) then
-					scripts["J_ALTUI_loc_"..lul_parameters["lang"]..".js"] = ""
+					local lang = string.sub( (lul_parameters["lang"].."    "),1,2)
+					scripts["J_ALTUI_loc_"..lang..".js"] = ""
 				end
 				-- scripts["J_ALTUI_utils.js"]=""
 				-- scripts["J_ALTUI_verabox.js"]=""
