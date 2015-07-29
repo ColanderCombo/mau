@@ -15,6 +15,7 @@ Localization.init( {
 	"Night":"Night",
 	"Vacation":"Vacation",
 	"Welcome to VERA Alternate UI": "Benvenuti a VERA UI Alternativo",
+	"Room": "Stanze",
 	"Rooms": "Stanze",
 	"Device":"Device",
 	"Devices": "Dispositivi",
@@ -244,6 +245,8 @@ Localization.init( {
 	"Controller":"Controller",
 	"Counters have been reset properly":"Counters have been reset properly",
 	"do you want to change lua startup code ? if yes, it will generate a LUA reload, be patient...":"do you want to change lua startup code ? if yes, it will generate a LUA reload, be patient...",
-	"Lua Startup code has been modified":"Lua Startup code has been modified"
-
+	"Lua Startup code has been modified":"Lua Startup code has been modified",
+	"Header":"Header",
+	"Delay":"Delay",
+	"Edited Scene {0} successfully ":"Edited Scene {0} successfully "
 	});

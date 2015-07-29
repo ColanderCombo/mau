@@ -76,6 +76,7 @@ var scaleGlyph = "";
 var helpGlyph = "";
 var homeGlyph = "";
 var tagsGlyph = "";
+var xsbuttonTemplate = "<button id='{0}' type='button' class='{1} btn btn-default btn-xs' aria-label='tbd' title='{3}'>{2}</button>";
 var smallbuttonTemplate = "<button id='{0}' type='button' class='{1} btn btn-default btn-sm' aria-label='tbd' title='{3}'>{2}</button>";
 var buttonTemplate 		= "<button id='{0}' type='button' class='{1} btn btn-{3}' aria-label='tbd' >{2}</button>";
 var buttonDebugHtml = "<button type='button' class='btn btn-default' id='altui-debug-btn' >Debug<span class='caret'></span></button>";
@@ -1025,6 +1026,8 @@ var DialogManager = ( function() {
 // Scene Editor
 //=====================================================================		
 var SceneEditor = function (scene) {
+	var xsbuttonTemplate = "<button id='{0}' type='button' class='{1} btn btn-default btn-xs' aria-label='tbd' title='{3}'>{2}</button>";
+	var jsonButton = xsbuttonTemplate.format('','altui-toggle-json pull-right','json','json');
 	var _timerTypes = [
 		{value:0,text:_T('**Illegal**')},
 		{value:1,text:_T('interval')},
@@ -1241,16 +1244,16 @@ var SceneEditor = function (scene) {
 		return html;
 	};
 	
-	function _findTimerById( scene, timerid )
-	{
+	function _findTimerById( scene, timerid ) {
 		var timer = null;
-		if (scene.timers)
+		if (scene.timers) {
 			$.each(scene.timers, function( idx,_timer) {	
 				if (_timer.id == timerid) {
 					timer = _timer;
 					return false;
 				}
 			});
+		}
 		return timer;
 	};
 	
@@ -1306,15 +1309,13 @@ var SceneEditor = function (scene) {
 			});
 		};
 	
-	function _editTimer( timerid, jqButton )
-	{
+	function _editTimer( timerid, jqButton ) 	{
 		var _timerUnits = [
 			{value:'h',text:'h'},
 			{value:'m',text:'m'}
 		];
 
-		function _formatRFC3339Date(str)
-		{	//2011-12-21T11:33:23Z
+		function _formatRFC3339Date(str) {	//2011-12-21T11:33:23Z
 			if (str && str!='')
 			{
 				var datetime = str.split(' ');
@@ -1331,14 +1332,13 @@ var SceneEditor = function (scene) {
 			return str;
 		};
 		
-
-		function _getNewTimerID()
-		{
+		function _getNewTimerID() {
 			var max = 0;
-			if (scene.timers)
+			if (scene.timers) {
 				$.each(scene.timers, function (idx,timer) {
 					max = Math.max(max, timer.id);
 				})
+			}
 			return ++max;
 		};
 		function _getTimerTime() {
@@ -1349,8 +1349,7 @@ var SceneEditor = function (scene) {
 			return template.format( val );
 		};
 		
-		function _showHideItems( timertype )
-		{
+		function _showHideItems( timertype ) {
 			switch (parseInt(timertype)) {
 				case 1:	// interval
 					$("#altui-widget-TimerInterval,#altui-widget-TimerIntervalUnit")
@@ -1581,7 +1580,7 @@ var SceneEditor = function (scene) {
 		$.each(group.actions, function(ida,action) {
 			html += _displayAction(action,ida,idx);
 		});
-		html +=("<tr><td colspan='3'>"+smallbuttonTemplate.format( idx, 'altui-addaction', plusGlyph,'Add action')+"</td></tr>");
+		html +=("<tr><td colspan='3'>"+smallbuttonTemplate.format( idx, 'altui-addaction', plusGlyph,_T('Action'))+" "+_T('Action')+"</td></tr>");
 		html +="</tbody>";
 		html +="</table>";
 		html += "</td>";
@@ -1597,7 +1596,7 @@ var SceneEditor = function (scene) {
 				// min:1,
 				// required:''
 			// });
-			DialogManager.dlgAddTimer(dialog, "Delay", null, group.delay.toString().toHHMMSS(), {
+			DialogManager.dlgAddTimer(dialog, _T("Delay"), null, group.delay.toString().toHHMMSS(), {
 				step: 1
 			});
 			$('div#dialogs')
@@ -1645,114 +1644,162 @@ var SceneEditor = function (scene) {
 	};
 
 	function _sceneEditDraw() {
-		var controller
-		var htmlSceneEditButton = "  <button type='submit' class='btn btn-default altui-scene-editbutton'>"+_T("Submit")+"</button>";
-		var htmlSceneAddButtonTmpl = "  <button type='submit' class='btn btn-default {0}'>"+plusGlyph+"</button>";
+		// var htmlSceneAddButtonTmpl = "  <button type='submit' class='btn btn-default {0}'>"+plusGlyph+"</button>";
 		var rooms = $.grep( MultiBox.getRoomsSync(), function(room,idx) {
 			return ( MultiBox.controllerOf(room.altuiid).controller == scenecontroller );
-		});
-		
-		var htmlRoomSelect = "<select id='altui-room-list' class='form-control'>";
-		if (rooms)
-				htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format("No Room",0,'');
-				$.each(rooms, function(idx,room) {
-					var selected = (room.id.toString() == scene.room);
-					htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format(room.name,room.id,selected ? 'selected' : '');
-				});
-		htmlRoomSelect 	  += "</select>";
-		var htmlRoomName = "<input id='altui-scene-name-input' type='text' class='form-control' value='"+scene.name+"'></input>";
+		});	
+
 		//scene options room, name, modes
-		var html = "<div class='form-group'><h3>Room : "+htmlRoomSelect+"</h3><label for='altui-scene-name-input'>Name :</Label>"+htmlRoomName;
-		if (UIManager.UI7Check()==true) {
-			if (scene.modeStatus == undefined)
-				scene.modeStatus="0";
-			var modes = scene.modeStatus.split(',');
-			html += "<label for='altui-scene-mode-input'>"+_T("Runs in all modes, or in selected mode")+" :</Label>";
-			html += "<div class='btn-group'>";
-			$.each(_HouseModes, function(idx,mode) {
-				var select = ($.inArray( mode.id.toString(), modes) == -1) ? "preset_unselected" : "preset_selected";
-				html += (houseModeButtonTemplate.format(mode.id, mode.text, mode.cls, select));
-			});
+
+		var panels = [
+			{id:'Header', title:_T("Header"), html:_displayHeader()},
+			{id:'Triggers', title:_T("Triggers"), html:_displayTriggers()},
+			{id:'Timers', title:_T("Timers"), html:_displayTimers()},
+			{id:'Actions', title:_T("Actions"), html:_displayActions()},
+			{id:'Lua', title:_T("Lua"), html:_displayLua()},
+		];
+		function _createAccordeon(panels) {
+			var bFirst = true;
+			var html="";
+			html += "<div class='bs-example'>";
+			html += "    <div class='panel-group' id='accordion'>";
+			$.each( panels, function (idx,panel){
+				html += "        <div class='panel panel-default' id='"+panel.id+"'>";
+				html += "            <div class='panel-heading'>";
+				html += 				jsonButton;
+				html += "                <h4 class='panel-title'>";
+				html += "                    <a data-toggle='collapse' data-parent='#accordion' href='#collapse"+panel.id+"'>"+panel.title+"</a><span id='trigger' class='caret'></span>";
+				html += "                </h4>";
+				html += "            </div>";
+				html += "            <div id='collapse"+panel.id+"' class='panel-collapse collapse {0}'>".format(bFirst ? 'in':'');
+				html += "                <div class='panel-body'>";
+				html += 					panel.html || _T('Empty');
+				html += "                </div>";
+				html += "            </div>";
+				html += "        </div>";
+				bFirst = false;
+			})
+			html += "    </div>";
+			html += "</div>";
+			return html
+		};
+		function _displayHeader() {
+			var htmlRoomSelect = "<select id='altui-room-list' class='form-control'>";
+			var htmlRoomName = "<input id='altui-scene-name-input' type='text' class='form-control' value='"+scene.name+"'></input>";
+			if (rooms) {
+					htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format("No Room",0,'');
+					$.each(rooms, function(idx,room) {
+						var selected = (room.id.toString() == scene.room);
+						htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format(room.name,room.id,selected ? 'selected' : '');
+					});
+			}
+			htmlRoomSelect += "</select>";
+			var html="";
+			html += "<div class='form form-inline'><label for='altui-room-list'>"+_T("Room")+" :</Label>"+htmlRoomSelect+"<label for='altui-scene-name-input'>"+_T("Name")+" :</Label>"+htmlRoomName;
+			if (UIManager.UI7Check()==true) {
+				if (scene.modeStatus == undefined)
+					scene.modeStatus="0";
+				var modes = scene.modeStatus.split(',');
+				html += "<label for='altui-scene-mode-input'>"+_T("Runs in all modes, or in selected mode")+" :</Label>";
+				html += "<div class='btn-group'>";
+				$.each(_HouseModes, function(idx,mode) {
+					var select = ($.inArray( mode.id.toString(), modes) == -1) ? "preset_unselected" : "preset_selected";
+					html += (houseModeButtonTemplate.format(mode.id, mode.text, mode.cls, select));
+				});
+				html+="</div>";
+			}
 			html+="</div>";
+			return html;
 		}
-		html+="</div>";
-		
-		html += ("<h3>"+_T("Triggers")+" <span id='trigger' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+"</h3> ");	
-		html += _displayJson( 'trigger', scene.triggers);
-		try {
-			html +="<table class='table table-condensed'>";
-			html +="<tbody>";
-			if (scene.triggers) {
-				$.each( scene.triggers, function(idx,trigger) {
-					html += _displayTrigger(trigger,idx);	// trigger do not have IDs so use array index
-				});
+		function _displayTriggers() {
+			var html="";
+			try {
+				html += _displayJson( 'Triggers', scene.triggers);
+				html +="<table class='table table-condensed'>";
+				html +="<tbody>";
+				if (scene.triggers) {
+					$.each( scene.triggers, function(idx,trigger) {
+						html += _displayTrigger(trigger,idx);	// trigger do not have IDs so use array index
+					});
+				}
+				html +=("<tr><td colspan='7'>"+smallbuttonTemplate.format( -1, 'altui-addtrigger', plusGlyph,_T('Trigger'))+" "+_T('Trigger')+"</td></tr>");
+				html +="</tbody>";
+				html +="</table>";
 			}
-			html +=("<tr><td colspan='7'>"+smallbuttonTemplate.format( -1, 'altui-addtrigger', plusGlyph,'Add trigger')+"</td></tr>");
-			html +="</tbody>";
-			html +="</table>";
-		}
-		catch(err) {
-			var str = _T("error happened during decoding triggers, probable duplicate ID or invalid format");
-			html +="</tbody>";
-			html +="</table>";
-			html +="<span class='text-danger'>"+str+"</span>";
-			PageMessage.message( str, "danger");
-		}
-		
-		html += "<h3>"+_T("Timers")+" <span id='timer' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+"</h3>";	
-		html += _displayJson( 'timer', scene.timers);
-		try {
-			html +="<table class='table table-condensed'>";
-			html +="<tbody>";
-			if (scene.timers) {
-				$.each( scene.timers, function(idx,timer) {
-					html += _displayTimer(timer);
-				});
+			catch(err) {
+				var str = _T("error happened during decoding triggers, probable duplicate ID or invalid format");
+				html +="</tbody>";
+				html +="</table>";
+				html +="<span class='text-danger'>"+str+"</span>";
+				PageMessage.message( str, "danger");
 			}
-			html +=("<tr><td colspan='4'>"+smallbuttonTemplate.format( -1 , 'altui-addtimer', plusGlyph,'Add timer')+"</td></tr>");
-			html +="</tbody>";
-			html +="</table>";
+			return html;
 		}
-		catch(err) {
-			var str = _T("error happened during decoding timers, probable duplicate ID or invalid format");
-			html +="</tbody>";
-			html +="</table>";
-			html +="<span class='text-danger'>"+str+"</span>";
-			PageMessage.message( str, "danger");
+		function _displayTimers() {
+			var html = "";
+			html += _displayJson( 'Timers', scene.timers);
+			try {
+				html +="<table class='table table-condensed'>";
+				html +="<tbody>";
+				if (scene.timers) {
+					$.each( scene.timers, function(idx,timer) {
+						html += _displayTimer(timer);
+					});
+				}
+				html +=("<tr><td colspan='4'>"+smallbuttonTemplate.format( -1 , 'altui-addtimer', plusGlyph,_T('Timer'))+" "+_T('Timer')+"</td></tr>");
+				html +="</tbody>";
+				html +="</table>";
+			}
+			catch(err) {
+				var str = _T("error happened during decoding timers, probable duplicate ID or invalid format");
+				html +="</tbody>";
+				html +="</table>";
+				html +="<span class='text-danger'>"+str+"</span>";
+				PageMessage.message( str, "danger");
+			}
+			return html;
+		}
+		function _displayActions() {
+			var html="";
+			html += _displayJson( 'Actions', scene.groups );
+			try {
+				html +="<table class='table table-condensed'>";
+				html +="<tbody>";
+				if (scene.groups)
+				{
+					$.each(scene.groups, function(idx,group){
+						html += _displayGroup(group,idx);
+					});
+				}
+				html +=("<tr><td colspan='3'>"+smallbuttonTemplate.format( -1 , 'altui-addgroup', plusGlyph,_T('Delay'))+" "+_T('Delay')+"</td></tr>");
+				html +="</tbody>";
+				html +="</table>";
+			}
+			catch(err) {
+				var str = _T("error happened during decoding actions, probable duplicate ID or invalid format");
+				html +="</tbody>";
+				html +="</table>";
+				html +="<span class='text-danger'>"+str+"</span>";
+				PageMessage.message( str, "danger");
+			}
+			return html;
+		}
+		function _displayLua() {
+			var html="";
+			var lua = (scene.lua!=undefined) ? scene.lua : "";
+			// html +="<form class='col-sm-11' role='form' action='javascript:void(0);'>";
+			html +="  <div class='form-group'>";
+			html += ("    <label for='altui-luascene'>Lua scene code:</label>");
+			html +="    <textarea id='altui-luascene' rows='10' class='form-control' placeholder='enter code here'>"+lua+"</textarea>";
+			html +="  </div>";
+			// html +="</form>";
+			return html;
 		}
 
-		html += "<h3>"+_T("Actions")+" <span id='group' class='altui-toggle-json caret'></span>"+htmlSceneEditButton+"</h3>";	
-		html += _displayJson( 'group', scene.groups );
-		try {
-			html +="<table class='table table-condensed'>";
-			html +="<tbody>";
-			if (scene.groups)
-			{
-				$.each(scene.groups, function(idx,group){
-					html += _displayGroup(group,idx);
-				});
-			}
-			html +=("<tr><td colspan='3'>"+smallbuttonTemplate.format( -1 , 'altui-addgroup', plusGlyph,'Add group')+"</td></tr>");
-			html +="</tbody>";
-			html +="</table>";
-		}
-		catch(err) {
-			var str = _T("error happened during decoding actions, probable duplicate ID or invalid format");
-			html +="</tbody>";
-			html +="</table>";
-			html +="<span class='text-danger'>"+str+"</span>";
-			PageMessage.message( str, "danger");
-		}
-
-		var lua = (scene.lua!=undefined) ? scene.lua : "";
-		html +=  "<h3>"+_T("Lua")+"</h3> ";	
-		// html +="<form class='col-sm-11' role='form' action='javascript:void(0);'>";
-		html +="  <div class='form-group'>";
-		html += ("    <label for='altui-luascene'>Lua scene code:</label>"+htmlSceneEditButton);
-		html +="    <textarea id='altui-luascene' rows='10' class='form-control' placeholder='enter code here'>"+lua+"</textarea>";
-		html +="  </div>";
-		// html +="</form>";
-		html += htmlSceneEditButton;
+		var htmlSceneEditButton = "  <button type='submit' class='btn btn-default altui-scene-editbutton'>"+_T("Submit")+"</button>";
+		var html="";
+		html += _createAccordeon(panels);
+		html +=  htmlSceneEditButton;
 		return html;
 	};
 	
@@ -1776,7 +1823,7 @@ var SceneEditor = function (scene) {
 			});
 		
 		$(".altui-toggle-json").click( function() {
-			var id = $(this).prop('id');
+			var id = $(this).closest('.panel').prop('id');
 			var type = "#altui-json-"+id;
 			$(type).toggle();
 		});

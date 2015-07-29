@@ -15,6 +15,7 @@ Localization.init( {
 	"Night":"Nuit",
 	"Vacation":"Vacances",
 	"Welcome to VERA Alternate UI": "Bienvenue dans AltUI pour VERA",
+	"Room": "Pièce",
 	"Rooms": "Pièces",
 	"Device": "Périphérique",
 	"Devices": "Périphériques",
@@ -60,7 +61,7 @@ Localization.init( {
 	"Wind":"Vent",
 	"Are you sure you want to delete scene ({0})":"confirmez vous la destruction de la scène ({0})",
 	"Controller {0} is busy, be patient.":"Le Controleur {0} est occupé, patience...",
-	"Submit":"Confirmer",
+	"Submit":"Sauver",
 	"Save Changes":"Sauvegarder",
 	"Trigger":"Evènement",
 	"Triggers":"Evènements",
@@ -116,7 +117,7 @@ Localization.init( {
 	"At sunset":"Au Coucher du Soleil",
 	"Before sunset":"Avant le Coucher du Soleil",
 	"After sunset":"Après le Coucher du Soleil",
-	"Timer":"Horloge",
+	"Timer":"Programmation",
 	"**Illegal**":"**Illegal**",
 	"interval":"intervalle",
 	"day of week":"Jour de la Semaine",
@@ -244,6 +245,8 @@ Localization.init( {
 	"Controller":"Controller",
 	"Counters have been reset properly":"Les compteurs ont été remis a zéro",
 	"do you want to change lua startup code ? if yes, it will generate a LUA reload, be patient...":"Voulez vous vraiment modifier le code LUA de démarrage, LUUP devra redémarrer, soyez patient...",
-	"Lua Startup code has been modified":"Le code LUA de démarrage a été modifié avec succès"
-	
+	"Lua Startup code has been modified":"Le code LUA de démarrage a été modifié avec succès",
+	"Header":"Entête",
+	"Delay":"Délai",
+	"Edited Scene {0} successfully ":"La scène {0} est sauvegardée"
 });
