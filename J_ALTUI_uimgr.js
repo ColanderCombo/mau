@@ -1696,6 +1696,7 @@ var SceneEditor = function (scene) {
 			htmlRoomSelect += "</select>";
 			var html="";
 			html += "<div class='form form-inline'><label for='altui-room-list'>"+_T("Room")+" :</Label>"+htmlRoomSelect+"<label for='altui-scene-name-input'>"+_T("Name")+" :</Label>"+htmlRoomName;
+			html+="</div>";
 			if (UIManager.UI7Check()==true) {
 				if (scene.modeStatus == undefined)
 					scene.modeStatus="0";
@@ -1708,7 +1709,6 @@ var SceneEditor = function (scene) {
 				});
 				html+="</div>";
 			}
-			html+="</div>";
 			return html;
 		}
 		function _displayTriggers() {
