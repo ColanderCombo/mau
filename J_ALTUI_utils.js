@@ -201,6 +201,47 @@ function _toIso(date,sep) {
 	return iso;
 };
 
+function _array2Table(arr,idcolumn,viscols) {
+	var html="";
+	var idcolumn = idcolumn || 'id';
+	var viscols = viscols || [idcolumn];
+	html+="<div class='col-xs-12'>";
+	if (arr && arr.length>0) {
+		var bFirst=true;
+		html+="<table id='altui-grid' class='table table-condensed table-hover table-striped'>";
+		$.each(arr, function(idx,obj) {
+			if (bFirst) {
+				html+="<thead>"
+				html+="<tr>"
+				$.each(obj, function(k,v) {
+					html+="<th data-column-id='{0}' {1} {2}>".format(
+						k,
+						(k==idcolumn) ? "data-identifier='true'" : "",
+						"data-visible='{0}'".format( $.inArray(k,viscols)!=-1 )
+					)
+					html+=k;
+					html+="</th>"
+				});
+				html+="</tr>"
+				html+="</thead>"
+				html+="<tbody>"
+				bFirst=false;
+			}
+			html+="<tr>"
+			$.each(obj, function(k,v) {
+				html+="<td>"
+				html+=v;
+				html+="</td>"
+			});
+			html+="</tr>"
+		});
+		html+="</tbody>"
+		html+="</table>";		
+	}
+	html+="</div>";
+	return html;
+};
+
 function isInteger(data) {
     return (data === parseInt(data, 10));
 };

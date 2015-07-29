@@ -373,6 +373,10 @@ var styles ="					\
 	#altui-grid {		\
 		font-size: 12px;	\
 	}				\
+	#altui-grid th {		\
+		font-size: 12px;	\
+		text-transform: capitalize;	\
+	}				\
 	.altui-plugin-version {		\
 		display: inline;	\
 		width: 44px; \
@@ -1022,9 +1026,64 @@ var DialogManager = ( function() {
 	};
 })();
 
+
 //=====================================================================		
 // Scene Editor
 //=====================================================================		
+
+//helper
+function _formatTrigger(controller,trigger)
+{
+	function _findEventFromTriggerTemplate(controller,device,template)
+	{
+		var devtype = device.device_type;
+		var _devicetypesDB = MultiBox.getDeviceTypesDB(controller);
+		var event = null;
+		$.each( _devicetypesDB[devtype].ui_static_data.eventList2, function( idx,e) {
+			if (e.id == template) {
+				event = e;
+				return false;
+			}
+		});
+		return event;
+	};
+	var line = {};
+	var deviceid = trigger.device;
+	var device = MultiBox.getDeviceByID(controller,deviceid);
+	var event = _findEventFromTriggerTemplate( controller,device, trigger.template );
+	line.name = trigger.name;
+	line.device = device.name + "<small class='text-muted'> (#"+device.altuiid+")</small>";
+	line.descr = event.label.text.replace("_DEVICE_NAME_","<b>"+device.name+"</b>");
+	line.condition = "";
+	line.lastrun = trigger.last_run ? _toIso(new Date(trigger.last_run*1000)) : "";
+	
+	if (trigger.arguments && event.argumentList)  {
+		$.each(trigger.arguments, function( idx,argument) {
+			var id = argument.id;
+			var eventargtemplate = null;
+			$.each(event.argumentList, function(idx,eventarg) {
+				if (eventarg.id==id)
+				{
+					line.condition +="{0} {1} {2}".format(
+						eventarg.name,
+						eventarg.comparisson,
+						(argument.value !=undefined) ? argument.value : eventarg.defaultValue );	
+					return false;	// we had a match
+				}				
+			});
+		});
+	} else {
+		var lines = [];
+		if (event.serviceStateTable)
+			$.each(event.serviceStateTable, function(key,serviceState){
+				lines.push("{0} {1} {2}".format( key, serviceState.comparisson, serviceState.value));					
+			});
+		line.condition += lines.join(" AND ");
+	}
+
+	return line;
+};
+
 var SceneEditor = function (scene) {
 	var xsbuttonTemplate = "<button id='{0}' type='button' class='{1} btn btn-default btn-xs' aria-label='tbd' title='{3}'>{2}</button>";
 	var jsonButton = xsbuttonTemplate.format('','altui-toggle-json pull-right','json','json');
@@ -1062,19 +1121,6 @@ var SceneEditor = function (scene) {
 	}
 	// trigger do not have IDs so use array index
 	function _displayTrigger(trigger,idx) {
-		function _findEventFromTriggerTemplate(device,template)
-		{
-			var devtype = device.device_type;
-			var _devicetypesDB = MultiBox.getDeviceTypesDB(scenecontroller);
-			var event = null;
-			$.each( _devicetypesDB[devtype].ui_static_data.eventList2, function( idx,e) {
-				if (e.id == template) {
-					event = e;
-					return false;
-				}
-			});
-			return event;
-		};
 		function _displayTriggerRestrictions(trigger) {
 			var html ="";
 			if (trigger.days_of_week) {
@@ -1085,48 +1131,23 @@ var SceneEditor = function (scene) {
 				html += ("[{0}-{1}]".format(trigger.start_time,trigger.stop_time));
 			return html;
 		};
-		
+				
 		var html="";
-		var deviceid = trigger.device;
-		var device = MultiBox.getDeviceByID(scenecontroller,deviceid);
-		var event = _findEventFromTriggerTemplate( device, trigger.template );
+		var triggerinfo = _formatTrigger(scenecontroller,trigger);
 		html +="<tr data-trigger-idx='"+idx+"'>";
 		html +="<td>";
 		html +="<input type='checkbox' {0} class='altui-enable-trigger' id='{1}'></input>".format( trigger.enabled==true ? 'checked' : '',idx);
 		html +="</td>";
 
 		html +="<td>";
-		html +="<b>{0}</b>".format(trigger.name);
+		html +="<b>{0}</b>".format(triggerinfo.name);
 		html +="</td>";
 
 		html +="<td>{0}</td><td>{1}</td>".format(
-			_displayDevice(deviceid),
-			event.label.text.replace("_DEVICE_NAME_","<b>"+device.name+"</b>"));
+			triggerinfo.device,
+			triggerinfo.descr);
 		html +="<td><small>";
-		if (trigger.arguments && event.argumentList)  {
-			$.each(trigger.arguments, function( idx,argument) {
-				var id = argument.id;
-				var eventargtemplate = null;
-				// html +="<li>";
-				$.each(event.argumentList, function(idx,eventarg) {
-					if (eventarg.id==id)
-					{
-						html +="{0} {1} {2}".format(
-							eventarg.name,
-							eventarg.comparisson,
-							(argument.value !=undefined) ? argument.value : eventarg.defaultValue );	
-						return false;	// we had a match
-					}				
-				});
-			});
-		} else {
-			var lines = [];
-			if (event.serviceStateTable)
-				$.each(event.serviceStateTable, function(key,serviceState){
-					lines.push("{0} {1} {2}".format( key, serviceState.comparisson, serviceState.value));					
-				});
-			html += lines.join(" AND ");
-		}
+		html += triggerinfo.condition;
 		html +="</small></td>";		
 
 		html +="<td>";
@@ -2591,8 +2612,8 @@ var UIManager  = ( function( window, undefined ) {
 			return field.format(id, _toIso(date));
 		}
 		return "<input id='inp"+id+"' class='form-control' type='text' value='"+value+"'></input>" 
-	}
-	
+	};
+		
 	function _deviceDrawVariables(device) {
 		// 0: variable , 1: value , 2: service
 		var deviceVariableLineTemplate = "  <tr>";
@@ -4758,6 +4779,7 @@ var UIManager  = ( function( window, undefined ) {
 			{ id:22, title:_T('Quality'), onclick:'UIManager.pageQuality()', parent:0 },
 			{ id:23, title:_T('TblDevices'), onclick:'UIManager.pageTblDevices()', parent:0 },
 			{ id:24, title:_T('OsCommand'), onclick:'UIManager.pageOsCommand()', parent:0 },
+			{ id:25, title:_T('Triggers'), onclick:'UIManager.pageTriggers()', 	parent:6 },
 		];
 
 		function _parentsOf(child) {
@@ -5698,7 +5720,52 @@ var UIManager  = ( function( window, undefined ) {
 		$(".altui-mainpanel").append($("<table id='table' class='table table-condensed'><thead><tr><th></th><th>"+_T("Name")+"</th><th>"+_T("Version")+"</th><th>"+_T("Files")+"</th><th>Actions</th><th>"+_T("Update")+"</th><th>"+_T("Uninstall")+"</th></tr></thead><tbody></tbody></table>"));
 		MultiBox.getPlugins( drawPlugin , endDrawPlugin);
 	},
+	
+	pageTriggers: function()
+	{
+		UIManager.clearPage(_T('Triggers'),_T('Triggers'),UIManager.oneColumnLayout);
+		$(".altui-mainpanel").empty();
+		var bFirst=true;
+		var bBody=false;
+		var arr = [];
+		MultiBox.getScenes( null , function(s) {return s.triggers!=null}, function(scenes) {
+			$.each(scenes, function(idx,scene) {
+				var controller = MultiBox.controllerOf(scene.altuiid).controller;
+				var triggers = $.grep(scene.triggers,function(t) { return t.last_run!=undefined});
+				$.each(triggers, function(idx,trigger) {
+					var triggerinfo = _formatTrigger(controller,trigger);
+					arr.push( {
+						lastrun: triggerinfo.lastrun,
+						scene: scene.name,
+						trigger: triggerinfo.name,
+						device: triggerinfo.device,
+						condition: "{0} {1}".format(triggerinfo.descr,triggerinfo.condition),
+						id: scene.altuiid+"-"+idx
+					})
+				})
+			});
+		})
+		
+		var viscols = MyLocalStorage.getSettings("TriggersVisibleCols") || [];
+		if (viscols.length==0)
+			viscols = [ 'lastrun','scene','trigger','device','condition','id'];
 
+		$(".altui-mainpanel").append( _array2Table(arr,'id',viscols) );
+		$("#altui-grid").bootgrid({
+			caseSensitive: false,
+			statusMapping: {}
+		})
+		.bootgrid("sort",{
+			lastrun:"desc"
+		})
+		.on("loaded.rs.jquery.bootgrid", function (e) {
+			var settings = $("#altui-grid").bootgrid("getColumnSettings");
+			viscols = $.map($.grep(settings, function (obj) { return obj.visible == true }),function(obj){ return obj.id;});
+			MyLocalStorage.setSettings("TriggersVisibleCols",viscols);
+			/* your code goes here */
+		});	
+	},
+	
 	pageUsePages: function ()
 	{
 		// var pages = g_CustomPages;
@@ -7781,7 +7848,7 @@ var UIManager  = ( function( window, undefined ) {
 			
 			function (devices) {	// all devices are enumarated
 
-				var viscols = MyLocalStorage.getSettings("BootgridVisibleCols") || [];
+				var viscols = MyLocalStorage.getSettings("DevicesVisibleCols") || [];
 				if (viscols.length==0)
 					viscols = [ 'id','name','manufacturer'];
 				
@@ -7837,7 +7904,7 @@ var UIManager  = ( function( window, undefined ) {
 				{
 					var settings = $("#altui-grid").bootgrid("getColumnSettings");
 					viscols = $.map($.grep(settings, function (obj) { return obj.visible == true }),function(obj){ return obj.id;});
-					MyLocalStorage.setSettings("BootgridVisibleCols",viscols);
+					MyLocalStorage.setSettings("DevicesVisibleCols",viscols);
 					/* your code goes here */
 				});	
 				
@@ -8154,7 +8221,14 @@ $(document).ready(function() {
 		body+="	  <ul class='nav navbar-nav'>";
 		body+="		<li class='active'><div class='imgLogo'></div></li>";
 		body+="		<li><a id='menu_device' href='#'  >"+_T("Devices")+"</a></li>";
-		body+="		<li><a id='menu_scene' href='#'  >"+_T("Scenes")+"</a></li>";
+		// body+="		<li><a id='menu_scene' href='#'  >"+_T("Scenes")+"</a></li>";
+		body+="		<li class='dropdown'>";
+		body+="			<a href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-expanded='false'>"+_T("Scenes")+" <span class='caret'></span></a>";
+		body+="			<ul class='dropdown-menu' role='menu'>";
+		body+="				<li><a id='menu_scene' href='#'  >"+_T("Scenes")+"</a></li>";
+		body+="				<li><a id='altui-scene-triggers' href='#' >"+_T("Triggers")+"</a></li>";
+		body+="			</ul>";
+		body+="		</li>";
 		body+="		<li><a id='menu_room' href='#'  >"+_T("Rooms")+"</a></li>";
 		body+="		<li><a id='menu_plugins' href='#'  >"+_T("Plugins")+"</a></li>";
 		body+="		<li class='dropdown'>";
@@ -8269,6 +8343,7 @@ $(document).ready(function() {
 		.on ("click", "#menu_room", UIManager.pageRooms )
 		.on ("click", "#menu_device", UIManager.pageDevices )
 		.on ("click", "#menu_scene", UIManager.pageScenes )
+		.on ("click", "#altui-scene-triggers", UIManager.pageTriggers )
 		.on ("click", "#menu_plugins", UIManager.pagePlugins )
 		.on ("click", "#altui-pages-see", UIManager.pageUsePages )
 		.on ("click", "#altui-pages-edit", UIManager.pageEditPages )
