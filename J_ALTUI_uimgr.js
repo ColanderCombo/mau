@@ -6947,7 +6947,6 @@ var UIManager  = ( function( window, undefined ) {
 			.append(
 				"<style>					\
 				.altui-route-d3chart-container {\
-					overflow: auto;		 \
 				}							\
 				.node {						\
 				}							\
@@ -6965,9 +6964,9 @@ var UIManager  = ( function( window, undefined ) {
 					fill: none;				\
 				}							\
 				</style>" )
-			.append("<div class='altui-route-d3chart-container'><svg class='altui-route-d3chart'></svg></div>")
+			.append("<div class='col-xs-12 altui-route-d3chart-container'><svg class='altui-route-d3chart'></svg></div>")
 		var available_height = $(window).height() - $("#altui-pagemessage").outerHeight() - $("#altui-pagetitle").outerHeight() - $("#altui-zwavechart-order").outerHeight() - $("footer").outerHeight();
-		width = $(".altui-route-d3chart-container").innerWidth() - margin.left - margin.right-30;
+		width = $(".altui-route-d3chart-container").innerWidth() - margin.left - margin.right;
 		height = Math.max(300,Math.min(width,available_height - margin.top - margin.bottom));
 		UIManager.loadD3Script( function() {
 			MultiBox.getDevices(null,function(d) {	return MultiBox.controllerOf(d.altuiid).controller==parseInt($("#altui-controller-select").val()); },function(arr) {
