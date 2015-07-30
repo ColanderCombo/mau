@@ -5489,7 +5489,7 @@ var UIManager  = ( function( window, undefined ) {
 		
 		function sceneDraw(idx, scene) {
 			var html = UIManager.sceneDraw(scene);
-			var scenecontainerTemplate="<div class=' col-sm-6 col-md-4 col-lg-3'>";
+			var scenecontainerTemplate="<div class=' col-sm-6 col-md-4'>";
 			scenecontainerTemplate	+= 	html;
 			scenecontainerTemplate	+= 	"</div>";		
 			var domPanel = $(".altui-mainpanel");
