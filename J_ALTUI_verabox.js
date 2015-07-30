@@ -712,7 +712,27 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			_asyncResponse( _scenes.sort(altuiSortByName), func , filterfunc, endfunc);
 		return _scenes;
 	};
-
+	
+	function _getUsers(func , filterfunc, endfunc ) {
+		if (_user_data.users !=null )
+			_asyncResponse( _user_data.users.sort(altuiSortByName2), func , filterfunc, endfunc);
+		return _user_data.users;
+	};
+	function _getUsersSync() {
+		return _user_data.users;
+	};
+	function _getUserByID(userid) {
+		var user=null;
+		if ( _user_data.users ) {
+			$.each(_user_data.users, function( idx,usr) {
+				if (usr.id==userid) {
+					user = usr;
+					return false;
+				}
+			});
+		}
+		return user;
+	};
 	function _getPlugins( func , endfunc ) {
 		if (_user_data.InstalledPlugins2)
 			_asyncResponse( _user_data.InstalledPlugins2, func , null, endfunc);
@@ -1695,6 +1715,9 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	getNewSceneID	: _getNewSceneID,
 	getPlugins		: _getPlugins,
 	getPluginByID 	: _getPluginByID, 
+	getUsers		: _getUsers,
+	getUsersSync	: _getUsersSync,
+	getUserByID		: _getUserByID,
 	getHouseMode	: _getHouseMode,
 	setHouseMode	: _setHouseMode,
 	setStatus		: _setStatus,
@@ -1848,7 +1871,13 @@ function sortByName(a, b) {
     var y = b.name.toLowerCase();
     return ((x < y) ? -1 : ((x > y) ? 1 : 0));
 };
+
 var altuiSortByName=sortByName;
+function altuiSortByName2(a, b) {
+    var x = a.Name.toLowerCase();
+    var y = b.Name.toLowerCase();
+    return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+};
 
 function get_device_index(deviceID){
     var devicesCount=jsonp.ud.devices.length;

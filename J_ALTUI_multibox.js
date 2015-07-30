@@ -211,6 +211,40 @@ var MultiBox = ( function( window, undefined ) {
 		var elems = altuiid.split("-");
 		return _controllers[ elems[0] ].controller.getRoomByID( elems[1] );
 	};
+	function _getUsers(func , filterfunc, endfunc) {
+		var arr=[];
+		var answers=0;
+		$.each(_controllers, function( i,c) {
+			c.controller.getUsers( 
+				function( idx, user) {
+					var index = arr.length;
+					arr.push(user);
+					if ($.isFunction(func))
+						(func)(index,user);
+				} ,
+				filterfunc,
+				function(users) {
+					answers++;
+					if (answers == _controllers.length) {
+						if ($.isFunction(endfunc))
+							(endfunc)(arr.sort(altuiSortByName2));
+					}
+				}
+			);
+		});		
+		return _getUsersSync();
+	};
+	function _getUsersSync() {
+		var arr=[];
+		$.each(_controllers, function( i,c) {
+			arr = arr.concat(c.controller.getUsersSync( ));
+		});		
+		return arr.sort(altuiSortByName2);
+	};
+	function _getUserByID(controllerid, userid) {
+		return _controllers[controllerid].controller.getUserByID( userid );
+	};
+	
 	function _deleteRoom(room) {
 		var elems = room.altuiid.split("-");
 		return _controllers[elems[0]].controller.deleteRoom(elems[1]);
@@ -577,6 +611,11 @@ var MultiBox = ( function( window, undefined ) {
 	getRoomByID		: _getRoomByID,		//( roomid )
 	getRoomByAltuiID:_getRoomByAltuiID,	//(altuiid)	
 	
+	// Users
+	getUsers		: _getUsers,
+	getUsersSync	: _getUsersSync,
+	getUserByID		: _getUserByID,
+
 	// Devices
 	createDevice			: _createDevice,			// ( param , cbfunc )
 	deleteDevice			: _deleteDevice,			// id
