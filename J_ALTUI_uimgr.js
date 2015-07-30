@@ -5004,7 +5004,7 @@ var UIManager  = ( function( window, undefined ) {
 		$(".altui-mainpanel")
 			.append( _createControllerSelect('altui-controller-select'))
 			.append($("<div class='col-xs-12'><table id='table' class='table table-condensed'><thead><tr><th>ID</th><th>Name</th><th>Devices</th><th>Actions</th></tr></thead><tbody></tbody></table></div>"));
-		$(".form-inline").append(formHtml);
+		$("#altui-controller-select").closest(".form-group").append(formHtml);
 		
 		var roomListTemplate = "<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td></tr>";	
 		MultiBox.getRooms( null,null,function( rooms) {
