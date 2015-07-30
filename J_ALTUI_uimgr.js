@@ -1055,7 +1055,7 @@ function _formatTrigger(controller,trigger)
 	line.device = device.name + "<small class='text-muted'> (#"+device.altuiid+")</small>";
 	line.descr = event.label.text.replace("_DEVICE_NAME_","<b>"+device.name+"</b>");
 	line.condition = "";
-	line.lastrun = trigger.last_run ? _toIso(new Date(trigger.last_run*1000)) : "";
+	line.lastrun = trigger.last_run ? _toIso(new Date(trigger.last_run*1000)," ") : "";
 	
 	if (trigger.arguments && event.argumentList)  {
 		$.each(trigger.arguments, function( idx,argument) {
@@ -2653,16 +2653,17 @@ var UIManager  = ( function( window, undefined ) {
 		return value.toString().htmlEncode();
 	};
 	
-	function _enhanceEditorValue(id,value)
+	function _enhanceEditorValue(id,value,altuiid)
 	{
+		var extradata = altuiid ? ("data-altuiid='"+altuiid+"'") : "";
 		if ($.isNumeric(value) && value>=1035615941 && value <= 4035615941) {
-			var field = "<input type='datetime-local' id='inp{0}' name='inp{0}' value='{1}'>";
+			var field = "<input {2} type='datetime-local' class='form-control' id='{0}' name='{0}' value='{1}'>";
 			var date = new Date(value*1000);
 			// var offset = date.getTimezoneOffset();
 			// offset = ((offset<0? '+':'-')+ _format(parseInt(Math.abs(offset/60)))+ ":"+_format(Math.abs(offset%60)));
-			return field.format(id, _toIso(date));
+			return field.format(id, _toIso(date),extradata);
 		}
-		return "<input id='inp"+id+"' class='form-control' type='text' value='"+value+"'></input>" 
+		return "<input {2} id='{0}' class='form-control' type='text' value='{1}'></input>".format(id,value,extradata);
 	};
 		
 	function _deviceDrawVariables(device) {
@@ -2680,8 +2681,8 @@ var UIManager  = ( function( window, undefined ) {
 			var value = MultiBox.getStatus(device,tbl[0],tbl[1]);
 			$(this).off( "click");
 			$(this).html( _enhanceEditorValue(id,value) );
-			$("input#inp"+id).focusout( function() {
-				var id = $(this).prop('id').substr(3);	// remove inp
+			$(this).find("input#"+id).focusout( function() {
+				var id = $(this).prop('id');	
 				var tbl = [device.states[id].service , device.states[id].variable]//atob(id).split('.');
 				var val = $(this).val();	// but this is in UTC so we need to convert back to locale timezone
 				if ($(this).attr('type')=='datetime-local') {
@@ -3782,7 +3783,8 @@ var UIManager  = ( function( window, undefined ) {
 					html += "<div class='col-sm-6 col-md-4 col-lg-3'>";
 					html += "<div class='form-group'>";
 					html += "<label for='"+key+"'>"+key+"</label>";
-					html += "<input id='"+key+"' data-altuiid='"+devid+"' class='form-control' value='"+val+"'></input>";
+					html += _enhanceEditorValue(key,val,devid)
+					// html += "<input id='"+key+"' data-altuiid='"+devid+"' class='form-control' value='"+val+"'></input>";
 					html += "</div>"
 					html += "</div>"
 				}
@@ -3792,28 +3794,30 @@ var UIManager  = ( function( window, undefined ) {
 			html += "</div>";	// row
 			$(container).append( html );
 
-			$(".altui-device-attributes input").change( function( event ) {
+			$(".altui-device-attributes input").focusout( function( event ) {
 				var altuiid = $(this).data('altuiid');
 				var device = MultiBox.getDeviceByAltuiID(altuiid);
 				var attribute = $(this).prop('id');
-				var oldval = device[attribute];
-				var value = $(this).val();
+				var oldval = $(this).attr('value');	// this is HTML value so old value
+				var value = $(this).val();			// this is jq dynamic value so new value
 				var input = $(this);
-				DialogManager.confirmDialog(_T("Are you sure you want to modify this attribute"),function(result) {
-					if (result==true) {
-						MultiBox.setAttr(device, attribute, value,function(result) {
-							if (result==null) {
-								PageMessage.message( "Set Attribute action failed!", "warning" );				
-							}
-							else {
-								PageMessage.message( "Set Attribute succeeded! a LUUP reload will happen now, be patient", "success" );			
-							}
-						});
-					}
-					else {
-						$(input).val(oldval);
-					}
-				});
+				if (value!=oldval) {
+					DialogManager.confirmDialog(_T("Are you sure you want to modify this attribute"),function(result) {
+						if (result==true) {
+							MultiBox.setAttr(device, attribute, value,function(result) {
+								if (result==null) {
+									PageMessage.message( "Set Attribute action failed!", "warning" );				
+								}
+								else {
+									PageMessage.message( "Set Attribute succeeded! a LUUP reload will happen now, be patient", "success" );			
+								}
+							});
+						}
+						else {
+							$(input).val(oldval);
+						}
+					});
+				}
 			});
 		};
 		
@@ -5052,6 +5056,7 @@ var UIManager  = ( function( window, undefined ) {
 		html += "<button type='button' class='btn btn-default altui-device-variables' id='"+altuiid+"'>"+_T("Variables")+"</button>";
 		html += "<button type='button' class='btn btn-default altui-device-actions' id='"+altuiid+"' >"+_T("Actions")+"</button>";
 		html += "<button type='button' class='btn btn-default' id='altui-device-usedin' >"+_T("Used in")+"<span class='caret'></span></button>";
+		html += "<button type='button' class='btn btn-default' id='altui-device-trigger' >"+_T("Trigger")+"</button>";
 		if (AltuiDebug.IsDebug())
 			html +=  buttonDebugHtml;
 		html += "</div>";
@@ -5090,6 +5095,9 @@ var UIManager  = ( function( window, undefined ) {
 			$("#altui-device-usedin span.caret").toggleClass( "caret-reversed" );
 		});
 		
+		$("#altui-device-trigger").click( function() {
+			
+		})
 		// resgister a handler on tab click to force a disaply & reload of JS tab , even if already loaded
 		$(container).off('click','.altui-device-controlpanel ul#altui-devtab-tabs a')
 					.on('click','.altui-device-controlpanel ul#altui-devtab-tabs a',  function(e) {
