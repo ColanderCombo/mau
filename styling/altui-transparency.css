@@ -18,6 +18,9 @@ body {
 .activated {
 	color: #39BF39;
 }
+.text-success {
+	color: #5CB75D;
+}
 
 .altui-device-body,.altui-scene-body {
     background-color: #E8E8E9;
