@@ -2681,16 +2681,21 @@ var UIManager  = ( function( window, undefined ) {
 			var value = MultiBox.getStatus(device,tbl[0],tbl[1]);
 			$(this).off( "click");
 			$(this).html( _enhanceEditorValue(id,value) );
-			$(this).find("input#"+id).focusout( function() {
+			$(this).find("input#"+id)
+				.focus()
+				.focusout( function() {
 				var id = $(this).prop('id');	
 				var tbl = [device.states[id].service , device.states[id].variable]//atob(id).split('.');
+				var oldval = $(this).attr("value");	// oldval
 				var val = $(this).val();	// but this is in UTC so we need to convert back to locale timezone
-				if ($(this).attr('type')=='datetime-local') {
-					var d = new Date(val);	// input returns in UTC but we want in locale
-					var locale = d.getTime() + (d.getTimezoneOffset()*60000);	// add offset so that it is locale
-					val = locale/1000;
+				if (oldval != val) {
+					if ($(this).attr('type')=='datetime-local') {
+						var d = new Date(val);	// input returns in UTC but we want in locale
+						var locale = d.getTime() + (d.getTimezoneOffset()*60000);	// add offset so that it is locale
+						val = locale/1000;
+					}
+					MultiBox.setStatus( device, tbl[0],tbl[1], val );
 				}
-				MultiBox.setStatus( device, tbl[0],tbl[1], val );
 				$(this).parent().click(_clickOnValue);
 				$(this).replaceWith(_enhanceValue(val));					
 			});
