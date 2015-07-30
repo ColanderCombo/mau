@@ -589,6 +589,70 @@ var DialogManager = ( function() {
 		return result;
 	};
 	
+	function _triggerDialog( trigger, controller, cbfunc ) {
+		var dialog = DialogManager.createPropertyDialog(_T('Trigger'));
+		var device = MultiBox.getDeviceByID( controller ,trigger.device);
+		DialogManager.dlgAddLine( dialog , "TriggerName", _T("TriggerName"), trigger.name, "", {required:''} ); 
+		DialogManager.dlgAddDevices( dialog , device ? device.altuiid : NULL_DEVICE, 
+			function() {			// callback
+				DialogManager.dlgAddEvents( dialog, "Events", "altui-select-events",device ? device.altuiid : NULL_DEVICE , trigger.template, trigger.arguments );
+				$('div#dialogModal').modal();
+			},
+			function( device ) {	// filter
+				return (MultiBox.controllerOf(device.altuiid).controller == controller);
+			}
+		);
+		$('div#dialogs').on( 'submit',"div#dialogModal form",  function( event ) {	
+			trigger.name = $("#altui-widget-TriggerName").val();
+			trigger.enabled = 1;
+			trigger.device = parseInt(MultiBox.controllerOf( $("#altui-select-device").val() ).id) ;
+			trigger.template = $("#altui-select-events").val();
+			trigger.arguments = [];
+			$(".altui-arguments input").each( function(idx,elem)
+			{
+				var id = $(elem).prop('id').substring("altui-event-param".length);
+				trigger.arguments.push( {id:id, value: $(elem).val() } );
+			});
+			if ((trigger.device>0) && (trigger.template>0))
+			{
+				$('div#dialogModal').modal('hide');
+				$(".modal-backdrop").remove();	// hack as it is too fast
+				if ($.isFunction(cbfunc))
+					(cbfunc)(event);
+			}
+		});
+	}
+	
+	function _triggerUsersDialog(trigger,controller,cbfunc) {
+		var dialog = DialogManager.createPropertyDialog(_T('Notify Users'));
+		var users = MultiBox.getUsersSync(controller);
+		var selectedusers = (trigger.users || "").toString().split(",");
+		$.each(users, function(idx,user){
+			var inarray  = $.inArray(user.id.toString(),selectedusers);
+			DialogManager.dlgAddCheck(dialog,'user-'+user.id,(inarray!=-1),user.Name,'altui-notify-user');
+		});
+		$('div#dialogModal').modal();
+		$('div#dialogs')	
+			.off('submit',"div#dialogModal form")
+			.on( 'submit',"div#dialogModal form", function(event) {
+				var lines=[];
+				$(".altui-notify-user").each(function(idx,check) {
+					if ($(check).prop('checked')==true) {
+						var id = $(check).prop('id').substring("altui-widget-user-".length)
+						lines.push(id);
+					}
+				});
+				if (lines.length>0)
+					trigger.users = lines.join(",");
+				else
+					delete trigger.users;	// warning : in UI7 setting a empty string is not sufficient
+				$('div#dialogModal').modal('hide');
+				$(".modal-backdrop").remove();	// hack as it is too fast
+				if ($.isFunction(cbfunc))
+					(cbfunc)(event);
+			});
+	};
+	
 	function _createPropertyDialog(title)
 	{
 		var dialog =  DialogManager.registerDialog('dialogModal',
@@ -1002,10 +1066,14 @@ var DialogManager = ( function() {
 			cbfunc();
 		});
 	};
+
+		
 	return {
 		registerDialog : _registerDialog,		// name, html
 		createSpinningDialog: _createSpinningDialog,
 		confirmDialog: _confirmDialog,
+		triggerDialog: _triggerDialog,
+		triggerUsersDialog: _triggerUsersDialog,
 		createPropertyDialog:_createPropertyDialog,
 		dlgAddDialogButton: _dlgAddDialogButton,	// (dialog, bSubmit, label)
 		dlgAddCheck:_dlgAddCheck,
@@ -1191,45 +1259,17 @@ var SceneEditor = function (scene) {
 			lua:''
 		};
 		
-		var dialog = DialogManager.createPropertyDialog(_T('Trigger'));
-		var device = MultiBox.getDeviceByID( scenecontroller,trigger.device);
-		DialogManager.dlgAddLine( dialog , "TriggerName", _T("TriggerName"), trigger.name, "", {required:''} ); 
-		DialogManager.dlgAddDevices( dialog , device ? device.altuiid : NULL_DEVICE, 
-			function() {			// callback
-				DialogManager.dlgAddEvents( dialog, "Events", "altui-select-events",device ? device.altuiid : NULL_DEVICE , trigger.template, trigger.arguments );
-				$('div#dialogModal').modal();
-			},
-			function( device ) {	// filter
-				return (MultiBox.controllerOf(device.altuiid).controller == scenecontroller);
+		DialogManager.triggerDialog( trigger, scenecontroller, function() {
+			// now update the UI
+			if (triggeridx>=0) {
+				$("tr[data-trigger-idx="+triggeridx+"]").replaceWith( _displayTrigger(trigger,triggeridx) );
+			} else {
+				scene.triggers.push( trigger );
+				var parent = $(jqButton).closest("tr")
+				parent.before(  _displayTrigger(trigger,scene.triggers.length-1) );
 			}
-		);
-		
-		$('div#dialogs').on( 'submit',"div#dialogModal form", { button: jqButton }, function( event ) {	
-			trigger.name = $("#altui-widget-TriggerName").val();
-			trigger.enabled = 1;
-			trigger.device = parseInt(MultiBox.controllerOf( $("#altui-select-device").val() ).id) ;
-			trigger.template = $("#altui-select-events").val();
-			trigger.arguments = [];
-			$(".altui-arguments input").each( function(idx,elem)
-			{
-				var id = $(elem).prop('id').substring("altui-event-param".length);
-				trigger.arguments.push( {id:id, value: $(elem).val() } );
-			});
-			if ((trigger.device>0) && (trigger.template>0))
-			{
-				$('div#dialogModal').modal('hide');
-				// now update the UI
-				if (triggeridx>=0) {
-					$("tr[data-trigger-idx="+triggeridx+"]").replaceWith( _displayTrigger(trigger,triggeridx) );
-				} else {
-					scene.triggers.push( trigger );
-					var parent = $(event.data.button).closest("tr");
-					parent.before(  _displayTrigger(trigger,scene.triggers.length-1) );
-					// $(jqButton).parent().before()
-				}
-				_showSaveNeeded();
-			}
-		});
+			_showSaveNeeded();
+		} );
 	};
 	
 	function _displayJson(type,obj) {
@@ -1291,33 +1331,11 @@ var SceneEditor = function (scene) {
 	};
 	
 	function _editTriggerUsers( triggeridx, jqButton ) {
-		var dialog = DialogManager.createPropertyDialog(_T('Notify Users'));
 		var trigger = scene.triggers[ triggeridx ];
-		var users = MultiBox.getUsersSync(scenecontroller);
-		var selectedusers = (trigger.users || "").toString().split(",");
-		$.each(users, function(idx,user){
-			var inarray  = $.inArray(user.id.toString(),selectedusers);
-			DialogManager.dlgAddCheck(dialog,'user-'+user.id,(inarray!=-1),user.Name,'altui-notify-user');
+		DialogManager.triggerUsersDialog(trigger,scenecontroller,function() {
+			$(".altui-trigger-users").find(".glyphicon").toggleClass("text-success",(trigger.users!=undefined));
+			_showSaveNeeded();
 		});
-		$('div#dialogModal').modal();
-		$('div#dialogs')	
-			.off('submit',"div#dialogModal form")
-			.on( 'submit',"div#dialogModal form", function() {
-				var lines=[];
-				$(".altui-notify-user").each(function(idx,check) {
-					if ($(check).prop('checked')==true) {
-						var id = $(check).prop('id').substring("altui-widget-user-".length)
-						lines.push(id);
-					}
-				});
-				if (lines.length>0)
-					trigger.users = lines.join(",");
-				else
-					delete trigger.users;	// warning : in UI7 setting a empty string is not sufficient
-				$('div#dialogModal').modal('hide');
-				$(".altui-trigger-users").find(".glyphicon").toggleClass("text-success",(lines.length>0));
-				_showSaveNeeded();
-			});
 	};
 	
 	function _editTriggerRestrict( triggeridx, jqButton ) {
@@ -5101,7 +5119,20 @@ var UIManager  = ( function( window, undefined ) {
 		});
 		
 		$("#altui-device-trigger").click( function() {
-			
+			var info = MultiBox.controllerOf(altuiid);
+			var trigger = {
+				name: _T("notification from {0}").format(device.name),
+				enabled:1,
+				template:'',
+				device:info.id,
+				arguments:[],
+				lua:''
+			}
+			DialogManager.triggerDialog( trigger, info.controller, function() {
+				DialogManager.triggerUsersDialog( trigger, info.controller, function() {
+					var scene = {};					
+				});
+			});		
 		})
 		// resgister a handler on tab click to force a disaply & reload of JS tab , even if already loaded
 		$(container).off('click','.altui-device-controlpanel ul#altui-devtab-tabs a')
