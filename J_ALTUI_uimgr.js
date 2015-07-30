@@ -611,12 +611,12 @@ var DialogManager = ( function() {
 		$(dialog).find(".modal-footer").append(html);
 	};
 	
-	function _dlgAddCheck(dialog, name, value, label)
+	function _dlgAddCheck(dialog, name, value, label, extraclass)
 	{
 		var propertyline = "";
 		// propertyline += "<div class='checkbox'>";
 		propertyline +="<label class='checkbox-inline'>";
-		propertyline +=("  <input type='checkbox' id='altui-widget-"+name+"' " + ( (value==true) ? 'checked' : '') +" value='"+value+"' title='check to invert status value'>"+(label ? label : name));
+		propertyline +=("  <input type='checkbox' class='"+(extraclass || '')+"' id='altui-widget-"+name+"' " + ( (value==true) ? 'checked' : '') +" value='"+value+"' title='check to invert status value'>"+(label ? label : name));
 		propertyline +="</label>";
 		// propertyline += "</div>";
 		$(dialog).find(".row-fluid").append(propertyline);
@@ -1121,6 +1121,17 @@ var SceneEditor = function (scene) {
 	}
 	// trigger do not have IDs so use array index
 	function _displayTrigger(trigger,idx) {
+		function _displayTriggerUsers(trigger) {
+			var lines=[];
+			if (trigger.users)
+				$.each(trigger.users.toString().split(","), function(idx,userid) {
+					var user  =  MultiBox.getUserByID(scenecontroller,userid);
+					lines.push(user.Name);
+				});
+			var html ="";
+			html += lines.join(", ");
+			return html;
+		}
 		function _displayTriggerRestrictions(trigger) {
 			var html ="";
 			if (trigger.days_of_week) {
@@ -1151,7 +1162,8 @@ var SceneEditor = function (scene) {
 		html +="</small></td>";		
 
 		html +="<td>";
-		html += smallbuttonTemplate.format( idx, 'altui-triggertimerestrict', "<span class='glyphicon glyphicon-time "+(trigger.days_of_week ? 'text-warning' : '' ) +"' aria-hidden='true'></span>",_displayTriggerRestrictions(trigger));
+		html += smallbuttonTemplate.format( idx, 'altui-triggertimerestrict', "<span class='glyphicon glyphicon-time "+(trigger.days_of_week ? 'text-success' : '' ) +"' aria-hidden='true'></span>",_displayTriggerRestrictions(trigger));
+		html += smallbuttonTemplate.format( idx, 'altui-trigger-users', "<span class='glyphicon glyphicon-user "+(trigger.users ? 'text-success' : '' ) +"' aria-hidden='true'></span>",_displayTriggerUsers(trigger));
 		html +="</td>";
 		
 		html +="<td>";
@@ -1278,6 +1290,36 @@ var SceneEditor = function (scene) {
 		return timer;
 	};
 	
+	function _editTriggerUsers( triggeridx, jqButton ) {
+		var dialog = DialogManager.createPropertyDialog(_T('Notify Users'));
+		var trigger = scene.triggers[ triggeridx ];
+		var users = MultiBox.getUsersSync(scenecontroller);
+		var selectedusers = (trigger.users || "").toString().split(",");
+		$.each(users, function(idx,user){
+			var inarray  = $.inArray(user.id.toString(),selectedusers);
+			DialogManager.dlgAddCheck(dialog,'user-'+user.id,(inarray!=-1),user.Name,'altui-notify-user');
+		});
+		$('div#dialogModal').modal();
+		$('div#dialogs')	
+			.off('submit',"div#dialogModal form")
+			.on( 'submit',"div#dialogModal form", function() {
+				var lines=[];
+				$(".altui-notify-user").each(function(idx,check) {
+					if ($(check).prop('checked')==true) {
+						var id = $(check).prop('id').substring("altui-widget-user-".length)
+						lines.push(id);
+					}
+				});
+				if (lines.length>0)
+					trigger.users = lines.join(",");
+				else
+					delete trigger.users;	// warning : in UI7 setting a empty string is not sufficient
+				$('div#dialogModal').modal('hide');
+				$(".altui-trigger-users").find(".glyphicon").toggleClass("text-success",(lines.length>0));
+				_showSaveNeeded();
+			});
+	};
+	
 	function _editTriggerRestrict( triggeridx, jqButton ) {
 		function _hideShowControls(  ) {
 			var bViewOthers = $("#altui-widget-RestrictTrigger").prop('checked');
@@ -1324,7 +1366,7 @@ var SceneEditor = function (scene) {
 						trigger.stop_time  =$("#altui-widget-StopTime").val();
 					}
 				}
-				$(".altui-triggertimerestrict").find(".glyphicon").toggleClass("text-warning",(trigger.days_of_week!=undefined));
+				$(".altui-triggertimerestrict").find(".glyphicon").toggleClass("text-success",(trigger.days_of_week!=undefined));
 				$('div#dialogModal').modal('hide');
 				_showSaveNeeded();
 			});
@@ -1838,6 +1880,10 @@ var SceneEditor = function (scene) {
 					PageMessage.message( "Event Lua code edited, remember to save your changes", "info");
 					});
 			})
+			.on("click",".altui-trigger-users",function() { 
+				var id = parseInt($(this).prop('id'));
+				_editTriggerUsers( id , $(this) );
+			})
 			.on("click",".altui-triggertimerestrict",function() { 
 				var id = parseInt($(this).prop('id'));
 				_editTriggerRestrict( id , $(this) );
@@ -2199,8 +2245,13 @@ var PageMessage = (function(window, undefined ) {
 })();
 
 var UIManager  = ( function( window, undefined ) {  
+	var _checkOptions = [
+		{ id:'ShowVideoThumbnail', label:_T("Show Video Thumbnail in Local mode"), _default:1 },
+		{ id:'FixedLeftButtonBar', label:_T("Left Buttons are fixed on the page"), _default:1 },
+	];
 	var edittools = [];
 	var tools = [];
+	
 	function _initLocalizedGlobals() {
 		edittools = [
 			{id:1000, glyph:'object-align-top' , onclick: onAlignTop},
@@ -4076,6 +4127,13 @@ var UIManager  = ( function( window, undefined ) {
 		};
 	};
 	
+	function _initOptions(css) {
+		$.each(_checkOptions, function(idx,opt) {
+			if (MyLocalStorage.getSettings(opt.id) == null)
+				MyLocalStorage.setSettings(opt.id,opt._default);
+		});
+	};
+	
 	function _initUIEngine(css) {
 		var head = document.getElementsByTagName('head')[0];
 		var style = document.createElement('style');
@@ -4085,6 +4143,7 @@ var UIManager  = ( function( window, undefined ) {
 	};
 	
 	function _initEngine(styles, devicetypes, themecss,cbfunc) {
+		_initOptions();
 		_initUIEngine(styles);
 		if (themecss && (themecss.trim()!="") )
 			$("title").after("<link rel='stylesheet' href='"+themecss+"'>");
@@ -4832,7 +4891,7 @@ var UIManager  = ( function( window, undefined ) {
 		body+="			<div class='altui-mainpanel row'>";
 		body+="			</div>";
 		body+="		</div>";
-		body+="		<div class='col-sm-2 col-sm-pull-10 hidden-xs affix'>";
+		body+="		<div class='col-sm-2 col-sm-pull-10 hidden-xs {0}'>".format( (MyLocalStorage.getSettings('FixedLeftButtonBar') || "") ? 'affix' : '' );
 		body+="			<div class='altui-leftnav btn-group-vertical' role='group' aria-label='...'>";
 		body+="				<!--";
 		body+="				<button type='button' class='btn btn-default'>One</button>";
@@ -7929,9 +7988,6 @@ var UIManager  = ( function( window, undefined ) {
 	},
 	
 	pageOptions: function() {
-		var _checkOptions = [
-			{ id:'ShowVideoThumbnail', label:_T("Show Video Thumbnail in Local mode"), _default:1 },
-		];
 		UIManager.clearPage(_T('Options'),_T("Options"),UIManager.oneColumnLayout);
 
 		var color = IconDB.isDB() ? "text-success" : "text-danger";
@@ -7954,7 +8010,7 @@ var UIManager  = ( function( window, undefined ) {
 		html +="  <div class='panel-body'>";
 		html += "<div class='row'>";
 			$.each(_checkOptions, function(id,check) {
-				var init =  MyLocalStorage.getSettings(check.id) || check._default;
+				var init =  (MyLocalStorage.getSettings(check.id)!=null) ? MyLocalStorage.getSettings(check.id) : check._default;
 				html += "<div class='col-sm-6'>";
 					html +="<label class='checkbox-inline'>";
 					html +=("  <input type='checkbox' id='altui-"+check.id+"' " + ( (init==true) ? 'checked' : '') +" value='"+init+"' title='"+check.id+"'>"+check.label);

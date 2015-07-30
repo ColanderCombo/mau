@@ -234,11 +234,14 @@ var MultiBox = ( function( window, undefined ) {
 		});		
 		return _getUsersSync();
 	};
-	function _getUsersSync() {
+	function _getUsersSync(controllerid) {
 		var arr=[];
-		$.each(_controllers, function( i,c) {
-			arr = arr.concat(c.controller.getUsersSync( ));
-		});		
+		if (controllerid!=null)
+			arr = arr.concat(_controllers[controllerid].controller.getUsersSync( ));
+		else
+			$.each(_controllers, function( i,c) {
+				arr = arr.concat(c.controller.getUsersSync( ));
+			});		
 		return arr.sort(altuiSortByName2);
 	};
 	function _getUserByID(controllerid, userid) {
