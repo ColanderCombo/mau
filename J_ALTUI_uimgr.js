@@ -3564,15 +3564,16 @@ var UIManager  = ( function( window, undefined ) {
 						
 						obj.slider( {
 						  // range: "min",
-						  min: parseInt(control.Display.MinValue || 0 ),
-						  max: parseInt(control.Display.MaxValue || 100),
-						  value: val ,
+						  min: parseFloat(control.Display.MinValue || 0 ),
+						  max: parseFloat(control.Display.MaxValue || 1000),
+						  value: val*10 ,
+						  step: 1,
 						  slide: function( event, ui ) {
-							$("#altui-slider-horizontal-value-"+uniqid).html(ui.value+symbol);
+							$("#altui-slider-horizontal-value-"+uniqid).html((ui.value/10)+symbol);
 						  },
 						  change: function( event, ui ) {
 							var params={};
-							params[ control.Command.Parameters[0].Name ] = ui.value;
+							params[ control.Command.Parameters[0].Name ] = ui.value/10;
 							MultiBox.runAction( device, control.Command.Service, control.Command.Action, params, null );
 						  } 
 						});
@@ -3587,12 +3588,12 @@ var UIManager  = ( function( window, undefined ) {
 						var cls = $(this).attr('class');
 						var style = $(this).attr('style') + ' width:50px; ';
 						$(this).hide();
-						$("input#"+htmlid).val( val ).show().focus();
+						$("input#"+htmlid).val( val).show().focus();
 					};
 					function _displaySliderValue(uniqid,control,val) {
 						var color = control.ControlCode == "heating_setpoint" ? "text-danger" : "text-primary";
 						var htmlid = "altui-slider-vertical-value-"+uniqid;
-						$("<div id='"+htmlid+"' class='"+color+"'>"+val+"</div>")
+						$("<div id='"+htmlid+"' class='"+color+"'>"+val*10+"</div>")
 							.appendTo( $(domparent) )
 							.css({
 								top: control.Display.Top, 
@@ -3601,7 +3602,7 @@ var UIManager  = ( function( window, undefined ) {
 							// .width(control.Display.Width)
 							.height(20 /*control.Display.Height*/ )		// height given by class on UI5
 							.click( {uniqid:uniqid, control:control},_onClickSlider);
-						$("<input required id='"+htmlid+"' type='number' value='' />")
+						$("<input required id='"+htmlid+"' type='number' step='"+1/10+"' value='' />")
 							.appendTo( $(domparent) )
 							.css({
 								top: control.Display.Top, 
@@ -3615,7 +3616,7 @@ var UIManager  = ( function( window, undefined ) {
 								var val = $(this).val();
 								var htmlid = $(this).prop('id');
 								$("div#"+htmlid).text(val).show();
-								$("div#altui-slider-vertical-"+uniqid).slider("value", val );
+								$("div#altui-slider-vertical-"+uniqid).slider("value", val*10 );
 								$("input#"+htmlid).hide();	// toggle both DIV and INPUT
 							});
 					};
@@ -3638,15 +3639,16 @@ var UIManager  = ( function( window, undefined ) {
 						  orientation: "vertical",
 						  range: "min",
 						  min: 0,
-						  max: 100,
-						  value: val ,
+						  max: 1000,
+						  step: 1,
+						  value: val*10 ,
 						  slide: function( event, ui ) {
-							$("#altui-slider-vertical-value-"+uniqid).text(ui.value);
+							$("#altui-slider-vertical-value-"+uniqid).text(ui.value/10);
 							// $( "#amount" ).val( ui.value );
 						  },
 						  change: function( event, ui ) {
 							var params={};
-							params[ control.Command.Parameters[0].Name ] = ui.value;
+							params[ control.Command.Parameters[0].Name ] = ui.value/10;
 							MultiBox.runAction( device, control.Command.Service, control.Command.Action, params, null );
 						  } 
 						});
