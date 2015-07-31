@@ -5134,7 +5134,7 @@ var UIManager  = ( function( window, undefined ) {
 				var info = MultiBox.controllerOf(altuiid);
 				var newid = MultiBox.getNewSceneID( info.controller );
 				var scenetemplate = { 
-						notification_only: device.id,
+						notification_only: parseInt(device.id),
 						name:_T("Notification from {0}").format(device.name),
 						id: newid.id,
 						altuiid: newid.altuiid,
