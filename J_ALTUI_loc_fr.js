@@ -248,5 +248,7 @@ Localization.init( {
 	"Lua Startup code has been modified":"Le code LUA de démarrage a été modifié avec succès",
 	"Header":"Entête",
 	"Delay":"Délai",
-	"Edited Scene {0} successfully ":"La scène {0} est sauvegardée"
+	"Edited Scene {0} successfully ":"La scène {0} est sauvegardée",
+	"Notification from {0}":"Notification de {0}",
+	"Notify Users":"Notifier ces Utilisateurs"
 });
