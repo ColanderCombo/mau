@@ -3784,7 +3784,10 @@ var UIManager  = ( function( window, undefined ) {
 			html += "<ul>";
 			if (usedin_objects.length>0)
 				$.each(usedin_objects, function(idx,obj) {
-					html += "<li>{0} '{2}' in scene #{1} '{3}'</li>".format(obj.type, obj.scene, obj.trigger ? obj.trigger.name : obj.action.action ,obj.name);
+					var smallbuttonTemplate = "<button id='{0}' type='button' class='{1} btn btn-default btn-sm' aria-label='tbd' title='{3}'>{2}</button>";
+					html += "<li>{0} <span class='text-info'>'{2}'</span> in scene #{1} <span class='text-info'>'{3}'</span> &nbsp;".format(obj.type, obj.scene, obj.trigger ? obj.trigger.name : obj.action.action ,obj.name);
+					html += smallbuttonTemplate.format(obj.scene,"btn btn-default btn-sm altui-scene-goto",_T("See"),_T("See")); // searchGlyph
+					html += "</li>";
 				});
 			else
 				html += "<li>{0}</li>".format(_T("Not used in scenes"));
@@ -3793,6 +3796,10 @@ var UIManager  = ( function( window, undefined ) {
 			html += "</div>";
 			html += "</div>";	// row
 			$(container).append( html );
+			$(".altui-scene-goto").click(function(){
+				var altuiid = $(this).prop("id");
+				UIManager.pageSceneEdit(altuiid);
+			});
 		};
 		
 		function _deviceDrawControlPanelAttributes(device, container ) {

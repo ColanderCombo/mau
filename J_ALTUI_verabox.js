@@ -1608,14 +1608,14 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			if (scene.triggers)
 				$.each(scene.triggers, function(idx,trigger) {
 					if (trigger.device == device.id) {
-						usedin_objects.push({type:'trigger', scene:scene.id, name:scene.name, trigger:trigger});
+						usedin_objects.push({type:'trigger', scene:scene.altuiid, name:scene.name, trigger:trigger});
 					}
 				});
 			if (scene.groups)
 				$.each(scene.groups, function(idx,group) {
 					$.each(group.actions, function(idx,action) {
 						if (action.device==device.id) {
-							usedin_objects.push({type:'action', scene:scene.id, name:scene.name, action:action});
+							usedin_objects.push({type:'action', scene:scene.altuiid, name:scene.name, action:action});
 						}
 					});
 				});
