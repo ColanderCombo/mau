@@ -3565,15 +3565,15 @@ var UIManager  = ( function( window, undefined ) {
 						obj.slider( {
 						  // range: "min",
 						  min: parseFloat(control.Display.MinValue || 0 ),
-						  max: parseFloat(control.Display.MaxValue || 1000),
-						  value: val*10 ,
+						  max: parseFloat(control.Display.MaxValue || 100),
+						  value: val ,
 						  step: 1,
 						  slide: function( event, ui ) {
-							$("#altui-slider-horizontal-value-"+uniqid).html((ui.value/10)+symbol);
+							$("#altui-slider-horizontal-value-"+uniqid).html(ui.value+symbol);
 						  },
 						  change: function( event, ui ) {
 							var params={};
-							params[ control.Command.Parameters[0].Name ] = ui.value/10;
+							params[ control.Command.Parameters[0].Name ] = ui.value;
 							MultiBox.runAction( device, control.Command.Service, control.Command.Action, params, null );
 						  } 
 						});
