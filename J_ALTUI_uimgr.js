@@ -1099,7 +1099,26 @@ var DialogManager = ( function() {
 // Scene Editor
 //=====================================================================		
 
-//helper
+//helper formatting functions
+function _formatAction(controller,action) {
+	function _displayDevice(controller,deviceid) {
+		var device = MultiBox.getDeviceByID(controller,deviceid);
+		return device.name + "<small class='text-muted'> (#"+device.altuiid+")</small>";
+	};
+	function _displayArguments(Thearguments) {
+		var html=[];
+		$.each(Thearguments, function(idx,arg) {
+			html.push("{0}: {1}".format( arg.name, arg.value));
+		});
+		return html.join(',');
+	};
+	return {
+		device:_displayDevice(controller,action.device),
+		action:action.action,
+		arguments:_displayArguments(action.arguments)
+	}
+};
+
 function _formatTrigger(controller,trigger)
 {
 	function _findEventFromTriggerTemplate(controller,device,template)
@@ -1538,26 +1557,15 @@ var SceneEditor = function (scene) {
 			);
 	};
 	
-	function _displayDevice(deviceid) {
-		var device = MultiBox.getDeviceByID(scenecontroller,deviceid);
-		return device.name + "<small class='text-muted'> (#"+device.altuiid+")</small>";
-	};
-	
-	function _displayArguments(Thearguments) {
-		var html=[];
-		$.each(Thearguments, function(idx,arg) {
-			html.push("{0}: {1}".format( arg.name, arg.value));
-		});
-		return "<small>"+html.join(',')+"</small>";
-	};
-	
 	function _displayAction(action,ida,idg) {
+		var actioninfo = _formatAction(scenecontroller,action);
 		var html="";
 		html +="<tr>";
-		html += "<td>{0}</td><td>{1} ({2})</td>".format(
-			_displayDevice(action.device),
-			action.action, 
-			_displayArguments(action.arguments));
+		html += "<td>{0}</td><td>{1} (<small class='text-muted'>{2}</small>)</td>".format(
+			actioninfo.device,			// _displayDevice(action.device),
+			actioninfo.action,			// action.action, 
+			actioninfo.arguments		//_displayArguments(action.arguments)
+		);
 		html +="<td>";
 		html += smallbuttonTemplate.format( "{0}.{1}".format(idg,ida), 'altui-delaction', deleteGlyph, 'Delete Action');
 		html += smallbuttonTemplate.format( "{0}.{1}".format(idg,ida), 'altui-editaction', editGlyph, 'Edit Action');
@@ -3784,9 +3792,17 @@ var UIManager  = ( function( window, undefined ) {
 			html += "<ul>";
 			if (usedin_objects.length>0)
 				$.each(usedin_objects, function(idx,obj) {
+					var info= (obj.action) ? _formatAction(controller,obj.action) : _formatTrigger(controller,obj.trigger);
 					var smallbuttonTemplate = "<button id='{0}' type='button' class='{1} btn btn-default btn-sm' aria-label='tbd' title='{3}'>{2}</button>";
-					html += "<li>{0} <span class='text-info'>'{2}'</span> in scene #{1} <span class='text-info'>'{3}'</span> &nbsp;".format(obj.type, obj.scene, obj.trigger ? obj.trigger.name : obj.action.action ,obj.name);
-					html += smallbuttonTemplate.format(obj.scene,"btn btn-default btn-sm altui-scene-goto",_T("See"),_T("See")); // searchGlyph
+					html += "<li>Scene #{0} <span class='text-info'>'{1}'</span>, {2} <span class='text-info'>'{3}'</span>  &nbsp;".format(
+						obj.scene, 
+						obj.name, 
+						obj.type, 
+						obj.trigger 
+							? "{0} {1} (<small class='text-muted'>{2}</small>)".format(info.name, info.descr,info.condition) 
+							: "{0} (<small class='text-muted'>{1}</small>)".format(obj.action.action,info.arguments)
+						);
+					html += smallbuttonTemplate.format(obj.scene,"btn btn-default btn-sm altui-scene-goto",searchGlyph,_T("See")); // searchGlyph
 					html += "</li>";
 				});
 			else
@@ -5088,7 +5104,7 @@ var UIManager  = ( function( window, undefined ) {
 		html += "<button type='button' class='btn btn-default altui-device-variables' id='"+altuiid+"'>"+_T("Variables")+"</button>";
 		html += "<button type='button' class='btn btn-default altui-device-actions' id='"+altuiid+"' >"+_T("Actions")+"</button>";
 		html += "<button type='button' class='btn btn-default' id='altui-device-usedin' >"+_T("Used in")+"<span class='caret'></span></button>";
-		html += "<button type='button' class='btn btn-default' id='altui-device-trigger' >"+_T("Trigger")+"</button>";
+		html += "<button type='button' class='btn btn-default' id='altui-device-trigger' >"+plusGlyph+_T("Trigger")+"</button>";
 		if (AltuiDebug.IsDebug())
 			html +=  buttonDebugHtml;
 		html += "</div>";

@@ -251,5 +251,7 @@ Localization.init( {
 	"Edited Scene {0} successfully ":"La scène {0} est sauvegardée",
 	"Notification from {0}":"Notification de {0}",
 	"Notify Users":"Notifier ces Utilisateurs",
-	"Deleted Scene {0} successfully ":"La scène {0} est détruite"
+	"Deleted Scene {0} successfully ":"La scène {0} est détruite",
+	"Left Buttons are fixed on the page":"Fixer la barre de boutons a gauche",
+	"See":"Voir"
 });
