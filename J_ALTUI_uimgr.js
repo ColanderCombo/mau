@@ -2271,9 +2271,10 @@ var PageMessage = (function(window, undefined ) {
 })();
 
 var UIManager  = ( function( window, undefined ) {  
+	// in English, we will apply the _T() later, at display time
 	var _checkOptions = [
-		{ id:'ShowVideoThumbnail', label:_T("Show Video Thumbnail in Local mode"), _default:1 },
-		{ id:'FixedLeftButtonBar', label:_T("Left Buttons are fixed on the page"), _default:1 },
+		{ id:'ShowVideoThumbnail', label:"Show Video Thumbnail in Local mode", _default:1 },
+		{ id:'FixedLeftButtonBar', label:"Left Buttons are fixed on the page", _default:1 },
 	];
 	var edittools = [];
 	var tools = [];
@@ -8097,7 +8098,7 @@ var UIManager  = ( function( window, undefined ) {
 				var init =  (MyLocalStorage.getSettings(check.id)!=null) ? MyLocalStorage.getSettings(check.id) : check._default;
 				html += "<div class='col-sm-6'>";
 					html +="<label class='checkbox-inline'>";
-					html +=("  <input type='checkbox' id='altui-"+check.id+"' " + ( (init==true) ? 'checked' : '') +" value='"+init+"' title='"+check.id+"'>"+check.label);
+					html +=("  <input type='checkbox' id='altui-"+check.id+"' " + ( (init==true) ? 'checked' : '') +" value='"+init+"' title='"+check.id+"'>"+_T(check.label));
 					html +="</label>";
 				html += "</div>";
 				$(".altui-mainpanel").on("click","#altui-"+check.id,function(){ 
