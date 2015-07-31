@@ -618,7 +618,7 @@ var DialogManager = ( function() {
 				$('div#dialogModal').modal('hide');
 				$(".modal-backdrop").remove();	// hack as it is too fast
 				if ($.isFunction(cbfunc))
-					(cbfunc)(event);
+					(cbfunc)(trigger);
 			}
 		});
 	}
@@ -5123,17 +5123,33 @@ var UIManager  = ( function( window, undefined ) {
 		$("#altui-device-trigger").click( function() {
 			var info = MultiBox.controllerOf(altuiid);
 			var trigger = {
-				name: _T("notification from {0}").format(device.name),
-				enabled:1,
-				template:'',
-				device:info.id,
-				arguments:[],
-				lua:''
-			}
-			DialogManager.triggerDialog( trigger, info.controller, function() {
-				DialogManager.triggerUsersDialog( trigger, info.controller, function() {
-					var scene = {};					
-				});
+							name: _T("Notification from {0}").format(device.name),
+							enabled:1,
+							template:'',
+							device:info.id,
+							arguments:[],
+							lua:''
+						};
+			DialogManager.triggerDialog( trigger, info.controller, function( trigger ) {
+				var info = MultiBox.controllerOf(altuiid);
+				var newid = MultiBox.getNewSceneID( info.controller );
+				var scenetemplate = { 
+						notification_only: device.id,
+						name:_T("Notification from {0}").format(device.name),
+						id: newid.id,
+						altuiid: newid.altuiid,
+						triggers: [trigger],
+						groups: [{"delay":0,"actions":[]}],
+						timers: [],
+						lua:"",
+						room:0
+				};
+
+				// clear page
+				UIManager.pageSceneEdit(NULL_SCENE,scenetemplate);
+				// DialogManager.triggerUsersDialog( trigger, info.controller, function() {
+					// var scene = {};					
+				// });
 			});		
 		})
 		// resgister a handler on tab click to force a disaply & reload of JS tab , even if already loaded
@@ -5605,11 +5621,10 @@ var UIManager  = ( function( window, undefined ) {
 		_drawScenes( null );
 	},
 
-	pageSceneEdit: function (altuiid)
+	pageSceneEdit: function (altuiid,newscene_template)
 	{
 		// Deep copy so we can edit it
-		var info = MultiBox.controllerOf(altuiid);
-		var newid = MultiBox.getNewSceneID( info.controller );
+		var newid = MultiBox.getNewSceneID( MultiBox.controllerOf(altuiid).controller );
 		var orgscene = (altuiid!=NULL_SCENE) ? MultiBox.getSceneByAltuiID( altuiid ) : { 
 				name:"New Scene",
 				id: newid.id,
@@ -5620,15 +5635,15 @@ var UIManager  = ( function( window, undefined ) {
 				lua:"",
 				room:0
 		};
-		var scene = jQuery.extend(true, {timers:[], triggers:[], groups:[] }, orgscene);
+		var scene = jQuery.extend(true, {timers:[], triggers:[], groups:[] }, orgscene, newscene_template );
 
 		// clear page
 		UIManager.clearPage(_T('Scene Edit'),altuiid!=undefined ? "Edit Scene #"+scene.altuiid : "Create Scene",UIManager.oneColumnLayout);
 
 		var editor = SceneEditor( scene );
 		var html = "<div class='col-xs-12'>" ;
-		html += UIManager.sceneDraw( scene, true);	// draw scene
-		html += editor.sceneEditDraw();					// draw editor
+			html += UIManager.sceneDraw( scene, true);	// draw scene
+			html += editor.sceneEditDraw();					// draw editor
 		html += "</div>";
 		$(".altui-mainpanel").append(  html );
 		
