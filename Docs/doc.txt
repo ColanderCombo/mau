@@ -5,7 +5,7 @@ This plugin offers an alternative user interface for your VERA(s) controllers th
 It works as a simple plugin and you just need your browser. it supports UI5 and UI7 veras and can aggregate in the same screen the devices from multiple seperate VERA boxes.
 It is not just a re skin of UI5/7, and will offer a number of additional feature
 
-[b]LATEST VERSION[/b] : [glow=red,2,300]V 0.63.521 July 28th 2015[/glow] : 
+[b]LATEST VERSION[/b] : [glow=red,2,300]V 0.63.550 July 31th 2015[/glow] : 
 
 [b]Extra features not present in UI5 UI7[/b]:
 [list]
@@ -36,6 +36,7 @@ It is not just a re skin of UI5/7, and will offer a number of additional feature
 [li]History button to automatically display Scene last Execution timestamps from the lua log files[/li]
 [li]Device: Variables displayed ordered alphabetically and with enhanced display format ( dates shown as dates, url as url )[/li]
 [li]Device: Variables just click and edit, no messy checkbox to edit variable even to enter JSON or special characters[/li]
+[li]Device: detailled view of utilisation in scene actions or triggers[/li]
 [li]History button to automatically display Device Variable Changes from the lua log files[/li]
 [li]supports lua log and ANSI color display[/li]
 [li]Auto detection of new version & updates[/li]
@@ -62,9 +63,10 @@ It is not just a re skin of UI5/7, and will offer a number of additional feature
 [li]Device: List, responsive design page, "as you type" Filter by name/category/room[/li]
 [li]Device: small dashboard panels to fit many device on one screen. Dynamic icons as defined by the plugin author in the JSON file[/li]
 [li]Device: Variables: List & Edit with enhanced display format ( dates shown as dates, url as url )[/li]
+[li]Device: Notifications on events, Notifications to users[/li]
 [li]Device: UpnP Actions: List & trigger with parameters [/li]
 [li]Device: Control panel: per the static JSON file of the author. Display "flash" and "javascript" tab. In addition it can be customized via a ALTUI plugin.[/li]
-[li]Device: Attributes: List / Edit[/li]
+[li]Device: Attributes: List / Edit with enhanced display format ( dates shown as dates, url as url )[/li]
 [li]Device: UpdateNeighbours feature in device Actions dialog box[/li]
 [li]Custom pages: Use mode (kiosk) and Edit. User can create its own set of custom pages by drag and drop of widgets 
 like device icon, web images, device action button, device variable/labels, camera picture or google gage. 
@@ -84,7 +86,7 @@ device large control panels, device icons. ask me for details, but basically you
 you know how to use jquery and to write HTML elements in a parent container. I will integrate your contributions[/li]
 [li]Display of Watts & last trip date on device dashboards[/li]
 [li]Skinnable based on bootstrap styles you can find on https://bootswatch.com/[/li]
-[li]Extensible architecture ( device dashboard & panel can be extended by a custom JS module ). developpers are welcomed to contact me on how to do this.  There is a UPNP action called [u]registerPlugin()[/u] for plugins to dynamically register with ALTUI, @reneboer used it and explained here : http://forum.micasaverde.com/index.php/topic,30310.msg242498.html#msg242498[/li]
+[li]Extensible architecture ( device dashboard & panel can be extended by a custom JS module ). developpers are welcomed to contact me on how to do this.  There is a UPNP action called [u]registerPlugin()[/u] for plugins to dynamically register with ALTUI, @reneboer used it and explained here: http://forum.micasaverde.com/index.php/topic,30310.msg242498.html#msg242498[/li]
 [li]Selectable home page by a url parameter ( home= )[/li]
 [li]Selectable language by a url parameter ( lang= )[/li]
 [li]language list extensible by a simple javascript, [u]ask me & contribute if you want[/u][/li]
@@ -97,7 +99,7 @@ you know how to use jquery and to write HTML elements in a parent container. I w
 background-image: url(http://ssssssss/mycss.css);[/li]
 [li]you declare the path of that CSS into the variable [b]ThemeCSS[/b] of your ALTUI device[/li]
 [li]you reload ALTUI/refresh browser[/li]
-[li][u][b]Example [/b][/u]: I provided the working example of fixed wood texture background with transparency in the "Styling" folder in the code.mios.com repository that you can access : http://code.mios.com/trac/mios_alternate_ui/browser [/li]
+[li][u][b]Example [/b][/u]: I provided the working example of fixed wood texture background with transparency in the "Styling" folder in the code.mios.com repository that you can access: http://code.mios.com/trac/mios_alternate_ui/browser [/li]
 [/list]
 [/list]
 
@@ -137,7 +139,7 @@ ellipsis glyph , signifying "default drawing"[/li]
 [list]
 [li]official version : by the store or the UI7 "Apps' menu.[/li]
 [li]latest version : accept the autoupdate dialog box proposal , or install by opening this link in your browser  
-[url=http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28276]http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28276[/url]
+[url=http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28301]http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28301[/url]
 ignore error messages displayed by this page and wait until your unit reloads...[/li]
 [/list]
 
