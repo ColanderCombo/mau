@@ -250,5 +250,6 @@ Localization.init( {
 	"Delay":"Delay",
 	"Edited Scene {0} successfully ":"Edited Scene {0} successfully ",
 	"Notification from {0}":"Notification from {0}",
-	"Notify Users":"Notify Users"
+	"Notify Users":"Notify Users",
+	"Deleted Scene {0} successfully ":"Deleted Scene {0} successfully "
 	});
