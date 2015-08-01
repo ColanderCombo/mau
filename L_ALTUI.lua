@@ -568,6 +568,24 @@ local htmlLayout = [[
 		{
 			document.writeln('<span>Sorry !! Your Browser is too old, you need to upgrade to a recent browser supporting <b>HTML5</b> like:<ul><li>Chrome</li><li>Firefox</li><li>IE 10,11,...</li></ul></span>');
 		}
+		
+		function _executeFunctionByName(functionName, context , device, extraparam) {
+			var namespaces = functionName.split(".");
+			var func = namespaces.pop();
+			for (var i = 0; i < namespaces.length; i++) {
+				context = context[ namespaces[i] ];
+			}
+			return context[func].call(context, device, extraparam);
+		};
+
+		function _loadStyle(styleFunctionName) {
+			var head = document.getElementsByTagName('head')[0];
+			var style = document.createElement('style');
+			style.type = 'text/css';
+			var css = _executeFunctionByName(styleFunctionName, window);
+			style.appendChild(document.createTextNode(css));
+			head.appendChild(style);
+		};
 	</script>
 
     <!-- Bootstrap core JavaScript    ================================================== -->
@@ -575,11 +593,11 @@ local htmlLayout = [[
 	<!-- Latest compiled and minified JavaScript -->
 	@mandatory_scripts@
 	
-	<script src="J_ALTUI_jquery.ui.touch-punch.min.js"></script>
-	<script src="J_ALTUI_utils.js" ></script>
+	<!-- <script src="J_ALTUI_jquery.ui.touch-punch.min.js"></script> -->
+	<!-- <script src="J_ALTUI_utils.js" ></script> -->
 	@optional_scripts@
-	<script src="J_ALTUI_verabox.js" ></script>
-	<script src="J_ALTUI_multibox.js" ></script>
+	<!-- <script src="J_ALTUI_verabox.js" ></script> -->
+	<!-- <script src="J_ALTUI_multibox.js" ></script> -->
 	<script type='text/javascript' >
 		google.setOnLoadCallback(drawVisualization);
 		function drawVisualization() {
@@ -591,7 +609,7 @@ local htmlLayout = [[
 		var g_MyDeviceID = @mydeviceid@;
 		var g_ExtraController = '@extracontroller@';
 	</script>
-	<script src="J_ALTUI_uimgr.js" defer ></script>
+	<!-- <script src="J_ALTUI_uimgr.js" defer ></script> -->
 	<hr>
 	<footer><p class="text-center"><small id="altui-footer">AltUI, amg0, <span class="bg-danger">Waiting Initial Data</span></small></p><span id="debug"></span></footer>
 </body>
@@ -606,6 +624,13 @@ function findALTUIDevice()
 		end
 	end
 	return -1
+end
+
+function inTable(tbl, item)
+    for key, value in pairs(tbl) do
+        if value == item then return key end
+    end
+    return false
 end
 
 function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
@@ -651,28 +676,56 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				
 				-- preload necessary scripts : optimization for remote access
 				-- without this, ALTUI just dynamically load the script but it seems to take long time sometime
-				local optional_scripts=""
 				local scripts = {}
-				for k,v in pairs(tbl) do	
-					if (v["ScriptFile"]  ~= nil) then
-						-- scripts[v["ScriptFile"]] = ""
-					end
-				end
+				local loaded = {}
+				local styles = {}
+				local idx= 1
+				scripts[idx] = "J_ALTUI_utils.js"
+				loaded[scripts[idx]]=true
+				idx = idx+1
 				if ( (lul_parameters["lang"]~=nil) and (lul_parameters["lang"]~="en") ) then
 					local lang = string.sub( (lul_parameters["lang"].."    "),1,2)
-					scripts["J_ALTUI_loc_"..lang..".js"] = ""
+					scripts[idx] = "J_ALTUI_loc_"..lang..".js"
+					loaded[scripts[idx]]=true
+					idx = idx+1
 				end
-				-- scripts["J_ALTUI_utils.js"]=""
-				-- scripts["J_ALTUI_verabox.js"]=""
-				for k,v in pairs(scripts) do
-					scripts[k] = getScriptContent(k)
+				for k,v in pairs(tbl) do	
+					if (v["ScriptFile"]  ~= nil) then
+						if (loaded[v["ScriptFile"]]~=true)  then
+							scripts[idx] = v["ScriptFile"]
+							loaded[v["ScriptFile"]]=true
+							idx = idx + 1
+						end
+						if (v["StyleFunc"]  ~= nil) then
+							styles[v["ScriptFile"]] = v["StyleFunc"]
+						end
+					end
+				end				
+				scripts[idx] = "J_ALTUI_jquery.ui.touch-punch.min.js"
+				loaded[scripts[idx]]=true
+				idx = idx+1
+				scripts[idx] = "J_ALTUI_verabox.js"
+				loaded[scripts[idx]]=true
+				idx = idx+1
+				scripts[idx] = "J_ALTUI_multibox.js"
+				loaded[scripts[idx]]=true
+				idx = idx+1
+				scripts[idx] = "J_ALTUI_uimgr.js"
+				loaded[scripts[idx]]=true
+				idx = idx+1
+				local optional_scripts=""
+				for i = 1,#scripts do
+					local str = getScriptContent(scripts[i])
+					if (styles[scripts[i]]  ~= nil) then
+						str = str .. "_loadStyle('"..styles[scripts[i]].."');"
+					end
 					optional_scripts = optional_scripts  .. string.format(
 						"<script type='text/javascript' data-src='%s' >%s</script>",
-						k,
-						scripts[k]  -- xml_encode(scripts[k])
+						scripts[i],
+						"\n<!--\n".. str .. "\n// // -->\n"
 						)
 				end
-				-- debug( json.encode(scripts) )
+				
 				local pagelist = getDataFor( deviceID, "CustomPages" ) or "{}"
 				if (pagelist=="[]") then
 					pagelist="{}"

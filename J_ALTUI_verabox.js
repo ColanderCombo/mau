@@ -1121,6 +1121,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	function _loadEngine() {
 		AltuiDebug.debug("_loadEngine()");
 		var verabox = MyLocalStorage.get("VeraBox"+_uniqID);
+		// if (0)
 		if (verabox)
 		{
 			// _user_data_LoadTime 	= verabox._user_data_LoadTime;
