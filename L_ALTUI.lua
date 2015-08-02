@@ -518,6 +518,7 @@ local htmlLocalScripts = [[
     <script src="@localcdn@/jquery-ui.min.js"></script> 
     <script src="@localcdn@/jquery.bootgrid.min.js"></script> 	
     <script src="@localcdn@/jsapi.js"></script> 	
+	<script src="J_ALTUI_utils.js" ></script>
 	<script src="J_ALTUI_verabox.js" ></script> 
 	<script src="J_ALTUI_multibox.js" ></script> 
 	<script src="J_ALTUI_uimgr.js" defer ></script> 
@@ -532,6 +533,7 @@ local htmlScripts = [[
 	<script type="text/javascript"  
 	  src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["gauge","table"]}]}' >
 	</script>
+	<script src="J_ALTUI_utils.js" ></script>
 	<script src="J_ALTUI_verabox.js" ></script> 
 	<script src="J_ALTUI_multibox.js" ></script> 
 	<script src="J_ALTUI_uimgr.js" defer ></script> 
@@ -613,7 +615,6 @@ local htmlLayout = [[
 	@mandatory_scripts@
 	
 	<!-- <script src="J_ALTUI_jquery.ui.touch-punch.min.js"></script> -->
-	<!-- <script src="J_ALTUI_utils.js" ></script> -->
 	@optional_scripts@
 	<script type='text/javascript' defer >
 	<!--
@@ -699,9 +700,9 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				local loaded = {}
 				local styles = {}
 				local idx= 1
-				scripts[idx] = "J_ALTUI_utils.js"
-				loaded[scripts[idx]]=true
-				idx = idx+1
+				-- scripts[idx] = "J_ALTUI_utils.js"
+				-- loaded[scripts[idx]]=true
+				-- idx = idx+1
 				if ( (lul_parameters["lang"]~=nil) and (lul_parameters["lang"]~="en") ) then
 					local lang = string.sub( (lul_parameters["lang"].."    "),1,2)
 					scripts[idx] = "J_ALTUI_loc_"..lang..".js"
@@ -758,7 +759,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				-- local custompages = luup.variable_get(service, "CustomPages", deviceID) or "[]"
 				-- custompages = string.gsub(custompages,"'","\\x27")
 				-- custompages = string.gsub(custompages,"\"","\\x22")
-				local localcdn = getSetVariable(service, "LocalCDN", lul_device, "")
+				local localcdn = getSetVariable(service, "LocalCDN", deviceID, "")
 				local variables={}
 				variables["hostname"] = hostname
 				variables["localcdn"] = localcdn
@@ -767,7 +768,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				variables["ThemeCSS"] = luup.variable_get(service, "ThemeCSS", deviceID) or ""
 				variables["style"] = htmlStyle
 				variables["mydeviceid"] = deviceID
-				variables["extracontroller"] = getSetVariable(service, "ExtraController", lul_device, "")
+				variables["extracontroller"] = getSetVariable(service, "ExtraController", deviceID, "")
 				-- variables["firstuserdata"] = "{}"
 				variables["firstuserdata"] = getFirstUserData()	-- ( json.encode( getFirstUserData() )	-- :gsub("'", "\'") )
 				if (localcdn ~= "") then
