@@ -443,6 +443,19 @@ local function getMode()
 end
 
 ------------------------------------------------
+-- Get user_data
+------------------------------------------------
+local function getFirstUserData()
+	local url_req = "http://127.0.0.1:3480/data_request?id=user_data&output_format=json"
+	local req_status, req_result = luup.inet.wget(url_req)
+	if (req_status~=0) then
+		debug(string.format("getScriptContent(%s) failed, returns: %s",filename,req_status))
+		return ""
+	end
+	return req_result
+end
+
+------------------------------------------------
 -- Get File ( uncompress & return content )
 ------------------------------------------------
 
@@ -608,6 +621,7 @@ local htmlLayout = [[
 		var g_CustomTheme = '@ThemeCSS@';
 		var g_MyDeviceID = @mydeviceid@;
 		var g_ExtraController = '@extracontroller@';
+		var b_FirstUserData = JSON.parse('@firstuserdata@');
 	</script>
 	<!-- <script src="J_ALTUI_uimgr.js" defer ></script> -->
 	<hr>
@@ -749,6 +763,8 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				variables["style"] = htmlStyle
 				variables["mydeviceid"] = deviceID
 				variables["extracontroller"] = getSetVariable(service, "ExtraController", lul_device, "")
+				variables["firstuserdata"] = ""
+				-- variables["firstuserdata"] = ( json.encode( getFirstUserData() ):gsub("'", "\'") )
 				if (localcdn ~= "") then
 					variables["csslinks"] = htmlLocalCSSlinks:template(variables)
 					variables["mandatory_scripts"] = htmlLocalScripts:template(variables)
