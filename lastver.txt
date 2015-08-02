@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("560,Optimisation of launch time especially remote access mode ( 30sec, was 2mn );Bug fix in lua handler,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28316")
+UIManager.checkAltuiUpdate("560,Optimisation of launch time especially remote access mode ( now 30sec was 2mn );Bug fix in lua handler,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28316")
