@@ -518,17 +518,23 @@ local htmlLocalScripts = [[
     <script src="@localcdn@/jquery-ui.min.js"></script> 
     <script src="@localcdn@/jquery.bootgrid.min.js"></script> 	
     <script src="@localcdn@/jsapi.js"></script> 	
+	<script src="J_ALTUI_verabox.js" ></script> 
+	<script src="J_ALTUI_multibox.js" ></script> 
+	<script src="J_ALTUI_uimgr.js" defer ></script> 
 ]]
     -- <script src="@localcdn@/d3.min.js"></script> 	
 
 local htmlScripts = [[
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script> 
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-bootgrid/1.2.0/jquery.bootgrid.min.js"></script> 	
-	<script type="text/javascript" 
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js" ></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" ></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js" ></script> 
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-bootgrid/1.2.0/jquery.bootgrid.min.js" defer></script> 	
+	<script type="text/javascript"  
 	  src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["gauge","table"]}]}' >
 	</script>
+	<script src="J_ALTUI_verabox.js" ></script> 
+	<script src="J_ALTUI_multibox.js" ></script> 
+	<script src="J_ALTUI_uimgr.js" defer ></script> 
 ]]
     -- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script> 	
 
@@ -609,9 +615,8 @@ local htmlLayout = [[
 	<!-- <script src="J_ALTUI_jquery.ui.touch-punch.min.js"></script> -->
 	<!-- <script src="J_ALTUI_utils.js" ></script> -->
 	@optional_scripts@
-	<!-- <script src="J_ALTUI_verabox.js" ></script> -->
-	<!-- <script src="J_ALTUI_multibox.js" ></script> -->
-	<script type='text/javascript' >
+	<script type='text/javascript' defer >
+	<!--
 		google.setOnLoadCallback(drawVisualization);
 		function drawVisualization() {
 			//console.log('google loaded');
@@ -621,9 +626,9 @@ local htmlLayout = [[
 		var g_CustomTheme = '@ThemeCSS@';
 		var g_MyDeviceID = @mydeviceid@;
 		var g_ExtraController = '@extracontroller@';
-		var b_FirstUserData = JSON.parse('@firstuserdata@');
+		var g_FirstUserData = @firstuserdata@;
+		// -->
 	</script>
-	<!-- <script src="J_ALTUI_uimgr.js" defer ></script> -->
 	<hr>
 	<footer><p class="text-center"><small id="altui-footer">AltUI, amg0, <span class="bg-danger">Waiting Initial Data</span></small></p><span id="debug"></span></footer>
 </body>
@@ -718,15 +723,15 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				scripts[idx] = "J_ALTUI_jquery.ui.touch-punch.min.js"
 				loaded[scripts[idx]]=true
 				idx = idx+1
-				scripts[idx] = "J_ALTUI_verabox.js"
-				loaded[scripts[idx]]=true
-				idx = idx+1
-				scripts[idx] = "J_ALTUI_multibox.js"
-				loaded[scripts[idx]]=true
-				idx = idx+1
-				scripts[idx] = "J_ALTUI_uimgr.js"
-				loaded[scripts[idx]]=true
-				idx = idx+1
+				-- scripts[idx] = "J_ALTUI_verabox.js"
+				-- loaded[scripts[idx]]=true
+				-- idx = idx+1
+				-- scripts[idx] = "J_ALTUI_multibox.js"
+				-- loaded[scripts[idx]]=true
+				-- idx = idx+1
+				-- scripts[idx] = "J_ALTUI_uimgr.js"
+				-- loaded[scripts[idx]]=true
+				-- idx = idx+1
 				local optional_scripts=""
 				for i = 1,#scripts do
 					local str = getScriptContent(scripts[i])
@@ -736,7 +741,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 					optional_scripts = optional_scripts  .. string.format(
 						"<script type='text/javascript' data-src='%s' >%s</script>",
 						scripts[i],
-						"\n<!--\n".. str .. "\n// // -->\n"
+						"//<!-- \n".. str .. "\n// // -->\n"
 						)
 				end
 				
@@ -763,8 +768,8 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				variables["style"] = htmlStyle
 				variables["mydeviceid"] = deviceID
 				variables["extracontroller"] = getSetVariable(service, "ExtraController", lul_device, "")
-				variables["firstuserdata"] = "{}"
-				-- variables["firstuserdata"] = ( json.encode( getFirstUserData() ):gsub("'", "\'") )
+				-- variables["firstuserdata"] = "{}"
+				variables["firstuserdata"] = getFirstUserData()	-- ( json.encode( getFirstUserData() )	-- :gsub("'", "\'") )
 				if (localcdn ~= "") then
 					variables["csslinks"] = htmlLocalCSSlinks:template(variables)
 					variables["mandatory_scripts"] = htmlLocalScripts:template(variables)

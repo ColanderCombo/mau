@@ -8422,7 +8422,7 @@ $(document).ready(function() {
 		
 		UIManager.initEngine(styles.format(window.location.hostname), g_DeviceTypes, g_CustomTheme, function() {
 			UIManager.initCustomPages(g_CustomPages);	
-			MultiBox.initEngine(g_ExtraController);
+			MultiBox.initEngine(g_ExtraController,g_FirstUserData);
 			EventBus.publishEvent("on_ui_initFinished");
 		});
 	};

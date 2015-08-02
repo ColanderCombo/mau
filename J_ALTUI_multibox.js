@@ -100,7 +100,7 @@ var MultiBox = ( function( window, undefined ) {
 		return $.map( _controllers , function(o,i) {return name+"_"+i } );
 	};
 	
-	function _initEngine(extraController) {
+	function _initEngine(extraController,firstuserdata) {
 		function _AllLoaded(eventname) {
 			switch(eventname) {
 				case "on_ui_userDataLoaded":
@@ -117,7 +117,7 @@ var MultiBox = ( function( window, undefined ) {
 							
 		// initialize controller 0 right away, no need to wait					
 		_controllers[0].controller = new VeraBox(0,'');		// create the main controller
-		_controllers[0].controller.initEngine();
+		_controllers[0].controller.initEngine( firstuserdata );
 		
 		// add the extra controllers
 		if (extraController.trim().length>0)

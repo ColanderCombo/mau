@@ -1118,20 +1118,22 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		return MyLocalStorage.clear("VeraBox"+_uniqID);
 	};
 
-	function _loadEngine() {
+	function _loadEngine( user_data ) {
 		AltuiDebug.debug("_loadEngine()");
-		var verabox = MyLocalStorage.get("VeraBox"+_uniqID);
-		// if (0)
-		if (verabox)
-		{
-			// _user_data_LoadTime 	= verabox._user_data_LoadTime;
-			// _user_data_DataVersion 	= verabox._user_data_DataVersion;
-			_user_data_DataVersion 	= 1;
-			_user_data_LoadTime 	= null;
-			_user_data				= verabox._user_data || {};
-			_user_data.BuildVersion = undefined;		// to keep the "waiting" message for the user
-			_loadUserData(_user_data);
+		if (user_data) {	// if received in parameter ( like pre-prepared by LUA module )
+			_user_data	= user_data;
+		} else {	// or try to get from cache
+			var verabox = MyLocalStorage.get("VeraBox"+_uniqID);
+			if (verabox) {
+				// _user_data_LoadTime 	= verabox._user_data_LoadTime;
+				// _user_data_DataVersion 	= verabox._user_data_DataVersion;
+				_user_data				= verabox._user_data || {};
+			}
 		}
+		_user_data_DataVersion 	= 1;
+		_user_data_LoadTime 	= null;
+		_user_data.BuildVersion = undefined;		// to keep the "waiting" message for the user			
+		_loadUserData(_user_data);
 	};
 	
 	function _initDataEngine() {
@@ -1764,10 +1766,10 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	saveData		: _saveData,		//  name, data , cbfunc
 	saveEngine 		: _saveEngine, 
 	clearEngine		: _clearEngine,
-	loadEngine 		: _loadEngine, 
+	loadEngine 		: _loadEngine, 		// optional user_data
 	isUserDataCached	: _isUserDataCached,
-	initEngine		: function() 	{
-						_loadEngine();
+	initEngine		: function( firstuserdata ) 	{
+						_loadEngine( firstuserdata );
 						_initDataEngine();				// init the data collection engine
 					},		
   };
