@@ -763,7 +763,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				variables["style"] = htmlStyle
 				variables["mydeviceid"] = deviceID
 				variables["extracontroller"] = getSetVariable(service, "ExtraController", lul_device, "")
-				variables["firstuserdata"] = ""
+				variables["firstuserdata"] = "{}"
 				-- variables["firstuserdata"] = ( json.encode( getFirstUserData() ):gsub("'", "\'") )
 				if (localcdn ~= "") then
 					variables["csslinks"] = htmlLocalCSSlinks:template(variables)
