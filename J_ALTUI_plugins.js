@@ -292,10 +292,6 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	function _drawMotion( device) {
 		var html = "";
 		
-		// armed, tripped
-		var tripped = parseInt(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Tripped' )); 
-		html += ("<span class='altui-motion' >{0}</span>".format( (tripped==true) ? "<span class='glyphicon glyphicon-flash text-danger' aria-hidden='true'></span>" : ""));
-
 		// armed button
 		// var status = parseInt(MultiBox.oldgetStatus( devid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status' )); 
 		// if ( ( ( device.Jobs != null ) && ( device.Jobs.length>0) ) || (device.status==1) || (device.status==5) ) {  
@@ -309,6 +305,11 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			var lasttripdate = _toIso(new Date(lasttrip*1000),' ');
 			html+= "<div class='altui-lasttrip-text text-muted'>{0} {1}</div>".format( timeGlyph,lasttripdate );
 		}
+
+		// armed, tripped
+		var tripped = parseInt(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Tripped' )); 
+		html += ("<span class='altui-motion' >{0}</span>".format( (tripped==true) ? "<span class='glyphicon glyphicon-flash text-danger' aria-hidden='true'></span>" : ""));
+
 		// armed
 		html += "<script type='text/javascript'>";
 		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleArmed('{0}','div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
