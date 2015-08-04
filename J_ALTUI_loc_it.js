@@ -253,5 +253,6 @@ Localization.init( {
 	"Notify Users":"Notify Users",
 	"Deleted Scene {0} successfully ":"Deleted Scene {0} successfully ",
 	"Left Buttons are fixed on the page":"Left Buttons are fixed on the page",
-	"See":"See"
+	"See":"See",
+	"2-columns Menu's limit":"2-columns Menu's limit"
 	});

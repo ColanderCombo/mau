@@ -253,5 +253,6 @@ Localization.init( {
 	"Notify Users":"Notifier ces Utilisateurs",
 	"Deleted Scene {0} successfully ":"La scène {0} est détruite",
 	"Left Buttons are fixed on the page":"Fixer la barre de boutons a gauche",
-	"See":"Voir"
+	"See":"Voir",
+	"2-columns Menu's limit":"Limite pour les Menus a 2 colonnes"
 });

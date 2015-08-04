@@ -8116,7 +8116,7 @@ var UIManager  = ( function( window, undefined ) {
 							html +="<label class='' for='altui-"+check.id+"'>"+_T(check.label)+"</label>:";
 							html +=("<input type='number' min='"+(check.min||0) +"' max='"+(check.max||999) +"' id='altui-"+check.id+"' " + ( (init==true) ? 'checked' : '') +" value='"+init+"' title='"+check.id+"'>");
 							$(".altui-mainpanel").on("focusout","#altui-"+check.id,function(){ 
-								MyLocalStorage.setSettings(check.id, $("#altui-"+check.id).val());
+								MyLocalStorage.setSettings(check.id, parseInt($("#altui-"+check.id).val()));
 							});
 							break;
 					}
