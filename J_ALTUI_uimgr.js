@@ -2273,8 +2273,9 @@ var PageMessage = (function(window, undefined ) {
 var UIManager  = ( function( window, undefined ) {  
 	// in English, we will apply the _T() later, at display time
 	var _checkOptions = [
-		{ id:'ShowVideoThumbnail', label:"Show Video Thumbnail in Local mode", _default:1 },
-		{ id:'FixedLeftButtonBar', label:"Left Buttons are fixed on the page", _default:1 },
+		{ id:'ShowVideoThumbnail', type:'checkbox', label:"Show Video Thumbnail in Local mode", _default:1 },
+		{ id:'FixedLeftButtonBar', type:'checkbox', label:"Left Buttons are fixed on the page", _default:1 },
+		{ id:'Menu2ColumnLimit', type:'number', label:"2-columns Menu's limit", _default:15, min:2, max:30  },
 	];
 	var edittools = [];
 	var tools = [];
@@ -4065,12 +4066,14 @@ var UIManager  = ( function( window, undefined ) {
 	
 	function _drawRoomFilterButton() {
 		var toolbarHtml="";
+		var rooms = MultiBox.getRoomsSync();
 		toolbarHtml+="	<div class='btn-group' id='altui-device-room-filter'>";
 			toolbarHtml+="  <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown' aria-expanded='false'>";
 			toolbarHtml+=  (homeGlyph + '&nbsp;' +_T('Rooms') + "<span class='caret'></span>");
 			toolbarHtml+="  </button>";
-			toolbarHtml+="  <ul class='dropdown-menu' role='menu'>";
-				var rooms = MultiBox.getRoomsSync();
+			toolbarHtml+="  <ul class='dropdown-menu' role='menu' {0}>".format(
+				(rooms.length+2>=parseInt(MyLocalStorage.getSettings('Menu2ColumnLimit'))) ? "style='columns: 2; -webkit-columns: 2; -moz-columns: 2;'" : ""
+				);
 				$.each([{id:-1,name:_T('All')},{id:0,name:_T('No Room')}], function( idx, room) {
 					toolbarHtml+="<li><a href='#' id='{1}' data-altuiid='{2}'>{0}</a></li>".format(room.name,room.id,"");
 				});
@@ -5328,9 +5331,6 @@ var UIManager  = ( function( window, undefined ) {
 			filterHtml+="</div>";
 			
 			var toolbarHtml="";
-			toolbarHtml+="  <button type='button' class='btn btn-default' id='altui-device-filter' >";
-			toolbarHtml+=  (searchGlyph + '&nbsp;' +_T('Filter') + "<span class='caret'></span>");
-			toolbarHtml+="  </button>";			
 
 			toolbarHtml+=_drawRoomFilterButton();
 			
@@ -5338,7 +5338,7 @@ var UIManager  = ( function( window, undefined ) {
 			toolbarHtml+="  <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown' aria-expanded='false'>";
 			toolbarHtml+=  (tagsGlyph + '&nbsp;' +_T('Category') + "<span class='caret'></span>");
 			toolbarHtml+="  </button>";
-			toolbarHtml+="  <ul class='dropdown-menu' role='menu'>";
+			toolbarHtml+="  <ul class='dropdown-menu' role='menu'>"
 			toolbarHtml+="<li><a href='#' id='{0}'>{1}</a></li>".format(0,_T('All'));
 			MultiBox.getCategories(
 				function(idx,category) {
@@ -5348,12 +5348,18 @@ var UIManager  = ( function( window, undefined ) {
 				function(categories) {
 					toolbarHtml+="  </ul>";
 					toolbarHtml+="</div>";			
+					toolbarHtml+="  <button type='button' class='btn btn-default' id='altui-device-filter' >";
+					toolbarHtml+=  (searchGlyph + '&nbsp;' +_T('Filter') + "<span class='caret'></span>");
+					toolbarHtml+="  </button>";			
 					toolbarHtml+="  <button type='button' class='btn btn-default' id='altui-device-create' >";
 					toolbarHtml+= (plusGlyph + "&nbsp;" + _T("Create"));
 					toolbarHtml+="  </button>";			
 					
 					// Display
 					$(".altui-device-toolbar").replaceWith( "<div class='altui-device-toolbar'>"+toolbarHtml+filterHtml+"</div>" );
+					if (categories.length+1>=parseInt(MyLocalStorage.getSettings('Menu2ColumnLimit')))
+						$("#altui-device-category-filter ul").attr('style','columns: 2; -webkit-columns: 2; -moz-columns: 2;');
+
 					$(".altui-pagefilter").css("display","inline");
 					
 					// interactivity					
@@ -8097,13 +8103,24 @@ var UIManager  = ( function( window, undefined ) {
 			$.each(_checkOptions, function(id,check) {
 				var init =  (MyLocalStorage.getSettings(check.id)!=null) ? MyLocalStorage.getSettings(check.id) : check._default;
 				html += "<div class='col-sm-6'>";
-					html +="<label class='checkbox-inline'>";
-					html +=("  <input type='checkbox' id='altui-"+check.id+"' " + ( (init==true) ? 'checked' : '') +" value='"+init+"' title='"+check.id+"'>"+_T(check.label));
-					html +="</label>";
+					switch( check.type ) {
+						case 'checkbox':
+							html +="<label class='checkbox-inline'>";
+							html +=("  <input type='checkbox' id='altui-"+check.id+"' " + ( (init==true) ? 'checked' : '') +" value='"+init+"' title='"+check.id+"'>"+_T(check.label));
+							html +="</label>";
+							$(".altui-mainpanel").on("click","#altui-"+check.id,function(){ 
+								MyLocalStorage.setSettings(check.id, $("#altui-"+check.id).is(':checked'));
+							});
+							break;
+						case 'number':
+							html +="<label class='' for='altui-"+check.id+"'>"+_T(check.label)+"</label>:";
+							html +=("<input type='number' min='"+(check.min||0) +"' max='"+(check.max||999) +"' id='altui-"+check.id+"' " + ( (init==true) ? 'checked' : '') +" value='"+init+"' title='"+check.id+"'>");
+							$(".altui-mainpanel").on("focusout","#altui-"+check.id,function(){ 
+								MyLocalStorage.setSettings(check.id, $("#altui-"+check.id).val());
+							});
+							break;
+					}
 				html += "</div>";
-				$(".altui-mainpanel").on("click","#altui-"+check.id,function(){ 
-					MyLocalStorage.setSettings(check.id, $("#altui-"+check.id).is(':checked'));
-				});
 			});		
 		html +="  </div>";
 		html +="  </div>";
