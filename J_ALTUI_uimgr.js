@@ -5211,16 +5211,23 @@ var UIManager  = ( function( window, undefined ) {
 		var _deviceID2RoomName = {};
 		var _deviceDisplayFilter = {
 			filterformvisible 	: false,
-			room			: -1,
+			room			: MyLocalStorage.getSettings("RoomFilter") || -1,
 			favorites		: (MyLocalStorage.getSettings("ShowFavoriteDevice")==true),
 			invisible 		: (MyLocalStorage.getSettings("ShowInvisibleDevice")==true),
 			batterydevice	: (MyLocalStorage.getSettings("ShowBatteryDevice")==true),
-			category		: 0,
-			filtername		: MyLocalStorage.getSettings("DeviceFilterName") || ""
+			category		: MyLocalStorage.getSettings("CategoryFilter") || 0,
+			filtername		: MyLocalStorage.getSettings("DeviceFilterName") || "",
+			isRoomFilterValid 		: function() {return this.room!=-1},
+			isCategoryFilterValid 	: function() {return this.category!=0},
 		};
 		
 		// filter function
 		function deviceFilter(device) {
+			if ((_deviceID2RoomName[ device.altuiid ]==null) && (parseInt(device.room)!=0)) {
+				var controller = MultiBox.controllerOf(device.altuiid).controller;
+				_deviceID2RoomName[ device.altuiid ] = _roomID2Name["{0}-{1}".format(controller,device.room)];
+			}
+
 			var batteryLevel = MultiBox.getDeviceBatteryLevel(device);
 			var regexp = new RegExp(RegExp.escape(_deviceDisplayFilter.filtername),"i")
 			return ( (parseInt(_deviceDisplayFilter.room) <0) || (device!=null &&  _deviceID2RoomName[device.altuiid] == _roomID2Name[_deviceDisplayFilter.room]) ) 
@@ -5271,11 +5278,8 @@ var UIManager  = ( function( window, undefined ) {
 		function endDrawDevice(devices) {
 			_drawDeviceToolbar();
 			UIManager.refreshUI(true,false);
-			$.each(devices, function(idx,device){
-				var controller = MultiBox.controllerOf(device.altuiid).controller;
-				if (parseInt(device.room)!=0)
-					_deviceID2RoomName[ device.altuiid ] = _roomID2Name["{0}-{1}".format(controller,device.room)];
-			})
+			$("#altui-device-room-filter button").toggleClass("text-info",_deviceDisplayFilter.isRoomFilterValid());
+			$("#altui-device-category-filter button").toggleClass("text-info",_deviceDisplayFilter.isCategoryFilterValid());
 		};
 		
 		function drawDeviceContainer(idx, device) {
@@ -5441,6 +5445,7 @@ var UIManager  = ( function( window, undefined ) {
 						$(this).closest(".dropdown-menu").find("li.active").removeClass("active");
 						$(this).parent().addClass("active");
 						_deviceDisplayFilter.category = $(this).prop('id');
+						MyLocalStorage.setSettings("CategoryFilter",_deviceDisplayFilter.category);
 						_drawDevices(deviceFilter);
 					});
 				}
@@ -5458,6 +5463,7 @@ var UIManager  = ( function( window, undefined ) {
 		{
 			// var roomid = $(this).prop('id');
 			_deviceDisplayFilter.room = (altuiid !="") ? altuiid : htmlid;	
+			MyLocalStorage.setSettings("RoomFilter",_deviceDisplayFilter.room);
 			_drawDevices(deviceFilter);
 			
 		};
@@ -5526,12 +5532,21 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		var _roomID2Name={};
 		var _sceneID2RoomName={};
-		
-		function _onClickRoomButton(htmlid,altuiid) {
-			function _sceneInThisRoom(scene) {
-				return ( (htmlid<0) || (scene!=null && _sceneID2RoomName[scene.altuiid]==_roomID2Name[altuiid]) ) 
-						&& ( (htmlid!=-2) || (scene.favorite==true) );
+		var _sceneFilter={
+			room: MyLocalStorage.getSettings("SceneRoomFilter") || -1,
+			isValid: function() { return this.room != -1 }
+		};
+		function _sceneInThisRoom(scene) {
+			if ((_sceneID2RoomName[scene.altuiid]==null)&&(scene.room>0)) {
+				var controller = MultiBox.controllerOf(scene.altuiid).controller;
+				_sceneID2RoomName[scene.altuiid] = _roomID2Name["{0}-{1}".format(controller,scene.room)];
 			}
+			return ( (_sceneFilter.room<0) || (scene!=null && _sceneID2RoomName[scene.altuiid]==_roomID2Name[_sceneFilter.room]) ) 
+				&& ( (_sceneFilter.room!=-2) || (scene.favorite==true) );
+		};
+		function _onClickRoomButton(htmlid,altuiid) {
+			_sceneFilter.room = (altuiid !="") ? altuiid : htmlid;
+			MyLocalStorage.setSettings("SceneRoomFilter",_sceneFilter.room);
 			_drawScenes( _sceneInThisRoom );
 		};
 		
@@ -5545,10 +5560,7 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		
 		function afterSceneListDraw(scenes) {
-			$.each(scenes, function(idx,scene){
-				var controller = MultiBox.controllerOf(scene.altuiid).controller;
-				_sceneID2RoomName[scene.altuiid] = _roomID2Name["{0}-{1}".format(controller,scene.room)];
-			});
+			$("#altui-device-room-filter button").toggleClass("text-info",_sceneFilter.isValid());
 			$(".altui-mainpanel")
 				// .off("click",".altui-delscene")
 				.on("click",".altui-delscene",function() {
@@ -5634,6 +5646,7 @@ var UIManager  = ( function( window, undefined ) {
 		toolbarHtml+=(plusGlyph + "&nbsp;" + _T("Create"));
 		toolbarHtml+="  </button>";			
 		$("#altui-pagetitle").append(toolbarHtml);
+				
 		$("#altui-scene-create").click( function() {
 			UIManager.pageSceneEdit(NULL_SCENE);
 		});
@@ -5648,7 +5661,7 @@ var UIManager  = ( function( window, undefined ) {
 			}
 		);
 		
-		_drawScenes( null );
+		_drawScenes( _sceneInThisRoom );
 	},
 
 	pageSceneEdit: function (altuiid,newscene_template)
