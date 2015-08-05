@@ -5276,10 +5276,11 @@ var UIManager  = ( function( window, undefined ) {
 		}
 		
 		function endDrawDevice(devices) {
-			_drawDeviceToolbar();
+			_drawDeviceToolbar().done( function() {
+				$("#altui-device-room-filter button").toggleClass("text-info",_deviceDisplayFilter.isRoomFilterValid());
+				$("#altui-device-category-filter button").toggleClass("text-info",_deviceDisplayFilter.isCategoryFilterValid());
+			});
 			UIManager.refreshUI(true,false);
-			$("#altui-device-room-filter button").toggleClass("text-info",_deviceDisplayFilter.isRoomFilterValid());
-			$("#altui-device-category-filter button").toggleClass("text-info",_deviceDisplayFilter.isCategoryFilterValid());
 		};
 		
 		function drawDeviceContainer(idx, device) {
@@ -5344,7 +5345,7 @@ var UIManager  = ( function( window, undefined ) {
 			toolbarHtml+="  </button>";
 			toolbarHtml+="  <ul class='dropdown-menu' role='menu'>"
 			toolbarHtml+="<li><a href='#' id='{0}'>{1}</a></li>".format(0,_T('All'));
-			MultiBox.getCategories(
+			return MultiBox.getCategories(
 				function(idx,category) {
 					toolbarHtml+="<li><a href='#' id='{0}'>{1}</a></li>".format(category.id,category.name);
 				},

@@ -373,6 +373,7 @@ var MultiBox = ( function( window, undefined ) {
 		return _controllers[elems[0]].controller.updateNeighbors(elems[1]);
 	};
 	function _getCategories( cbfunc, filterfunc, endfunc ) {
+		var dfd = $.Deferred();
 		var arr=[];
 		var answers = 0;
 		$.each(_controllers, function( idx,c) {
@@ -393,11 +394,13 @@ var MultiBox = ( function( window, undefined ) {
 
 						if ($.isFunction(endfunc))
 							(endfunc)(arr2);
+						
+						dfd.resolve(categories);
 					}
 				}
 			);
 		});
-		return arr;
+		return dfd.promise();
 	};
 	function _getCategoryTitle(catnum) {
 		return _controllers[0].controller.getCategoryTitle(catnum);	//returns (found !=undefined) ? found : '';
