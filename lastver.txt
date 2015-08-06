@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("566,2 columns menu controllable by a user option,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28346")
+UIManager.checkAltuiUpdate("571,theme loading order;filter persistency and visual hint;2 columns menu controllable by a user option,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28351")
