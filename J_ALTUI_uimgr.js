@@ -4064,7 +4064,7 @@ var UIManager  = ( function( window, undefined ) {
 		}
 	};
 	
-	function _drawRoomFilterButton() {
+	function _drawRoomFilterButton( selectedroom ) {
 		var toolbarHtml="";
 		var rooms = MultiBox.getRoomsSync();
 		toolbarHtml+="	<div class='btn-group' id='altui-device-room-filter'>";
@@ -4075,14 +4075,14 @@ var UIManager  = ( function( window, undefined ) {
 				(rooms.length+2>=parseInt(MyLocalStorage.getSettings('Menu2ColumnLimit'))) ? "style='columns: 2; -webkit-columns: 2; -moz-columns: 2;'" : ""
 				);
 				$.each([{id:-1,name:_T('All')},{id:0,name:_T('No Room')}], function( idx, room) {
-					toolbarHtml+="<li><a href='#' id='{1}' data-altuiid='{2}'>{0}</a></li>".format(room.name,room.id,"");
+					toolbarHtml+="<li><a href='#' id='{1}' data-altuiid='{2}' class='{3}' >{0}</a></li>".format(room.name,room.id,"",(selectedroom==room.id) ? 'bg-primary' : '');
 				});
 				var namearray = $.map(rooms, function(r) { return r.name;} );
 				var filteredrooms = $.grep(rooms, function(room, idx) {
 					return $.inArray(room.name ,namearray) == idx;
 				});
 				$.each(filteredrooms, function( idx, room) {
-					toolbarHtml+="<li><a href='#' id='{1}' data-altuiid='{2}'>{0}</a></li>".format(room.name,room.id,room.altuiid);
+					toolbarHtml+="<li><a href='#' id='{1}' data-altuiid='{2}' class='{3}'>{0}</a></li>".format(room.name,room.id,room.altuiid,(selectedroom==room.altuiid) ? 'bg-primary' : '');
 				});
 				toolbarHtml+="  </ul>";
 		toolbarHtml+="</div>";			
@@ -5333,7 +5333,7 @@ var UIManager  = ( function( window, undefined ) {
 			
 			var toolbarHtml="";
 
-			toolbarHtml+=_drawRoomFilterButton();
+			toolbarHtml+=_drawRoomFilterButton( _deviceDisplayFilter.room );
 			
 			toolbarHtml+="	<div class='btn-group' id='altui-device-category-filter'>";
 			toolbarHtml+="  <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown' aria-expanded='false'>";
@@ -5462,7 +5462,6 @@ var UIManager  = ( function( window, undefined ) {
 			_deviceDisplayFilter.room = (altuiid !="") ? altuiid : htmlid;	
 			MyLocalStorage.setSettings("RoomFilter",_deviceDisplayFilter.room);
 			_drawDevices(deviceFilter);
-			
 		};
 		
 		// Page Preparation
@@ -5557,7 +5556,20 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		
 		function afterSceneListDraw(scenes) {
+			// draw toolbar buttons
+			var toolbarHtml="";
+			toolbarHtml+=_drawRoomFilterButton( _sceneFilter.room );
+			toolbarHtml+="  <button type='button' class='btn btn-default' id='altui-scene-create' >";
+			toolbarHtml+=(plusGlyph + "&nbsp;" + _T("Create"));
+			toolbarHtml+="  </button>";			
+			$(".altui-scene-toolbar").replaceWith( "<div class='altui-scene-toolbar'>"+toolbarHtml+"</div>" );
+					
+			$("#altui-scene-create").click( function() {
+				UIManager.pageSceneEdit(NULL_SCENE);
+			});
 			$("#altui-device-room-filter button").toggleClass("btn-info",_sceneFilter.isValid());
+			
+			// actions
 			$(".altui-mainpanel")
 				// .off("click",".altui-delscene")
 				.on("click",".altui-delscene",function() {
@@ -5637,16 +5649,7 @@ var UIManager  = ( function( window, undefined ) {
 		}
 		
 		UIManager.clearPage(_T('Scenes'),_T("Scenes"));
-		var toolbarHtml="";
-		toolbarHtml+=_drawRoomFilterButton();
-		toolbarHtml+="  <button type='button' class='btn btn-default' id='altui-scene-create' >";
-		toolbarHtml+=(plusGlyph + "&nbsp;" + _T("Create"));
-		toolbarHtml+="  </button>";			
-		$("#altui-pagetitle").append(toolbarHtml);
-				
-		$("#altui-scene-create").click( function() {
-			UIManager.pageSceneEdit(NULL_SCENE);
-		});
+		$("#altui-pagetitle").css("display","inline").after("<div class='altui-scene-toolbar'></div>");
 		
 		// on the left, get the rooms
 		UIManager.leftnavRooms( 
