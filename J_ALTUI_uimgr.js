@@ -5340,10 +5340,10 @@ var UIManager  = ( function( window, undefined ) {
 			toolbarHtml+=  (tagsGlyph + '&nbsp;' +_T('Category') + "<span class='caret'></span>");
 			toolbarHtml+="  </button>";
 			toolbarHtml+="  <ul class='dropdown-menu' role='menu'>"
-			toolbarHtml+="<li><a href='#' id='{0}'>{1}</a></li>".format(0,_T('All'));
+			toolbarHtml+="<li><a href='#' id='{0}' class='{2}'>{1}</a></li>".format(0,_T('All'),(_deviceDisplayFilter.category==0) ? 'bg-primary' : '');
 			return MultiBox.getCategories(
 				function(idx,category) {
-					toolbarHtml+="<li><a href='#' id='{0}'>{1}</a></li>".format(category.id,category.name);
+					toolbarHtml+="<li><a href='#' id='{0}' class='{2}'>{1}</a></li>".format(category.id,category.name,(_deviceDisplayFilter.category==category.id) ? 'bg-primary' : '');
 				},
 				null,
 				function(categories) {
