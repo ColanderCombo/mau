@@ -32,6 +32,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-blue { color:blue;}";
 		style += ".altui-orange { color:darkorange;}";
 		style += ".altui-magenta { color:magenta;}";
+		style += ".altui-multiswitch-container { position:absolute; left:58px; right:16px; } .altui-multiswitch-container .row { padding-top:1px; padding-bottom:1px; margin-left:0px; margin-right:0px;} .altui-multiswitch-container .col-xs-3 { padding-left:1px; padding-right:1px; }  .altui-multiswitch-open { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left:0px; margin-right:0px; width: 100%; max-width: 100% }";
 		style += ".altui-cyan { color:cyan;}";
 		style += ".altui-dimmable-slider { margin-left: 60px; }";	
 		style += ".altui-infoviewer-log,.altui-window-btn,.altui-datamine-open { margin-top: 10px; }";	
@@ -388,12 +389,51 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var ipaddr = MultiBox.getIpAddr(device.altuiid);
 		var hostname = (ipaddr=='') ? window.location.hostname : ipaddr;
 		var url = window.location.protocol+'//'+hostname+"/dm/index.html";
-		html+= ("<button id='{0}' type='button' class='pull-right altui-datamine-open btn btn-default btn-sm ' >{1}</button>" .format( device.altuiid,_T("Open") )) ;
+		html+= ("<button id='altui-datamine-{0}' type='button' class='pull-right altui-datamine-open btn btn-default btn-sm ' >{1}</button>" .format( device.altuiid,_T("Open") )) ;
 		html += "<script type='text/javascript'>";
-		html += " $('button#{0}.altui-datamine-open').on('click', function() { window.open('{1}','_blank'); } );".format(device.altuiid,url);
+		html += " $('button#altui-datamine-{0}.altui-datamine-open').on('click', function() { window.open('{1}','_blank'); } );".format(device.altuiid,url);
 		html += "</script>";
 		return html;
 	};	
+	
+	function _drawMultiswitch(device) {
+		var btnid = 0;
+		var html ="";
+
+		var names = MultiBox.getStatus(device,"urn:dcineco-com:serviceId:MSwitch1","BtnNames") || "[]";
+		names = JSON.parse(names);
+
+		html += "<div class='altui-multiswitch-container pull-right'>";
+		for (var line=0; line<2 ; line++) {
+			html += "<div class='row'>";
+			for (var col=0; col<4; col ++) {
+				var name = names[btnid] ? names[btnid] : ("Btn_"+btnid);
+				var status = parseInt(MultiBox.getStatus(device,"urn:dcineco-com:serviceId:MSwitch1","Status"+(btnid+1)));
+
+				html += "<div class='col-xs-3'>";
+				html+= ("<button id='{0}' type='button' class='altui-multiswitch-open btn btn-default btn-xs {2}' >{1}</button>".format( 
+					btnid ,
+					name  ,
+					(status==1) ? 'btn-info' : ''
+					)) ;
+				// html+= "x";
+				html += "</div>";
+				
+				btnid ++;
+			}
+			html += "</div>";
+		}
+		html += "</div>";
+		html += "<script type='text/javascript'>";
+		html += " $('button.altui-multiswitch-open').on('click', function() { 	";
+		html += " 	var btnid = parseInt($(this).prop('id'))+1;					";
+		html += "   var action = 'SetStatus'+btnid; 							";
+		html += "   var params = {}; params['newStatus'+btnid]=-1;				";
+		html += "	MultiBox.runActionByAltuiID('{0}', 'urn:dcineco-com:serviceId:MSwitch1', action, params);".format(device.altuiid);
+		html += "});"
+		html += "</script>";
+		return html;
+	};
 	
 	function _drawInfoViewer( device) {
 		var html ="";
@@ -401,9 +441,9 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var urlhead = MultiBox.getUrlHead(device.altuiid);
 		if (pattern!="")
 			html+= "<span class=''>Pattern: {0}</span>".format( pattern.htmlEncode() );
-		html+= ("<button id='{0}' type='button' class='pull-right altui-infoviewer-log btn btn-default btn-sm '>{1}</button>" .format( device.altuiid,_T("Open") )) ;
+		html+= ("<button id='altui-infoviewer-{0}' type='button' class='pull-right altui-infoviewer-log btn btn-default btn-sm '>{1}</button>" .format( device.altuiid,_T("Open") )) ;
 		html += "<script type='text/javascript'>";
-		html += " $('button#{0}.altui-infoviewer-log').on('click', function() { window.open('{1}?id=lr_al_info','_blank'); } );".format(device.altuiid,urlhead);
+		html += " $('button.altui-infoviewer-log').on('click', function() { window.open('{1}?id=lr_al_info','_blank'); } );".format(device.altuiid,urlhead);
 		html += "</script>";
 		return html;
 	};	
@@ -449,6 +489,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawWeatherIcon : _drawWeatherIcon,
 	drawInfoViewer  : _drawInfoViewer,
 	drawDataMine 	: _drawDataMine,
+	drawMultiswitch : _drawMultiswitch,		// warning, hardcoded display direction from UIMANAGER on this one due to changing device type
 	toggleButton    : _toggleButton,
 	toggleOnOffButton : function (altuiid,htmlid) {
 		_toggleButton(altuiid, htmlid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status', function(id,newval) {
