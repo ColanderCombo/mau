@@ -4191,18 +4191,14 @@ var UIManager  = ( function( window, undefined ) {
 	};
 	
 	function _initUIEngine(css) {
-		var head = document.getElementsByTagName('head')[0];
-		var style = document.createElement('style');
-		style.type = 'text/css';
-		style.appendChild(document.createTextNode(css));
-		head.appendChild(style);	
+		$("title").after("<style type='text/css'>{0}</style>".format(css));
 	};
 	
 	function _initEngine(styles, devicetypes, themecss,cbfunc) {
 		_initOptions();
-		_initUIEngine(styles);
 		if (themecss && (themecss.trim()!="") )
 			$("title").after("<link rel='stylesheet' href='"+themecss+"'>");
+		_initUIEngine(styles);
 		_initDB(devicetypes,cbfunc);
 	};
 
