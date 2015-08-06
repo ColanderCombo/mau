@@ -5273,8 +5273,8 @@ var UIManager  = ( function( window, undefined ) {
 		
 		function endDrawDevice(devices) {
 			_drawDeviceToolbar().done( function() {
-				$("#altui-device-room-filter button").toggleClass("text-info",_deviceDisplayFilter.isRoomFilterValid());
-				$("#altui-device-category-filter button").toggleClass("text-info",_deviceDisplayFilter.isCategoryFilterValid());
+				$("#altui-device-room-filter button").toggleClass("btn-info",_deviceDisplayFilter.isRoomFilterValid());
+				$("#altui-device-category-filter button").toggleClass("btn-info",_deviceDisplayFilter.isCategoryFilterValid());
 			});
 			UIManager.refreshUI(true,false);
 		};
@@ -5557,7 +5557,7 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		
 		function afterSceneListDraw(scenes) {
-			$("#altui-device-room-filter button").toggleClass("text-info",_sceneFilter.isValid());
+			$("#altui-device-room-filter button").toggleClass("btn-info",_sceneFilter.isValid());
 			$(".altui-mainpanel")
 				// .off("click",".altui-delscene")
 				.on("click",".altui-delscene",function() {
