@@ -2454,7 +2454,7 @@ var UIManager  = ( function( window, undefined ) {
 				cls:'altui-widget-camera', 
 				no_refresh:true,
 				html: _toolHtml(cameraGlyph,_T("Camera")),
-				onWidgetResize: _onResizeStub,
+				onWidgetResize: _onResizeCamera,
 				aspectRatio: true,
 				property: _onPropertyCamera, 
 				widgetdisplay: function(widget,bEdit)	{ 
@@ -4216,6 +4216,22 @@ var UIManager  = ( function( window, undefined ) {
 	//------------------------------------------------------------	
 
 	var startpos = null;
+	var _widgetOnCanvasResizableOptions = function(tool) {
+		return {
+			aspectRatio: tool.aspectRatio ||false,		// no aspect ratio by default
+			grid: [ 5,5 ],
+			containment: "parent",
+			stop: function( event, ui ) {
+				var pagename = _getActivePageName();
+				var page = PageManager.getPageFromName( pagename );
+				var widgetid = $(ui.helper).prop('id');
+				(tool.onWidgetResize)(page,widgetid,ui.position,ui.size);
+				PageManager.updateChildrenInPage( page, widgetid, ui.position, ui.size );
+				_showSavePageNeeded(true);
+			}
+		}
+	};
+	
 	var _widgetOnCanvasDraggableOptions = {
 		grid: [ 5,5 ],
 		// helper: "clone",
@@ -4512,8 +4528,21 @@ var UIManager  = ( function( window, undefined ) {
 	{
 	};
 	
+	function _onResizeCamera(page, widgetid, position, size)
+	{
+		var widget = PageManager.getWidgetByID( page, widgetid ); 
+		var tool = _getToolByClass( widget.cls );
+		widget.size = size;
+		_replaceElementKeepAttributes( $(".altui-custompage-canvas .altui-widget#"+widgetid) , _getWidgetHtml(widget,true) );
+		$(".altui-custompage-canvas .altui-widget#"+widgetid).resizable(
+			_widgetOnCanvasResizableOptions(tool)
+		);
+	};
 	function _onResizeGauge(page, widgetid, position, size)
 	{
+		var widget = PageManager.getWidgetByID( page, widgetid ); 
+		var tool = _getToolByClass( widget.cls );
+		widget.size = size;
 		_onDisplayGauge(page,widgetid,true);
 	};
 	
@@ -6056,24 +6085,9 @@ var UIManager  = ( function( window, undefined ) {
 			$.each(tools, function(idx,tool){
 				if ($.isFunction( tool.onWidgetResize) ) {
 				// if (tool.resizable==true) {
-					$(".altui-custompage-canvas ."+tool.cls).resizable({
-						// helper: "ui-resizable-helper",
-						// start: function( event, ui ) {
-							// $(ui.helper).height(ui.originalSize.height);
-							// $(ui.helper).width(ui.originalSize.width);
-						// },
-						aspectRatio: tool.aspectRatio || false,	// no aspect ratio by default
-						containment: "parent",
-						grid: [ 5,5 ],
-						stop: function( event, ui ) {
-							var pagename = _getActivePageName();
-							var page = PageManager.getPageFromName( pagename );
-							var widgetid = $(ui.helper).prop('id');
-							PageManager.updateChildrenInPage( page, widgetid, ui.position, ui.size );
-							(tool.onWidgetResize)(page,widgetid,ui.position,ui.size);
-							_showSavePageNeeded(true);
-						}
-					});
+					$(".altui-custompage-canvas ."+tool.cls).resizable(
+						_widgetOnCanvasResizableOptions(tool)
+					);
 				}
 			});
 			
@@ -6132,21 +6146,9 @@ var UIManager  = ( function( window, undefined ) {
 							.draggable(_widgetOnCanvasDraggableOptions);
 						if ($.isFunction( tool.onWidgetResize) ) 
 						{	
-							obj.resizable({
-								// helper: "ui-resizable-helper",
-								// start: function( event, ui ) {
-									// $(ui.helper).height(ui.originalSize.height);
-									// $(ui.helper).width(ui.originalSize.width);
-								// },
-								aspectRatio: tool.aspectRatio ||false,	// no aspect ratio by default
-								grid: [ 5,5 ],
-								containment: "parent",
-								stop: function( event, ui ) {
-									(tool.onWidgetResize)(page,widgetid,ui.position,ui.size);
-									PageManager.updateChildrenInPage( page, widgetid, ui.position, ui.size );
-									_showSavePageNeeded(true);
-								}
-							});
+							obj.resizable(
+								_widgetOnCanvasResizableOptions(tool)
+							);
 						}
 						if ($.isFunction( tool.onWidgetDisplay) )
 						{
