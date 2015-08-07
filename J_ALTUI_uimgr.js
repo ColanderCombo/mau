@@ -506,7 +506,7 @@ var DialogManager = ( function() {
 	function _getDeviceServiceVariableSelect(device, service, variable) {
 		// var device = MultiBox.getDeviceByID( deviceid );
 		var select = $("<select id='altui-select-variable' class='form-control'></select>");
-		if (device!=null) {
+		if ((device!=null) && (device.altuiid!=NULL_DEVICE)) {
 			$.each(device.states.sort(_sortByVariableName), function(idx,state) {
 				select.append("<option value='{0}' {2}>{1}</option>".format(
 					idx,
@@ -2458,7 +2458,7 @@ var UIManager  = ( function( window, undefined ) {
 				property: _onPropertyCamera, 
 				widgetdisplay: function(widget,bEdit)	{ 
 					var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
-					return (device!=null) ? _cameraDraw(device,widget.size) : "<img src='{0}' style='max-height:100%; max-width:100%;'></img>".format(cameraURI);	//"<div class='altui-camera-div'>xxx</div>";
+					return ((device!=null) && (device.altuiid!=NULL_DEVICE)) ? _cameraDraw(device,widget.size) : "<img src='{0}' style='max-height:100%; max-width:100%;'></img>".format(cameraURI);	//"<div class='altui-camera-div'>xxx</div>";
 				},
 				properties: {	//( deviceID, service, action, params, cbfunc )
 					deviceid:NULL_DEVICE
@@ -4147,7 +4147,8 @@ var UIManager  = ( function( window, undefined ) {
 			var pagename = _getActivePageName();
 			var page = PageManager.getPageFromName( pagename );
 			// for all widget present which need refresh
-			$(".altui-widget").each( function (idx,elem) {
+			var selector = "#altui-page-content-{0} .altui-widget".format(pagename);
+			$(selector).each( function (idx,elem) {
 				var widgetid = $(elem).prop('id');
 				var widget = PageManager.getWidgetByID( page, widgetid );
 				var tool = _getToolByClass( widget.cls );
@@ -4568,24 +4569,27 @@ var UIManager  = ( function( window, undefined ) {
 			// save for real this time
 			real_widget.properties.deviceid = widget.properties.deviceid;
 			var states = MultiBox.getStatesByAltuiID( widget.properties.deviceid );
-			var selected = states[ $("#altui-select-variable").val() ];
-			real_widget.properties.variable = selected.variable;
-			real_widget.properties.service = selected.service;
-			real_widget.properties.label = $("#altui-widget-Label").val();
-			real_widget.properties.min = $("#altui-widget-Min").val();
-			real_widget.properties.max = $("#altui-widget-Max").val();
-			real_widget.properties.greenfrom = $("#altui-widget-Green").val();
-			real_widget.properties.orangefrom = $("#altui-widget-Orange").val();
-			real_widget.properties.redfrom = $("#altui-widget-Red").val();
-			var ticks = $("#altui-widget-Ticks").val();
-			real_widget.properties.majorTicks = ticks.split(',');
+			var variable = $("#altui-select-variable").val();
+			if (variable!=null) {
+				var selected = states[ $("#altui-select-variable").val() ];
+				real_widget.properties.variable = selected.variable;
+				real_widget.properties.service = selected.service;
+				real_widget.properties.label = $("#altui-widget-Label").val();
+				real_widget.properties.min = $("#altui-widget-Min").val();
+				real_widget.properties.max = $("#altui-widget-Max").val();
+				real_widget.properties.greenfrom = $("#altui-widget-Green").val();
+				real_widget.properties.orangefrom = $("#altui-widget-Orange").val();
+				real_widget.properties.redfrom = $("#altui-widget-Red").val();
+				var ticks = $("#altui-widget-Ticks").val();
+				real_widget.properties.majorTicks = ticks.split(',');
+				_showSavePageNeeded(true);
+				
+				// refresh widget
+				var pagename = _getActivePageName();
+				var page = PageManager.getPageFromName( pagename );
+				_onDisplayGauge(page,real_widget.id,true);
+			}
 			$('div#dialogModal').modal('hide');
-			_showSavePageNeeded(true);
-			
-			// refresh widget
-			var pagename = _getActivePageName();
-			var page = PageManager.getPageFromName( pagename );
-			_onDisplayGauge(page,real_widget.id,true);
 		});
 	}
 
@@ -4797,17 +4801,19 @@ var UIManager  = ( function( window, undefined ) {
 	
 	function _updateDynamicDisplayTools( bEdit )
 	{
-		var pagename = _getActivePageName();
-		var page = PageManager.getPageFromName( pagename );
-		$.each(tools, function(idx,tool) {
-			if ($.isFunction( tool.onWidgetDisplay) )
-			{
-				$(".altui-custompage-canvas ."+tool.cls).each( function(idx,elem) {
-					var widgetid = $(elem).prop('id');
-					(tool.onWidgetDisplay)(page,widgetid, bEdit);		// edit mode							
-				})
-			}
-		});	
+		// var pagename = _getActivePageName();
+		PageManager.forEachPage( function( idx, page) {
+			$.each(tools, function(idx,tool) {
+				if ($.isFunction( tool.onWidgetDisplay) )
+				{
+					var selector = "#altui-page-content-{0} .{1}".format(page.name,tool.cls);
+					$(selector).each( function(idx,elem) {
+						var widgetid = $(elem).prop('id');
+						(tool.onWidgetDisplay)(page,widgetid, bEdit);		// edit mode							
+					})
+				}
+			});	
+		});
 	};
 	
 	function _createControllerSelect(htmlid) {
