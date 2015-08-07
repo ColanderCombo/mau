@@ -3319,9 +3319,10 @@ var UIManager  = ( function( window, undefined ) {
 							})
 					.css("max-width","100%")
 					.css("max-width","100%")
-					.css("width","100%")
-					.css("height","100%")
-					.height((size!=undefined) ? size.height : 300);
+					// .css("width","100%")
+					// .css("height","100%")
+					.height((size!=undefined) ? size.height : 300)
+					.width((size!=undefined) ? size.width : Math.floor(300*640/480))
 			}
 		} else
 			obj = $("<div >"+_T("Unknown Device")+"</div>");
@@ -4538,6 +4539,7 @@ var UIManager  = ( function( window, undefined ) {
 			.on( 'submit',"div#dialogModal form", function() {
 			// save for real this time
 			real_widget.properties.deviceid = $("#altui-select-device").val();
+			real_widget.size = $.extend({ width:Math.floor(300*640/480), height:300},widget.size);
 			$('div#dialogModal button.btn-primary').off('click');
 			$('div#dialogModal').modal('hide');
 			_showSavePageNeeded(true);
@@ -4571,6 +4573,7 @@ var UIManager  = ( function( window, undefined ) {
 			if (widget.properties.deviceid==0)
 				return;	// mandatory data
 			real_widget.properties.deviceid = widget.properties.deviceid;
+			real_widget.size = $.extend({ width:120, height:120},widget.size);
 			var states = MultiBox.getStatesByAltuiID( widget.properties.deviceid );
 			var variable = $("#altui-select-variable").val();
 			if (variable!=null) {
