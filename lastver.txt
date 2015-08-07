@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("577,multiswitch plugin display;theme loading order;filter persistency and visual hint,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28364")
+UIManager.checkAltuiUpdate("582,bugfix for multi pages panels & google gauge,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28371")
