@@ -864,6 +864,7 @@ var DialogManager = ( function() {
 		});
 		
 		//service & variables
+		widget.properties.deviceid = $("#altui-select-device").val();
 		var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
 		var propertyline = "";
 		propertyline += "<div class='form-group'>";
@@ -4567,6 +4568,8 @@ var UIManager  = ( function( window, undefined ) {
 			.off('submit',"div#dialogModal form")
 			.on( 'submit',"div#dialogModal form", function() {
 			// save for real this time
+			if (widget.properties.deviceid==0)
+				return;	// mandatory data
 			real_widget.properties.deviceid = widget.properties.deviceid;
 			var states = MultiBox.getStatesByAltuiID( widget.properties.deviceid );
 			var variable = $("#altui-select-variable").val();
