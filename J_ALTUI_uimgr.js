@@ -4145,7 +4145,7 @@ var UIManager  = ( function( window, undefined ) {
 		});
 		
 		// refresh custom pages
-		if ($(".altui-page-contents").length>0)
+		if ($(".altui-page-contents").not(".altui-norefresh").length>0)
 		{
 			var pagename = _getActivePageName();
 			var page = PageManager.getPageFromName( pagename );
@@ -4233,60 +4233,73 @@ var UIManager  = ( function( window, undefined ) {
 		}
 	};
 	
-	var _widgetOnCanvasDraggableOptions = {
-		grid: [ 5,5 ],
-		// helper: "clone",
-		revert: "invalid",
-		// snap: true,
-		// snapMode: "inner",
-		// snapTolerance: 20,
-		start: function(event, ui) {
-			startpos = ui.position;
-			$(this).toggleClass("ui-selected");
-		},
-		drag: function(event, ui) {
-			// take all selected elements except me and fix their position to make them move.
-			var selected = $(".altui-custompage-canvas").children(".ui-selected").not("#"+ui.helper.prop('id'));
-			selected.each( function(index,elem) {
-				var elempos = $(elem).position();
-				$(elem).css ({
-					top: elempos.top + (ui.position.top-startpos.top),
-					left: elempos.left + (ui.position.left-startpos.left)
-				})
-			});
-			startpos = ui.position;
-			// console.log( "selected:"+selected.length+", "+JSON.stringify(startpos) + ":" + JSON.stringify(ui.position) );
-		},
-		stop: function(event, ui) {
-			startpos = null;
-			var selected = $(".altui-custompage-canvas").children(".ui-selected").not("#"+ui.helper.prop('id'));
-			var maxwidth = $(".altui-custompage-canvas").width();
-			var maxheight = $(".altui-custompage-canvas").height();
-			selected.each( function(index,elem) {
-				var elempos = $(elem).position();
-				if (elempos.top <= 0)
-					$(elem).css ('top',0);
-				if (elempos.top + $(elem).height() >= maxheight)
-					$(elem).css ('top',maxheight - $(elem).height() );
-				if (elempos.left <= 0)
-					$(elem).css ('left',0);
-				if (elempos.left+$(elem).width() >= maxwidth)
-					$(elem).css ('left',maxwidth - $(elem).width() );
-			});
-		}
+	// one page if specified, all pages otherwise
+	var _widgetOnCanvasDraggableOptions = function(page) {
+		return {
+			grid: [ 5,5 ],
+			// helper: "clone",
+			revert: "invalid",
+			// snap: true,
+			// snapMode: "inner",
+			// snapTolerance: 20,
+			start: function(event, ui) {
+				startpos = ui.position;
+				$(this).toggleClass("ui-selected");
+			},
+			drag: function(event, ui) {
+				// take all selected elements except me and fix their position to make them move.
+				var canvas = $( _getPageSelector( page ) );
+				var selected = canvas.children(".ui-selected").not("#"+ui.helper.prop('id'));
+				selected.each( function(index,elem) {
+					var elempos = $(elem).position();
+					$(elem).css ({
+						top: elempos.top + (ui.position.top-startpos.top),
+						left: elempos.left + (ui.position.left-startpos.left)
+					})
+				});
+				startpos = ui.position;
+				// console.log( "selected:"+selected.length+", "+JSON.stringify(startpos) + ":" + JSON.stringify(ui.position) );
+			},
+			stop: function(event, ui) {
+				var canvas = $( _getPageSelector( page ) );
+				startpos = null;
+				var selected = canvas.children(".ui-selected").not("#"+ui.helper.prop('id'));
+				var maxwidth = canvas.width();
+				var maxheight = canvas.height();
+				selected.each( function(index,elem) {
+					var elempos = $(elem).position();
+					if (elempos.top <= 0)
+						$(elem).css ('top',0);
+					if (elempos.top + $(elem).height() >= maxheight)
+						$(elem).css ('top',maxheight - $(elem).height() );
+					if (elempos.left <= 0)
+						$(elem).css ('left',0);
+					if (elempos.left+$(elem).width() >= maxwidth)
+						$(elem).css ('left',maxwidth - $(elem).width() );
+				});
+			}
+		};
 	};
 	
 	// ------------------------------------------
 	// Property dialog box for toolbox widgets
 	// ------------------------------------------
-	function _replaceElementKeepAttributes( oldobject, html ) {
+	function _replaceElementKeepAttributes( selector, html ) {
+		var oldobject = $(selector);
 		var cls = oldobject.attr('class');
 		var style = oldobject.attr('style');
 		var newobject = $(html).attr('class',cls).attr('style',style);
 		oldobject.replaceWith(newobject);
-		newobject.draggable(_widgetOnCanvasDraggableOptions);
+		return $(selector);
 	};
-
+	
+	function _replaceWidgetHtmlInPage( widget , html )
+	{
+		var page = PageManager.getPageFromName( _getActivePageName() );
+		var selector = _getWidgetSelector(page,widget)
+		return _replaceElementKeepAttributes( selector, html ).draggable( _widgetOnCanvasDraggableOptions(page) );
+	};
+	
 	function _showSavePageNeeded(bNeeded) {
 		$("#altui-page-action-save")
 			.toggleClass("btn-info",bNeeded)
@@ -4297,6 +4310,9 @@ var UIManager  = ( function( window, undefined ) {
 	function _onPropertyImage(real_widget) {
 		// clone for temporary storage
 		var widget = $.extend( true, {}, real_widget );
+		var pagename = _getActivePageName();
+		var page = PageManager.getPageFromName( pagename );
+
 		var properties = widget.properties;		
 		var propertyline = "";
 		propertyline += "      	<div class='form-group'>";
@@ -4316,7 +4332,7 @@ var UIManager  = ( function( window, undefined ) {
 			real_widget.properties.url = $('#altui-widget-imgsource').val();
 			$('div#dialogModal').modal('hide');
 			_showSavePageNeeded(true);
-			$(".altui-custompage-canvas .altui-widget#"+real_widget.id).find("img").attr("src",real_widget.properties.url);
+			$( _getWidgetSelector(page,real_widget) ).find("img").attr("src",real_widget.properties.url);
 		});
 		
 		$('div#dialogModal').modal();
@@ -4348,8 +4364,7 @@ var UIManager  = ( function( window, undefined ) {
 			real_widget.properties.variable = selected.variable;
 			$('div#dialogModal').modal('hide');
 			_showSavePageNeeded(true);
-			_replaceElementKeepAttributes( $(".altui-custompage-canvas .altui-widget#"+real_widget.id) , _getWidgetHtml(real_widget,true) );
-			// $(".altui-custompage-canvas .altui-widget#"+real_widget.id).find("p").text( MultiBox.oldgetStatus( real_widget.properties.deviceid , real_widget.properties.service, real_widget.properties.variable ) );
+			_replaceWidgetHtmlInPage( real_widget , _getWidgetHtml(real_widget,true) );
 		});
 	};
 
@@ -4373,7 +4388,7 @@ var UIManager  = ( function( window, undefined ) {
 			$('div#dialogModal button.btn-primary').off('click');
 			$('div#dialogModal').modal('hide');
 			_showSavePageNeeded(true);
-			_replaceElementKeepAttributes( $(".altui-custompage-canvas .altui-widget#"+widget.id) , _getWidgetHtml(widget,true) );
+			_replaceWidgetHtmlInPage( widget , _getWidgetHtml(widget,true) )
 		});
 		
 		$('div#dialogModal').modal();
@@ -4399,7 +4414,7 @@ var UIManager  = ( function( window, undefined ) {
 			real_widget.properties.label = $("#altui-widget-Label").val();
 			$('div#dialogModal').modal('hide');
 			_showSavePageNeeded(true);
-			_replaceElementKeepAttributes( $(".altui-custompage-canvas .altui-widget#"+real_widget.id) , _getWidgetHtml(real_widget,true) );
+			_replaceWidgetHtmlInPage( real_widget , _getWidgetHtml(real_widget,true) )
 		});
 	};
 	
@@ -4436,7 +4451,7 @@ var UIManager  = ( function( window, undefined ) {
 			});
 			$('div#dialogModal').modal('hide');
 			_showSavePageNeeded(true);
-			_replaceElementKeepAttributes( $(".altui-custompage-canvas .altui-widget#"+real_widget.id) , _getWidgetHtml(real_widget,true));
+			_replaceWidgetHtmlInPage( real_widget , _getWidgetHtml(real_widget,true) )
 		});	
 	};
 
@@ -4497,7 +4512,7 @@ var UIManager  = ( function( window, undefined ) {
 			});
 			$('div#dialogModal').modal('hide');
 			_showSavePageNeeded(true);
-			_replaceElementKeepAttributes( $(".altui-custompage-canvas .altui-widget#"+real_widget.id) , _getWidgetHtml(real_widget,true));
+			_replaceWidgetHtmlInPage( real_widget , _getWidgetHtml(real_widget,true) )
 		});	
 	};
 	
@@ -4521,7 +4536,7 @@ var UIManager  = ( function( window, undefined ) {
 			$('div#dialogModal button.btn-primary').off('click');
 			$('div#dialogModal').modal('hide');
 			_showSavePageNeeded(true);
-			_replaceElementKeepAttributes( $(".altui-custompage-canvas .altui-widget#"+real_widget.id) , _getWidgetHtml(real_widget,true) );
+			_replaceWidgetHtmlInPage( real_widget , _getWidgetHtml(real_widget,true) )
 		});
 	};
 
@@ -4534,11 +4549,11 @@ var UIManager  = ( function( window, undefined ) {
 		var widget = PageManager.getWidgetByID( page, widgetid ); 
 		var tool = _getToolByClass( widget.cls );
 		widget.size = size;
-		_replaceElementKeepAttributes( $(".altui-custompage-canvas .altui-widget#"+widgetid) , _getWidgetHtml(widget,true) );
-		$(".altui-custompage-canvas .altui-widget#"+widgetid).resizable(
+		_replaceWidgetHtmlInPage( widget , _getWidgetHtml(widget,true) ).resizable(
 			_widgetOnCanvasResizableOptions(tool)
 		);
 	};
+	
 	function _onResizeGauge(page, widgetid, position, size)
 	{
 		var widget = PageManager.getWidgetByID( page, widgetid ); 
@@ -4546,7 +4561,7 @@ var UIManager  = ( function( window, undefined ) {
 		widget.size = size;
 		_onDisplayGauge(page,widgetid,true);
 	};
-	
+
 	function _onPropertyCamera(real_widget)
 	{
 		// clone for temporary storage
@@ -4573,7 +4588,10 @@ var UIManager  = ( function( window, undefined ) {
 			$('div#dialogModal button.btn-primary').off('click');
 			$('div#dialogModal').modal('hide');
 			_showSavePageNeeded(true);
-			_replaceElementKeepAttributes( $(".altui-custompage-canvas .altui-widget#"+real_widget.id) , _getWidgetHtml(real_widget,true) );
+			var tool = _getToolByClass( real_widget.cls );
+			_replaceWidgetHtmlInPage( real_widget , _getWidgetHtml(real_widget,true) ).resizable(
+				_widgetOnCanvasResizableOptions(tool)
+			);
 		});
 	};
 
@@ -4775,7 +4793,19 @@ var UIManager  = ( function( window, undefined ) {
 		var pagename = $("#altui-page-tabs li.active").prop('id');
 		return pagename != undefined ? pagename.substring( "altui-page-".length) : '';
 	};
-
+	
+	// one page if specified, all pages otherwise
+	function _getPageSelector( page ) {
+		if (page == undefined)
+				return ".altui-page-content-one";
+		return "#altui-page-content-{0}".format(page.name);
+	};
+	function _getWidgetSelector(page,widget) {
+		if ((page==undefined) || (widget==undefined))
+			return "";
+		return _getPageSelector(page)+" .altui-widget#"+widget.id
+	};
+	
 	function _createPageTabsHtml( bEditMode ) {
 		var actions = "";
 		var lines = new Array();
@@ -4830,7 +4860,7 @@ var UIManager  = ( function( window, undefined ) {
 				pageHtml += _getWidgetHtml( child, bEditMode );
 			});
 		pageHtml += "</div>";
-		var str = "<div role='tabpanel' class='tab-pane' id='altui-page-content-{0}' >{1}</div>".format(page.name,pageHtml);
+		var str = "<div role='tabpanel' class='tab-pane altui-page-content-one' id='altui-page-content-{0}' >{1}</div>".format(page.name,pageHtml);
 		var elem = $(str).css('background',page.background);
 		return elem.wrap( "<div></div>" ).parent().html();
 	};
@@ -6042,7 +6072,7 @@ var UIManager  = ( function( window, undefined ) {
 		function _createPageEditorHtml() {
 			var pageTabs = _createPageTabsHtml( true );		// edit mode
 
-			var Html = "<div class='tab-content'>";
+			var Html = "<div class='tab-content altui-page-contents altui-norefresh'>";
 			PageManager.forEachPage( function( idx, page) {
 				Html += _getPageHtml(page, true)	// edit mode
 			});
@@ -6078,9 +6108,10 @@ var UIManager  = ( function( window, undefined ) {
 			$(".altui-mainpanel").html( pageEditorHtml );
 			$('#altui-page-tabs a:first').tab('show');
 			_updateDynamicDisplayTools( true );	//edit mode
+			
 			// make all reloaded children draggable
 			$(".altui-mainpanel .altui-widget")							
-				.draggable(_widgetOnCanvasDraggableOptions)
+				.draggable( _widgetOnCanvasDraggableOptions() )	// for all pages
 
 			// add resizable & gauges
 			$.each(tools, function(idx,tool){
@@ -6122,7 +6153,7 @@ var UIManager  = ( function( window, undefined ) {
 						_showSavePageNeeded(true);
 
 						// save also all selected items which moved as well as part of the drag and drop
-						var selected = $(".altui-custompage-canvas").children(".ui-selected").not("#"+ui.helper.prop('id'));
+						var selected = $(_getPageSelector( page )).children(".ui-selected").not("#"+ui.helper.prop('id'));
 						$.each(selected, function (idx,elem) {
 							widgetid = $(elem).prop('id');
 							PageManager.updateChildrenInPage( page, widgetid, $(elem).position() , $(elem).size() );
@@ -6144,7 +6175,7 @@ var UIManager  = ( function( window, undefined ) {
 						var html = _getWidgetHtml( widget , true);		// edit mode
 						var obj = $(html)
 							.appendTo(parent)
-							.draggable(_widgetOnCanvasDraggableOptions);
+							.draggable( _widgetOnCanvasDraggableOptions(page) );
 						if ($.isFunction( tool.onWidgetResize) ) 
 						{	
 							obj.resizable(
@@ -6178,7 +6209,7 @@ var UIManager  = ( function( window, undefined ) {
 					var page = PageManager.getPageFromName( pagename );
 					var dropped = ui.helper;				// clone
 					if ( $(dropped).parents(".altui-leftnav").length==0 ) { // not from toolbox
-						var selected = $(".altui-custompage-canvas").children(".ui-selected").not("#"+ui.helper.prop('id'));
+						var selected = $(_getPageSelector( page )).children(".ui-selected").not("#"+ui.helper.prop('id'));
 						selected.each( function(idx,elem)
 						{
 							PageManager.removeChildrenInPage( page, $(elem).prop('id') );
@@ -6209,7 +6240,7 @@ var UIManager  = ( function( window, undefined ) {
 				if (tool.glyph == id) {
 					// update on HTML page
 					var page = PageManager.getPageFromName( _getActivePageName() );
-					var selected = $(".altui-custompage-canvas").children(".ui-selected");
+					var selected = $( _getPageSelector( page ) ).children(".ui-selected");
 					(tool.onclick)( selected );
 					
 					// update the children position for each selected children
