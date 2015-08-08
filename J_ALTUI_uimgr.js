@@ -5057,12 +5057,24 @@ var UIManager  = ( function( window, undefined ) {
 	// ===========================
 
 
+	setLeftnavRoomsActive : function ( selectedRoomId ) {
+		var button = null;
+		$(".altui-leftbutton").toggleClass("active",false);
+		button = $(".altui-leftbutton[data-altuiid='"+selectedRoomId+"']");			
+		if (button.length==0) 
+			button = $(".altui-leftbutton[id="+selectedRoomId+"]")
+		button.toggleClass("active",true);
+	},
+	
 	leftnavRooms : function ( clickFunction , roomLoadedFunction)
 	{
+		var leftnav = $(".altui-leftnav");
 		$("body").off("click",".altui-leftbutton");
-		$(".altui-leftnav").append( leftNavButtonTemplate.format( -1, "", _T("All")) );
-		$(".altui-leftnav").append( leftNavButtonTemplate.format( -2, "", starGlyph+' '+_T("Favorites")) );
-		$(".altui-leftnav").append( leftNavButtonTemplate.format( 0, "", _T("No Room")) );
+		leftnav.empty()
+			.append( leftNavButtonTemplate.format( -1, "", _T("All")) )
+			.append( leftNavButtonTemplate.format( -2, "", starGlyph+' '+_T("Favorites")) )
+			.append( leftNavButtonTemplate.format( 0, "", _T("No Room")) );
+			
 		// install a click handler on button
 		if ($.isFunction( clickFunction ))  {
 			$("body").off("click",".altui-leftbutton");
@@ -5074,13 +5086,14 @@ var UIManager  = ( function( window, undefined ) {
 		}
 
 		MultiBox.getRooms( null,null,function( rooms ) {
+			// calculate unique rooms by name
 			var namearray = $.map(rooms, function(r) { return r.name;} );
 			var filteredrooms = $.grep(rooms, function(room,idx) {
 				return $.inArray(room.name ,namearray) == idx;
 			});
 
 			$.each(filteredrooms, function(i,room) {
-				$(".altui-leftnav").append( leftNavButtonTemplate.format( room.id, room.altuiid, (room!=null) ? room.name : "No Room") );	
+				leftnav.append( leftNavButtonTemplate.format( room.id, room.altuiid, (room!=null) ? room.name : "No Room") );	
 			})
 			if ($.isFunction(roomLoadedFunction))
 				(roomLoadedFunction)(rooms);
@@ -5271,7 +5284,7 @@ var UIManager  = ( function( window, undefined ) {
 		var _deviceID2RoomName = {};
 		var _deviceDisplayFilter = {
 			filterformvisible 	: false,
-			room			: MyLocalStorage.getSettings("RoomFilter") || -1,
+			room			: MyLocalStorage.getSettings("DeviceRoomFilter") || -1,
 			favorites		: (MyLocalStorage.getSettings("ShowFavoriteDevice")==true),
 			invisible 		: (MyLocalStorage.getSettings("ShowInvisibleDevice")==true),
 			batterydevice	: (MyLocalStorage.getSettings("ShowBatteryDevice")==true),
@@ -5524,7 +5537,8 @@ var UIManager  = ( function( window, undefined ) {
 		{
 			// var roomid = $(this).prop('id');
 			_deviceDisplayFilter.room = (altuiid !="") ? altuiid : htmlid;	
-			MyLocalStorage.setSettings("RoomFilter",_deviceDisplayFilter.room);
+			UIManager.setLeftnavRoomsActive(_deviceDisplayFilter.room);
+			MyLocalStorage.setSettings("DeviceRoomFilter",_deviceDisplayFilter.room);
 			_drawDevices(deviceFilter);
 		};
 		
@@ -5542,7 +5556,8 @@ var UIManager  = ( function( window, undefined ) {
 			function(rooms) {		// all rooms loaded callback
 				$.each(rooms, function(idx,room) {
 					_roomID2Name[ room.altuiid ] = room.name;
-				})
+				});
+				UIManager.setLeftnavRoomsActive(_deviceDisplayFilter.room);
 			}
 		);
 
@@ -5606,6 +5621,7 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		function _onClickRoomButton(htmlid,altuiid) {
 			_sceneFilter.room = (altuiid !="") ? altuiid : htmlid;
+			UIManager.setLeftnavRoomsActive( _sceneFilter.room );
 			MyLocalStorage.setSettings("SceneRoomFilter",_sceneFilter.room);
 			_drawScenes( _sceneInThisRoom );
 		};
@@ -5721,10 +5737,11 @@ var UIManager  = ( function( window, undefined ) {
 			function(rooms) {		// all rooms loaded callback
 				$.each(rooms, function(idx,room) {
 					_roomID2Name[ room.altuiid ] = room.name;
-				})
+				});
+				UIManager.setLeftnavRoomsActive( _sceneFilter.room );
 			}
 		);
-		
+
 		_drawScenes( _sceneInThisRoom );
 	},
 
