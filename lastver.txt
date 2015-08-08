@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("588,many bugfixes for multi pages custom panels,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28376")
+UIManager.checkAltuiUpdate("590,many bugfixes for multi pages custom panels,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28382")
