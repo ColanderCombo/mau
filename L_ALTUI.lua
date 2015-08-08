@@ -14,6 +14,7 @@ local version = "v0.64"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
+local socket = require("socket")
 local http = require("socket.http")
 local ltn12 = require("ltn12")
 local tmpprefix = "/tmp/altui_"		-- prefix for tmp files
@@ -220,10 +221,15 @@ local function checkVersion(lul_device)
 end
 
 local function getIP()
-	local stdout = io.popen("GetNetworkState.sh ip_wan")
-	local ip = stdout:read("*a")
-	stdout:close()
-	return ip
+	-- local stdout = io.popen("GetNetworkState.sh ip_wan")
+	-- local ip = stdout:read("*a")
+	-- stdout:close()
+	-- return ip
+	local mySocket = socket.udp ()  
+	mySocket:setpeername ("42.42.42.42", "424242")  -- arbitrary IP/PORT  
+	local ip = mySocket:getsockname ()  
+	mySocket: close()  
+	return ip or "127.0.0.1" 
 end
 
 local function getSysinfo(ip)

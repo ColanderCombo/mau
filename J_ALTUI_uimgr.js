@@ -2506,14 +2506,7 @@ var UIManager  = ( function( window, undefined ) {
 	var _remoteAccessUrl = "";
 
 	//var devicecontainerTemplate = "<div class=' col-xs-12 col-sm-6 col-md-4 col-lg-3 '><p data-toggle='tooltip' data-placement='left' title='{2}'>{0} [{1}]</p></div>"
-	function _loadStyle(styleFunctionName) {
-		var head = document.getElementsByTagName('head')[0];
-		var style = document.createElement('style');
-		style.type = 'text/css';
-		var css = _executeFunctionByName(styleFunctionName, window);
-		style.appendChild(document.createTextNode(css));
-		head.appendChild(style);
-	};
+
 
 	function _createScript(scriptName ) {
 		var container = $(".altui-scripts")[0];			// js object
@@ -2547,15 +2540,6 @@ var UIManager  = ( function( window, undefined ) {
 			return;
 		}
 		(drawfunc)();
-	};
-	
-	function _executeFunctionByName(functionName, context , device, extraparam) {
-		var namespaces = functionName.split(".");
-		var func = namespaces.pop();
-		for (var i = 0; i < namespaces.length; i++) {
-			context = context[namespaces[i]];
-		}
-		return context[func].call(context, device, extraparam);
 	};
 
 	// func is the function to call, if it contains module.funcname it is a UI7 style. otherwise it is assumed UI5 style
@@ -2650,7 +2634,7 @@ var UIManager  = ( function( window, undefined ) {
 						// script has been loaded , check if style needs to be loaded and if so, load them
 						$.each(_devicetypesDB,function(idx,dt) {
 							if ( (dt.ScriptFile == obj.ScriptFile) && (dt.StyleFunc != undefined) ) {
-								_loadStyle(dt.StyleFunc);
+								Altui_LoadStyle(dt.StyleFunc);
 								return false;	// exit the loop
 							}
 						});				
@@ -3127,7 +3111,7 @@ var UIManager  = ( function( window, undefined ) {
 		
 		// if there is a custom function, use it
 		if (_devicetypesDB[ device.device_type ]!=null && _devicetypesDB[ device.device_type ].DeviceIconFunc!=null) {
-			return  _executeFunctionByName(_devicetypesDB[ device.device_type ].DeviceIconFunc, window, device);
+			return  Altui_ExecuteFunctionByName(_devicetypesDB[ device.device_type ].DeviceIconFunc, window, device);
 		}
 		
 		//otherwise
@@ -3215,7 +3199,7 @@ var UIManager  = ( function( window, undefined ) {
 				devicebodyHtml+=ALTUI_PluginDisplays.drawMultiswitch(device);
 			} else if (_devicetypesDB[ device.device_type ]!=null && _devicetypesDB[ device.device_type ].DeviceDrawFunc!=null) {
 				//drawfunction = eval( _devicetypesDB[ device.device_type ].DeviceDrawFunc );
-				devicebodyHtml+= _executeFunctionByName(_devicetypesDB[ device.device_type ].DeviceDrawFunc, window, device);
+				devicebodyHtml+= Altui_ExecuteFunctionByName(_devicetypesDB[ device.device_type ].DeviceDrawFunc, window, device);
 			}
 			else {
 				devicebodyHtml+= _defaultDeviceDraw(device);
@@ -3745,7 +3729,7 @@ var UIManager  = ( function( window, undefined ) {
 		var _altuitypesDB = MultiBox.getALTUITypesDB();	// Master controller
 		var dt = _altuitypesDB[device.device_type];
 		if (dt!=null && dt.ControlPanelFunc!=null && (tabidx==0)) {
-			_executeFunctionByName(dt.ControlPanelFunc, window, device, parent);
+			Altui_ExecuteFunctionByName(dt.ControlPanelFunc, window, device, parent);
 			_fixHeight( parent );
 		}
 		else if (tabidx>0) {

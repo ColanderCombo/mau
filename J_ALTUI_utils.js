@@ -35,6 +35,25 @@ function Altui_SelectText(element) {
 	}
 };
 
+function Altui_LoadStyle(styleFunctionName) {
+	var head = document.getElementsByTagName('head')[0];
+	var style = document.createElement('style');
+	style.type = 'text/css';
+	var css = Altui_ExecuteFunctionByName(styleFunctionName, window);
+	style.appendChild(document.createTextNode(css));
+	head.appendChild(style);
+};
+	
+function Altui_ExecuteFunctionByName(functionName, context , device, extraparam) {
+	var namespaces = functionName.split(".");
+	var func = namespaces.pop();
+	for (var i = 0; i < namespaces.length; i++) {
+		context = context[namespaces[i]];
+	}
+	return context[func].call(context, device, extraparam);
+};
+	
+
 var Localization = ( function (undefined) {
 	var _unknown_terms = {};
 	var _terms = {};
