@@ -146,8 +146,11 @@ var styles ="					\
 		padding: 4px;		\
 	}						\
 	.altui-custompage-canvas div.altui-widget:hover { \
-		cursor: hand; cursor: pointer; \
-	}							\
+		cursor: move; \
+	}		\
+	.altui-custompage-canvas *[disabled] { \
+		cursor: move; \
+	}		\
 	.altui-custompage-canvas div.altui-widget.ui-selecting { \
 		outline-style: solid;	\
 		outline-color: red;		\
@@ -2355,11 +2358,11 @@ var UIManager  = ( function( window, undefined ) {
 				onWidgetResize: _onResizeStub,
 				widgetdisplay: function(widget,bEdit)	{ 
 					var scene = MultiBox.getSceneByAltuiID(widget.properties.sceneid);
-					return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='MultiBox.runSceneByAltuiID(\"{0}\")' style='{5}'>{4}{2}</button>".format(
+					return "<button type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='{3}' style='{5}'>{4}{2}</button>".format(
 							scene ? scene.altuiid : NULL_DEVICE,
 							'altui-widget-runscene-button',
 							runGlyph.replace('glyphicon','pull-right glyphicon'),
-							(bEdit==true)?'disabled':'',
+							(bEdit==true)?'':'MultiBox.runSceneByAltuiID("{0}")'.format(scene ? scene.altuiid : NULL_DEVICE),
 							widget.properties.label,
 							"height: 100%; width: 100%;"
 							);
@@ -2377,14 +2380,16 @@ var UIManager  = ( function( window, undefined ) {
 				onWidgetResize: _onResizeStub,
 				widgetdisplay: function(widget,bEdit)	{ 
 					var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
-					return "<button {3} type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='MultiBox.runActionByAltuiID(\"{0}\", \"{4}\", \"{5}\", {6} )' style='{8}' >{7}{2}</button>".format(
+					return "<button type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='{3}' style='{5}' >{4}{2}</button>".format(
 						device ? device.altuiid : NULL_DEVICE,
 						'altui-widget-upnpaction-button',
 						runGlyph.replace('glyphicon','pull-right glyphicon'),
-						(bEdit==true)?'disabled':'',
-						widget.properties.service,
-						widget.properties.action,
-						JSON.stringify(widget.properties.params),
+						(bEdit==true)?'':'MultiBox.runActionByAltuiID("{0}", "{1}", "{2}", {3} )'.format(
+							device ? device.altuiid : NULL_DEVICE,
+							widget.properties.service,
+							widget.properties.action,
+							JSON.stringify(widget.properties.params)
+						),
 						widget.properties.label,
 						"height: 100%; width: 100%;"
 						);
@@ -2421,16 +2426,15 @@ var UIManager  = ( function( window, undefined ) {
 						htmlLabels.append( $("<small class='pull-left'></small>").text(widget.properties.labels[1]));
 					htmlLabels = htmlLabels.wrap( "<div></div>" ).parent().html();
 					
-					return "<button {3}  type='button' style='color:{4};' class='{1} btn btn-default' aria-label='Run Scene' onclick='UIManager.onoffOnClick( {5})' >{2}</button>".format(
+					return "<button  type='button' style='color:{4};' class='{1} btn btn-default' aria-label='Run Scene' onclick='{3}' >{2}</button>".format(
 						widget.properties.deviceid,					// id
 						'altui-widget-2statebtn',					// class
 						onoffGlyph,									// content
-						(bEdit==true)?'disabled':'',				// editmode
+						(bEdit==true)? '' : 'UIManager.onoffOnClick( {0})'.format(widget.id),				// editmode
 						// widget.properties.service,					// action service
 						// widget.properties.action,					// action name
 						// JSON.stringify(widget.properties.params),	// action parameter
-						(status==0) ? 'red' : 'green',		// status & color of button
-						widget.id
+						(status==0) ? 'red' : 'green'		// status & color of button
 						)+htmlLabels;
 				},
 				properties: {	//( deviceID, service, action, params, cbfunc )
@@ -4237,6 +4241,7 @@ var UIManager  = ( function( window, undefined ) {
 	var _widgetOnCanvasDraggableOptions = function(page) {
 		return {
 			grid: [ 5,5 ],
+			cancel: false,	// prevent draggable to be cancelled on disabled buttons
 			// helper: "clone",
 			revert: "invalid",
 			// snap: true,
@@ -4249,7 +4254,7 @@ var UIManager  = ( function( window, undefined ) {
 			drag: function(event, ui) {
 				// take all selected elements except me and fix their position to make them move.
 				var canvas = $( _getPageSelector( page ) );
-				var selected = canvas.children(".ui-selected").not("#"+ui.helper.prop('id'));
+				var selected = canvas.find(".altui-widget.ui-selected").not("#"+ui.helper.prop('id'));
 				selected.each( function(index,elem) {
 					var elempos = $(elem).position();
 					$(elem).css ({
@@ -4263,7 +4268,7 @@ var UIManager  = ( function( window, undefined ) {
 			stop: function(event, ui) {
 				var canvas = $( _getPageSelector( page ) );
 				startpos = null;
-				var selected = canvas.children(".ui-selected").not("#"+ui.helper.prop('id'));
+				var selected = canvas.find(".altui-widget.ui-selected").not("#"+ui.helper.prop('id'));
 				var maxwidth = canvas.width();
 				var maxheight = canvas.height();
 				selected.each( function(index,elem) {
@@ -4296,8 +4301,12 @@ var UIManager  = ( function( window, undefined ) {
 	function _replaceWidgetHtmlInPage( widget , html )
 	{
 		var page = PageManager.getPageFromName( _getActivePageName() );
-		var selector = _getWidgetSelector(page,widget)
-		return _replaceElementKeepAttributes( selector, html ).draggable( _widgetOnCanvasDraggableOptions(page) );
+		var selector = _getWidgetSelector(page,widget);
+		$(selector).draggable("disable");
+		_replaceElementKeepAttributes( selector, html );
+		$(selector).draggable(_widgetOnCanvasDraggableOptions(page));
+		return $(selector);
+		// .draggable( _widgetOnCanvasDraggableOptions(page) );
 	};
 	
 	function _showSavePageNeeded(bNeeded) {
