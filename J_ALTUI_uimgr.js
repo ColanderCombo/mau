@@ -5168,7 +5168,7 @@ var UIManager  = ( function( window, undefined ) {
 		html += "<button type='button' class='btn btn-default altui-device-variables' id='"+altuiid+"'>"+_T("Variables")+"</button>";
 		html += "<button type='button' class='btn btn-default altui-device-actions' id='"+altuiid+"' >"+_T("Actions")+"</button>";
 		html += "<button type='button' class='btn btn-default' id='altui-device-usedin' >"+_T("Used in")+"<span class='caret'></span></button>";
-		html += "<button type='button' class='btn btn-default' id='altui-device-trigger' >"+plusGlyph+_T("Trigger")+"</button>";
+		html += "<button type='button' class='btn btn-default' id='altui-device-trigger' >"+plusGlyph+_T("Notification")+"</button>";
 		if (AltuiDebug.IsDebug())
 			html +=  buttonDebugHtml;
 		html += "</div>";

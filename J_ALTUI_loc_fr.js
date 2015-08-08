@@ -63,7 +63,7 @@ Localization.init( {
 	"Controller {0} is busy, be patient.":"Le Controleur {0} est occupé, patience...",
 	"Submit":"Sauver",
 	"Save Changes":"Sauvegarder",
-	"Trigger":"Evènement",
+	"Notification":"Notification",
 	"Triggers":"Evènements",
 	"Timers":"Echéancier",
 	"Actions":"Actions",
