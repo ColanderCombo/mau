@@ -6514,7 +6514,8 @@ var UIManager  = ( function( window, undefined ) {
 				show_loading();
 				MultiBox.osCommand( parseInt($("#altui-controller-select").val()), oscmd, function(res) {
 					hide_loading();
-					$('#altui-oscommand-result').html( (res.success==true) ? _replaceANSI(res.result) : _T("failed to execute"));
+					var html = $("<span></span>").text(res.result).html();	// escape html
+					$('#altui-oscommand-result').html( (res.success==true) ? _replaceANSI(html) : _T("failed to execute"));
 				});
 			};
 			
