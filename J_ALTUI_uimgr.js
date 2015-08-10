@@ -4351,8 +4351,7 @@ var UIManager  = ( function( window, undefined ) {
 			// save for real this time
 			real_widget.properties.deviceid = widget.properties.deviceid;
 			real_widget.properties.color = $('#altui-widget-Color').val();
-			var states = MultiBox.getStatesByAltuiID( widget.properties.deviceid );
-			var selected = states[ MultiBox.getStateIdx( $("#altui-select-variable").val() ) ];
+			var selected = MultiBox.getStateByID( real_widget.properties.deviceid,$("#altui-select-variable").val() );
 			real_widget.properties.service = selected.service;
 			real_widget.properties.variable = selected.variable;
 			$('div#dialogModal').modal('hide');
@@ -4478,8 +4477,7 @@ var UIManager  = ( function( window, undefined ) {
 			real_widget.properties.deviceid = widget.properties.deviceid;
 			real_widget.properties.inverted = $("#altui-widget-Inverted").is(':checked');
 
-			var states = MultiBox.getStatesByAltuiID( widget.properties.deviceid );
-			var selected = states[ MultiBox.getStateIdx( $("#altui-select-variable").val() ) ];
+			var selected = MultiBox.getStateByID( real_widget.properties.deviceid,$("#altui-select-variable").val() );
 			real_widget.properties.variable = selected.variable;
 			real_widget.properties.service = selected.service;
 			
@@ -4618,7 +4616,7 @@ var UIManager  = ( function( window, undefined ) {
 			var states = MultiBox.getStatesByAltuiID( widget.properties.deviceid );
 			var variable = $("#altui-select-variable").val();
 			if (variable!=null) {
-				var selected = states[ MultiBox.getStateIdx( variable ) ];
+				var selected = MultiBox.getStateByID( real_widget.properties.deviceid,variable );
 				real_widget.properties.variable = selected.variable;
 				real_widget.properties.service = selected.service;
 				real_widget.properties.label = $("#altui-widget-Label").val();
