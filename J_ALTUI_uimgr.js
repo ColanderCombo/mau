@@ -512,7 +512,7 @@ var DialogManager = ( function() {
 		if ((device!=null) && (device.altuiid!=NULL_DEVICE)) {
 			$.each(device.states.sort(_sortByVariableName), function(idx,state) {
 				select.append("<option value='{0}' {2}>{1}</option>".format(
-					idx,
+					state.id,
 					state.variable + " : ("+state.service+")",
 					(service==state.service) && (variable==state.variable)? 'selected' : ''));
 			});
@@ -4352,7 +4352,7 @@ var UIManager  = ( function( window, undefined ) {
 			real_widget.properties.deviceid = widget.properties.deviceid;
 			real_widget.properties.color = $('#altui-widget-Color').val();
 			var states = MultiBox.getStatesByAltuiID( widget.properties.deviceid );
-			var selected = states[ $("#altui-select-variable").val() ];
+			var selected = states[ MultiBox.getStateIdx( $("#altui-select-variable").val() ) ];
 			real_widget.properties.service = selected.service;
 			real_widget.properties.variable = selected.variable;
 			$('div#dialogModal').modal('hide');
@@ -4479,7 +4479,7 @@ var UIManager  = ( function( window, undefined ) {
 			real_widget.properties.inverted = $("#altui-widget-Inverted").is(':checked');
 
 			var states = MultiBox.getStatesByAltuiID( widget.properties.deviceid );
-			var selected = states[ $("#altui-select-variable").val() ];
+			var selected = states[ MultiBox.getStateIdx( $("#altui-select-variable").val() ) ];
 			real_widget.properties.variable = selected.variable;
 			real_widget.properties.service = selected.service;
 			
@@ -4618,7 +4618,7 @@ var UIManager  = ( function( window, undefined ) {
 			var states = MultiBox.getStatesByAltuiID( widget.properties.deviceid );
 			var variable = $("#altui-select-variable").val();
 			if (variable!=null) {
-				var selected = states[ $("#altui-select-variable").val() ];
+				var selected = states[ MultiBox.getStateIdx( variable ) ];
 				real_widget.properties.variable = selected.variable;
 				real_widget.properties.service = selected.service;
 				real_widget.properties.label = $("#altui-widget-Label").val();

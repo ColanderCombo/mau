@@ -334,6 +334,17 @@ var MultiBox = ( function( window, undefined ) {
 		var elems = altuiid.split("-");
 		return _controllers[elems[0]].controller.getStates( elems[1]  );
 	};
+	function _getStateIdx( altuiid, id ) {
+		var state = null;
+		var states = _getStatesByAltuiID(altuiid)
+		$.each(states, function( idx, state) {
+			if (state.id==id) {
+				bFound = state;
+				return false;				
+			}
+		})
+		return state;
+	}
 	function _getStates( device ) {
 		if (device==null) return null;
 		var elems = device.altuiid.split("-");
@@ -640,6 +651,7 @@ var MultiBox = ( function( window, undefined ) {
 	evaluateConditions 		: _evaluateConditions,		// ( device,devsubcat,conditions ) evaluate a device condition table ( AND between conditions )
 	getStates				: _getStates,				// ( device )
 	getStatesByAltuiID		: _getStatesByAltuiID,		// (altuiid)
+	getStateIdx				: _getStateIdx,				// ( device, id ) 		// return idx of state object in states array , by ID
 	getStatus				: _getStatus,				// ( device, service, variable ) 
 	setStatus				: _setStatus,				// ( device, service, variable, value, dynamic )				
 	getJobStatus			: _getJobStatus,			// (  jobid , cbfunc )
