@@ -6161,7 +6161,7 @@ var UIManager  = ( function( window, undefined ) {
 						_showSavePageNeeded(true);
 
 						// save also all selected items which moved as well as part of the drag and drop
-						var selected = $(_getPageSelector( page )).children(".ui-selected").not("#"+ui.helper.prop('id'));
+						var selected = $(_getPageSelector( page )).find(".altui-widget.ui-selected").not("#"+ui.helper.prop('id'));
 						$.each(selected, function (idx,elem) {
 							widgetid = $(elem).prop('id');
 							PageManager.updateChildrenInPage( page, widgetid, $(elem).position() , $(elem).size() );
@@ -6217,7 +6217,7 @@ var UIManager  = ( function( window, undefined ) {
 					var page = PageManager.getPageFromName( pagename );
 					var dropped = ui.helper;				// clone
 					if ( $(dropped).parents(".altui-leftnav").length==0 ) { // not from toolbox
-						var selected = $(_getPageSelector( page )).children(".ui-selected").not("#"+ui.helper.prop('id'));
+						var selected = $(_getPageSelector( page )).find(".altui-widget.ui-selected").not("#"+ui.helper.prop('id'));
 						selected.each( function(idx,elem)
 						{
 							PageManager.removeChildrenInPage( page, $(elem).prop('id') );
@@ -6248,7 +6248,7 @@ var UIManager  = ( function( window, undefined ) {
 				if (tool.glyph == id) {
 					// update on HTML page
 					var page = PageManager.getPageFromName( _getActivePageName() );
-					var selected = $( _getPageSelector( page ) ).children(".ui-selected");
+					var selected = $( _getPageSelector( page ) ).find(".altui-widget.ui-selected");
 					(tool.onclick)( selected );
 					
 					// update the children position for each selected children
