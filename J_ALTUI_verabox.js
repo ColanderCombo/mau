@@ -393,19 +393,19 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 			"users":{}
 		};
 		
+		$.extend( target, user_data );
 		var xml = "";
 		xml +="<s:Envelope xmlns:s='http://schemas.xmlsoap.org/soap/envelope/' s:encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'>";
 		xml +="   <s:Body>";
 		xml +="      <u:ModifyUserData xmlns:u='urn:schemas-micasaverde-org:service:HomeAutomationGateway:1'>";
 		xml +="         <inUserData>";
-		xml +="		 	{0}";
+		xml +=				escapeXml(JSON.stringify(target));
 		xml +="		 	</inUserData>";
 		xml +="         <DataFormat>json</DataFormat>";
 		xml +="      </u:ModifyUserData>";
 		xml +="   </s:Body>";
 		xml +="</s:Envelope>";
 
-		$.extend( target, user_data );
 		var url = _buildHAGSoapUrl();
 		if (_ipaddr=='') {
 			// local mode
@@ -415,7 +415,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 				dataType: "text",
 				contentType: "text/xml;charset=UTF-8",
 				processData: false,
-				data:  xml.format( escapeXml(JSON.stringify(target)) ),
+				data:  xml,
 				headers: {
 					"SOAPACTION":'"urn:schemas-micasaverde-org:service:HomeAutomationGateway:1#ModifyUserData"'
 				},
@@ -926,14 +926,20 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			
 			// if dynamic ==0 permits the user to save
 			if (dynamic==0) {
-				var target = {};
-				target.devices={};
-				target.devices["devices_"+deviceid]={};
-				target.devices["devices_"+deviceid].states = {};
-				target.devices["devices_"+deviceid].states["states_"+statusobj.id] = {
-					"value": value
-				};
-				_updateChangeCache( target );
+				if (_isUI5() ) {	
+					// on UI5 cache until the user presses SAVE button
+					var target = {};
+					target.devices={};
+					target.devices["devices_"+deviceid]={};
+					target.devices["devices_"+deviceid].states = {};
+					target.devices["devices_"+deviceid].states["states_"+statusobj.id] = {
+						"value": value
+					};
+					_updateChangeCache( target );
+				} else {
+					// on UI7, do it asynchronously
+					promise =  _upnpHelper.UPnPSet( deviceid, service, variable, value );					
+				}
 			}
 		}
 		else {
@@ -1171,7 +1177,8 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		};
 	};
 	function _isUI5() {
-		return (_getBoxInfo().BuildVersion==undefined);
+		var bi = _getBoxInfo()
+		return (bi.BuildVersion==undefined) || (bi.BuildVersion.startsWith("*1.5.")) || ((_uniqID==0)&&(UIManager.UI7Check()==false));
 	};
 	function _getLuaStartup() {
 		return _user_data.StartupCode;
