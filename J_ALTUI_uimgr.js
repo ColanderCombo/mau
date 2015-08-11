@@ -5043,6 +5043,14 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		UIManager.clearPage(_T('Home'),_T("Welcome to VERA Alternate UI"),UIManager.oneColumnLayout);
 		UIManager.drawHouseMode();
+		var ws = MultiBox.getWeatherSettings();
+		if (ws.tempFormat==undefined)
+			ws.tempFormat="f";
+		var language = getQueryStringValue("lang") || window.navigator.userLanguage || window.navigator.language;
+		var html="";
+		html +='<a href="http://www.accuweather.com/fr/fr/meylan/1097583/weather-forecast/1097583" class="aw-widget-legal">';
+		html +=('</a><div id="awcc1439296613816" class="aw-widget-current"  data-locationkey="1097583" data-unit="'+ws.tempFormat.toLowerCase()+'" data-language="'+language.substring(0, 2)+'" data-useip="true" data-uid="awcc1439296613816"></div><script type="text/javascript" src="http://oap.accuweather.com/launch.js"></script>');
+		$("#altui-pagetitle").after(html);
 	},
 	
 	pageRemoteAccess : function ()
