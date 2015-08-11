@@ -254,5 +254,6 @@ Localization.init( {
 	"Deleted Scene {0} successfully ":"Deleted Scene {0} successfully ",
 	"Left Buttons are fixed on the page":"Left Buttons are fixed on the page",
 	"See":"See",
-	"2-columns Menu's limit":"2-columns Menu's limit"
+	"2-columns Menu's limit":"2-columns Menu's limit",
+	"Find Json":"Find Json"
 	});

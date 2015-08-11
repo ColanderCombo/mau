@@ -6404,6 +6404,7 @@ var UIManager  = ( function( window, undefined ) {
 			{label:_T("Log Sizes"), command:'ls -l /var/log/cmh' },
 			{label:_T("Search Logs"), command:"cat /var/log/cmh/LuaUPnP.log | grep '{0}'" },
 			{label:_T("Tail Logs"), command:"tail -n 50 /var/log/cmh/LuaUPnP.log" },
+			{label:_T("Find Json"), command:"find / -name *json*.lua" }
 		];
 		var commands = MyLocalStorage.getSettings("OsCommands") || defaultCommands;
 		var actions = [

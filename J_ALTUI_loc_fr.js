@@ -254,5 +254,6 @@ Localization.init( {
 	"Deleted Scene {0} successfully ":"La scène {0} est détruite",
 	"Left Buttons are fixed on the page":"Fixer la barre de boutons a gauche",
 	"See":"Voir",
-	"2-columns Menu's limit":"Limite pour les Menus a 2 colonnes"
+	"2-columns Menu's limit":"Limite pour les Menus a 2 colonnes",
+	"Find Json":"Chercher Json"
 });
