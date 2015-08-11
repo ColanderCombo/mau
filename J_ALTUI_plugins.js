@@ -156,14 +156,28 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			ws.tempFormat="";
 		
 		var status = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSensor1', 'CurrentTemperature' ); 
-		var heatsetpoint = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Heat', 'CurrentSetpoint' ); 
-		var coldsetpoint = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Cool', 'CurrentSetpoint' ); 
-		html += ("<span class='altui-temperature' >"+((status!=null) ? (status+"&deg;"+ws.tempFormat) : "--") +"</span>");
+		var allsetpoints = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1', 'AllSetpoints' ); 
+		var heatsetpoint=null, coldsetpoint=null, autosetpoint=null;
+		if (allsetpoints==null) {
+			heatsetpoint = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Heat', 'CurrentSetpoint' ); 
+			coldsetpoint = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Cool', 'CurrentSetpoint' ); 
+		}
+		else {
+			var splits = allsetpoints.split(",");
+			heatsetpoint = splits[0] || "";
+			coldsetpoint = splits[1] || "";
+			autosetpoint = splits[2] || "";
+		}
+
+		html += ("<span class='altui-temperature' >"+((status!=null) ? (status.toFixed(1)+"&deg;"+ws.tempFormat) : "--") +"</span>");
 		if (heatsetpoint!=null) {
-			html += ("<span class='altui-temperature altui-red' > / "+heatsetpoint+"&deg;"+ws.tempFormat+"</span>");
+			html += ("<span class='altui-temperature altui-red' > / "+parseFloat(heatsetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
 		}
 		if (coldsetpoint!=null) {
-			html += ("<span class='altui-temperature altui-blue' > / "+coldsetpoint+"&deg;"+ws.tempFormat+"</span>");
+			html += ("<span class='altui-temperature altui-blue' > / "+parseFloat(coldsetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
+		}
+		if (autosetpoint!=null) {
+			html += ("<span class='altui-temperature' > / "+parseFloat(autosetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
 		}
 		return html;
 	}
