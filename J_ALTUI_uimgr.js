@@ -8012,8 +8012,12 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		function onClickOneDevice() {
 			_getParameter('devaltuiid', _T('Altui ID'),function(altuiid){
-				var states  = MultiBox.getStatesByAltuiID(altuiid);
-				$("#altui-oscommand-result").text(JSON.stringify(states,null,2));
+				var result = {
+					altuiid: altuiid,
+					device_type:MultiBox.getDeviceByAltuiID(altuiid).device_type,
+					states:MultiBox.getStatesByAltuiID(altuiid),
+				};
+				$("#altui-oscommand-result").text(JSON.stringify(result,null,2));	// pretty print
 			});
 		};
 		function onClickAllDevices() {
