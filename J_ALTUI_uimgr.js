@@ -6406,7 +6406,7 @@ var UIManager  = ( function( window, undefined ) {
 	pageOsCommand: function ()
 	{
 		var defaultCommands = [
-			{label:_T("Disk Usage"), command:'du' },
+			{label:_T("Disk Usage"), command:'du -h' },
 			{label:_T("Free Space"), command:'df -h' },
 			{label:_T("Plugin Files"), command:'ls -l /etc/cmh-ludl' },
 			{label:_T("Log Sizes"), command:'ls -l /var/log/cmh' },
