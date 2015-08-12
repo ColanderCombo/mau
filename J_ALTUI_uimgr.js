@@ -2279,6 +2279,7 @@ var UIManager  = ( function( window, undefined ) {
 	var _checkOptions = [
 		{ id:'ShowVideoThumbnail', type:'checkbox', label:"Show Video Thumbnail in Local mode", _default:1 },
 		{ id:'FixedLeftButtonBar', type:'checkbox', label:"Left Buttons are fixed on the page", _default:1 },
+		{ id:'ShowWeather', type:'checkbox', label:"Show Weather on home page", _default:1 },
 		{ id:'Menu2ColumnLimit', type:'number', label:"2-columns Menu's limit", _default:15, min:2, max:30  },
 	];
 	var edittools = [];
@@ -5047,10 +5048,14 @@ var UIManager  = ( function( window, undefined ) {
 		if (ws.tempFormat==undefined)
 			ws.tempFormat="f";
 		var language = getQueryStringValue("lang") || window.navigator.userLanguage || window.navigator.language;
-		var html="";
-		html +='<a href="//www.accuweather.com/fr/fr/meylan/1097583/weather-forecast/1097583" class="aw-widget-legal">';
-		html +=('</a><div id="awcc1439296613816" class="aw-widget-current"  data-locationkey="1097583" data-unit="'+ws.tempFormat.toLowerCase()+'" data-language="'+language.substring(0, 2)+'" data-useip="true" data-uid="awcc1439296613816"></div><script type="text/javascript" src="//oap.accuweather.com/launch.js"></script>');
-		$("#altui-pagetitle").after(html);
+		if ( MyLocalStorage.getSettings('ShowWeather') )
+		{
+			var html="";
+			html +='<a href="//www.accuweather.com/fr/fr/meylan/1097583/weather-forecast/1097583" class="aw-widget-legal">';
+			html +=('</a><div id="awcc1439296613816" class="aw-widget-current"  data-locationkey="1097583" data-unit="'+ws.tempFormat.toLowerCase()+'" data-language="'+language.substring(0, 2)+'" data-useip="true" data-uid="awcc1439296613816"></div><script type="text/javascript" src="//oap.accuweather.com/launch.js"></script>');
+			$("#altui-pagetitle").after(html);
+			
+		}
 	},
 	
 	pageRemoteAccess : function ()
