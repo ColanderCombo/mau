@@ -25,7 +25,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	function _getStyle() {
 		var style="";
 		style += ".altui-watts, .altui-volts, .altui-dimmable, .altui-countdown  {font-size: 16px;}";
-		style += ".altui-temperature, .altui-humidity, .altui-light  {font-size: 18px;}";
+		style += ".altui-temperature  {font-size: 16px;}";
+		style += ".altui-humidity, .altui-light  {font-size: 18px;}";
 		style += ".altui-motion {font-size: 22px;}";
 		style += ".altui-weather-text, .altui-lasttrip-text {font-size: 11px;}";
 		style += ".altui-red { color:red;}";
@@ -170,6 +171,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		}
 
 		html += ("<span class='altui-temperature' >"+((status!=null) ? (parseFloat(status).toFixed(1)+"&deg;"+ws.tempFormat) : "--") +"</span>");
+		// html += "<div>";
 		if (heatsetpoint!=null) {
 			html += ("<span class='altui-temperature altui-red' > / "+parseFloat(heatsetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
 		}
@@ -179,6 +181,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		if (autosetpoint!=null) {
 			html += ("<span class='altui-temperature' > / "+parseFloat(autosetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
 		}
+		// html += "</div>";
 		return html;
 	}
 

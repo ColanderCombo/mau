@@ -254,6 +254,10 @@ var styles ="					\
 	.altui-runscene {		\
 		height:76px;\
 	}						\
+	.altui-hint {		\
+		padding-left:10px;\
+		padding-right:10px;\
+	}						\
 	.altui-scene-date{		\
 		clear: right;		\
 		width: 80px;		\
@@ -1734,6 +1738,7 @@ var SceneEditor = function (scene) {
 			$(".altui-scene-editbutton").removeClass("btn-danger").addClass("btn-default");
 		else
 			$(".altui-scene-editbutton").removeClass("btn-default").addClass("btn-danger");
+		_updateAccordeonHeaders();
 	};
 
 	function _sceneEditDraw() {
@@ -1761,7 +1766,7 @@ var SceneEditor = function (scene) {
 				html += "            <div class='panel-heading'>";
 				html += 				jsonButton;
 				html += "                <h4 class='panel-title'>";
-				html += "                    <a data-toggle='collapse' data-parent='#accordion' href='#collapse"+panel.id+"'>"+panel.title+"</a><span id='trigger' class='caret'></span>";
+				html += "                    <a data-toggle='collapse' data-parent='#accordion' href='#collapse"+panel.id+"'>"+panel.title+"</a><span class='altui-hint' id='altui-hint-"+panel.id+"'></span><span id='trigger' class='caret'></span>";
 				html += "                </h4>";
 				html += "            </div>";
 				html += "            <div id='collapse"+panel.id+"' class='panel-collapse collapse {0}'>".format(bFirst ? 'in':'');
@@ -1896,10 +1901,25 @@ var SceneEditor = function (scene) {
 		return html;
 	};
 	
+	function _updateAccordeonHeaders() {
+		function _countActions(scene) {
+			var n=0;
+			$.each(scene.groups, function(i,g) {
+				n+=g.actions.length;
+			})
+			return n;
+		};
+		$("#altui-hint-Lua").html( ($("#altui-luascene").val()=="") ? "" : plusGlyph );
+		$("#altui-hint-Triggers").html( '<span class="badge">{0}</span>'.format( scene.triggers.length));
+		$("#altui-hint-Timers").html( '<span class="badge">{0}</span>'.format( scene.timers.length));
+		$("#altui-hint-Actions").html( '<span class="badge">{0}</span>'.format( _countActions(scene)) );
+	};
+	
 	function _runActions() {
 		//
 		// actions
 		//
+		_updateAccordeonHeaders();
 		$(".altui-json-code").hide();
 		$(".altui-mainpanel")
 			.on("click",".altui-luatrigger",function() { 
@@ -1926,7 +1946,7 @@ var SceneEditor = function (scene) {
 		});
 		
 		$(".altui-mainpanel")
-			.on("change","#altui-luascene",function(){ 
+			.on("change","#altui-luascene",function() { 
 				if ( $("#altui-luascene").val() != scene.lua ) {
 					_showSaveNeeded(false);
 				}
@@ -1999,7 +2019,8 @@ var SceneEditor = function (scene) {
 				var ids = $(this).prop('id').split('.');
 				var group = scene.groups[ ids[0] ];
 				group.actions.splice( ids[1], 1 );
-				$(this).parents("tr").first().remove();
+				$(this).parents("tr [data-group-idx=0]").parent().parent().replaceWith( _displayGroup(group,ids[0] ) );
+				// $(this).parents("tr").first().remove();
 				_showSaveNeeded();
 				PageMessage.message( "Action deleted, remember to save your changes", "info");
 				// MultiBox.setScene(sceneid,scene);
