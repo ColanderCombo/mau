@@ -1066,14 +1066,14 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			
 			if (data.devices)
 				$.each(data.devices, function(idx,device) {
-					device.favorite=Favorites.get('device',device.id);
 					device.altuiid = "{0}-{1}".format(_uniqID,device.id);
+					device.favorite=Favorites.get('device',device.altuiid);
 					// jsonp.ud.devices.push(device);
 				});
 			if (data.scenes)
 				$.each(data.scenes, function(idx,scene) {
-					scene.favorite=Favorites.get('scene',scene.id);
 					scene.altuiid = "{0}-{1}".format(_uniqID,scene.id);
+					scene.favorite=Favorites.get('scene',scene.altuiid);
 					// jsonp.ud.scenes.push(scene);
 				});
 			if (data.rooms)

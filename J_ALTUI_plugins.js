@@ -169,7 +169,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			autosetpoint = splits[2] || "";
 		}
 
-		html += ("<span class='altui-temperature' >"+((status!=null) ? (status.toFixed(1)+"&deg;"+ws.tempFormat) : "--") +"</span>");
+		html += ("<span class='altui-temperature' >"+((status!=null) ? (parseFloat(status).toFixed(1)+"&deg;"+ws.tempFormat) : "--") +"</span>");
 		if (heatsetpoint!=null) {
 			html += ("<span class='altui-temperature altui-red' > / "+parseFloat(heatsetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
 		}
