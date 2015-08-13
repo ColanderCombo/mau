@@ -1913,6 +1913,14 @@ var SceneEditor = function (scene) {
 		$("#altui-hint-Triggers").html( '<span class="badge">{0}</span>'.format( scene.triggers.length));
 		$("#altui-hint-Timers").html( '<span class="badge">{0}</span>'.format( scene.timers.length));
 		$("#altui-hint-Actions").html( '<span class="badge">{0}</span>'.format( _countActions(scene)) );
+		if (UIManager.UI7Check())
+		{
+			var html = $.map( $("div.housemode.preset_selected") , function(elem,idx) {	
+				var id = parseInt( $(elem).prop('id').substring("altui-mode".length) ) - 1;
+				return _HouseModes[ id ].text;
+			}).join(",");
+			$("#altui-hint-Header").html( '<span class="text-muted"><small>({0})</small></span>'.format( html ));
+		}
 	};
 	
 	function _runActions() {
