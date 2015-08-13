@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("612,Weather widget;du-h and find Json file OS command;Device type displayed in DEBUG show variable screen;Heather UI7 dashboard;Fix for attributes change,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28516")
+UIManager.checkAltuiUpdate("616,Fix Favorites;Fix Heather display;Scene editor header visual hints,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28520")
