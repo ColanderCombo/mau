@@ -18,6 +18,7 @@ var ALTUI_IPhoneLocator= ( function( window, undefined ) {
 		style += ".altui-canalplus 	{	font-size: 12px;	}";
 		style += "#altui-cplus-keytbl td {text-align:center;     vertical-align:middle;}";
 		style += ".altui-cplus-button { width: 70px; font-size:12px;}";
+		style += ".altui-ipx  { margin-top: 10px; }";	
 		return style;
 	};
 
@@ -31,6 +32,19 @@ var ALTUI_IPhoneLocator= ( function( window, undefined ) {
 		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_IPhoneLocator.toggleDebug('{0}','div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
 		html += "</script>";
 		
+		return html;
+	};
+	
+
+	function _drawIPX( device) {
+		var html ="";
+		var ip = device.ip;
+		if (ip) {
+			html+= ("<button id='altui-ipx-{0}' type='button' class='pull-right altui-ipx btn btn-default btn-sm '>{1}</button>" .format( device.altuiid,_T("Open") )) ;
+			html += "<script type='text/javascript'>";
+			html += " $('button#altui-ipx-{0}').on('click', function() { window.open('http://{1}','_blank'); } );".format(device.altuiid,ip);
+			html += "</script>";
+		}
 		return html;
 	};
 	
@@ -111,6 +125,7 @@ html+="<tr><td><button class='altui-cplus-button btn btn-default' id='VOL-'>VOL-
 	//---------------------------------------------------------
 	getStyle 	: _getStyle,
 	drawIPhone 	: _drawIPhone,
+	drawIPX		: _drawIPX,
 	drawAltUI 	: _drawAltUI,
 	drawCanalplus : _drawCanalplus,
 	drawCanaplusControlPanel : _drawCanaplusControlPanel,

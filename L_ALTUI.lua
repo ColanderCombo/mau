@@ -1088,6 +1088,11 @@ local function getDefaultConfig()
 		["StyleFunc"]="ALTUI_IPhoneLocator.getStyle",
 		-- ["ControlPanelFunc"]="ALTUI_IPhoneLocator.drawControlPanel",
 	}
+	tbl["urn:schemas-upnp-org:device:IPX800:1"]= {
+		["ScriptFile"]="J_ALTUI_iphone.js",
+		["DeviceDrawFunc"]="ALTUI_IPhoneLocator.drawIPX"
+		-- ["ControlPanelFunc"]="ALTUI_IPhoneLocator.drawControlPanel",
+	}
 	return tbl
 end
 
