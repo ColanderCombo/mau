@@ -2372,6 +2372,7 @@ var UIManager  = ( function( window, undefined ) {
 			{ 	id:35, 
 				cls:'altui-widget-frame', 
 				no_refresh:true,
+				aspectRatio: false,
 				html: _toolHtml(uncheckedGlyph,_T("Frame")),
 				property: _onPropertyFrame, 
 				onWidgetResize: _onResizeStub,
@@ -4558,6 +4559,7 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		// clone for temporary storage
 		var widget = $.extend( true, {}, real_widget );
+		var tool = _getToolByClass( widget.cls );
 		var dialog = DialogManager.createPropertyDialog(_T('Frame Properties'));
 		DialogManager.dlgAddLine(dialog, "Label", _T("Frame Label"), widget.properties.label, "");
 		DialogManager.dlgAddLine(dialog, "CSS", _T("background CSS"), widget.properties.css, "");
@@ -4570,7 +4572,9 @@ var UIManager  = ( function( window, undefined ) {
 				real_widget.properties.css = $("#altui-widget-CSS").val();
 				$('div#dialogModal').modal('hide');
 				_showSavePageNeeded(true);
-				_replaceWidgetHtmlInPage( real_widget , _getWidgetHtml(real_widget,true) )
+				_replaceWidgetHtmlInPage( real_widget , _getWidgetHtml(real_widget,true) ).resizable(
+					_widgetOnCanvasResizableOptions(tool)
+				);
 			});
 	};
 	
