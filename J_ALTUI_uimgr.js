@@ -68,6 +68,7 @@ var starGlyph = "";
 var loadGlyph = "";
 var infoGlyph = "";
 var picGlyph = "";
+var uncheckedGlyph ="";
 var runGlyph = "";
 var editGlyph = "";
 var cameraGlyph = "";
@@ -105,7 +106,7 @@ var styles ="					\
 		padding-left: 5px;		\
 		padding-right: 5px;		\
 	}					\
-	.solid-border {	\
+	.altui-widget-frame-div , .solid-border {	\
 		border:1px solid;: 0px;\
 	}					\
 	.fill {	\
@@ -2329,7 +2330,7 @@ var UIManager  = ( function( window, undefined ) {
 				no_refresh:true,
 				html: _toolHtml(labelGlyph,_T("Label")),
 				property: _onPropertyLabel, 
-				widgetdisplay: function(widget,bEdit)	{ return "<p style='color:{1};'>{0}</p>".format(widget.properties.label,widget.properties.color); },
+				widgetdisplay: function(widget,bEdit)	{ return "<p style='color:{1}; '>{0}</p>".format(widget.properties.label,widget.properties.color); },
 				properties: {
 					label:'Default Label',
 					color:$(".altui-mainpanel").css("color")
@@ -2362,10 +2363,26 @@ var UIManager  = ( function( window, undefined ) {
 				onWidgetResize: _onResizeStub,
 				aspectRatio: true,
 				widgetdisplay: function(widget,bEdit)	{ 
-					return "<img src='{0}' style='max-height:100%; max-width:100%; height:100%; width:100%;'></img>".format( widget.properties.url);
+					return "<img src='{0}' style='max-height:100%; max-width:100%; height:100%; width:100%; '></img>".format( widget.properties.url);
 				},
 				properties: {
 					url:'data:image/png;base64,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'
+				} 
+			},
+			{ 	id:35, 
+				cls:'altui-widget-frame', 
+				no_refresh:true,
+				html: _toolHtml(uncheckedGlyph,_T("Frame")),
+				property: _onPropertyFrame, 
+				onWidgetResize: _onResizeStub,
+				widgetdisplay: function(widget,bEdit)	{ 
+					return "<div class='altui-widget-frame-div' src='{0}' style='max-height:100%; max-width:100%; height:100%; width:100%; background:{1}; '>{0}</div>".format( widget.properties.label,widget.properties.css );
+				},
+				defaultSize: { width:50, height:50 },
+				zindex: -1,
+				properties: {
+					label:'',
+					css:''
 				} 
 			},
 			{ 	id:40, 
@@ -2464,7 +2481,7 @@ var UIManager  = ( function( window, undefined ) {
 						// widget.properties.service,					// action service
 						// widget.properties.action,					// action name
 						// JSON.stringify(widget.properties.params),	// action parameter
-						(status==0) ? 'red' : 'green'		// status & color of button
+						(status==0) ? 'red' : 'green'				// status & color of button
 						)+htmlLabels;
 				},
 				properties: {	//( deviceID, service, action, params, cbfunc )
@@ -2506,7 +2523,7 @@ var UIManager  = ( function( window, undefined ) {
 				property: _onPropertyGauge, 
 				onWidgetResize: _onResizeGauge,
 				widgetdisplay: function(widget,bEdit)	{ 
-					return "<div class='altui-gauge-div' id='altui-gauge-{0}'></div>".format(widget.id);
+					return "<div class='altui-gauge-div' id='altui-gauge-{0}' ></div>".format( widget.id );
 				},
 				onWidgetDisplay: _onDisplayGauge,
 				properties: {	//( deviceID, service, action, params, cbfunc )
@@ -3128,7 +3145,7 @@ var UIManager  = ( function( window, undefined ) {
 		return icon;
 	};
 
-	function _deviceIconHtml( device )	// deviceid if device is null
+	function _deviceIconHtml( device, zindex )	// deviceid if device is null
 	{
 		var controller = MultiBox.controllerOf(device.altuiid).controller;
 		//
@@ -3137,8 +3154,12 @@ var UIManager  = ( function( window, undefined ) {
 		var _devicetypesDB = MultiBox.getALTUITypesDB();	// master controller
 		
 		if (device==null)
-			return "<img class='altui-device-icon pull-left img-rounded' data-org-src='/err' src='"+defaultIconSrc+"' alt='_todo_' onerror='UIManager.onDeviceIconError(\""+device.altuiid+"\")' ></img>";
-		
+			return "<img class='altui-device-icon pull-left img-rounded' data-org-src='/err' src='{0}' alt='_todo_' onerror='UIManager.onDeviceIconError(\"{1}\")' {2} ></img>".format(
+				defaultIconSrc,
+				device.altuiid,
+				(zindex ? " style='z-index:{0};' ".format(zindex) : "" )
+				);
+			// return "<img class='altui-device-icon pull-left img-rounded' data-org-src='/err' src='"+defaultIconSrc+"' alt='_todo_' "+(zindex ? "style='z-index:{0}'" : "")+" onerror='UIManager.onDeviceIconError(\""+device.altuiid+"\")' ></img>";		
 		// if there is a custom function, use it
 		if (_devicetypesDB[ device.device_type ]!=null && _devicetypesDB[ device.device_type ].DeviceIconFunc!=null) {
 			return  Altui_ExecuteFunctionByName(_devicetypesDB[ device.device_type ].DeviceIconFunc, window, device);
@@ -3294,7 +3315,7 @@ var UIManager  = ( function( window, undefined ) {
 		return scenecontainerTemplate.format(scene.altuiid, label, 'tooltip', runButtonHtml , editButtonHtml , calendarHtml , lastrun, nextrun);
 	};
 	
-	function _cameraDraw(device,size) // size:1,2,3,... 1=220px
+	function _cameraDraw(device,size,zindex) // size:1,2,3,... 1=220px
 	{
 		var obj = null;
 		// if (size==undefined)
@@ -3313,6 +3334,7 @@ var UIManager  = ( function( window, undefined ) {
 					.css("max-width","100%")
 					.css("width","100%")
 					.css("height","100%")
+					.css("z-index",(zindex ? zindex : 0))
 					.attr("data-camera",device.altuiid);
 				var timeout = null;
 				function _resfreshIt(id) {
@@ -3338,6 +3360,7 @@ var UIManager  = ( function( window, undefined ) {
 							})
 					.css("max-width","100%")
 					.css("max-width","100%")
+					.css("z-index",(zindex ? zindex : 0))
 					// .css("width","100%")
 					// .css("height","100%")
 					.height((size!=undefined) ? size.height : 300)
@@ -4391,12 +4414,6 @@ var UIManager  = ( function( window, undefined ) {
 	};
 
 	function _onPropertyLabel(widget) {
-		var propertyline = "";
-		propertyline += "      	<div class='form-group'>";
-		propertyline += "      		<label for='altui-widget-labeltext'>Label</label>";
-		propertyline += "      		<input id='altui-widget-labeltext' class='form-control' value='{0}' placeholder='enter label here'></input>";
-		propertyline += "      	</div>";
-		
 		var dialog = DialogManager.createPropertyDialog('Label Properties');
 		DialogManager.dlgAddLine(dialog, "Label", _T("Button Label"), widget.properties.label, "");
 		DialogManager.dlgAddColorPicker(dialog, "Color", _T("Color"), "", widget.properties.color);
@@ -4535,6 +4552,26 @@ var UIManager  = ( function( window, undefined ) {
 			_showSavePageNeeded(true);
 			_replaceWidgetHtmlInPage( real_widget , _getWidgetHtml(real_widget,true) )
 		});	
+	};
+	
+	function _onPropertyFrame(real_widget)
+	{
+		// clone for temporary storage
+		var widget = $.extend( true, {}, real_widget );
+		var dialog = DialogManager.createPropertyDialog(_T('Frame Properties'));
+		DialogManager.dlgAddLine(dialog, "Label", _T("Frame Label"), widget.properties.label, "");
+		DialogManager.dlgAddLine(dialog, "CSS", _T("background CSS"), widget.properties.css, "");
+		$('div#dialogModal').modal();
+		// buttons
+		$('div#dialogs')		
+			.off('submit',"div#dialogModal form")
+			.on( 'submit',"div#dialogModal form", function() {
+				real_widget.properties.label = $("#altui-widget-Label").val();
+				real_widget.properties.css = $("#altui-widget-CSS").val();
+				$('div#dialogModal').modal('hide');
+				_showSavePageNeeded(true);
+				_replaceWidgetHtmlInPage( real_widget , _getWidgetHtml(real_widget,true) )
+			});
 	};
 	
 	function _onPropertyIcon(real_widget)
@@ -4857,7 +4894,9 @@ var UIManager  = ( function( window, undefined ) {
 		{
 			var tool = _getToolByClass( widget.cls )
 			widget.properties = $.extend(true,{}, tool.properties, widget.properties);
-			var style = (widget.size!=undefined) ? 'style="width:{0}px; height:{1}px;"'.format(widget.size.width, widget.size.height) : '';
+			var style = (widget.size!=undefined) 
+				? 'style="width:{0}px; height:{1}px; z-index:{2};"'.format(widget.size.width, widget.size.height,widget.zindex) 
+				: 'style="z-index:{0};"'.format(widget.zindex);
 			html += ("<div class='altui-widget {0} ' id='{1}' data-type='{0}' {2}>").format(widget.cls,widget.id,style);
 			html += (tool.widgetdisplay)(widget,bEditMode);
 			html +="</div>";
@@ -4875,7 +4914,7 @@ var UIManager  = ( function( window, undefined ) {
 	};
 	
 	function _getPageHtml(page,bEditMode) {
-		var pageHtml = "<div class='altui-custompage-canvas'>";
+		var pageHtml = "<div class='altui-custompage-canvas' style='z-index:0;'>";
 		if (page.children)
 			$.each(page.children, function(idx,child) {							
 				pageHtml += _getWidgetHtml( child, bEditMode );
@@ -8464,6 +8503,7 @@ $(document).ready(function() {
 		loadGlyph = glyphTemplate.format( "open", _T("Load") , "");
 		infoGlyph = glyphTemplate.format( "info-sign", _T("Info") , "");
 		picGlyph = glyphTemplate.format( "picture", _T("Image") , "");
+		uncheckedGlyph= glyphTemplate.format( "unchecked", _T("Frame") , "");
 		runGlyph = glyphTemplate.format( "play", _T("Run Scene") , "");
 		editGlyph = glyphTemplate.format( "pencil", _T("Edit") , "");
 		cameraGlyph = glyphTemplate.format( "facetime-video", _T("Camera") , "");

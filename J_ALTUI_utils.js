@@ -497,6 +497,8 @@ var PageManager = (function() {
 					child.properties.sceneid = "0-"+child.properties.sceneid;
 				}
 			}
+			if (child.zindex == undefined )
+				child.zindex = 0;
 		});
 	};
 	
@@ -576,7 +578,7 @@ var PageManager = (function() {
 		return result;
 	};
 	
-	function _updateChildrenInPage( page, widgetid, position , size )
+	function _updateChildrenInPage( page, widgetid, position , size, zindex )
 	{
 		if (page.children)
 			$.each(page.children, function(idx,child) {
@@ -584,12 +586,14 @@ var PageManager = (function() {
 					if (position)
 						child.position = jQuery.extend(true, {}, position);
 					if (size)
-						child.size = jQuery.extend(true, {}, size);
+						child.size = jQuery.extend(true, {width:50, height:50}, size);
+					if (zindex)
+						child.zindex = zindex;
 				}
 			});
 	};		
 
-	function _insertChildrenInPage( page, tool, position )
+	function _insertChildrenInPage( page, tool, position, zindex )
 	{
 		var id = 0;
 		if (page !=null) {
@@ -604,6 +608,8 @@ var PageManager = (function() {
 					cls: tool.cls,
 					position: jQuery.extend(true, {}, position),
 					properties : jQuery.extend(true, {}, tool.properties),	// default values
+					size: jQuery.extend(true, { width:50, height:50 }, tool.defaultSize),
+					zindex : (zindex || tool.zindex || 0),
 			});				
 		}
 		return id;	//0 if error
