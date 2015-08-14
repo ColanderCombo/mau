@@ -3364,8 +3364,8 @@ var UIManager  = ( function( window, undefined ) {
 					.css("z-index",(zindex ? zindex : 0))
 					// .css("width","100%")
 					// .css("height","100%")
-					.height((size!=undefined) ? size.height : 300)
-					.width((size!=undefined) ? size.width : Math.floor(300*640/480))
+					.height((size!=undefined)&&(size.height!=undefined) ? size.height : 300)
+					.width((size!=undefined)&&(size.width!=undefined)? size.width : Math.floor(300*640/480))
 			}
 		} else
 			obj = $("<div >"+_T("Unknown Device")+"</div>");
@@ -4336,17 +4336,18 @@ var UIManager  = ( function( window, undefined ) {
 		return $(selector);
 	};
 	
-	function _replaceWidgetHtmlInPage( widget , html )
-	{
+	function _replaceWidget(widget) {
+		var tool = _getToolByClass( widget.cls );
+		var html = _getWidgetHtml(widget,true);
 		var page = PageManager.getPageFromName( _getActivePageName() );
 		var selector = _getWidgetSelector(page,widget);
 		$(selector).draggable("disable");
 		_replaceElementKeepAttributes( selector, html );
 		$(selector).draggable(_widgetOnCanvasDraggableOptions(page));
-		return $(selector);
-		// .draggable( _widgetOnCanvasDraggableOptions(page) );
+		if ($.isFunction( tool.onWidgetResize) ) {
+			$(selector).resizable( _widgetOnCanvasResizableOptions(tool) );
+		}
 	};
-	
 	function _showSavePageNeeded(bNeeded) {
 		$("#altui-page-action-save")
 			.toggleClass("btn-info",bNeeded)
@@ -4410,7 +4411,7 @@ var UIManager  = ( function( window, undefined ) {
 			real_widget.properties.variable = selected.variable;
 			$('div#dialogModal').modal('hide');
 			_showSavePageNeeded(true);
-			_replaceWidgetHtmlInPage( real_widget , _getWidgetHtml(real_widget,true) );
+			_replaceWidget(real_widget);
 		});
 	};
 
@@ -4428,7 +4429,7 @@ var UIManager  = ( function( window, undefined ) {
 			$('div#dialogModal button.btn-primary').off('click');
 			$('div#dialogModal').modal('hide');
 			_showSavePageNeeded(true);
-			_replaceWidgetHtmlInPage( widget , _getWidgetHtml(widget,true) )
+			_replaceWidget(widget);
 		});
 		
 		$('div#dialogModal').modal();
@@ -4454,7 +4455,7 @@ var UIManager  = ( function( window, undefined ) {
 			real_widget.properties.label = $("#altui-widget-Label").val();
 			$('div#dialogModal').modal('hide');
 			_showSavePageNeeded(true);
-			_replaceWidgetHtmlInPage( real_widget , _getWidgetHtml(real_widget,true) )
+			_replaceWidget(real_widget);
 		});
 	};
 	
@@ -4491,7 +4492,7 @@ var UIManager  = ( function( window, undefined ) {
 			});
 			$('div#dialogModal').modal('hide');
 			_showSavePageNeeded(true);
-			_replaceWidgetHtmlInPage( real_widget , _getWidgetHtml(real_widget,true) )
+			_replaceWidget(real_widget);
 		});	
 	};
 
@@ -4551,7 +4552,7 @@ var UIManager  = ( function( window, undefined ) {
 			});
 			$('div#dialogModal').modal('hide');
 			_showSavePageNeeded(true);
-			_replaceWidgetHtmlInPage( real_widget , _getWidgetHtml(real_widget,true) )
+			_replaceWidget(real_widget);
 		});	
 	};
 	
@@ -4572,9 +4573,7 @@ var UIManager  = ( function( window, undefined ) {
 				real_widget.properties.css = $("#altui-widget-CSS").val();
 				$('div#dialogModal').modal('hide');
 				_showSavePageNeeded(true);
-				_replaceWidgetHtmlInPage( real_widget , _getWidgetHtml(real_widget,true) ).resizable(
-					_widgetOnCanvasResizableOptions(tool)
-				);
+				_replaceWidget(real_widget);
 			});
 	};
 	
@@ -4598,7 +4597,7 @@ var UIManager  = ( function( window, undefined ) {
 			$('div#dialogModal button.btn-primary').off('click');
 			$('div#dialogModal').modal('hide');
 			_showSavePageNeeded(true);
-			_replaceWidgetHtmlInPage( real_widget , _getWidgetHtml(real_widget,true) )
+			_replaceWidget(real_widget);
 		});
 	};
 
@@ -4611,9 +4610,7 @@ var UIManager  = ( function( window, undefined ) {
 		var widget = PageManager.getWidgetByID( page, widgetid ); 
 		var tool = _getToolByClass( widget.cls );
 		widget.size = size;
-		_replaceWidgetHtmlInPage( widget , _getWidgetHtml(widget,true) ).resizable(
-			_widgetOnCanvasResizableOptions(tool)
-		);
+		_replaceWidget(widget);
 	};
 	
 	function _onResizeGauge(page, widgetid, position, size)
@@ -4651,9 +4648,7 @@ var UIManager  = ( function( window, undefined ) {
 			$('div#dialogModal').modal('hide');
 			_showSavePageNeeded(true);
 			var tool = _getToolByClass( real_widget.cls );
-			_replaceWidgetHtmlInPage( real_widget , _getWidgetHtml(real_widget,true) ).resizable(
-				_widgetOnCanvasResizableOptions(tool)
-			);
+			_replaceWidget(real_widget);
 		});
 	};
 

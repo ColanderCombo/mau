@@ -586,7 +586,7 @@ var PageManager = (function() {
 					if (position)
 						child.position = jQuery.extend(true, {}, position);
 					if (size)
-						child.size = jQuery.extend(true, {width:50, height:50}, size);
+						child.size = jQuery.extend(true, {}, size);
 					if (zindex)
 						child.zindex = zindex;
 				}
@@ -608,7 +608,7 @@ var PageManager = (function() {
 					cls: tool.cls,
 					position: jQuery.extend(true, {}, position),
 					properties : jQuery.extend(true, {}, tool.properties),	// default values
-					size: jQuery.extend(true, { width:50, height:50 }, tool.defaultSize),
+					size: jQuery.extend(true, { }, tool.defaultSize),
 					zindex : (zindex || tool.zindex || 0),
 			});				
 		}
