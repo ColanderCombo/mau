@@ -5111,18 +5111,24 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		UIManager.clearPage(_T('Home'),_T("Welcome to VERA Alternate UI"),UIManager.oneColumnLayout);
 		UIManager.drawHouseMode();
-		var ws = MultiBox.getWeatherSettings();
-		if (ws.tempFormat==undefined)
-			ws.tempFormat="f";
-		var language = getQueryStringValue("lang") || window.navigator.userLanguage || window.navigator.language;
 		if ( MyLocalStorage.getSettings('ShowWeather') )
 		{
+			var language = getQueryStringValue("lang") || window.navigator.userLanguage || window.navigator.language;
+			var ws = MultiBox.getWeatherSettings();
+			if (ws.tempFormat==undefined)
+				ws.tempFormat="f";
 			var html="";
+			html ="<div class='altui-weather-widget col-md-6'>";
 			html +='<a href="//www.accuweather.com/fr/fr/meylan/1097583/weather-forecast/1097583" class="aw-widget-legal">';
 			html +=('</a><div id="awcc1439296613816" class="aw-widget-current"  data-locationkey="1097583" data-unit="'+ws.tempFormat.toLowerCase()+'" data-language="'+language.substring(0, 2)+'" data-useip="true" data-uid="awcc1439296613816"></div><script type="text/javascript" src="//oap.accuweather.com/launch.js"></script>');
-			$("#altui-pagetitle").after(html);
-			
+			html +="</div>";
+			$(".altui-mainpanel").append(html);
 		}
+		var html = "<div class='col-xs-12'>";
+		html +="	<br><p>"+_T("This plugin is a work in progress, it will continuously evolve over time.");
+		html +=	_T("You may check out the evolutions on the Micasaverde <a href='http://forum.micasaverde.com/index.php/topic,30310.msg216129.html#msg216129'>Forum</a>")+"</p>";
+		html += "</div>";
+		$(".altui-mainpanel").append(html);
 	},
 	
 	pageRemoteAccess : function ()
@@ -7999,7 +8005,7 @@ var UIManager  = ( function( window, undefined ) {
 		// http://192.168.1.5/cmh/skins/default/img/other/spritemap_640_480_preset_modes.png
 
 		var html = "";				
-		html +="<div class='col-xs-12'>";
+		html +="<div class='col-xs-12 col-md-6'>";
 		html +="	<div class='altui-housemode row'>";
 
 		if (_ui7Check==true) {
@@ -8016,8 +8022,6 @@ var UIManager  = ( function( window, undefined ) {
 			html += "<p>No Housemode feature on UI5</p>";
 		}		
 		html +="	</div>";
-		html +="	<br><p>"+_T("This plugin is a work in progress, it will continuously evolve over time.");
-		html +=	_T("You may check out the evolutions on the Micasaverde <a href='http://forum.micasaverde.com/index.php/topic,30310.msg216129.html#msg216129'>Forum</a>")+"</p>";
 		html +="</div>";
 		$(".altui-mainpanel").append( html );
 		UIManager.refreshModes();
