@@ -35,7 +35,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-magenta { color:magenta;}";
 		style += ".altui-multiswitch-container { position:absolute; left:58px; right:16px; } .altui-multiswitch-container .row { padding-top:1px; padding-bottom:1px; margin-left:0px; margin-right:0px;} .altui-multiswitch-container .col-xs-3 { padding-left:1px; padding-right:1px; }  .altui-multiswitch-open { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; width: 100%; max-width: 100% }";
 		style += ".altui-heater-container { position:absolute; left:71px; right:16px; } .altui-heater-container .row { padding-top:1px; padding-bottom:1px; margin-left:0px; margin-right:0px;} .altui-heater-container .col-xs-3 { padding-left:1px; padding-right:1px; text-align:center;}  .altui-heater-btn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; width: 100%; max-width: 100% }";
-		style += ".altui-heater-container select.input-sm { height:22px;}"; 
+		style += ".altui-heater-container select.input-sm { height:22px; padding:0;}"; 
 		style += ".altui-cyan { color:cyan;}";
 		style += ".altui-dimmable-slider { margin-left: 60px; }";	
 		style += ".altui-infoviewer-log,.altui-window-btn,.altui-datamine-open { margin-top: 10px; }";	
@@ -151,8 +151,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		html += ("<span class='altui-temperature' >"+status+"&deg;"+ws.tempFormat+"</span>");
 		return html;
 	}
-	
-	function _drawHeater( device) {
+		
+	function _internaldrawZoneThermostat( device , userOperatingMode1Items,  userHVACFanOperatingMode1Items ) {
 		var ws = MultiBox.getWeatherSettings();
 		if (ws.tempFormat==undefined)
 			ws.tempFormat="";
@@ -170,10 +170,15 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			coldsetpoint = splits[1] || "";
 			autosetpoint = splits[2] || "";
 		}
-		status = 20;
-		heatsetpoint = 22.3;
-		coldsetpoint = 18;
-		autosetpoint = 21;		
+		var modeStatus = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:HVAC_UserOperatingMode1', 'ModeStatus' ); 
+		var modeFan = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:HVAC_FanOperatingMode1', 'Mode' ); 
+		//debug
+		// status = 20;
+		// heatsetpoint = 22.3;
+		// coldsetpoint = 18;
+		// autosetpoint = 21;		
+		// modeFan = "PeriodicOn";
+		// modeStatus = "HeatOn";
 		var html = "";
 		html += "<div class='altui-heater-container pull-right'>";
 			html += "<div class='row'>";
@@ -198,17 +203,15 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			html += "</div>";
 			html += "<div class='row'>";
 				html += "<div class='col-xs-3'>";
-					var items = [
-						{label:"Off", value:"Off" , service:"urn:upnp-org:serviceId:HVAC_UserOperatingMode1", action:"SetModeTarget", name:"NewMode" },
-						{label:"Auto", value:"AutoChangeOver" , service:"urn:upnp-org:serviceId:HVAC_UserOperatingMode1", action:"SetModeTarget", name:"NewMode"},
-						{label:"Cool", value:"CoolOn" , service:"urn:upnp-org:serviceId:HVAC_UserOperatingMode1", action:"SetModeTarget", name:"NewMode"},
-						{label:"Heat", value:"HeatOn", service:"urn:upnp-org:serviceId:HVAC_UserOperatingMode1", action:"SetModeTarget", name:"NewMode"}
-					];
-					html +="<select id='altui-heater-select1' class='altui-heater-select form-control input-sm'>";
-					$.each(items, function(idx,item) {
-						html += "<option data-service='{1}' data-action='{2}' data-name='{3}' data-value='{4}'>{0}</option>".format(item.label,item.service,item.action,item.name,item.value);
-					});
-					html +="</select>";
+					if (userOperatingMode1Items.length>0) {
+						html +="<select id='altui-heater-select-{0}' class='altui-heater-select form-control input-sm'>".format(device.altuiid);
+						$.each(userOperatingMode1Items, function(idx,item) {
+							html += "<option data-service='{1}' data-action='{2}' data-name='{3}' data-value='{4}' {5}>{0}</option>".format(
+								item.label,item.service,item.action,item.name,item.value,
+								item.value==modeStatus ? 'selected' : '');
+						});
+						html +="</select>";
+					}
 				html += "</div>";
 				html += "<div class='col-xs-3'>";
 					html+= ("<button id='{0}' type='button' style='width:50%;' class='altui-heater-btn altui-red btn btn-default btn-xs {2}' >{1}</button>".format( 
@@ -235,22 +238,21 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 						);
 				html += "</div>";
 				html += "<div class='col-xs-3'>";
-					var items = [
-						{label:"Auto", value:"Auto", service:"urn:upnp-org:serviceId:HVAC_FanOperatingMode1", action:"SetMode" , name:"NewMode"},
-						{label:"On", value:"ContinuousOn", service:"urn:upnp-org:serviceId:HVAC_FanOperatingMode1", action:"SetMode", name:"NewMode"},
-						{label:"Cycle", value:"PeriodicOn", service:"urn:upnp-org:serviceId:HVAC_FanOperatingMode1", action:"SetMode", name:"NewMode"}
-					];
-					html +="<select id='altui-heater-select2' class='altui-heater-select form-control input-sm'>";
-					$.each(items, function(idx,item) {
-						html += "<option data-service='{1}' data-action='{2}' data-name='{3}' data-value='{4}'>{0}</option>".format(item.label,item.service,item.action,item.name,item.value);
-					});
-					html +="</select>";
+					if (userHVACFanOperatingMode1Items.length>0) {
+						html +="<select id='altui-heater-select-{0}' class='altui-heater-select form-control input-sm'>".format(device.altuiid);
+						$.each(userHVACFanOperatingMode1Items, function(idx,item) {
+							html += "<option data-service='{1}' data-action='{2}' data-name='{3}' data-value='{4}' {5}>{0}</option>".format(
+								item.label,item.service,item.action,item.name,item.value,
+								item.value==modeFan ? 'selected' : '');
+						});
+						html +="</select>";
+					}
 				html += "</div>";
 			html += "</div>";
 		html += "</div>";
 
 		html += "<script type='text/javascript'>";
-		html += " $('select.altui-heater-select').on('change', function() { 	";
+		html += " $('select#altui-heater-select-{0}').on('change', function() { 	".format(device.altuiid);
 		html += " 	var selected = $(this).find(':selected');					";
 		html += "   var service = $(selected).data('service');					";
 		html += "   var action = $(selected).data('action');					";
@@ -264,6 +266,30 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		return html;
 	}
 
+	function _drawZoneThermostat( device ) {
+		var userOperatingMode1Items = [
+			{label:"Off", value:"Off" , service:"urn:upnp-org:serviceId:HVAC_UserOperatingMode1", action:"SetModeTarget", name:"NewMode" },
+			{label:"Auto", value:"AutoChangeOver" , service:"urn:upnp-org:serviceId:HVAC_UserOperatingMode1", action:"SetModeTarget", name:"NewMode"},
+			{label:"Cool", value:"CoolOn" , service:"urn:upnp-org:serviceId:HVAC_UserOperatingMode1", action:"SetModeTarget", name:"NewMode"},
+			{label:"Heat", value:"HeatOn", service:"urn:upnp-org:serviceId:HVAC_UserOperatingMode1", action:"SetModeTarget", name:"NewMode"}
+		];
+		var userHVACFanOperatingMode1Items = [
+			{label:"Auto", value:"Auto", service:"urn:upnp-org:serviceId:HVAC_FanOperatingMode1", action:"SetMode" , name:"NewMode"},
+			{label:"On", value:"ContinuousOn", service:"urn:upnp-org:serviceId:HVAC_FanOperatingMode1", action:"SetMode", name:"NewMode"},
+			{label:"Cycle", value:"PeriodicOn", service:"urn:upnp-org:serviceId:HVAC_FanOperatingMode1", action:"SetMode", name:"NewMode"}
+		];
+		return  _internaldrawZoneThermostat( device , userOperatingMode1Items,  userHVACFanOperatingMode1Items );
+	};
+	
+	function _drawHeater( device) {
+		var userOperatingMode1Items = [
+			{label:"Off", value:"Off" , service:"urn:upnp-org:serviceId:HVAC_UserOperatingMode1", action:"SetModeTarget", name:"NewMode" },
+			{label:"Heat", value:"HeatOn", service:"urn:upnp-org:serviceId:HVAC_UserOperatingMode1", action:"SetModeTarget", name:"NewMode"}
+		];
+		var userHVACFanOperatingMode1Items = [];
+		return  _internaldrawZoneThermostat( device , userOperatingMode1Items,  userHVACFanOperatingMode1Items );
+	};
+		
 	// return the html string inside the .panel-body of the .altui-device#id panel
 	function _drawHumidity( device) {
 		var html = "";
@@ -568,6 +594,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawBinLightControlPanel : _drawBinLightControlPanel,
 	drawTempSensor : _drawTempSensor,
 	drawHeater	   : _drawHeater,
+	drawZoneThermostat : _drawZoneThermostat,
 	drawCamera     : _drawCamera,
 	onSliderChange : _onSliderChange,
 	drawDoorSensor : _drawDoorSensor,
