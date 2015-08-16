@@ -46,6 +46,7 @@ Localization.init( {
 	"Use Custom Pages":"Utilise Pages",
 	"Edit Custom Pages":"Edit Pages",
 	"More":"Plus",
+	"Less":"Moins",
 	"Remote Access Login":"Accès à Distance",
 	"Reload Luup Engine":"Redémarrer Luup",
 	"Lua Startup Code":"Démarrage Lua",
@@ -255,5 +256,6 @@ Localization.init( {
 	"Left Buttons are fixed on the page":"Fixer la barre de boutons a gauche",
 	"See":"Voir",
 	"2-columns Menu's limit":"Limite pour les Menus a 2 colonnes",
-	"Find Json":"Chercher Json"
+	"Find Json":"Chercher Json",
+	"Frame":"Cadre"
 });

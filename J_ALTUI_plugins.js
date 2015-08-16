@@ -153,13 +153,25 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	}
 		
 	function _internaldrawZoneThermostat( device , userOperatingMode1Items,  userHVACFanOperatingMode1Items ) {
+		function _button(altuiid, colorclass, glyph, service, action, name, value) {
+			return ("<button id='altui-setpointcontrol-{0}' type='button' style='width:50%;' class='altui-heater-btn {6} btn btn-default btn-xs' data-service='{2}' data-action='{3}' data-name='{4}' data-value='{5}'>{1}</button>".format( 
+			altuiid,		// id
+			glyph,	// label
+			service,
+			action,
+			name,
+			value,
+			colorclass
+			));
+		};
+				
 		var ws = MultiBox.getWeatherSettings();
 		if (ws.tempFormat==undefined)
 			ws.tempFormat="";
 		
 		var status = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSensor1', 'CurrentTemperature' ); 
 		var allsetpoints = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1', 'AllSetpoints' ); 
-		var heatsetpoint=null, coldsetpoint=null, autosetpoint=null;
+		var heatsetpoint=null, coldsetpoint=null, autosetpoint=null, currentmodesetpoint=null;
 		if (allsetpoints==null) {
 			heatsetpoint = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Heat', 'CurrentSetpoint' ); 
 			coldsetpoint = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Cool', 'CurrentSetpoint' ); 
@@ -169,6 +181,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			heatsetpoint = splits[0] || "";
 			coldsetpoint = splits[1] || "";
 			autosetpoint = splits[2] || "";
+			currentmodesetpoint = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1', 'CurrentSetpoint' ); 
 		}
 		var modeStatus = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:HVAC_UserOperatingMode1', 'ModeStatus' ); 
 		var modeFan = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:HVAC_FanOperatingMode1', 'Mode' ); 
@@ -177,6 +190,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		// heatsetpoint = 22.3;
 		// coldsetpoint = 18;
 		// autosetpoint = 21;		
+		// currentmodesetpoint=12;
 		// modeFan = "PeriodicOn";
 		// modeStatus = "HeatOn";
 		var html = "";
@@ -213,29 +227,56 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 						html +="</select>";
 					}
 				html += "</div>";
-				html += "<div class='col-xs-3'>";
-					html+= ("<button id='{0}' type='button' style='width:50%;' class='altui-heater-btn altui-red btn btn-default btn-xs {2}' >{1}</button>".format( 
-						0,		// id
-						upGlyph,	// label
-						"")		// active stateLabel
-						);				
-					html+= ("<button id='{0}' type='button' style='width:50%;' class='altui-heater-btn altui-red btn btn-default btn-xs {2}' >{1}</button>".format( 
-						0,		// id
-						downGlyph,	// label
-						"")		// active stateLabel
-						);				
+				html += "<div class='col-xs-3'>"; 
+					if (allsetpoints==null) {
+						//UI5
+						html += _button(device.altuiid, "altui-red", upGlyph, 
+									"urn:upnp-org:serviceId:TemperatureSetpoint1_Heat",
+									"SetCurrentSetpoint",
+									"NewCurrentSetpoint",
+									heatsetpoint+0.1	
+								);
+						html += _button(device.altuiid, "altui-red", downGlyph, 
+									"urn:upnp-org:serviceId:TemperatureSetpoint1_Heat",
+									"SetCurrentSetpoint",
+									"NewCurrentSetpoint",
+									heatsetpoint-0.1
+								);	
+					} else {
+						//currentmodesetpoint
+						//UI7
+						html += _button(device.altuiid, "", upGlyph, 
+									"urn:upnp-org:serviceId:TemperatureSetpoint1",
+									"SetCurrentSetpoint",
+									"NewCurrentSetpoint",
+									currentmodesetpoint+0.1	
+								);						
+					}
 				html += "</div>";
 				html += "<div class='col-xs-3'>";
-					html+= ("<button id='{0}' type='button' style='width:50%;' class='altui-heater-btn altui-blue btn btn-default btn-xs {2}' >{1}</button>".format( 
-						0,		// id
-						upGlyph,	// label
-						"")		// active stateLabel
-						);			
-					html+= ("<button id='{0}' type='button' style='width:50%;' class='altui-heater-btn altui-blue btn btn-default btn-xs {2}' >{1}</button>".format( 
-						0,		// id 
-						downGlyph,	// label
-						"")		// active stateLabel
-						);
+					if (allsetpoints==null) {
+						//UI5
+						html += _button(device.altuiid, "altui-blue", upGlyph, 
+									"urn:upnp-org:serviceId:TemperatureSetpoint1_Cool",
+									"SetCurrentSetpoint",
+									"NewCurrentSetpoint",
+									coldsetpoint+0.1
+								);
+						html += _button(device.altuiid, "altui-blue", downGlyph, 
+									"urn:upnp-org:serviceId:TemperatureSetpoint1_Cool",
+									"SetCurrentSetpoint",
+									"NewCurrentSetpoint",
+									coldsetpoint-0.1
+								);	
+					} else {
+						//UI7
+						html += _button(device.altuiid, "", downGlyph, 
+									"urn:upnp-org:serviceId:TemperatureSetpoint1",
+									"SetCurrentSetpoint",
+									"NewCurrentSetpoint",
+									currentmodesetpoint-0.1	
+								);						
+					}
 				html += "</div>";
 				html += "<div class='col-xs-3'>";
 					if (userHVACFanOperatingMode1Items.length>0) {
@@ -252,6 +293,15 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		html += "</div>";
 
 		html += "<script type='text/javascript'>";
+		html += " $('button#altui-setpointcontrol-{0}').on('click', function() { 	".format(device.altuiid);
+		html += " 	var selected = $(this);					";
+		html += "   var service = $(selected).data('service');					";
+		html += "   var action = $(selected).data('action');					";
+		html += "   var name = $(selected).data('name');					";
+		html += "   var value = $(selected).data('value');					";
+		html += "   var params = {}; params[name]=value;				";
+		html += "	MultiBox.runActionByAltuiID('{0}', service, action, params);".format(device.altuiid);
+		html += "});"
 		html += " $('select#altui-heater-select-{0}').on('change', function() { 	".format(device.altuiid);
 		html += " 	var selected = $(this).find(':selected');					";
 		html += "   var service = $(selected).data('service');					";

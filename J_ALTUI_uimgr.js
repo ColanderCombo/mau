@@ -9,7 +9,7 @@
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- 
+
 /*The MIT License (MIT)
 BOOTGRID: Copyright (c) 2014-2015 Rafael J. Staib
 
@@ -8508,8 +8508,8 @@ $(document).ready(function() {
 		loadGlyph = glyphTemplate.format( "open", _T("Load") , "");
 		infoGlyph = glyphTemplate.format( "info-sign", _T("Info") , "");
 		picGlyph = glyphTemplate.format( "picture", _T("Image") , "");
-		upGlyph = glyphTemplate.format( "arrow-up", _T("Up") , "");
-		downGlyph = glyphTemplate.format( "arrow-down", _T("Downs") , "");
+		upGlyph = glyphTemplate.format( "arrow-up", _T("More") , "");
+		downGlyph = glyphTemplate.format( "arrow-down", _T("Less") , "");
 		uncheckedGlyph= glyphTemplate.format( "unchecked", _T("Frame") , "");
 		runGlyph = glyphTemplate.format( "play", _T("Run Scene") , "");
 		editGlyph = glyphTemplate.format( "pencil", _T("Edit") , "");
