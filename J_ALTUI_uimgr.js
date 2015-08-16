@@ -5113,16 +5113,17 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		UIManager.clearPage(_T('Home'),_T("Welcome to VERA Alternate UI"),UIManager.oneColumnLayout);
 		if ( MyLocalStorage.getSettings('ShowWeather') )
-		{
+		{                                                            
 			var language = getQueryStringValue("lang") || window.navigator.userLanguage || window.navigator.language;
 			var ws = MultiBox.getWeatherSettings();
-			if (ws.tempFormat==undefined)
-				ws.tempFormat="f";
+			if ((ws.tempFormat==undefined) || (ws.tempFormat==""))
+				ws.tempFormat="c";
 			var html="";
 			html ="<div class='altui-weather-widget col-md-6'>";
 			html +='<a href="//www.accuweather.com/fr/fr/meylan/1097583/weather-forecast/1097583" class="aw-widget-legal">';
 			html +=('</a><div id="awcc1439296613816" class="aw-widget-current"  data-locationkey="1097583" data-unit="'+ws.tempFormat.toLowerCase()+'" data-language="'+language.substring(0, 2)+'" data-useip="true" data-uid="awcc1439296613816"></div><script type="text/javascript" src="//oap.accuweather.com/launch.js"></script>');
 			html +="</div>";
+			console.log(html);
 			$(".altui-mainpanel").append(html);
 		}
 		UIManager.drawHouseMode();
