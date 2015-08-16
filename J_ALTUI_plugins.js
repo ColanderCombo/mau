@@ -34,6 +34,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-orange { color:darkorange;}";
 		style += ".altui-magenta { color:magenta;}";
 		style += ".altui-multiswitch-container { position:absolute; left:58px; right:16px; } .altui-multiswitch-container .row { padding-top:1px; padding-bottom:1px; margin-left:0px; margin-right:0px;} .altui-multiswitch-container .col-xs-3 { padding-left:1px; padding-right:1px; }  .altui-multiswitch-open { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; width: 100%; max-width: 100% }";
+		style += ".altui-heater-container { position:absolute; left:71px; right:16px; } .altui-heater-container .row { padding-top:1px; padding-bottom:1px; margin-left:0px; margin-right:0px;} .altui-heater-container .col-xs-3 { padding-left:1px; padding-right:1px; text-align:center;}  .altui-heater-btn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; width: 100%; max-width: 100% }";
+		style += ".altui-heater-container select.input-sm { height:22px;}"; 
 		style += ".altui-cyan { color:cyan;}";
 		style += ".altui-dimmable-slider { margin-left: 60px; }";	
 		style += ".altui-infoviewer-log,.altui-window-btn,.altui-datamine-open { margin-top: 10px; }";	
@@ -151,7 +153,6 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	}
 	
 	function _drawHeater( device) {
-		var html = "";
 		var ws = MultiBox.getWeatherSettings();
 		if (ws.tempFormat==undefined)
 			ws.tempFormat="";
@@ -169,19 +170,97 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			coldsetpoint = splits[1] || "";
 			autosetpoint = splits[2] || "";
 		}
+		status = 20;
+		heatsetpoint = 22.3;
+		coldsetpoint = 18;
+		autosetpoint = 21;		
+		var html = "";
+		html += "<div class='altui-heater-container pull-right'>";
+			html += "<div class='row'>";
+				html += "<div class='col-xs-3'>";
+					html += ("<span class='altui-temperature' >"+((status!=null) ? (parseFloat(status).toFixed(1)+"&deg;"+ws.tempFormat) : "--") +"</span>");
+				html += "</div>";
+				html += "<div class='col-xs-3'>";
+					if (heatsetpoint!=null) {
+						html += ("<span class='altui-temperature altui-red' >"+parseFloat(heatsetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
+					}
+				html += "</div>";
+				html += "<div class='col-xs-3'>";
+					if (coldsetpoint!=null) {
+						html += ("<span class='altui-temperature altui-blue' >"+parseFloat(coldsetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
+					}
+				html += "</div>";
+				html += "<div class='col-xs-3'>";
+					if (autosetpoint!=null) {
+						html += ("<span class='altui-temperature' >"+parseFloat(autosetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
+					}
+				html += "</div>";
+			html += "</div>";
+			html += "<div class='row'>";
+				html += "<div class='col-xs-3'>";
+					var items = [
+						{label:"Off", value:"Off" , service:"urn:upnp-org:serviceId:HVAC_UserOperatingMode1", action:"SetModeTarget", name:"NewMode" },
+						{label:"Auto", value:"AutoChangeOver" , service:"urn:upnp-org:serviceId:HVAC_UserOperatingMode1", action:"SetModeTarget", name:"NewMode"},
+						{label:"Cool", value:"CoolOn" , service:"urn:upnp-org:serviceId:HVAC_UserOperatingMode1", action:"SetModeTarget", name:"NewMode"},
+						{label:"Heat", value:"HeatOn", service:"urn:upnp-org:serviceId:HVAC_UserOperatingMode1", action:"SetModeTarget", name:"NewMode"}
+					];
+					html +="<select id='altui-heater-select1' class='altui-heater-select form-control input-sm'>";
+					$.each(items, function(idx,item) {
+						html += "<option data-service='{1}' data-action='{2}' data-name='{3}' data-value='{4}'>{0}</option>".format(item.label,item.service,item.action,item.name,item.value);
+					});
+					html +="</select>";
+				html += "</div>";
+				html += "<div class='col-xs-3'>";
+					html+= ("<button id='{0}' type='button' style='width:50%;' class='altui-heater-btn altui-red btn btn-default btn-xs {2}' >{1}</button>".format( 
+						0,		// id
+						upGlyph,	// label
+						"")		// active stateLabel
+						);				
+					html+= ("<button id='{0}' type='button' style='width:50%;' class='altui-heater-btn altui-red btn btn-default btn-xs {2}' >{1}</button>".format( 
+						0,		// id
+						downGlyph,	// label
+						"")		// active stateLabel
+						);				
+				html += "</div>";
+				html += "<div class='col-xs-3'>";
+					html+= ("<button id='{0}' type='button' style='width:50%;' class='altui-heater-btn altui-blue btn btn-default btn-xs {2}' >{1}</button>".format( 
+						0,		// id
+						upGlyph,	// label
+						"")		// active stateLabel
+						);			
+					html+= ("<button id='{0}' type='button' style='width:50%;' class='altui-heater-btn altui-blue btn btn-default btn-xs {2}' >{1}</button>".format( 
+						0,		// id 
+						downGlyph,	// label
+						"")		// active stateLabel
+						);
+				html += "</div>";
+				html += "<div class='col-xs-3'>";
+					var items = [
+						{label:"Auto", value:"Auto", service:"urn:upnp-org:serviceId:HVAC_FanOperatingMode1", action:"SetMode" , name:"NewMode"},
+						{label:"On", value:"ContinuousOn", service:"urn:upnp-org:serviceId:HVAC_FanOperatingMode1", action:"SetMode", name:"NewMode"},
+						{label:"Cycle", value:"PeriodicOn", service:"urn:upnp-org:serviceId:HVAC_FanOperatingMode1", action:"SetMode", name:"NewMode"}
+					];
+					html +="<select id='altui-heater-select2' class='altui-heater-select form-control input-sm'>";
+					$.each(items, function(idx,item) {
+						html += "<option data-service='{1}' data-action='{2}' data-name='{3}' data-value='{4}'>{0}</option>".format(item.label,item.service,item.action,item.name,item.value);
+					});
+					html +="</select>";
+				html += "</div>";
+			html += "</div>";
+		html += "</div>";
 
-		html += ("<span class='altui-temperature' >"+((status!=null) ? (parseFloat(status).toFixed(1)+"&deg;"+ws.tempFormat) : "--") +"</span>");
-		// html += "<div>";
-		if (heatsetpoint!=null) {
-			html += ("<span class='altui-temperature altui-red' > / "+parseFloat(heatsetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
-		}
-		if (coldsetpoint!=null) {
-			html += ("<span class='altui-temperature altui-blue' > / "+parseFloat(coldsetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
-		}
-		if (autosetpoint!=null) {
-			html += ("<span class='altui-temperature' > / "+parseFloat(autosetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
-		}
-		// html += "</div>";
+		html += "<script type='text/javascript'>";
+		html += " $('select.altui-heater-select').on('change', function() { 	";
+		html += " 	var selected = $(this).find(':selected');					";
+		html += "   var service = $(selected).data('service');					";
+		html += "   var action = $(selected).data('action');					";
+		html += "   var name = $(selected).data('name');					";
+		html += "   var value = $(selected).data('value');					";
+		html += "   var params = {}; params[name]=value;				";
+		html += "	MultiBox.runActionByAltuiID('{0}', service, action, params);".format(device.altuiid);
+		html += "});"
+		html += "</script>";
+
 		return html;
 	}
 

@@ -68,6 +68,8 @@ var starGlyph = "";
 var loadGlyph = "";
 var infoGlyph = "";
 var picGlyph = "";
+var upGlyph = "";
+var downGlyph = "";
 var uncheckedGlyph ="";
 var runGlyph = "";
 var editGlyph = "";
@@ -5110,7 +5112,6 @@ var UIManager  = ( function( window, undefined ) {
 	pageHome : function()
 	{
 		UIManager.clearPage(_T('Home'),_T("Welcome to VERA Alternate UI"),UIManager.oneColumnLayout);
-		UIManager.drawHouseMode();
 		if ( MyLocalStorage.getSettings('ShowWeather') )
 		{
 			var language = getQueryStringValue("lang") || window.navigator.userLanguage || window.navigator.language;
@@ -5124,6 +5125,7 @@ var UIManager  = ( function( window, undefined ) {
 			html +="</div>";
 			$(".altui-mainpanel").append(html);
 		}
+		UIManager.drawHouseMode();
 		var html = "<div class='col-xs-12'>";
 		html +="	<br><p>"+_T("This plugin is a work in progress, it will continuously evolve over time.");
 		html +=	_T("You may check out the evolutions on the Micasaverde <a href='http://forum.micasaverde.com/index.php/topic,30310.msg216129.html#msg216129'>Forum</a>")+"</p>";
@@ -8506,6 +8508,8 @@ $(document).ready(function() {
 		loadGlyph = glyphTemplate.format( "open", _T("Load") , "");
 		infoGlyph = glyphTemplate.format( "info-sign", _T("Info") , "");
 		picGlyph = glyphTemplate.format( "picture", _T("Image") , "");
+		upGlyph = glyphTemplate.format( "arrow-up", _T("Up") , "");
+		downGlyph = glyphTemplate.format( "arrow-down", _T("Downs") , "");
 		uncheckedGlyph= glyphTemplate.format( "unchecked", _T("Frame") , "");
 		runGlyph = glyphTemplate.format( "play", _T("Run Scene") , "");
 		editGlyph = glyphTemplate.format( "pencil", _T("Edit") , "");
