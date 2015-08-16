@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.66"
+local version = "v0.67"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -1093,6 +1093,12 @@ local function getDefaultConfig()
 		["DeviceDrawFunc"]="ALTUI_IPhoneLocator.drawIPX"
 		-- ["ControlPanelFunc"]="ALTUI_IPhoneLocator.drawControlPanel",
 	}
+	tbl["urn:schemas-rts-services-com:device:ProgramLogicEG:1"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawPLEG",
+		-- ["ControlPanelFunc"]="ALTUI_IPhoneLocator.drawControlPanel",
+	}
+	
 	return tbl
 end
 

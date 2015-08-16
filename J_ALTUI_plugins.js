@@ -450,6 +450,16 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		html += "</script>";
 		return html;
 	};
+	function _drawPLEG(device) {
+		var status = MultiBox.getStatus( device, 'urn:rts-services-com:serviceId:ProgramLogicEG', 'Armed' );
+		var html ="";
+		html += ALTUI_PluginDisplays.createOnOffButton( status,"altui-onoffbtn-"+device.altuiid, _T("Bypass,Arm") , "pull-right");
+		
+		html += "<script type='text/javascript'>";
+		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.togglePLEG('{0}','div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
+		html += "</script>";
+		return html;
+	};
 	
 	// return the html string inside the .panel-body of the .altui-device#id panel
 	function _drawDoorSensor( device) {
@@ -649,6 +659,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	onSliderChange : _onSliderChange,
 	drawDoorSensor : _drawDoorSensor,
 	drawDoorLock   : _drawDoorLock,
+	drawPLEG 	   : _drawPLEG,
 	drawDimmable   : _drawDimmable,
 	drawMotion 	   : _drawMotion,
 	drawSmoke 	   : _drawSmoke,
@@ -677,6 +688,11 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	toggleDoorLock : function (altuiid, htmlid) {
 		_toggleButton(altuiid, htmlid,'urn:micasaverde-com:serviceId:DoorLock1', 'Status', function(id,newval) {
 			MultiBox.setDoorLock( altuiid, newval);
+		});
+	},
+	togglePLEG: function (altuiid, htmlid) {
+		_toggleButton(altuiid, htmlid,'urn:rts-services-com:serviceId:ProgramLogicEG', 'Armed', function(id,newval) {
+			MultiBox.runActionByAltuiID( altuiid, 'urn:rts-services-com:serviceId:ProgramLogicEG', 'SetArmed', {'newArmedValue':newval} );
 		});
 	}
   };
