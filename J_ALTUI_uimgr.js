@@ -4191,7 +4191,6 @@ var UIManager  = ( function( window, undefined ) {
 					break;			
 				case "urn:schemas-micasaverde-com:device:MotionSensor:1":
 					var tripped = parseInt(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Tripped' )); 
-					tripped = 1;
 					html += ("<span>{0}</span>".format( (tripped==true) ? "<span class='glyphicon glyphicon-flash text-danger' aria-hidden='true'></span>" : ""));
 					break;
 				default:
