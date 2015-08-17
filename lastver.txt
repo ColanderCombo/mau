@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("631,PLEG dashboard;HVAC and heather display,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28592")
+UIManager.checkAltuiUpdate("637,PLEG dashboard;Favorites tiles on home,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28606")
