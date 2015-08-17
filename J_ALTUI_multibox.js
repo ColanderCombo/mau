@@ -446,11 +446,16 @@ var MultiBox = ( function( window, undefined ) {
 	};
 	function _getScenes( func , filterfunc, endfunc ) {
 		var arr=[];
+		var answers = 0;
 		$.each(_controllers, function( i,c) {
-			arr = arr.concat(c.controller.getScenes( func , filterfunc, null ));
+			c.controller.getScenes( func , filterfunc, function(scenes) {
+				arr = arr.concat(scenes);
+				answers++
+				if ((answers==_controllers.length) && ($.isFunction(endfunc))) {
+					(endfunc)(arr);					
+				}
+			});
 		});
-		if ($.isFunction(endfunc))
-			(endfunc)( arr );		
 		return arr;
 	};
 	function _getScenesSync() {
