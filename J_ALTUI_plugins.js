@@ -164,7 +164,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			colorclass
 			));
 		};
-				
+		var HVAC_INCREMENT = 1;	
 		var ws = MultiBox.getWeatherSettings();
 		if (ws.tempFormat==undefined)
 			ws.tempFormat="";
@@ -193,6 +193,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		// currentmodesetpoint=12;
 		// modeFan = "PeriodicOn";
 		// modeStatus = "HeatOn";
+		// allsetpoints = "3,4,5";
+
 		var html = "";
 		html += "<div class='altui-heater-container pull-right'>";
 			html += "<div class='row'>";
@@ -234,13 +236,13 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 									"urn:upnp-org:serviceId:TemperatureSetpoint1_Heat",
 									"SetCurrentSetpoint",
 									"NewCurrentSetpoint",
-									heatsetpoint+0.1	
+									heatsetpoint+HVAC_INCREMENT	
 								);
 						html += _button(device.altuiid, "altui-red", downGlyph, 
 									"urn:upnp-org:serviceId:TemperatureSetpoint1_Heat",
 									"SetCurrentSetpoint",
 									"NewCurrentSetpoint",
-									heatsetpoint-0.1
+									heatsetpoint-HVAC_INCREMENT
 								);	
 					} else {
 						//currentmodesetpoint
@@ -249,7 +251,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 									"urn:upnp-org:serviceId:TemperatureSetpoint1",
 									"SetCurrentSetpoint",
 									"NewCurrentSetpoint",
-									currentmodesetpoint+0.1	
+									currentmodesetpoint+HVAC_INCREMENT	
 								);						
 					}
 				html += "</div>";
@@ -260,13 +262,13 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 									"urn:upnp-org:serviceId:TemperatureSetpoint1_Cool",
 									"SetCurrentSetpoint",
 									"NewCurrentSetpoint",
-									coldsetpoint+0.1
+									coldsetpoint+HVAC_INCREMENT
 								);
 						html += _button(device.altuiid, "altui-blue", downGlyph, 
 									"urn:upnp-org:serviceId:TemperatureSetpoint1_Cool",
 									"SetCurrentSetpoint",
 									"NewCurrentSetpoint",
-									coldsetpoint-0.1
+									coldsetpoint-HVAC_INCREMENT
 								);	
 					} else {
 						//UI7
@@ -274,7 +276,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 									"urn:upnp-org:serviceId:TemperatureSetpoint1",
 									"SetCurrentSetpoint",
 									"NewCurrentSetpoint",
-									currentmodesetpoint-0.1	
+									currentmodesetpoint-HVAC_INCREMENT	
 								);						
 					}
 				html += "</div>";
