@@ -4231,6 +4231,7 @@ var UIManager  = ( function( window, undefined ) {
 		function _drawFavoriteScene(scene) {
 			return "<div data-altuiid='{1}' class='altui-favorites-scene-content'>{0}</div>".format(runGlyph,scene.altuiid);
 		};
+		
 		var favoriteTemplate = "";
 		favoriteTemplate += "<div class='altui-favorites-container ' >";
 		// favoriteTemplate += "<div class='altui-favorites-container col-xs-3 col-sm-3 col-md-2 col-lg-1' >";
@@ -4245,7 +4246,7 @@ var UIManager  = ( function( window, undefined ) {
 		favoriteTemplate += "</div>";
 
 		var html = "";
-		$(".altui-favorites").toggle(false);
+		// $(".altui-favorites").toggle(false);
 		MultiBox.getDevices(null , function(device) { return device.favorite; }, function(devices) {
 			html += "<div class='altui-favorites row'>";
 			$.each(devices, function(idx,device) {
@@ -4264,7 +4265,7 @@ var UIManager  = ( function( window, undefined ) {
 				// html += "</div>";		
 
 				$(".altui-favorites").replaceWith(html);
-				$(".altui-favorites").toggle(true);
+				// $(".altui-favorites").toggle(true);
 				_resizeFavorites();
 			})
 		});
@@ -8527,8 +8528,70 @@ var UIManager  = ( function( window, undefined ) {
 		}
 		if ( (bEngineReady==true) && (bUIReady==true) ) {
 			bUIReady=false;
-			_refreshFooter();
-			UIManager.run();
+			
+			$(window).on('resize', function () {
+			  /*if (window.innerWidth > tabletSize) */
+			  $(".navbar-collapse").collapse('hide');
+			  UIManager.refreshUI( true ,false  );	// full but not first time
+			});			
+			$( window ).unload(function() {
+				// save state to accelerate the launch next time
+				// UIManager.saveEngine();	
+				MultiBox.saveEngine();
+				AltuiDebug.debug("exiting");
+			});
+	
+			$(".altui-debug-div").toggle(false);
+	
+			$( document )
+				.on ("click", ".navbar-nav a", function() {		// collapse on click on small screens
+					//	$(".navbar-toggle").click();
+					if ($(this).data("toggle") != "dropdown")	// not for the More... button
+						$(".navbar-collapse").collapse('hide');
+				} )
+				.on ("click touchend", ".imgLogo", UIManager.pageHome )
+				// .on ("click", ".altui-savechanges-button", MultiBox.saveChangeCaches )
+				.on ("click", "#menu_room", UIManager.pageRooms )
+				.on ("click", "#menu_device", UIManager.pageDevices )
+				.on ("click", "#menu_scene", UIManager.pageScenes )
+				.on ("click", "#altui-scene-triggers", UIManager.pageTriggers )
+				.on ("click", "#menu_plugins", UIManager.pagePlugins )
+				.on ("click", "#altui-pages-see", UIManager.pageUsePages )
+				.on ("click", "#altui-pages-edit", UIManager.pageEditPages )
+				.on( "click", "#altui-reload", UIManager.reloadEngine )
+				.on( "click", "#altui-reboot", UIManager.reboot )
+				.on( "click", "#altui-remoteaccess", UIManager.pageRemoteAccess )
+				.on( "click", "#altui-credits", UIManager.pageCredits )
+				.on( "click", "#altui-oscommand", UIManager.pageOsCommand )
+				.on( "click", "#altui-luastart", UIManager.pageLuaStart )
+				.on( "click", "#altui-luatest", UIManager.pageLuaTest )
+				.on( "click", "#altui-zwavenetwork", UIManager.pageZwave )		
+				.on( "click", "#altui-childrennetwork", UIManager.pageChildren )		
+				.on( "click", "#altui-zwaveroutes", UIManager.pageRoutes )		
+				.on( "click", "#altui-quality", UIManager.pageQuality )		
+				.on( "click", "#altui-energy", UIManager.pagePower )	
+				.on( "click", "#altui-tbl-device", UIManager.pageTblDevices )
+				.on( "click", "#altui-optimize", UIManager.pageOptions )
+				.on( "click", "#altui-localize", UIManager.pageLocalization  )
+				.on( "click", "#altui-debugtools", UIManager.pageDebug  )
+				.on( "click", "#altui-debug-btn", function() {
+					$(".altui-debug-div").toggle();
+					$("#altui-debug-btn span.caret").toggleClass( "caret-reversed" );
+				})
+				.on("click",".altui-device-variables",function(){ 
+					var altuiid = $(this).prop('id');
+					var device = MultiBox.getDeviceByAltuiID(altuiid);
+					UIManager.deviceDrawVariables(device);
+				})
+				.on("click",".altui-device-actions",function(){ 
+					var altuiid = $(this).prop('id');
+					var device = MultiBox.getDeviceByAltuiID(altuiid);
+					UIManager.deviceDrawActions(device);
+				});
+				AltuiDebug.debug("init done");
+				// console.log("start UIManager.run()");
+				_refreshFooter();
+				UIManager.run();
 		}
 	},
 	
@@ -8790,64 +8853,4 @@ $(document).ready(function() {
 		_initLocalizedGlobals();
 	}
 
-	$(window).on('resize', function () {
-	  /*if (window.innerWidth > tabletSize) */
-	  $(".navbar-collapse").collapse('hide');
-	  UIManager.refreshUI( true ,false  );	// full but not first time
-	});			
-	$( window ).unload(function() {
-		// save state to accelerate the launch next time
-		// UIManager.saveEngine();	
-		MultiBox.saveEngine();
-		AltuiDebug.debug("exiting");
-	});
-	
-	$(".altui-debug-div").toggle(false);
-	
-	$( document )
-		.on ("click", ".navbar-nav a", function() {		// collapse on click on small screens
-			//	$(".navbar-toggle").click();
-			if ($(this).data("toggle") != "dropdown")	// not for the More... button
-				$(".navbar-collapse").collapse('hide');
-		} )
-		.on ("click touchend", ".imgLogo", UIManager.pageHome )
-		// .on ("click", ".altui-savechanges-button", MultiBox.saveChangeCaches )
-		.on ("click", "#menu_room", UIManager.pageRooms )
-		.on ("click", "#menu_device", UIManager.pageDevices )
-		.on ("click", "#menu_scene", UIManager.pageScenes )
-		.on ("click", "#altui-scene-triggers", UIManager.pageTriggers )
-		.on ("click", "#menu_plugins", UIManager.pagePlugins )
-		.on ("click", "#altui-pages-see", UIManager.pageUsePages )
-		.on ("click", "#altui-pages-edit", UIManager.pageEditPages )
-		.on( "click", "#altui-reload", UIManager.reloadEngine )
-		.on( "click", "#altui-reboot", UIManager.reboot )
-		.on( "click", "#altui-remoteaccess", UIManager.pageRemoteAccess )
-		.on( "click", "#altui-credits", UIManager.pageCredits )
-		.on( "click", "#altui-oscommand", UIManager.pageOsCommand )
-		.on( "click", "#altui-luastart", UIManager.pageLuaStart )
-		.on( "click", "#altui-luatest", UIManager.pageLuaTest )
-		.on( "click", "#altui-zwavenetwork", UIManager.pageZwave )		
-		.on( "click", "#altui-childrennetwork", UIManager.pageChildren )		
-		.on( "click", "#altui-zwaveroutes", UIManager.pageRoutes )		
-		.on( "click", "#altui-quality", UIManager.pageQuality )		
-		.on( "click", "#altui-energy", UIManager.pagePower )	
-		.on( "click", "#altui-tbl-device", UIManager.pageTblDevices )
-		.on( "click", "#altui-optimize", UIManager.pageOptions )
-		.on( "click", "#altui-localize", UIManager.pageLocalization  )
-		.on( "click", "#altui-debugtools", UIManager.pageDebug  )
-		.on( "click", "#altui-debug-btn", function() {
-			$(".altui-debug-div").toggle();
-			$("#altui-debug-btn span.caret").toggleClass( "caret-reversed" );
-		})
-		.on("click",".altui-device-variables",function(){ 
-			var altuiid = $(this).prop('id');
-			var device = MultiBox.getDeviceByAltuiID(altuiid);
-			UIManager.deviceDrawVariables(device);
-		})
-		.on("click",".altui-device-actions",function(){ 
-			var altuiid = $(this).prop('id');
-			var device = MultiBox.getDeviceByAltuiID(altuiid);
-			UIManager.deviceDrawActions(device);
-		});
-	AltuiDebug.debug("init done");
 });
