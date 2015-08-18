@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("637,PLEG dashboard;Favorites tiles on home,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28606")
+UIManager.checkAltuiUpdate("642,active favorite buttons;+1 increment on heater dashboard;PLEG dashboard;Favorites tiles on home,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28616")
