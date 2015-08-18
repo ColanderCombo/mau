@@ -4245,6 +4245,7 @@ var UIManager  = ( function( window, undefined ) {
 		favoriteTemplate += "</div>";
 
 		var html = "";
+		$(".altui-favorites").toggle(false);
 		MultiBox.getDevices(null , function(device) { return device.favorite; }, function(devices) {
 			html += "<div class='altui-favorites row'>";
 			$.each(devices, function(idx,device) {
@@ -4263,6 +4264,7 @@ var UIManager  = ( function( window, undefined ) {
 				// html += "</div>";		
 
 				$(".altui-favorites").replaceWith(html);
+				$(".altui-favorites").toggle(true);
 				_resizeFavorites();
 			})
 		});
@@ -5261,13 +5263,25 @@ var UIManager  = ( function( window, undefined ) {
 			.on("click",".altui-favorites-scene-content",function() {
 				var altuiid = $(this).data("altuiid");
 				MultiBox.runSceneByAltuiID(altuiid);
-			}
+			})
 			.off("click",".altui-favorites-device-content")
 			.on("click",".altui-favorites-device-content",function() {
 				var altuiid = $(this).data("altuiid");
-				MultiBox.runSceneByAltuiID(altuiid);
-			}
-		);
+				var device = MultiBox.getDeviceByAltuiID(altuiid);
+				switch( device.device_type) {
+					case "urn:schemas-upnp-org:device:BinaryLight:1":
+						var status = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:SwitchPower1', 'Status' ); 
+						MultiBox.runAction(device,"urn:upnp-org:serviceId:SwitchPower1","SetTarget", {newTargetValue:1-parseInt(status||1)});
+						break;
+					case "urn:schemas-micasaverde-com:device:WindowCovering:1"	:
+					case "urn:schemas-upnp-org:device:DimmableLight:1":
+						var status = parseInt(MultiBox.getStatus(device,"urn:upnp-org:serviceId:Dimming1","LoadLevelStatus") || 1);
+						MultiBox.runAction( device , "urn:upnp-org:serviceId:Dimming1", "SetLoadLevelTarget", {newLoadlevelTarget: ((status>0) ? 0 : 100) } );
+						break;
+					default:
+						break;
+				}	
+			});
 		_redrawFavorites();
 	},
 	
