@@ -3049,6 +3049,7 @@ var UIManager  = ( function( window, undefined ) {
 	function _getDeviceIconPath(device) {
 		var id = device.altuiid;
 		var controller = MultiBox.controllerOf(id).controller;
+		var ui5 = MultiBox.isUI5( controller );
 		var _devicetypesDB = MultiBox.getDeviceTypesDB(controller);
 		var icon='';
 		switch( device.device_type ) {
@@ -3127,7 +3128,10 @@ var UIManager  = ( function( window, undefined ) {
 					else {
 						// no state icons found
 						//str = (dt.ui_static_data.default_icon != undefined) ? dt.ui_static_data.default_icon : dt.ui_static_data.flashicon;
-						str = (dt.ui_static_data.flashicon != undefined) ? dt.ui_static_data.flashicon : dt.ui_static_data.default_icon;
+						if (ui5==true)
+							str = (dt.ui_static_data.flashicon != undefined) ? dt.ui_static_data.flashicon : dt.ui_static_data.default_icon;
+						else
+							str = (dt.ui_static_data.default_icon != undefined) ? dt.ui_static_data.default_icon : dt.ui_static_data.flashicon;
 						AltuiDebug.debug("Icon for device id:"+id+"  string from json:"+str);
 						if (str == undefined) {
 							AltuiDebug.debug("Undefined icon in ui_static_data, device.type:"+device.device_type);
