@@ -28,7 +28,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-temperature  {font-size: 16px;}";
 		style += ".altui-humidity, .altui-light  {font-size: 18px;}";
 		style += ".altui-motion {font-size: 22px;}";
-		style += ".altui-weather-text, .altui-lasttrip-text {font-size: 11px;}";
+		style += ".altui-weather-text, .altui-lasttrip-text, .altui-vswitch-text {font-size: 11px;}";
 		style += ".altui-red { color:red;}";
 		style += ".altui-blue { color:blue;}";
 		style += ".altui-orange { color:darkorange;}";
@@ -138,6 +138,22 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 				.width(50);
 			return div.wrap( "<div></div>" ).parent().html();
 		}
+	}
+	
+	function _drawVswitch( device ) {
+		var html ="";
+		var status = parseInt(MultiBox.getStatus( device, 'urn:upnp-org:serviceId:VSwitch1', 'Status' )); 
+		html += ALTUI_PluginDisplays.createOnOffButton( status,"altui-vswitch-"+device.altuiid, _T("OFF,ON") , "pull-right");
+		$.each( ['Text1','Text2'],function(i,v) {
+			var dl1 = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:VSwitch1', v ); 
+			if (dl1 != null) 
+				html += $("<div class='altui-vswitch-text'></div>").text(dl1).wrap( "<div></div>" ).parent().html()
+		});
+		// on off 
+		html += "<script type='text/javascript'>";
+		html += "$('div#altui-vswitch-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleVswitch('{0}','div#altui-vswitch-{0}'); } );".format(device.altuiid);
+		html += "</script>";
+		return html;
 	}
 	
 	// return the html string inside the .panel-body of the .altui-device#id panel
@@ -658,6 +674,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawHeater	   : _drawHeater,
 	drawZoneThermostat : _drawZoneThermostat,
 	drawCamera     : _drawCamera,
+	drawVswitch	   : _drawVswitch,
 	onSliderChange : _onSliderChange,
 	drawDoorSensor : _drawDoorSensor,
 	drawDoorLock   : _drawDoorLock,
@@ -696,6 +713,11 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		_toggleButton(altuiid, htmlid,'urn:rts-services-com:serviceId:ProgramLogicEG', 'Armed', function(id,newval) {
 			MultiBox.runActionByAltuiID( altuiid, 'urn:rts-services-com:serviceId:ProgramLogicEG', 'SetArmed', {'newArmedValue':newval} );
 		});
-	}
+	},
+	toggleVswitch: function (altuiid, htmlid) {
+		ALTUI_PluginDisplays.toggleButton(altuiid, htmlid, 'urn:upnp-org:serviceId:VSwitch1', 'Status', function(id,newval) {
+			MultiBox.runActionByAltuiID( altuiid, 'urn:upnp-org:serviceId:VSwitch1', 'SetTarget', {newTargetValue:newval} );
+		});
+	},
   };
 })( window );
