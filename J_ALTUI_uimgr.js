@@ -3942,38 +3942,38 @@ var UIManager  = ( function( window, undefined ) {
 		};
 		
 		function _deviceDrawWireFrame( device,container) {
-				var devicecontroller = MultiBox.controllerOf(device.altuiid).controller;
-				var rooms = $.grep( MultiBox.getRoomsSync(), function(room,idx) {
-					return ( MultiBox.controllerOf(room.altuiid).controller == devicecontroller );
-				});
+			var devicecontroller = MultiBox.controllerOf(device.altuiid).controller;
+			var rooms = $.grep( MultiBox.getRoomsSync(), function(room,idx) {
+				return ( MultiBox.controllerOf(room.altuiid).controller == devicecontroller );
+			});
 
-				var htmlRoomSelect = "<select id='altui-room-list' class='form-control input-sm'>";
-				if (rooms)
-						htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format("No Room",0,'');
-						$.each(rooms, function(idx,room) {
-							var selected = (room.id.toString() == device.room);
-							htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format(room.name,room.id,selected ? 'selected' : '');
-						});
-				htmlRoomSelect 	  += "</select>";
-		
-				var htmlDeleteButton= buttonTemplate.format( device.altuiid, 'btn-xs altui-deldevice pull-right', deleteGlyph,'default');;
-				var html ="";
-				html+="<div class='row'>";
-					html +="<div id='altui-device-controlpanel-"+device.altuiid+"' class='col-xs-12 altui-device-controlpanel' data-altuiid='"+device.altuiid+"'>";
-					html +="	<div class='panel panel-default'>";
-					html +="		<div class='panel-heading form-inline'>";
-					html += htmlDeleteButton;
-					html +="			<h1 class='panel-title'>{0} {1} {2} (#{3}) "+htmlRoomSelect+"</h1>";
-					html +="		</div>";
-					html +="		<div class='panel-body'>";
-					html +="		</div>";
-					html +="	</div>";
-					html +="</div>";
-				html += "</div>";	// row
-				$(container).append( html.format(device.manufacturer || '', device.model || '', device.name || '', device.id) );	
-				$("#altui-room-list").change( function() {
-					MultiBox.renameDevice(device, device.name, $(this).val() );
-				});
+			var htmlRoomSelect = "<select id='altui-room-list' class='form-control input-sm'>";
+			if (rooms)
+					htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format("No Room",0,'');
+					$.each(rooms, function(idx,room) {
+						var selected = (room.id.toString() == device.room);
+						htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format(room.name,room.id,selected ? 'selected' : '');
+					});
+			htmlRoomSelect 	  += "</select>";
+	
+			var htmlDeleteButton= buttonTemplate.format( device.altuiid, 'btn-xs altui-deldevice pull-right', deleteGlyph,'default');;
+			var html ="";
+			html+="<div class='row'>";
+				html +="<div id='altui-device-controlpanel-"+device.altuiid+"' class='col-xs-12 altui-device-controlpanel' data-altuiid='"+device.altuiid+"'>";
+				html +="	<div class='panel panel-default'>";
+				html +="		<div class='panel-heading form-inline'>";
+				html += htmlDeleteButton;
+				html +="			<h1 class='panel-title'>{0} {1} {2} (#{3}) "+htmlRoomSelect+"</h1>";
+				html +="		</div>";
+				html +="		<div class='panel-body'>";
+				html +="		</div>";
+				html +="	</div>";
+				html +="</div>";
+			html += "</div>";	// row
+			$(container).append( html.format(device.manufacturer || '', device.model || '', device.name || '', device.id) );	
+			$("#altui-room-list").change( function() {
+				MultiBox.renameDevice(device, device.name, $(this).val() );
+			});
 		};
 			
 		function _defereddisplay(bAsync) {
@@ -5412,12 +5412,36 @@ var UIManager  = ( function( window, undefined ) {
 
 	pageControlPanel: function( altuiid ) 
 	{
+		function _drawDeviceLastUpdateStats( device ) {
+			var variables = [
+				{ service:"urn:micasaverde-com:serviceId:HaDevice1", name:"FirstConfigured" },
+				{ service:"urn:micasaverde-com:serviceId:HaDevice1", name:"LastUpdate" },
+				{ service:"urn:micasaverde-com:serviceId:HaDevice1", name:"BatteryDate" },
+				{ service:"urn:micasaverde-com:serviceId:ZWaveDevice1", name:"LastWakeup" },
+				{ service:"urn:micasaverde-com:serviceId:ZWaveDevice1", name:"LastRouteUpdate" },
+				{ service:"urn:micasaverde-com:serviceId:SecuritySensor1", name:"LastTrip" },
+			];
+			var html = "<div class='row'><div class='col-xs-12'>";
+			html += "<ul>"
+			$.each(variables, function(idx,variable) {
+				var value = MultiBox.getStatus( device, variable.service, variable.name);
+				if ((value !=null) && (value !="")) {
+					html += "<li><b>{0}</b> : {1}</li>".format(variable.name,_enhanceValue(value));
+				}
+			});
+			html += "</ul>"
+			html += "</div></div>";
+			return html;
+		};
+		
 		var rooms = MultiBox.getRoomsSync();
 		var device = MultiBox.getDeviceByAltuiID( altuiid );
 		var controllerid = MultiBox.controllerOf(altuiid).controller;
 		var category = MultiBox.getCategoryTitle( device.category_num );
 
 		UIManager.clearPage(_T('Control Panel'),"{0} <small>{1} <small>#{2}</small></small>".format( device.name , category ,altuiid),UIManager.oneColumnLayout);
+		
+		$(".altui-mainpanel").append( _drawDeviceLastUpdateStats(device) );
 		
 		var html = "<div class='form-inline col-xs-12'>";
 		html += "<button type='button' class='btn btn-default' id='altui-toggle-attributes' >"+_T("Attributes")+"<span class='caret'></span></button>";
