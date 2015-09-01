@@ -1940,7 +1940,8 @@ function new_scene_id(){
 
 function get_device_state(deviceId, serviceId, variable, dynamic) {
 	var device = MultiBox.getDeviceByID( _JSAPI_ctx.controllerid , deviceId);
-	return MultiBox.getStatus( device, serviceId, variable );
+	var result = MultiBox.getStatus( device, serviceId, variable );
+	return (result==null) ? false : result;
 };
 
 function set_device_state (deviceId, serviceId, variable, value, dynamic) {
