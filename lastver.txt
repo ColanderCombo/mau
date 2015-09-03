@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("646,fix api.getDeviceState;fix device icon selection from json;Display key device variables on control panel,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28706")
+UIManager.checkAltuiUpdate("649,VSwitch dashboard,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28731")
