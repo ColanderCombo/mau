@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("649,VSwitch dashboard,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28731")
+UIManager.checkAltuiUpdate("655,clickable Vswitch as favorite;favorite hovering cosmetics;cosmetics for device key variables in control panel;bug fix for argument less triggers in scene editor,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28748")
