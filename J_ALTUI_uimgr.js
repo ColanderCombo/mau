@@ -189,6 +189,8 @@ var styles ="					\
 	  padding-bottom: 15px; \
 	  padding-right: 15px; \
 	}	\
+	.altui-device-keyvariables {	\
+	}							\
 	.altui-device-controlpanel .panel-body {	\
 		padding-top: 0px;\
 		padding-bottom: 0px;\
@@ -5426,16 +5428,18 @@ var UIManager  = ( function( window, undefined ) {
 				{ service:"urn:micasaverde-com:serviceId:ZWaveDevice1", name:"LastRouteUpdate" },
 				{ service:"urn:micasaverde-com:serviceId:SecuritySensor1", name:"LastTrip" },
 			];
-			var html = "<div class='row'><div class='col-xs-12'>";
-			html += "<ul>"
+			var html = "<div class='col-xs-12'>";
+			html += "<div class='panel panel-default'><div class='panel-body altui-device-keyvariables bg-info'>";
+			html += "<div class='row'>";
 			$.each(variables, function(idx,variable) {
 				var value = MultiBox.getStatus( device, variable.service, variable.name);
 				if ((value !=null) && (value !="")) {
-					html += "<li><b>{0}</b> : {1}</li>".format(variable.name,_enhanceValue(value));
+					html += "<div class='col-sm-6 col-md-4'><b>{0}</b>: {1}</div>".format(variable.name,_enhanceValue(value));
 				}
 			});
-			html += "</ul>"
-			html += "</div></div>";
+			html += "</div>";
+			html +="</div></div>";		// panel
+			html += "</div>";			// col
 			return html;
 		};
 		
