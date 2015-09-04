@@ -293,10 +293,16 @@ var styles ="					\
 	div.altui-favorites-device, div.altui-favorites-scene {				\
 		float:	left;			\
 		text-align: center;		\
-		border:1px solid;		\
+		border-width:1px;		\
+		border-style: solid;	\
 		margin: 2px;			\
 		padding-left: 2px;		\
 		padding-right: 2px;		\
+	}		\
+	div.altui-favorites-device:hover, div.altui-favorites-scene:hover {				\
+		cursor: pointer;		\
+		border-width:2px;		\
+		border-color: green;		\
 	}		\
 	.altui-favorites-device-content, .altui-favorites-scene-content {	\
 		clear:both;				\
