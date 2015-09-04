@@ -643,8 +643,8 @@ var DialogManager = ( function() {
 				var id = $(elem).prop('id').substring("altui-event-param".length);
 				trigger.arguments.push( {id:id, value: $(elem).val() } );
 			});
-			// on UI7 10, for motion sensor which have no argument list in their eventlist definition
-			// it seems that passing at least {id:1} is mandatory
+			// on UI7 10, for motion sensor which have no argument list in their  eventlist definition
+			// it seems that passing at least {id:1} is mandatory 
 			if (trigger.arguments.length==0)
 				trigger.arguments.push( {id:1} );
 			
