@@ -5,7 +5,7 @@ This plugin offers an alternative user interface for your VERA(s) controllers th
 It works as a simple plugin and you just need your browser. it supports UI5 and UI7 veras and can aggregate in the same screen the devices from multiple seperate VERA boxes.
 It is not just a re skin of UI5/7, and will offer a number of additional feature
 
-[b]LATEST VERSION[/b] : [glow=red,2,300]V 0.65.622 August 10th 2015[/glow] : 
+[b]LATEST VERSION[/b] : [glow=red,2,300]V 0.68.655 Sept 4th 2015[/glow] : 
 
 [b]Extra features not present in UI5 UI7[/b]:
 [list]
