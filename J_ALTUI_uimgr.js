@@ -4232,6 +4232,14 @@ var UIManager  = ( function( window, undefined ) {
 					var tripped = parseInt(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Tripped' )); 
 					html += ("<span>{0}</span>".format( (tripped==true) ? "<span class='glyphicon glyphicon-flash text-danger' aria-hidden='true'></span>" : ""));
 					break;
+				case "urn:schemas-upnp-org:device:VSwitch:1":
+					var status = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:VSwitch1', 'Status' ); 
+					status = parseInt(status);
+					html += "<span class='{1}'>{0}</span>".format(
+						status==1 ? "On" : "Off",
+						status==1 ? "text-success" : "text-danger"
+					);
+					break;
 				default:
 					html += "-";
 					break;
@@ -5289,6 +5297,9 @@ var UIManager  = ( function( window, undefined ) {
 					case "urn:schemas-upnp-org:device:DimmableLight:1":
 						var status = parseInt(MultiBox.getStatus(device,"urn:upnp-org:serviceId:Dimming1","LoadLevelStatus") || 1);
 						MultiBox.runAction( device , "urn:upnp-org:serviceId:Dimming1", "SetLoadLevelTarget", {newLoadlevelTarget: ((status>0) ? 0 : 100) } );
+						break;
+					case "urn:schemas-upnp-org:device:VSwitch:1":
+						MultiBox.runAction( device, "urn:upnp-org:serviceId:VSwitch1","ToggleState", {} );
 						break;
 					default:
 						break;
