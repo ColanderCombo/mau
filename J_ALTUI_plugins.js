@@ -369,7 +369,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	function _drawLight( device) {
 		var html = "";
 		var status = parseInt(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:LightSensor1', 'CurrentLevel' )); 
-		var unit = (status>100) ? "lux" : "% or lux";
+		var unit = "lux";	//(status>100) ? "lux" : "% or lux";
 		html += ("<span class='altui-light' >{0} {1}</span>".format(status,unit));
 		return html;
 	};
