@@ -257,5 +257,6 @@ Localization.init( {
 	"See":"Voir",
 	"2-columns Menu's limit":"Limite pour les Menus a 2 colonnes",
 	"Find Json":"Chercher Json",
-	"Frame":"Cadre"
+	"Frame":"Cadre",
+	"Reload is done":"Redémarrage en cours"
 });

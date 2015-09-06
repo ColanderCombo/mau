@@ -175,6 +175,7 @@ var MultiBox = ( function( window, undefined ) {
 		return _controllers[0].controller.setHouseMode(newmode,cbfunc);
 	};
 	function _getRooms( func , filterfunc, endfunc) {
+		var dfd = $.Deferred();
 		var arr=[];
 		var answers=0;
 		$.each(_controllers, function( i,c) {
@@ -191,11 +192,12 @@ var MultiBox = ( function( window, undefined ) {
 					if (answers == _controllers.length) {
 						if ($.isFunction(endfunc))
 							(endfunc)(arr.sort(altuiSortByName));
+						dfd.resolve(rooms);
 					}
 				}
 			);
 		});		
-		return _getRoomsSync();
+		return dfd.promise();
 	};
 	function _getRoomsSync() {
 		var arr=[];

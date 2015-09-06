@@ -3956,37 +3956,37 @@ var UIManager  = ( function( window, undefined ) {
 		
 		function _deviceDrawWireFrame( device,container) {
 			var devicecontroller = MultiBox.controllerOf(device.altuiid).controller;
-			var rooms = $.grep( MultiBox.getRoomsSync(), function(room,idx) {
+			MultiBox.getRooms(null, function(room,idx) {
 				return ( MultiBox.controllerOf(room.altuiid).controller == devicecontroller );
-			});
-
-			var htmlRoomSelect = "<select id='altui-room-list' class='form-control input-sm'>";
-			if (rooms)
-					htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format("No Room",0,'');
-					$.each(rooms, function(idx,room) {
-						var selected = (room.id.toString() == device.room);
-						htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format(room.name,room.id,selected ? 'selected' : '');
-					});
-			htmlRoomSelect 	  += "</select>";
-	
-			var htmlDeleteButton= buttonTemplate.format( device.altuiid, 'btn-xs altui-deldevice pull-right', deleteGlyph,'default');;
-			var html ="";
-			html+="<div class='row'>";
-				html +="<div id='altui-device-controlpanel-"+device.altuiid+"' class='col-xs-12 altui-device-controlpanel' data-altuiid='"+device.altuiid+"'>";
-				html +="	<div class='panel panel-default'>";
-				html +="		<div class='panel-heading form-inline'>";
-				html += htmlDeleteButton;
-				html +="			<h1 class='panel-title'>{0} {1} {2} (#{3}) "+htmlRoomSelect+"</h1>";
-				html +="		</div>";
-				html +="		<div class='panel-body'>";
-				html +="		</div>";
-				html +="	</div>";
-				html +="</div>";
-			html += "</div>";	// row
-			$(container).append( html.format(device.manufacturer || '', device.model || '', device.name || '', device.id) );	
-			$("#altui-room-list").change( function() {
-				MultiBox.renameDevice(device, device.name, $(this).val() );
-			});
+			},function(rooms) {
+				var htmlRoomSelect = "<select id='altui-room-list' class='form-control input-sm'>";
+				if (rooms)
+						htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format("No Room",0,'');
+						$.each(rooms, function(idx,room) {
+							var selected = (room.id.toString() == device.room);
+							htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format(room.name,room.id,selected ? 'selected' : '');
+						});
+				htmlRoomSelect 	  += "</select>";
+		
+				var htmlDeleteButton= buttonTemplate.format( device.altuiid, 'btn-xs altui-deldevice pull-right', deleteGlyph,'default');;
+				var html ="";
+				html+="<div class='row'>";
+					html +="<div id='altui-device-controlpanel-"+device.altuiid+"' class='col-xs-12 altui-device-controlpanel' data-altuiid='"+device.altuiid+"'>";
+					html +="	<div class='panel panel-default'>";
+					html +="		<div class='panel-heading form-inline'>";
+					html += htmlDeleteButton;
+					html +="			<h1 class='panel-title'>{0} {1} {2} (#{3}) "+htmlRoomSelect+"</h1>";
+					html +="		</div>";
+					html +="		<div class='panel-body'>";
+					html +="		</div>";
+					html +="	</div>";
+					html +="</div>";
+				html += "</div>";	// row
+				$(container).append( html.format(device.manufacturer || '', device.model || '', device.name || '', device.id) );	
+				$("#altui-room-list").change( function() {
+					MultiBox.renameDevice(device, device.name, $(this).val() );
+				});
+			})
 		};
 			
 		function _defereddisplay(bAsync) {
@@ -4147,29 +4147,32 @@ var UIManager  = ( function( window, undefined ) {
 		}
 	};
 	
-	function _drawRoomFilterButton( selectedroom ) {
+	function _drawRoomFilterButtonAsync( selectedroom ) {
+		var dfd = $.Deferred();
 		var toolbarHtml="";
-		var rooms = MultiBox.getRoomsSync();
-		toolbarHtml+="	<div class='btn-group' id='altui-device-room-filter'>";
-			toolbarHtml+="  <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown' aria-expanded='false'>";
-			toolbarHtml+=  (homeGlyph + '&nbsp;' +_T('Rooms') + "<span class='caret'></span>");
-			toolbarHtml+="  </button>";
-			toolbarHtml+="  <ul class='dropdown-menu' role='menu' {0}>".format(
-				(rooms.length+2>=parseInt(MyLocalStorage.getSettings('Menu2ColumnLimit'))) ? "style='columns: 2; -webkit-columns: 2; -moz-columns: 2;'" : ""
-				);
-				$.each([{id:-1,name:_T('All')},{id:0,name:_T('No Room')}], function( idx, room) {
-					toolbarHtml+="<li><a href='#' id='{1}' data-altuiid='{2}' class='{3}' >{0}</a></li>".format(room.name,room.id,"",(selectedroom==room.id) ? 'bg-primary' : '');
-				});
-				var namearray = $.map(rooms, function(r) { return r.name;} );
-				var filteredrooms = $.grep(rooms, function(room, idx) {
-					return $.inArray(room.name ,namearray) == idx;
-				});
-				$.each(filteredrooms, function( idx, room) {
-					toolbarHtml+="<li><a href='#' id='{1}' data-altuiid='{2}' class='{3}'>{0}</a></li>".format(room.name,room.id,room.altuiid,(selectedroom==room.altuiid) ? 'bg-primary' : '');
-				});
-				toolbarHtml+="  </ul>";
-		toolbarHtml+="</div>";			
-		return toolbarHtml;
+		var rooms = $.when(MultiBox.getRooms()).then(function(rooms) {
+			toolbarHtml+="	<div class='btn-group' id='altui-device-room-filter'>";
+				toolbarHtml+="  <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown' aria-expanded='false'>";
+				toolbarHtml+=  (homeGlyph + '&nbsp;' +_T('Rooms') + "<span class='caret'></span>");
+				toolbarHtml+="  </button>";
+				toolbarHtml+="  <ul class='dropdown-menu' role='menu' {0}>".format(
+					(rooms.length+2>=parseInt(MyLocalStorage.getSettings('Menu2ColumnLimit'))) ? "style='columns: 2; -webkit-columns: 2; -moz-columns: 2;'" : ""
+					);
+					$.each([{id:-1,name:_T('All')},{id:0,name:_T('No Room')}], function( idx, room) {
+						toolbarHtml+="<li><a href='#' id='{1}' data-altuiid='{2}' class='{3}' >{0}</a></li>".format(room.name,room.id,"",(selectedroom==room.id) ? 'bg-primary' : '');
+					});
+					var namearray = $.map(rooms, function(r) { return r.name;} );
+					var filteredrooms = $.grep(rooms, function(room, idx) {
+						return $.inArray(room.name ,namearray) == idx;
+					});
+					$.each(filteredrooms, function( idx, room) {
+						toolbarHtml+="<li><a href='#' id='{1}' data-altuiid='{2}' class='{3}'>{0}</a></li>".format(room.name,room.id,room.altuiid,(selectedroom==room.altuiid) ? 'bg-primary' : '');
+					});
+					toolbarHtml+="  </ul>";
+			toolbarHtml+="</div>";			
+			dfd.resolve(toolbarHtml);
+		});
+		return dfd.promise();
 	};
 		
 	function _refreshUIPerDevice(eventname,device) {
@@ -5460,7 +5463,7 @@ var UIManager  = ( function( window, undefined ) {
 			return html;
 		};
 		
-		var rooms = MultiBox.getRoomsSync();
+		// var rooms = MultiBox.getRoomsSync();
 		var device = MultiBox.getDeviceByAltuiID( altuiid );
 		var controllerid = MultiBox.controllerOf(altuiid).controller;
 		var category = MultiBox.getCategoryTitle( device.category_num );
@@ -5702,32 +5705,39 @@ var UIManager  = ( function( window, undefined ) {
 			filterHtml+="</div>";
 			
 			var toolbarHtml="";
+			var roomfilterHtml="";    
+			var categoryfilterHtml="";
+			var dfd = $.Deferred();		
+			$.when( _drawRoomFilterButtonAsync(_deviceDisplayFilter.room) )
+			.then( function(html) { 
+				roomfilterHtml = html; 
 
-			toolbarHtml+=_drawRoomFilterButton( _deviceDisplayFilter.room );
-			
-			toolbarHtml+="	<div class='btn-group' id='altui-device-category-filter'>";
-			toolbarHtml+="  <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown' aria-expanded='false'>";
-			toolbarHtml+=  (tagsGlyph + '&nbsp;' +_T('Category') + "<span class='caret'></span>");
-			toolbarHtml+="  </button>";
-			toolbarHtml+="  <ul class='dropdown-menu' role='menu'>"
-			toolbarHtml+="<li><a href='#' id='{0}' class='{2}'>{1}</a></li>".format(0,_T('All'),(_deviceDisplayFilter.category==0) ? 'bg-primary' : '');
-			return MultiBox.getCategories(
-				function(idx,category) {
-					toolbarHtml+="<li><a href='#' id='{0}' class='{2}'>{1}</a></li>".format(category.id,category.name,(_deviceDisplayFilter.category==category.id) ? 'bg-primary' : '');
-				},
-				null,
-				function(categories) {
-					toolbarHtml+="  </ul>";
-					toolbarHtml+="</div>";			
-					toolbarHtml+="  <button type='button' class='btn btn-default' id='altui-device-filter' >";
-					toolbarHtml+=  (searchGlyph + '&nbsp;' +_T('Filter') + "<span class='caret'></span>");
-					toolbarHtml+="  </button>";			
-					toolbarHtml+="  <button type='button' class='btn btn-default' id='altui-device-create' >";
-					toolbarHtml+= (plusGlyph + "&nbsp;" + _T("Create"));
-					toolbarHtml+="  </button>";			
-					
+				categoryfilterHtml+="	<div class='btn-group' id='altui-device-category-filter'>";
+				categoryfilterHtml+="  <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown' aria-expanded='false'>";
+				categoryfilterHtml+=  (tagsGlyph + '&nbsp;' +_T('Category') + "<span class='caret'></span>");
+				categoryfilterHtml+="  </button>";
+				categoryfilterHtml+="  <ul class='dropdown-menu' role='menu'>"
+				categoryfilterHtml+="<li><a href='#' id='{0}' class='{2}'>{1}</a></li>".format(0,_T('All'),(_deviceDisplayFilter.category==0) ? 'bg-primary' : '');
+
+				$.when( MultiBox.getCategories(
+					function(idx,category) {
+						categoryfilterHtml+="<li><a href='#' id='{0}' class='{2}'>{1}</a></li>".format(category.id,category.name,(_deviceDisplayFilter.category==category.id) ? 'bg-primary' : '');
+					},
+					null,
+					function(categories) {
+						categoryfilterHtml+="  </ul>";
+						categoryfilterHtml+="</div>";			
+						categoryfilterHtml+="  <button type='button' class='btn btn-default' id='altui-device-filter' >";
+						categoryfilterHtml+=  (searchGlyph + '&nbsp;' +_T('Filter') + "<span class='caret'></span>");
+						categoryfilterHtml+="  </button>";			
+						categoryfilterHtml+="  <button type='button' class='btn btn-default' id='altui-device-create' >";
+						categoryfilterHtml+= (plusGlyph + "&nbsp;" + _T("Create"));
+						categoryfilterHtml+="  </button>";	
+					}
+				))
+				.then ( function(categories) {
 					// Display
-					$(".altui-device-toolbar").replaceWith( "<div class='altui-device-toolbar'>"+toolbarHtml+filterHtml+"</div>" );
+					$(".altui-device-toolbar").replaceWith( "<div class='altui-device-toolbar'>"+roomfilterHtml+categoryfilterHtml+filterHtml+"</div>" );
 					if (categories.length+1>=parseInt(MyLocalStorage.getSettings('Menu2ColumnLimit')))
 						$("#altui-device-category-filter ul").attr('style','columns: 2; -webkit-columns: 2; -moz-columns: 2;');
 
@@ -5815,8 +5825,10 @@ var UIManager  = ( function( window, undefined ) {
 						MyLocalStorage.setSettings("CategoryFilter",_deviceDisplayFilter.category);
 						_drawDevices(deviceFilter);
 					});
-				}
-			);
+					dfd.resolve();
+				});
+			});
+			return dfd.promise();		
 		};
 		
 		function _drawDevices(filterfunc)
@@ -5931,87 +5943,90 @@ var UIManager  = ( function( window, undefined ) {
 		function afterSceneListDraw(scenes) {
 			// draw toolbar buttons
 			var toolbarHtml="";
-			toolbarHtml+=_drawRoomFilterButton( _sceneFilter.room );
-			toolbarHtml+="  <button type='button' class='btn btn-default' id='altui-scene-create' >";
-			toolbarHtml+=(plusGlyph + "&nbsp;" + _T("Create"));
-			toolbarHtml+="  </button>";			
-			$(".altui-scene-toolbar").replaceWith( "<div class='altui-scene-toolbar'>"+toolbarHtml+"</div>" );
-					
-			$("#altui-scene-create").click( function() {
-				UIManager.pageSceneEdit(NULL_SCENE);
-			});
-			$("#altui-device-room-filter button").toggleClass("btn-info",_sceneFilter.isValid());
-			
-			// actions
-			$(".altui-mainpanel")
-				// .off("click",".altui-delscene")
-				.on("click",".altui-delscene",function() {
-					var altuiid = $(this).closest(".altui-scene").data('altuiid');
-					var scene = MultiBox.getSceneByAltuiID(altuiid);
-					DialogManager.confirmDialog(_T("Are you sure you want to delete scene ({0})").format(altuiid),function(result) {
-						if (result==true) {
-							MultiBox.deleteScene( scene );
-						}
-					});
-				})
-				// .off("click",".altui-pausescene")
-				.on("click",".altui-pausescene",function() {
-					var altuiid = $(this).closest(".altui-scene").data('altuiid');
-					var scene = MultiBox.getSceneByAltuiID(altuiid);
-					scene.paused = (scene.paused==1) ? 0 : 1; 
-					MultiBox.editScene( altuiid , scene );
-				})
-				// .off("click",".altui-runscene")
-				.on("click",".altui-runscene",function() {
-					var altuiid = $(this).closest(".altui-scene").data('altuiid');
-					var scene = MultiBox.getSceneByAltuiID(altuiid);
-					$(this).removeClass("btn-primary").addClass("btn-success");
-					MultiBox.runScene( scene );
-				})
-				// .off("click",".altui-editscene")
-				.on("click",".altui-editscene",function() {
-					var altuiid = $(this).closest(".altui-scene").data('altuiid');
-					UIManager.pageSceneEdit( altuiid );
-				})
-				.on("click",".altui-scene-history",function() {
-					var altuiid = $(this).closest(".altui-scene").data('altuiid');
-					var scene = MultiBox.getSceneByAltuiID(altuiid);
-					var dialog =  DialogManager.registerDialog('dialogModal',
-						defaultDialogModalTemplate.format( 
-						_T("Scene History"), 			// title
-						""				// body
-						));
-					MultiBox.getSceneHistory( scene, function(history) {
-						var html="";
-						html += "<div class='panel panel-default'> <div class='panel-body'>";
-						html +="<table id='{0}' class='table table-condensed altui-variable-value-history'>".format(altuiid);
-						html +="<thead>";
-						html += ("<tr><th>{0}</th><th>{1}</th></tr>".format(_T("Date"),_T("Name")));
-						html +="</thead>";
-						html +="<tbody>";
-						history.lines.reverse();
-						$.each(history.lines, function(i,e) {
-							html += ("<tr><td>{0}</td><td>{1}</td></tr>".format( e.date, e.name) );
-						});
-						html +="</tbody>";
-						html +="</table>";
-						html += "  </div></div>";
-						$(dialog).find(".row-fluid").append(html);
-						$('div#dialogModal').modal();
-					});
-				})
-				.on("click",".altui-favorite",function(event) { 
-					var altuiid = $(this).closest(".altui-scene").data('altuiid');
-					var scene = MultiBox.getSceneByAltuiID(altuiid);
-					scene.favorite = !scene.favorite;
-					Favorites.set('scene', altuiid, scene.favorite );
-					$(this).replaceWith( (scene.favorite==true) ? starGlyph : staremtpyGlyph );
+			$.when( _drawRoomFilterButtonAsync( _sceneFilter.room ) )
+			.then(function( html) {
+				toolbarHtml+= html;	// room filter
+				toolbarHtml+="  <button type='button' class='btn btn-default' id='altui-scene-create' >";
+				toolbarHtml+=(plusGlyph + "&nbsp;" + _T("Create"));
+				toolbarHtml+="  </button>";			
+				$(".altui-scene-toolbar").replaceWith( "<div class='altui-scene-toolbar'>"+toolbarHtml+"</div>" );
+						
+				$("#altui-scene-create").click( function() {
+					UIManager.pageSceneEdit(NULL_SCENE);
 				});
-			
-			$("#altui-device-room-filter a").click( function() {
-				$(this).closest(".dropdown-menu").find("li.active").removeClass("active");
-				$(this).parent().addClass("active");
-				_onClickRoomButton( $(this).prop('id'), $(this).data("altuiid") );
+				$("#altui-device-room-filter button").toggleClass("btn-info",_sceneFilter.isValid());
+				
+				// actions
+				$(".altui-mainpanel")
+					// .off("click",".altui-delscene")
+					.on("click",".altui-delscene",function() {
+						var altuiid = $(this).closest(".altui-scene").data('altuiid');
+						var scene = MultiBox.getSceneByAltuiID(altuiid);
+						DialogManager.confirmDialog(_T("Are you sure you want to delete scene ({0})").format(altuiid),function(result) {
+							if (result==true) {
+								MultiBox.deleteScene( scene );
+							}
+						});
+					})
+					// .off("click",".altui-pausescene")
+					.on("click",".altui-pausescene",function() {
+						var altuiid = $(this).closest(".altui-scene").data('altuiid');
+						var scene = MultiBox.getSceneByAltuiID(altuiid);
+						scene.paused = (scene.paused==1) ? 0 : 1; 
+						MultiBox.editScene( altuiid , scene );
+					})
+					// .off("click",".altui-runscene")
+					.on("click",".altui-runscene",function() {
+						var altuiid = $(this).closest(".altui-scene").data('altuiid');
+						var scene = MultiBox.getSceneByAltuiID(altuiid);
+						$(this).removeClass("btn-primary").addClass("btn-success");
+						MultiBox.runScene( scene );
+					})
+					// .off("click",".altui-editscene")
+					.on("click",".altui-editscene",function() {
+						var altuiid = $(this).closest(".altui-scene").data('altuiid');
+						UIManager.pageSceneEdit( altuiid );
+					})
+					.on("click",".altui-scene-history",function() {
+						var altuiid = $(this).closest(".altui-scene").data('altuiid');
+						var scene = MultiBox.getSceneByAltuiID(altuiid);
+						var dialog =  DialogManager.registerDialog('dialogModal',
+							defaultDialogModalTemplate.format( 
+							_T("Scene History"), 			// title
+							""				// body
+							));
+						MultiBox.getSceneHistory( scene, function(history) {
+							var html="";
+							html += "<div class='panel panel-default'> <div class='panel-body'>";
+							html +="<table id='{0}' class='table table-condensed altui-variable-value-history'>".format(altuiid);
+							html +="<thead>";
+							html += ("<tr><th>{0}</th><th>{1}</th></tr>".format(_T("Date"),_T("Name")));
+							html +="</thead>";
+							html +="<tbody>";
+							history.lines.reverse();
+							$.each(history.lines, function(i,e) {
+								html += ("<tr><td>{0}</td><td>{1}</td></tr>".format( e.date, e.name) );
+							});
+							html +="</tbody>";
+							html +="</table>";
+							html += "  </div></div>";
+							$(dialog).find(".row-fluid").append(html);
+							$('div#dialogModal').modal();
+						});
+					})
+					.on("click",".altui-favorite",function(event) { 
+						var altuiid = $(this).closest(".altui-scene").data('altuiid');
+						var scene = MultiBox.getSceneByAltuiID(altuiid);
+						scene.favorite = !scene.favorite;
+						Favorites.set('scene', altuiid, scene.favorite );
+						$(this).replaceWith( (scene.favorite==true) ? starGlyph : staremtpyGlyph );
+					});
+				
+				$("#altui-device-room-filter a").click( function() {
+					$(this).closest(".dropdown-menu").find("li.active").removeClass("active");
+					$(this).parent().addClass("active");
+					_onClickRoomButton( $(this).prop('id'), $(this).data("altuiid") );
+				});
 			});
 		};
 		

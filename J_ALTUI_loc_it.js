@@ -257,5 +257,6 @@ Localization.init( {
 	"See":"See",
 	"2-columns Menu's limit":"2-columns Menu's limit",
 	"Find Json":"Find Json",
-	"Frame":"Frame"
+	"Frame":"Frame",
+	"Reload is done":"Reload is done"
 	});
