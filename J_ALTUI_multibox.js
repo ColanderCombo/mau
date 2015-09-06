@@ -621,7 +621,7 @@ var MultiBox = ( function( window, undefined ) {
 	updateDeviceTypeUIDB 	: _updateDeviceTypeUIDB,	//( controllerid, devtype, ui_definitions)		update devicetype UI static infos ( from user_data )
 	
 	// Access & Modes
-	isRemoteAccess	: function() 	{ 	return window.location.origin.indexOf("mios.com")!=-1; /*return true;*/ },
+	isRemoteAccess	: function() 	{ 	return window.location.href.indexOf("mios.com")!=-1; /*return true;*/ },
 	getBoxInfo		: function() 	{	return _controllers[0].controller.getBoxInfo(); },
 	getHouseMode	: function(cb) 	{	return _controllers[0].controller.getHouseMode(cb); },		// (cbfunc)
 	setHouseMode	: _setHouseMode,		// (newmode,cbfunc)
