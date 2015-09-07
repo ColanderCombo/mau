@@ -488,6 +488,10 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	function _drawSmoke( device) {
 		return _drawMotion( device);
 	};
+
+	function _drawGCal( device) {
+		return _drawMotion( device);
+	};
 	
 	// return the html string inside the .panel-body of the .altui-device#id panel
 	function _drawMotion( device) {
@@ -681,6 +685,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawPLEG 	   : _drawPLEG,
 	drawDimmable   : _drawDimmable,
 	drawMotion 	   : _drawMotion,
+	drawGCal       : _drawGCal,
 	drawSmoke 	   : _drawSmoke,
 	drawHumidity   : _drawHumidity,
 	drawLight   	: _drawLight,
