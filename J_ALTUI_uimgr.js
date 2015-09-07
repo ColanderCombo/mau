@@ -2924,7 +2924,7 @@ var UIManager  = ( function( window, undefined ) {
 			
 			// update modal with new text
 			var extrabuttons = MultiBox.isDeviceZwave(device) ? buttonTemplate.format( device.altuii, "altui-update-neighbors", _T("Update Neighbors"),"default") : "";
-			DialogManager.registerDialog('deviceActionModal',deviceActionModalTemplate.format( lines.join(''), device.name, device.altuii, extrabuttons ));
+			DialogManager.registerDialog('deviceActionModal',deviceActionModalTemplate.format( lines.join(''), device.name, device.altuiid, extrabuttons ));
 
 			$('div#deviceActionModal button.altui-run-action').click( function() {
 				var service = $(this).data().service;	// better than this.dataset.service in case of old browsers
