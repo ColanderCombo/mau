@@ -496,20 +496,20 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
     function _drawCombinationSwitch( device ) {
         var html = "";
         
-        var poke = 0;
-        html += _createOnOffButton( poke,"altui-pokebtn-"+device.altuiid, _T("Poke,Poke") , "pull-right" );
+        html += ("<button id='altui-pokebtn-{0}' type='button' class='pull-right altui-window-btn btn btn-default btn-sm '>{1}</button>" .format( device.altuiid,_T("Poke") )) ;
 
         var label = MultiBox.getStatus( device, 'urn:futzle-com:serviceId:CombinationSwitch1', 'Label' );
         if (label != null) {
-            html += "<div class='altui-temperature'><br>Watched Items: {0}</div>".format(label);
+            html += "<div class='altui-vswitch-text text-muted'><br>Watched Items: {0}</div>".format(label);
         }
 
         html += "<script type='text/javascript'>";
-        html += " $('div#altui-pokebtn-{0}').on('click touchend', function() { MultiBox.runActionByAltuiID('{0}', 'urn:futzle-com:serviceId:CombinationSwitch1', 'Trigger', {}); } );".format(device.altuiid);
+        html += " $('button#altui-pokebtn-{0}').on('click', function() { MultiBox.runActionByAltuiID('{0}', 'urn:futzle-com:serviceId:CombinationSwitch1', 'Trigger', {}); } );".format(device.altuiid);
         html += "</script>";
 
         return html;
     };
+	
 	function _drawDayTime( device ) {
 		var html = "";
         
