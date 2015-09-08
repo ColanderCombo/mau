@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("660,bug fix IE11;display lux instead of %;room filter asynchronous code (trial),?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28756")
+UIManager.checkAltuiUpdate("667,new dashboards dklinkman contributions;GCAL;Combination switch;Daynight,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28772")
