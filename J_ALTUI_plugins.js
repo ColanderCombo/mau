@@ -493,6 +493,34 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		return _drawMotion( device);
 	};
 	
+    function _drawCombinationSwitch( device ) {
+        var html = "";
+        
+        var poke = 0;
+        html += _createOnOffButton( poke,"altui-pokebtn-"+device.altuiid, _T("Poke,Poke") , "pull-right" );
+
+        var label = MultiBox.getStatus( device, 'urn:futzle-com:serviceId:CombinationSwitch1', 'Label' );
+        if (label != null) {
+            html += "<div class='altui-temperature'><br>Watched Items: {0}</div>".format(label);
+        }
+
+        html += "<script type='text/javascript'>";
+        html += " $('div#altui-pokebtn-{0}').on('click touchend', function() { MultiBox.runActionByAltuiID('{0}', 'urn:futzle-com:serviceId:CombinationSwitch1', 'Trigger', {}); } );".format(device.altuiid);
+        html += "</script>";
+
+        return html;
+    };
+	function _drawDayTime( device ) {
+		var html = "";
+        
+		var status = parseInt(MultiBox.getStatus( device, 'urn:rts-services-com:serviceId:DayTime', 'Status' )); 
+		html += _createOnOffButton( status,"altui-onoffbtn-"+device.altuiid, _T("Night,Day") , "pull-right");
+		
+		html += "<script type='text/javascript'>";
+		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleDayTimeButton('{0}','div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
+		html += "</script>";
+		return html;
+    }
 	// return the html string inside the .panel-body of the .altui-device#id panel
 	function _drawMotion( device) {
 		var html = "";
@@ -686,6 +714,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawDimmable   : _drawDimmable,
 	drawMotion 	   : _drawMotion,
 	drawGCal       : _drawGCal,
+	drawCombinationSwitch	: _drawCombinationSwitch,
+	drawDayTime		: _drawDayTime,
 	drawSmoke 	   : _drawSmoke,
 	drawHumidity   : _drawHumidity,
 	drawLight   	: _drawLight,
@@ -724,5 +754,10 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			MultiBox.runActionByAltuiID( altuiid, 'urn:upnp-org:serviceId:VSwitch1', 'SetTarget', {newTargetValue:newval} );
 		});
 	},
+	toggleDayTimeButton : function (altuiid,htmlid) {
+		ALTUI_PluginDisplays.toggleButton(altuiid, htmlid, 'urn:rts-services-com:serviceId:DayTime', 'Status', function(id,newval) {
+            MultiBox.runActionByAltuiID( altuiid, 'urn:rts-services-com:serviceId:DayTime', 'SetTarget', {newTargetValue:newval} );
+        });
+    },
   };
 })( window );
