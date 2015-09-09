@@ -2346,10 +2346,11 @@ var UIManager  = ( function( window, undefined ) {
 		{ id:'FixedLeftButtonBar', type:'checkbox', label:"Left Buttons are fixed on the page", _default:1 },
 		{ id:'ShowWeather', type:'checkbox', label:"Show Weather on home page", _default:1 },
 		{ id:'Menu2ColumnLimit', type:'number', label:"2-columns Menu's limit", _default:15, min:2, max:30  },
+		{ id:'TempUnitOverride', type:'select', label:"Weather Temp Unit", _default:'c', choices:'c|f'  },
 	];
 	var edittools = [];
 	var tools = [];
-	
+
 	function _initLocalizedGlobals() {
 		edittools = [
 			{id:1000, glyph:'object-align-top' , onclick: onAlignTop},
@@ -5275,7 +5276,7 @@ var UIManager  = ( function( window, undefined ) {
 			var language = getQueryStringValue("lang") || window.navigator.userLanguage || window.navigator.language;
 			var ws = MultiBox.getWeatherSettings();
 			if ((ws.tempFormat==undefined) || (ws.tempFormat==""))
-				ws.tempFormat="c";
+				ws.tempFormat=MyLocalStorage.getSettings('TempUnitOverride');
 			var html="";
 			html ="<div class='altui-weather-widget col-sm-6'>";
 			// html +='<a href="//www.accuweather.com/fr/fr/meylan/1097583/weather-forecast/1097583" class="aw-widget-legal">';
@@ -8484,6 +8485,17 @@ var UIManager  = ( function( window, undefined ) {
 				var init =  (MyLocalStorage.getSettings(check.id)!=null) ? MyLocalStorage.getSettings(check.id) : check._default;
 				html += "<div class='col-sm-6'>";
 					switch( check.type ) {
+						case 'select':
+							html +="<label class='' for='altui-"+check.id+"'>"+_T(check.label)+"</label> : ";
+							html +="<select id='altui-"+check.id+"'>";
+							$.each(check.choices.split("|"),function(id,unit){
+								html += "<option value='{0}' {1}>{0}</option>".format( unit , (unit==init) ? 'selected' : '' );	
+							})
+							html +="</select>";
+							$(".altui-mainpanel").on("change","#altui-"+check.id,function(){ 
+								MyLocalStorage.setSettings(check.id, $("#altui-"+check.id).val());
+							});
+							break;
 						case 'checkbox':
 							html +="<label class='checkbox-inline'>";
 							html +=("  <input type='checkbox' id='altui-"+check.id+"' " + ( (init==true) ? 'checked' : '') +" value='"+init+"' title='"+check.id+"'>"+_T(check.label));
