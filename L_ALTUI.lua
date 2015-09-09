@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.70"
+local version = "v0.71"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -1113,6 +1113,10 @@ local function getDefaultConfig()
 	tbl["urn:schemas-rts-services-com:device:DayTime:1"]= {
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawDayTime"
+	}
+	tbl["urn:schemas-micasaverde-com:device:Sonos:1"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawSonos"
 	}
 	return tbl
 end

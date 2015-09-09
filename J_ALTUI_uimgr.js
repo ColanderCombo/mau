@@ -2346,7 +2346,7 @@ var UIManager  = ( function( window, undefined ) {
 		{ id:'FixedLeftButtonBar', type:'checkbox', label:"Left Buttons are fixed on the page", _default:1 },
 		{ id:'ShowWeather', type:'checkbox', label:"Show Weather on home page", _default:1 },
 		{ id:'Menu2ColumnLimit', type:'number', label:"2-columns Menu's limit", _default:15, min:2, max:30  },
-		{ id:'TempUnitOverride', type:'select', label:"Weather Temp Unit", _default:'c', choices:'c|f'  },
+		{ id:'TempUnitOverride', type:'select', label:"Weather Temp Unit (UI5)", _default:'c', choices:'c|f'  },
 	];
 	var edittools = [];
 	var tools = [];

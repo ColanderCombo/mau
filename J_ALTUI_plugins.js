@@ -521,6 +521,38 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		html += "</script>";
 		return html;
     }
+
+    function _drawSonos( device ) {
+        var html = "";
+        var status = MultiBox.getStatus(device, 'urn:upnp-org:serviceId:AVTransport', 'TransportState'); // may return: PLAYING, PAUSED_PLAYBACK, STOPPED
+        var title = MultiBox.getStatus(device, 'urn:upnp-org:serviceId:AVTransport', 'CurrentTitle'); // could also get CurrentAlbum, CurrentArtist, CurrentStatus
+        var playstatus = ""; var playtitle = ""; var playbtn = "Play"; var stopbtn = "Stop"; var playbtnstyle = ""; var stopbtnstyle = "";
+        if (title != null) {
+            if (status == "PLAYING") {
+                playstatus = "Playing..."; playtitle = title; playbtn = "Pause";
+            } else {
+                if (status == "PAUSED_PLAYBACK") {
+                    playstatus = "<br>Paused...<br>Press Play to continue";
+                } else if (status == "STOPPED") {
+                    playstatus = "<br>Stopped";
+                } else {
+                    playstatus = "";
+                }
+            }
+        }        
+        html += "<button id='altui-Stopbtn-{0}' type='button' class='pull-right altui-window-btn btn btn-default btn-sm {1}'>{2}</button>" .format(device.altuiid, stopbtnstyle, _T(stopbtn)) ;
+        html += "<button id='altui-{2}btn-{0}' type='button' class='pull-right altui-window-btn btn btn-default btn-sm {1}'>{2}</button>" .format(device.altuiid, playbtnstyle, _T(playbtn)) ;
+        if (title != null) {
+            html += "<div class='altui-vswitch-text text-muted' style='height: 50px; overflow: hidden'>{0}<br>{1}</div>".format(playstatus, playtitle);
+        }
+        html += "<script type='text/javascript'>";
+        html += " $('button#altui-Playbtn-{0}').on('click', function() { MultiBox.runActionByAltuiID('{0}', 'urn:micasaverde-com:serviceId:MediaNavigation1', 'Play', {}); } );".format(device.altuiid);
+        html += " $('button#altui-Pausebtn-{0}').on('click', function() { MultiBox.runActionByAltuiID('{0}', 'urn:micasaverde-com:serviceId:MediaNavigation1', 'Pause', {}); } );".format(device.altuiid);
+        html += " $('button#altui-Stopbtn-{0}').on('click', function() { MultiBox.runActionByAltuiID('{0}', 'urn:micasaverde-com:serviceId:MediaNavigation1', 'Stop', {}); } );".format(device.altuiid);
+        html += "</script>";
+        return html;
+    }
+	
 	// return the html string inside the .panel-body of the .altui-device#id panel
 	function _drawMotion( device) {
 		var html = "";
@@ -716,6 +748,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawGCal       : _drawGCal,
 	drawCombinationSwitch	: _drawCombinationSwitch,
 	drawDayTime		: _drawDayTime,
+	drawSonos		: _drawSonos,
 	drawSmoke 	   : _drawSmoke,
 	drawHumidity   : _drawHumidity,
 	drawLight   	: _drawLight,
