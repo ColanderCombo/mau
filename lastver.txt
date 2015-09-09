@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("667,new dashboards dklinkman contributions;GCAL;Combination switch;Daynight,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28772")
+UIManager.checkAltuiUpdate("671,weather widget unit option for UI5;new dashboards dklinkman contributions:Sonos,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28781")
