@@ -5276,7 +5276,7 @@ var UIManager  = ( function( window, undefined ) {
 			var language = getQueryStringValue("lang") || window.navigator.userLanguage || window.navigator.language;
 			var ws = MultiBox.getWeatherSettings();
 			if ((ws.tempFormat==undefined) || (ws.tempFormat==""))
-				ws.tempFormat=MyLocalStorage.getSettings('TempUnitOverride');
+				ws.tempFormat=MyLocalStorage.getSettings('TempUnitOverride'); 
 			var html="";
 			html ="<div class='altui-weather-widget col-sm-6'>";
 			// html +='<a href="//www.accuweather.com/fr/fr/meylan/1097583/weather-forecast/1097583" class="aw-widget-legal">';
