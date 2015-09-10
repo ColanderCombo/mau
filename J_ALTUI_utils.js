@@ -36,12 +36,19 @@ function Altui_SelectText(element) {
 };
 
 function Altui_LoadStyle(styleFunctionName) {
-	var head = document.getElementsByTagName('head')[0];
+	// var head = document.getElementsByTagName('head')[0];
+	// var style = document.createElement('style');
+	// style.type = 'text/css';
+	// var css = Altui_ExecuteFunctionByName(styleFunctionName, window);
+	// style.appendChild(document.createTextNode(css));
+	// head.appendChild(style);
+	
+	var title = document.getElementsByTagName('title')[0];
 	var style = document.createElement('style');
 	style.type = 'text/css';
 	var css = Altui_ExecuteFunctionByName(styleFunctionName, window);
 	style.appendChild(document.createTextNode(css));
-	head.appendChild(style);
+	title.parentNode.insertBefore(style,title);	
 };
 	
 function Altui_ExecuteFunctionByName(functionName, context , device, extraparam) {

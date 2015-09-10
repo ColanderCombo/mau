@@ -606,12 +606,13 @@ local htmlLayout = [[
 		};
 
 		function _loadStyle(styleFunctionName) {
-			var head = document.getElementsByTagName('head')[0];
+			var title = document.getElementsByTagName('title')[0];
 			var style = document.createElement('style');
 			style.type = 'text/css';
 			var css = _executeFunctionByName(styleFunctionName, window);
 			style.appendChild(document.createTextNode(css));
-			head.appendChild(style);
+			title.parentNode.insertBefore(style,title);	
+	
 		};
 	</script>
 

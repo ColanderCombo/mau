@@ -4396,15 +4396,15 @@ var UIManager  = ( function( window, undefined ) {
 	};
 	
 	function _initUIEngine(css) {
-		$("title").after("<style type='text/css'>{0}</style>".format(css));
+		$("title").before("<style type='text/css'>{0}</style>".format(css));
 	};
 	
 	function _initEngine(styles, devicetypes, themecss,cbfunc) {
 		_initOptions();
-		if (themecss && (themecss.trim()!="") )
-			$("title").after("<link rel='stylesheet' href='"+themecss+"'>");
 		_initUIEngine(styles);
 		_initDB(devicetypes,cbfunc);
+		if (themecss && (themecss.trim()!="") )
+			$("title").after("<link rel='stylesheet' href='"+themecss+"'>");
 	};
 
 	function _initCustomPages( custompages ) {
