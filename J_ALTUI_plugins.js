@@ -40,6 +40,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-dimmable-slider { margin-left: 60px; }";	
 		style += ".altui-infoviewer-log,.altui-window-btn,.altui-datamine-open { margin-top: 10px; }";	
 		style += "div.altui-windowcover button.btn-sm { width: 4em; }";
+		style += ".altui-sonos-text, .altui-combsw-text, .altui-sysmon-text, .altui-veraalerts-text {font-size: 11px;}";
 		return style;
 	};
 
@@ -500,7 +501,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 
         var label = MultiBox.getStatus( device, 'urn:futzle-com:serviceId:CombinationSwitch1', 'Label' );
         if (label != null) {
-            html += "<div class='altui-vswitch-text text-muted'><br>Watched Items: {0}</div>".format(label);
+            html += "<div class='altui-combsw-text text-muted'><br>Watched Items: {0}</div>".format(label);
         }
 
         html += "<script type='text/javascript'>";
@@ -543,13 +544,49 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
         html += "<button id='altui-Stopbtn-{0}' type='button' class='pull-right altui-window-btn btn btn-default btn-sm {1}'>{2}</button>" .format(device.altuiid, stopbtnstyle, _T(stopbtn)) ;
         html += "<button id='altui-{2}btn-{0}' type='button' class='pull-right altui-window-btn btn btn-default btn-sm {1}'>{2}</button>" .format(device.altuiid, playbtnstyle, _T(playbtn)) ;
         if (title != null) {
-            html += "<div class='altui-vswitch-text text-muted' style='height: 50px; overflow: hidden'>{0}<br>{1}</div>".format(playstatus, playtitle);
+            html += "<div class='altui-sonos-text text-muted' style='height: 48px; overflow: hidden'>{0}<br>{1}</div>".format(playstatus, playtitle);
         }
         html += "<script type='text/javascript'>";
         html += " $('button#altui-Playbtn-{0}').on('click', function() { MultiBox.runActionByAltuiID('{0}', 'urn:micasaverde-com:serviceId:MediaNavigation1', 'Play', {}); } );".format(device.altuiid);
         html += " $('button#altui-Pausebtn-{0}').on('click', function() { MultiBox.runActionByAltuiID('{0}', 'urn:micasaverde-com:serviceId:MediaNavigation1', 'Pause', {}); } );".format(device.altuiid);
         html += " $('button#altui-Stopbtn-{0}').on('click', function() { MultiBox.runActionByAltuiID('{0}', 'urn:micasaverde-com:serviceId:MediaNavigation1', 'Stop', {}); } );".format(device.altuiid);
         html += "</script>";
+        return html;
+    }
+	
+    function _drawSysMonitor( device ) {
+        var html = "";
+        var memoryavail = MultiBox.getStatus(device, 'urn:cd-jackson-com:serviceId:SystemMonitor', 'memoryAvailable');
+        var cpuload = MultiBox.getStatus(device, 'urn:cd-jackson-com:serviceId:SystemMonitor', 'cpuLoad5');
+        if (memoryavail != null && cpuload != null) {
+            html += "<div class='altui-sysmon-text text-muted'><br>Memory Available: {0}<br>CPU Load (5 minute): {1}</div>".format(memoryavail, cpuload);
+        }
+        return html;
+    }
+	
+    function _drawVeraAlerts( device ) {
+        var html = "";
+        var lastmsgsent = MultiBox.getStatus(device, 'urn:richardgreen:serviceId:VeraAlert1', 'LastMsgSent');
+        var lastrecipient = MultiBox.getStatus(device, 'urn:richardgreen:serviceId:VeraAlert1', 'LastRecipient');
+        if (lastmsgsent != null && lastrecipient != null) {
+            html += "<div class='altui-sysmon-text text-muted' style='padding-left: 52px'><br>Last Msg Sent: {0}<br>Profile Used: {1}</div>".format(lastmsgsent, lastrecipient);
+        }
+        return html;
+    }
+	
+	function _drawTempLeak( device ) {
+        var html = "";
+        var armed = parseInt(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Armed' )); 
+		html += _createOnOffButton( armed,"altui-onoffbtn-"+device.altuiid, _T("Bypass,Arm"), "pull-right" );
+        html += _drawTempSensor(device);
+        var lasttrip = MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'LastTrip' );
+		if (lasttrip != null) {
+			var lasttripdate = _toIso(new Date(lasttrip*1000),' ');
+			html+= "<div class='altui-lasttrip-text text-muted'>{0} {1} </div>".format( timeGlyph,lasttripdate );
+		}
+		html += "<script type='text/javascript'>";
+		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleArmed('{0}','div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
+		html += "</script>";
         return html;
     }
 	
@@ -749,6 +786,9 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawCombinationSwitch	: _drawCombinationSwitch,
 	drawDayTime		: _drawDayTime,
 	drawSonos		: _drawSonos,
+	drawTempLeak	: _drawTempLeak,
+	drawSysMonitor : _drawSysMonitor,
+	drawVeraAlerts  : _drawVeraAlerts,
 	drawSmoke 	   : _drawSmoke,
 	drawHumidity   : _drawHumidity,
 	drawLight   	: _drawLight,

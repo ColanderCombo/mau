@@ -1118,6 +1118,19 @@ local function getDefaultConfig()
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawSonos"
 	}
+	tbl["urn:schemas-cd-jackson-com:device:SystemMonitor:1"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawSysMonitor"
+	}
+	tbl["urn:richardgreen:device:VeraAlert:1"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawVeraAlerts"
+	}
+	tbl["urn:schemas-micasaverde-com:device:TempLeakSensor:1"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawTempLeak"
+	}
+	
 	return tbl
 end
 
