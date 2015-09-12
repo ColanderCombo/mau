@@ -1244,7 +1244,7 @@ var SceneEditor = function (scene) {
 		{value:"{0}T",text:_T('After sunset')}
 	];
 
-	var scenealtuiid = scene.altuiid;
+	// var scenealtuiid = scene.altuiid;
 	var scenecontroller = MultiBox.controllerOf(scene.altuiid).controller;
 
 	function _makeAltuiid(controllerid,id) {
@@ -1769,8 +1769,8 @@ var SceneEditor = function (scene) {
 			$('div#dialogModal').modal();
 		};
 		
-	function _showSaveNeeded( bNoSaveNeeded ) {
-		if (bNoSaveNeeded == true)
+	function _showSaveNeeded( bSaveNeeded ) { // defaults to "save needed"
+		if (bSaveNeeded == false)
 			$(".altui-scene-editbutton").removeClass("btn-danger").addClass("btn-default");
 		else
 			$(".altui-scene-editbutton").removeClass("btn-default").addClass("btn-danger");
@@ -1789,8 +1789,8 @@ var SceneEditor = function (scene) {
 			{id:'Header', title:_T("Header"), html:_displayHeader()},
 			{id:'Triggers', title:_T("Triggers"), html:_displayTriggers()},
 			{id:'Timers', title:_T("Timers"), html:_displayTimers()},
-			{id:'Actions', title:_T("Actions"), html:_displayActions()},
 			{id:'Lua', title:_T("Lua"), html:_displayLua()},
+			{id:'Actions', title:_T("Actions"), html:_displayActions()},
 		];
 		function _createAccordeon(panels) {
 			var bFirst = true;
@@ -1959,7 +1959,7 @@ var SceneEditor = function (scene) {
 		}
 	};
 	
-	function _runActions() {
+	function _runActions(  ) {
 		//
 		// actions
 		//
@@ -1992,7 +1992,7 @@ var SceneEditor = function (scene) {
 		$(".altui-mainpanel")
 			.on("change","#altui-luascene",function() { 
 				if ( $("#altui-luascene").val() != scene.lua ) {
-					_showSaveNeeded(false);
+					_showSaveNeeded();
 				}
 			})
 			.on("click",".altui-scene-editbutton",function(){ 
@@ -2011,8 +2011,8 @@ var SceneEditor = function (scene) {
 					else
 						scene.modeStatus="0";
 				}
-				MultiBox.editScene(scenealtuiid,scene);
-				_showSaveNeeded(true);
+				MultiBox.editScene(scene.altuiid,scene);
+				_showSaveNeeded(false);
 			});
 
 		// $(".altui-mainpanel").off("click",".altui-deltrigger");
@@ -6071,7 +6071,7 @@ var UIManager  = ( function( window, undefined ) {
 		var scene = jQuery.extend(true, {timers:[], triggers:[], groups:[] }, orgscene, newscene_template );
 
 		// clear page
-		UIManager.clearPage(_T('Scene Edit'),altuiid!=undefined ? "Edit Scene #"+scene.altuiid : "Create Scene",UIManager.oneColumnLayout);
+		UIManager.clearPage(_T('Scene Edit'),altuiid!=NULL_SCENE ? "Edit Scene #"+scene.altuiid : "Create Scene",UIManager.oneColumnLayout);
 
 		var editor = SceneEditor( scene );
 		var html = "<div class='col-xs-12'>" ;
@@ -6080,7 +6080,7 @@ var UIManager  = ( function( window, undefined ) {
 		html += "</div>";
 		$(".altui-mainpanel").append(  html );
 		
-		editor.runActions();							// interactivity
+		editor.runActions(  );	
 	},
 
 	pagePlugins: function ()

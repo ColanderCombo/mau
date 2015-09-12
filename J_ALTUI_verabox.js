@@ -1296,8 +1296,24 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		});
 	};
 	
+	function _deleteSceneUserData(id)
+	{
+		if (_user_data.scenes) {
+			var _index = null;
+			$.each(_user_data.scenes, function(index,s) {
+				if (s.id == id) {
+					_index = index;
+					return false;
+				}
+			})			
+			if (_index!=null )
+				_user_data.scenes.splice(_index, 1);
+		}
+	}
+	
 	function _deleteScene(id)
 	{
+		_deleteSceneUserData(id);
 		var jqxhr = _httpGet( "?id=scene&action=delete&scene="+id, {}, function(data, textStatus, jqXHR) {
 			if ( (data!=null) && (data!="ERROR") ) {
 				PageMessage.message(_T("Deleted Scene {0} successfully ").format(id), "success");
@@ -1332,13 +1348,19 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	
 	function _updateSceneUserData(scene)
 	{
-		if (_user_data.scenes)
+		if (_user_data.scenes) {
+			var bFound = false;
 			$.each(_user_data.scenes, function(i,s) {
 				if (s.id == scene.id) {
 					_user_data.scenes[i] = scene;
+					bFound = true;
 					return false;
 				}
-			})
+			})			
+			if (bFound==false) {
+				_user_data.scenes.push(scene);
+			}
+		}
 	}
 	function _editScene(sceneid,scene,cbfunc)
 	{
