@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.73"
+local version = "v0.73b"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -416,6 +416,12 @@ local function setAttrIfChanged(name, value, deviceId)
 	return value
 end
 
+local function run_scene(id)
+	debug(string.format("run_scene(%s)",id or "nil"))
+    local resultCode, resultString, job, returnArguments = luup.call_action("urn:micasaverde-com:serviceId:HomeAutomationGateway1", "RunScene", {SceneNum = tostring(id)}, 0)
+	return resultCode, resultString, job, returnArguments
+end
+
 ------------------------------------------------
 -- HOUSE MODE
 ------------------------------------------------
@@ -426,7 +432,7 @@ end
 local HModes = { "Home", "Away", "Night", "Vacation" ,"Unknown" }
 
 local function setHouseMode( newmode ) 
-	log(string.format("HouseMode, setHouseMode( %s )",newmode))
+	debug(string.format("HouseMode, setHouseMode( %s )",newmode))
 	newmode = tonumber(newmode)
 	if (newmode>=1) and (newmode<=4) then
 		debug("SetHouseMode to "..newmode)
@@ -435,7 +441,7 @@ local function setHouseMode( newmode )
 end
 
 local function getMode() 
-	log("HouseMode, getMode()")
+	debug("HouseMode, getMode()")
 	-- local url_req = "http://" .. getIP() .. ":3480/data_request?id=variableget&DeviceNum=0&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&Variable=Mode"
 	local url_req = "http://127.0.0.1:3480/data_request?id=variableget&DeviceNum=0&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&Variable=Mode"
 	local req_status, req_result = luup.inet.wget(url_req)
@@ -1175,6 +1181,53 @@ end
 ------------------------------------------------
 -- STARTUP Sequence
 ------------------------------------------------
+function getWatchParams(str)
+	local params = str:split(",")
+	return params[1],params[2],tonumber(params[3]),tonumber(params[4]),params[5]	-- service,variable,deviceid,sceneid,lua_expr;service,variable,deviceid,sceneid,lua_expr
+end
+
+function variableWatchCallback(lul_device, lul_service, lul_variable, lul_value_old, lul_value_new)
+	debug(string.format("variableWatchCallback(%s,%s,%s,old:'%s',new:'%s')",lul_device, lul_service, lul_variable, lul_value_old, lul_value_new))
+	local altuiDeviceID = findALTUIDevice()
+	local variableWatchString = getSetVariable(service, "VariablesToWatch", altuiDeviceID, "")	-- service,variable,deviceid,sceneid;service,variable,deviceid,sceneid
+	debug(string.format("variableWatchString = %s",variableWatchString))
+	
+	-- for all watches for this service variable
+	-- execute the scene
+	local watches = variableWatchString:split(";")
+	for k,v  in pairs(watches) do
+		local service,variable,device,scene,expr = getWatchParams(v)
+		if ( (service==lul_service) and (variable==lul_variable) and (device== tonumber(lul_device)) ) then
+			-- init the global x and evaluate the boolean expression expr
+			local str = "local x = ".. lul_value_new .."; return ("..expr..")"
+			debug("loading code = "..str)
+			local f,msg = loadstring(str)
+			if (f==nil) then
+				error(string.format("loadstring %s failed to compile with x=%s , msg=%s",str,lul_value_new,msg))
+			else
+				local err= f()	-- call it
+				debug(string.format("loadstring %s returned %s with x=%s",expr,tostring(err or 'nil'), lul_value_new))
+				if (err == true ) or ((tonumber(err) == 1 )) then
+					local err = run_scene(scene)
+					if (err==-1) then
+						error(string.format("variableWatchCallback(%s,%s,%s,old:'%s',new:'%s') failed to run the scene %s",lul_device, lul_service, lul_variable, lul_value_old, lul_value_new,scene))
+					end
+				else
+					warning(string.format("ignoring watch trigger, loadstring %s returned %s with x=%s",str,tostring(err or 'nil'), lul_value_new))
+				end
+			end
+		end
+	end
+end
+
+function initVariableWatches( variableWatchString )
+	debug(string.format("initVariableWatches(%s)",variableWatchString))
+	local watches = variableWatchString:split(";")
+	for k,v  in pairs(watches) do
+		local service,variable,device,scene = getWatchParams(v)
+		luup.variable_watch("variableWatchCallback", service,variable,device)
+	end
+end
 
 function startupDeferred(lul_device)
 	lul_device = tonumber(lul_device)
@@ -1220,6 +1273,10 @@ function startupDeferred(lul_device)
 		
 		luup.variable_set(service, "Version", version, lul_device)
 	end	
+	
+	-- init watches
+	local variableWatch = getSetVariable(service, "VariablesToWatch", lul_device, "")	-- service,variable,deviceid,sceneid;service,variable,deviceid,sceneid
+	initVariableWatches( variableWatch )
 	
 	-- NOTHING to start 
 	if( luup.version_branch == 1 and luup.version_major == 7) then
