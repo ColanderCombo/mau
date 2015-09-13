@@ -49,6 +49,7 @@ It is not just a re skin of UI5/7, and will offer a number of additional feature
 [li]Display of manually installed plugin[/li]
 [li]Camera: live video feed in local mode, images in remote mode[/li]
 [li]Debug tool screen enabling to get all device information, to get one device / all variable info, to search all devices for a given variable name (pattern matching), or to call a javascript piece of code, including the ALTUI object apis[/li]
+[li]Scene trigger can be a device variable watch without any line of LUA code[/li]
 [/list]
 
 [b]Features equivalent to UI5 UI7[/b]:
@@ -156,6 +157,10 @@ ignore error messages displayed by this page and wait until your unit reloads...
 [li][b]Debug [/b]: 1 for extra debugging logs[/li]
 [li][b]Data_xx_xx[/b] variables : internal storage for ALTUI user pages definitions[/li]
 [li][b]Data_CustomPages_0[/b] : JSON array of user custom page names[/li]
+[li]VariablesToWatch: semi column ';' seperated list of watch variable instructions. Each watch is instructions is in this format : "service,variable,deviceid,sceneid,lua_expr".
+sceneid is the scene to run if the lua expression is true. lua expressions uses x as a variable for the watched variable. example:
+urn:micasaverde-com:serviceId:SceneController1,LastSceneID,208,71,x==2 . ALTUI scene editor will take care of editing that variable.
+[/li]
 [/list]
 
 [b]UPNP ACTIONS[/b]
