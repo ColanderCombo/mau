@@ -1246,7 +1246,27 @@ var SceneEditor = function (scene) {
 
 	// var scenealtuiid = scene.altuiid;
 	var scenecontroller = MultiBox.controllerOf(scene.altuiid).controller;
-
+	var altuidevice = MultiBox.getDeviceByID( 0, g_MyDeviceID );
+	
+	function _getWatchLineParams(watchLine) {
+		var params = watchLine.split(',');
+		//service,variable,deviceid,sceneid,lua_expr
+		return {
+			service : params[0],
+			variable : params[1],
+			deviceid : params[2],
+			sceneid : params[3],
+			luaexpr : params[4]
+		};
+	}
+	function _setWatchLineParams(watch) {
+		return "{0},{1},{2},{3},{4}".format( watch.service, watch.variable, watch.deviceid, watch.sceneid, watch.luaexpr);
+	}
+	var scenewatches = $.grep( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToWatch" ) || "").split(';'),function(w) {
+		var watch = _getWatchLineParams(w);
+		return (watch.sceneid == scene.id) && (scenecontroller==0);
+	});
+		
 	function _makeAltuiid(controllerid,id) {
 		return controllerid+"-"+id;
 	}
@@ -1333,6 +1353,83 @@ var SceneEditor = function (scene) {
 			}
 			_showSaveNeeded();
 		} );
+	};
+	
+	function _editWatch( idx, jqButton) {
+		var watch =  (idx!=-1) ? _getWatchLineParams( scenewatches[idx] ) : "";
+		var dialog = DialogManager.createPropertyDialog(_T('Watch'));
+		var device = (idx!=-1) ? MultiBox.getDeviceByID( scenecontroller , watch.deviceid) : NULL_DEVICE;
+		
+		DialogManager.dlgAddDevices( dialog , device ? device.altuiid : NULL_DEVICE, 
+			function() {			// callback
+				var widget = {};
+				widget.properties ={
+					deviceid: 	device.altuiid,
+					service:	watch.service,
+					variable:	watch.variable
+				}
+				DialogManager.dlgAddVariables(dialog, widget, function() {
+					DialogManager.dlgAddLine( dialog , "LuaExpression", _T("LUA Expression with x=variable"), watch.luaexpr , _T("Expression with x as the variable and lua operators like <   >   <=  >=  ==  ~="), {required:''} ); 
+					$('div#dialogModal').modal();
+				});
+			},
+			function( device ) {	// filter
+				return (MultiBox.controllerOf(device.altuiid).controller == scenecontroller);
+			}
+		);
+		
+		$('div#dialogs').on( 'submit',"div#dialogModal form",  function( event ) {	
+			// get new values
+			var altuiid = $("#altui-select-device").val();
+			var state = MultiBox.getStateByID( altuiid,$("#altui-select-variable").val() );
+			var newwatch = {
+				//watch.service, watch.variable, watch.deviceid, watch.sceneid, watch.luaexpr
+				service:state.service,
+				variable:state.variable,
+				deviceid:MultiBox.controllerOf(altuiid).id,
+				sceneid:scene.id,  
+				luaexpr:$("#altui-widget-LuaExpression").val()
+			};
+			$('div#dialogModal').modal('hide');
+
+			// now update the UI in the scene editor
+			if (idx!=-1) {
+				scenewatches[idx] = _setWatchLineParams( newwatch );
+				$(jqButton).closest("tr[data-watch-idx='"+idx+"']").replaceWith( _displayWatch(idx,newwatch) );
+			}
+			else {
+				scenewatches.push( _setWatchLineParams( newwatch ) );				
+				var parent = $(jqButton).closest("tr")
+				parent.before(  _displayWatch(scenewatches.length-1 , newwatch) );
+			}
+
+			_showSaveNeeded();
+			PageMessage.message( "Change in Watches will require a LUUP reload after you save the scene", "info");
+		});
+	}
+	
+	function _displayWatch(idx,watch) {
+		var html ="";
+		html +="<tr data-watch-idx='{0}'>".format(idx);
+		html +="<td>";
+		var device = MultiBox.getDeviceByID(scenecontroller,watch.deviceid)
+		html += device.name;
+		html +="</td>";
+		html +="<td>";
+		html += watch.service;
+		html +="</td>";
+		html +="<td>";
+		html += watch.variable;
+		html +="</td>";
+		html +="<td>";
+		html += watch.luaexpr;
+		html +="</td>";
+		html +="<td>";
+		html += smallbuttonTemplate.format( idx, 'altui-delwatch', deleteGlyph,'Delete watch');
+		html += smallbuttonTemplate.format( idx, 'altui-editwatch', editGlyph, 'Edit watch');
+		html +="</td>";
+		html +="</tr>";
+		return html;
 	};
 	
 	function _displayJson(type,obj) {
@@ -1787,7 +1884,7 @@ var SceneEditor = function (scene) {
 
 		var panels = [
 			{id:'Header', title:_T("Header"), html:_displayHeader()},
-			{id:'Triggers', title:_T("Triggers"), html:_displayTriggers()},
+			{id:'Triggers', title:_T("Triggers"), html:_displayTriggersAndWatches()},
 			{id:'Timers', title:_T("Timers"), html:_displayTimers()},
 			{id:'Lua', title:_T("Lua"), html:_displayLua()},
 			{id:'Actions', title:_T("Actions"), html:_displayActions()},
@@ -1845,18 +1942,40 @@ var SceneEditor = function (scene) {
 			}
 			return html;
 		}
-		function _displayTriggers() {
+
+		function _displayWatches(scenewatches) {
+			html = "";
+			if (scenecontroller==0) {
+				html +="<table class='table table-condensed'>";
+				html +="<caption>{0}</caption>".format(_T("Device Variable Watches"));
+				html +="<tbody>";
+				$.each( scenewatches, function (idx,watchLine) {				
+					var watch = _getWatchLineParams(watchLine);
+					html += _displayWatch(idx,watch);
+				});
+				html +=("<tr><td colspan='4'>"
+					+smallbuttonTemplate.format( -1, 'altui-addwatch', plusGlyph,_T('Watch'))+" "+_T('Watch')
+					+"</td></tr>");
+				html +="</tbody>";
+				html +="</table>";
+			}
+			return html;
+		}
+		function _displayTriggersAndWatches() {
 			var html="";
 			try {
 				html += _displayJson( 'Triggers', scene.triggers);
 				html +="<table class='table table-condensed'>";
+				html +="<caption>{0}</caption>".format(_T("Device Triggers"));
 				html +="<tbody>";
 				if (scene.triggers) {
 					$.each( scene.triggers, function(idx,trigger) {
 						html += _displayTrigger(trigger,idx);	// trigger do not have IDs so use array index
 					});
 				}
-				html +=("<tr><td colspan='7'>"+smallbuttonTemplate.format( -1, 'altui-addtrigger', plusGlyph,_T('Trigger'))+" "+_T('Trigger')+"</td></tr>");
+				html +=("<tr><td colspan='7'>"
+					+smallbuttonTemplate.format( -1, 'altui-addtrigger', plusGlyph,_T('Trigger'))+" "+_T('Trigger')
+					+"</td></tr>");
 				html +="</tbody>";
 				html +="</table>";
 			}
@@ -1867,6 +1986,8 @@ var SceneEditor = function (scene) {
 				html +="<span class='text-danger'>"+str+"</span>";
 				PageMessage.message( str, "danger");
 			}
+			
+			html += _displayWatches(scenewatches);
 			return html;
 		}
 		function _displayTimers() {
@@ -1946,7 +2067,7 @@ var SceneEditor = function (scene) {
 			return n;
 		};
 		$("#altui-hint-Lua").html( ($("#altui-luascene").val()=="") ? "" : plusGlyph );
-		$("#altui-hint-Triggers").html( '<span class="badge">{0}</span>'.format( scene.triggers.length));
+		$("#altui-hint-Triggers").html( '<span class="badge">{0}</span>'.format( scene.triggers.length + scenewatches.length));
 		$("#altui-hint-Timers").html( '<span class="badge">{0}</span>'.format( scene.timers.length));
 		$("#altui-hint-Actions").html( '<span class="badge">{0}</span>'.format( _countActions(scene)) );
 		if (UIManager.UI7Check())
@@ -2011,6 +2132,16 @@ var SceneEditor = function (scene) {
 					else
 						scene.modeStatus="0";
 				}
+
+				// save new watches
+				var watchesToKeep = $.grep( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToWatch" ) || "").split(';'),function(w) {
+					var watch = _getWatchLineParams(w);
+					return (watch.sceneid != scene.id) && (scenecontroller==0);
+				});
+				watchesToKeep = watchesToKeep.concat(scenewatches);
+				MultiBox.setStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToWatch", watchesToKeep.join(';')); 
+
+				// save the scene
 				MultiBox.editScene(scene.altuiid,scene);
 				_showSaveNeeded(false);
 			});
@@ -2022,6 +2153,14 @@ var SceneEditor = function (scene) {
 			_showSaveNeeded();
 			PageMessage.message( "Trigger deleted, remember to save your changes", "info");
 			// MultiBox.setScene(sceneid,scene);
+		});
+		$(".altui-mainpanel").on("click",".altui-delwatch",function(){ 
+			var idx = $(this).prop('id');
+			scenewatches.splice( $(this).prop('id') , 1 );
+			$(this).parents("tr").remove();
+			_showSaveNeeded();
+			PageMessage.message( "Watch deleted, remember to save your changes", "info");
+			PageMessage.message( "Change in Watches will require a LUUP reload after you save the scene", "info");
 		});
 		
 		$(".altui-mainpanel")
@@ -2106,6 +2245,13 @@ var SceneEditor = function (scene) {
 			})
 			.on("click",".altui-addtrigger",function(){ 
 				_editTrigger( -1 , $(this) );
+			})
+			.on("click",".altui-editwatch",function(){ 
+				var idx = $(this).prop('id');
+				_editWatch( idx, $(this) );
+			})
+			.on("click",".altui-addwatch",function(){ 
+				_editWatch( -1 , $(this) );
 			})
 			.on("click",".altui-pausescene",function(){ 
 				scene.paused = (scene.paused==1) ? 0 : 1;
@@ -4303,7 +4449,7 @@ var UIManager  = ( function( window, undefined ) {
 	function _refreshUI( bFull, bFirstTime ) {
 		// refresh rooms
 		// refresh devices
-		AltuiDebug.debug("_refreshUI( {0}, {1} )".format(bFull,bFirstTime));
+		// AltuiDebug.debug("_refreshUI( {0}, {1} )".format(bFull,bFirstTime));
 		
 		// $(".altui-device") which do not have a btngroup in open state
 		// to avoid a refresh to erase an opened popup menu

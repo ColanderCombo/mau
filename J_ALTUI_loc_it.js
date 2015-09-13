@@ -258,5 +258,11 @@ Localization.init( {
 	"2-columns Menu's limit":"2-columns Menu's limit",
 	"Find Json":"Find Json",
 	"Frame":"Frame",
-	"Reload is done":"Reload is done"
+	"Reload is done":"Reload is done",
+	"Device Triggers":"Device Triggers",
+	"Trigger":"Trigger",
+	"Device Variable Watches":"Device Variable Watches",
+	"Watch":"Watch",
+	"LUA Expression with x=variable":"LUA Expression with x=variable",
+	"Expression with x as the variable and lua operators like <   >   <=  >=  ==  ~=":"Expression with x as the variable and lua operators like <   >   <=  >=  ==  ~="
 	});

@@ -1223,9 +1223,15 @@ end
 function initVariableWatches( variableWatchString )
 	debug(string.format("initVariableWatches(%s)",variableWatchString))
 	local watches = variableWatchString:split(";")
+	local done = {}
 	for k,v  in pairs(watches) do
 		local service,variable,device,scene = getWatchParams(v)
-		luup.variable_watch("variableWatchCallback", service,variable,device)
+		if (done[service.."_"..variable]==nil) then
+			luup.variable_watch("variableWatchCallback", service,variable,device)
+			done[service.."_"..variable] = true
+		else
+			debug(string.format("Ignoring duplicate watch for %s-%s",service,variable))
+		end
 	end
 end
 
