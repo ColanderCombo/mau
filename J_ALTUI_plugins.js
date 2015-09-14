@@ -578,33 +578,42 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
         return html;
     }
 	
-	// return the html string inside the .panel-body of the .altui-device#id panel
+    // return the html string inside the .panel-body of the .altui-device#id panel
     function _drawMultiString( device ) {
-        var html = "";
-		var sMore = _T("More");
-		var sLess = _T("Less");
-		var sAll = _T("All");
+        var html = ""; var sAll = _T("All"); var sMore = _T("More"); var sLess = _T("Less");
+        if ($('button#altui-morebtn-'+device.altuiid).html() == undefined) {
+            var initstate = {}; initstate['devicestate'] = 0;
+            MyLocalStorage.setSettings("MULTISTRINGUISTATE"+device.altuiid, initstate);
+        }        
+        var state = MyLocalStorage.getSettings("MULTISTRINGUISTATE"+device.altuiid);
+        var display = state != null ? state['devicestate'] : 0;
         html += "<div class='btn-group pull-right'>";
         html += " <button id='altui-allbtn-{0}' type='button' class='altui-window-btn btn btn-default btn-xs'>{1}</button>".format( device.altuiid,sAll);
-        html += " <button id='altui-morebtn-{0}' type='button' class='altui-window-btn btn btn-default btn-xs'>{1}</button>".format( device.altuiid,sMore);
+        html += " <button id='altui-morebtn-{0}' type='button' class='altui-window-btn btn btn-default btn-xs'>{1}</button>".format( device.altuiid,(display != 2 ? sMore : sLess));
         html += "</div>";
         html += "<div class='altui-multistring-text-div'>";
         for (var v = 1; v <= 5 ; v++) {
             var label = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:VContainer1', "VariableName" + v ); 
             var value = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:VContainer1', "Variable" + v );
-            var style = "class='altui-multistring-text-some altui-multistring-text-1 text-muted'";
-            if (v > 3) { style = "class='altui-multistring-text-some altui-multistring-text-2 text-muted' style='display: none;'"; }
+            var style = "";
+            if (v <= 3) { style = "class='" + (display != 2 ? "altui-multistring-text-some" : "altui-multistring-text-all") + " altui-multistring-text-1 text-muted'"; }
+            else {
+                style = "class='" + (display != 2 ? "altui-multistring-text-some" : "altui-multistring-text-all") + " altui-multistring-text-2 text-muted'";
+                if (display != 2) { style += " style='display: none;'"; } 
+            }            
             if (label != null && value != null) {
-                html += $(" <div " + style + "></div>").text(label + ": " + value).wrap( "<div></div>" ).parent().html()
+                html += $(" <div " + style + "></div>").text(label + ": " + value).wrap( "<div></div>" ).parent().html();
             }
         }
         html += "</div>";
-        html += "<script type='text/javascript'>";            
-        html += " $('button#altui-allbtn-{0}').on('click', function() { $('.altui-multistring-text-some').removeClass('altui-multistring-text-some').addClass('altui-multistring-text-all').show(); $('#altui-morebtn-{0}').html('{1}'); });".format(device.altuiid,sLess);            
-        html += " $('button#altui-morebtn-{0}').on('click', function() { var ml = $(this).html(); if (ml == '{1}') { $('.altui-multistring-text-all').removeClass('altui-multistring-text-all').addClass('altui-multistring-text-some'); $('.altui-multistring-text-2').hide(); $('#altui-morebtn-{0}').html('{2}'); } else { $('.altui-multistring-text-1').toggle(); $('.altui-multistring-text-2').toggle(); } });".format(device.altuiid,sLess,sMore);
+        html += "<script type='text/javascript'>";
+        html += " var state = MyLocalStorage.getSettings('MULTISTRINGUISTATE{0}');".format(device.altuiid);
+        html += " if (state['devicestate'] == 1) { $('.altui-multistring-text-1').toggle(); $('.altui-multistring-text-2').toggle(); }";
+        html += " $('button#altui-allbtn-{0}').on('click', function() { $('.altui-multistring-text-some').removeClass('altui-multistring-text-some').addClass('altui-multistring-text-all').show(); $('#altui-morebtn-{0}').html('{1}'); state['devicestate'] = 2; MyLocalStorage.setSettings('MULTISTRINGUISTATE{0}', state); });".format(device.altuiid,sLess);            
+        html += " $('button#altui-morebtn-{0}').on('click', function() { if ($(this).html() == '{1}') { $('.altui-multistring-text-all').removeClass('altui-multistring-text-all').addClass('altui-multistring-text-some'); $('.altui-multistring-text-2').hide(); $('#altui-morebtn-{0}').html('{2}'); state['devicestate'] = 0; MyLocalStorage.setSettings('MULTISTRINGUISTATE{0}', state); } else { $('.altui-multistring-text-1').toggle(); $('.altui-multistring-text-2').toggle(); state['devicestate'] = state['devicestate'] == 0 ? 1 : 0; MyLocalStorage.setSettings('MULTISTRINGUISTATE{0}', state); } });".format(device.altuiid,sLess,sMore);            
         html += "</script>";
         return html;
-    }	
+    }
 	
 	function _drawTempLeak( device ) {
         var html = "";

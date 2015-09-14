@@ -203,6 +203,10 @@ var styles ="					\
 		overflow: hidden;		\
 		height: 28px;			\
 	}		\
+	.altui-device-title-input {		\
+		width: 70%;				\
+		height: 20px;			\
+	}		\
 	.altui-mainpanel , .altui-device-toolbar{		\
 		margin-top: 2px;			\
 		margin-bottom: 2px;			\
