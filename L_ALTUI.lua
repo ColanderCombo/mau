@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.75"
+local version = "v0.76"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -1201,22 +1201,22 @@ function variableWatchCallback(lul_device, lul_service, lul_variable, lul_value_
 	for k,v  in pairs(watches) do
 		local service,variable,device,scene,expr = getWatchParams(v)
 		if ( (service==lul_service) and (variable==lul_variable) and (device== tonumber(lul_device)) ) then
-			-- init the global x and evaluate the boolean expression expr
-			local str = "local x = ".. lul_value_new .."; return ("..expr..")"
+			-- init the local old new vars and evaluate the boolean expression expr
+			local str = "local old = ".. lul_value_old .."; local new = ".. lul_value_new .."; return ("..expr..")"
 			debug("loading code = "..str)
 			local f,msg = loadstring(str)
 			if (f==nil) then
-				error(string.format("loadstring %s failed to compile with x=%s , msg=%s",str,lul_value_new,msg))
+				error(string.format("loadstring %s failed to compile, msg=%s",str,msg))
 			else
 				local err= f()	-- call it
-				debug(string.format("loadstring %s returned %s with x=%s",expr,tostring(err or 'nil'), lul_value_new))
+				debug(string.format("loadstring %s returned %s",expr,tostring(err or 'nil')))
 				if (err == true ) or ((tonumber(err) == 1 )) then
 					local err = run_scene(scene)
 					if (err==-1) then
 						error(string.format("variableWatchCallback(%s,%s,%s,old:'%s',new:'%s') failed to run the scene %s",lul_device, lul_service, lul_variable, lul_value_old, lul_value_new,scene))
 					end
 				else
-					warning(string.format("ignoring watch trigger, loadstring %s returned %s with x=%s",str,tostring(err or 'nil'), lul_value_new))
+					warning(string.format("ignoring watch trigger, loadstring %s returned %s",str,tostring(err or 'nil')))
 				end
 			end
 		end

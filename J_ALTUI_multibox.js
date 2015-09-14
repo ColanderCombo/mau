@@ -174,6 +174,9 @@ var MultiBox = ( function( window, undefined ) {
 	function _setHouseMode(newmode,cbfunc) {
 		return _controllers[0].controller.setHouseMode(newmode,cbfunc);
 	};
+	function _getHouseModeSwitchDelay() {
+		return _controllers[0].controller.getHouseModeSwitchDelay();
+	};
 	function _getRooms( func , filterfunc, endfunc) {
 		var dfd = $.Deferred();
 		var arr=[];
@@ -627,7 +630,8 @@ var MultiBox = ( function( window, undefined ) {
 	getBoxInfo		: function() 	{	return _controllers[0].controller.getBoxInfo(); },
 	getHouseMode	: function(cb) 	{	return _controllers[0].controller.getHouseMode(cb); },		// (cbfunc)
 	setHouseMode	: _setHouseMode,		// (newmode,cbfunc)
-
+	getHouseModeSwitchDelay : _getHouseModeSwitchDelay,
+	
 	// Rooms
 	getRooms		: _getRooms,		// in the future getRooms could cache the information and only call _getRooms when needed
 	getRoomsSync	: _getRoomsSync,	//()

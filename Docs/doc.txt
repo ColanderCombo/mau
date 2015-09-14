@@ -158,8 +158,8 @@ ignore error messages displayed by this page and wait until your unit reloads...
 [li][b]Data_xx_xx[/b] variables : internal storage for ALTUI user pages definitions[/li]
 [li][b]Data_CustomPages_0[/b] : JSON array of user custom page names[/li]
 [li]VariablesToWatch: semi column ';' seperated list of watch variable instructions. Each watch is instructions is in this format : "service,variable,deviceid,sceneid,lua_expr".
-sceneid is the scene to run if the lua expression is true. lua expressions uses x as a variable for the watched variable. example:
-urn:micasaverde-com:serviceId:SceneController1,LastSceneID,208,71,x==2 . ALTUI scene editor will take care of editing that variable.
+sceneid is the scene to run if the lua expression is true. lua expressions uses old and new as variables for the watched variable where old = previous value and new = new value. example:
+urn:micasaverde-com:serviceId:SceneController1,LastSceneID,208,71,(old==2)and(new==1) . ALTUI scene editor will take care of editing this VariablesToWatch variable.
 [/li]
 [/list]
 

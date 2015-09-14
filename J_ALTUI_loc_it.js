@@ -263,8 +263,8 @@ Localization.init( {
 	"Trigger":"Trigger",
 	"Device Variable Watches":"Device Variable Watches",
 	"Watch":"Watch",
-	"LUA Expression with x=variable":"LUA Expression with x=variable",
-	"Expression with x as the variable and lua operators like <   >   <=  >=  ==  ~=":"Expression with x as the variable and lua operators like <   >   <=  >=  ==  ~=",
+	"LUA Expression with new=newvalue and old=oldvalue":"LUA Expression with new=newvalue and old=oldvalue",
+	"Expression with old new as variables and lua operators like <  >  <= >= == ~=":"Expression with old new as variables and lua operators like <   >   <=  >=  ==  ~=",
 	"Logs":"Logs",
 	"Play":"Play"
 	});

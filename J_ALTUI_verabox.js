@@ -798,7 +798,11 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		}
 		return promise;
 	};
-	
+	function _getHouseModeSwitchDelay() {
+		if ( _isUI5() == true )	// UI5 or not ready
+			return 12;
+		return ( parseInt(_user_data.mode_change_delay || 9) +3);
+	};
 	function _findDeviceIdxByID(devid)
 	{
 		var idx=-1;
@@ -1752,6 +1756,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	getUserByID		: _getUserByID,
 	getHouseMode	: _getHouseMode,
 	setHouseMode	: _setHouseMode,
+	getHouseModeSwitchDelay : _getHouseModeSwitchDelay,
 	setStatus		: _setStatus,
 	getStatus		: _getStatus,
 	getJobStatus	: _getJobStatus,	//(jobid, cbfunc) 
