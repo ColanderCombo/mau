@@ -3768,7 +3768,7 @@ var UIManager  = ( function( window, undefined ) {
 							.click( function() {
 								//"Command":{"Service":"urn:a-lurker-com:serviceId:InfoViewer1","Action":"SetParameters","Parameters":[{"Name":"newLuaPattern","ID":"thePattern"}]}}	
 								var parameters = {};
-								$.each(control.Command.Parameters, function(idx,param) {
+								$.each(control.Command.Parameters || [], function(idx,param) {
 									if (param.Value )
 										parameters[ param.Name ] = param.Value;
 									if (param.ID)
