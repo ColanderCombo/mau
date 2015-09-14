@@ -41,6 +41,10 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-infoviewer-log-btn,.altui-infoviewer-btn,.altui-window-btn,.altui-datamine-open { margin-top: 10px; }";	
 		style += "div.altui-windowcover button.btn-sm { width: 4em; }";
 		style += ".altui-sonos-text, .altui-combsw-text, .altui-sysmon-text, .altui-veraalerts-text {font-size: 11px;}";
+		style += ".altui-multistring-text-div { margin-top: 2px; height: 48px; overflow: hidden; }"
+        style += ".altui-multistring-text-some { font-size: 11px; }";
+        style += ".altui-multistring-text-all { font-size: 7px; }";
+		style += ".altui-multistring-text-1, .altui-multistring-text-2 { }";
 		return style;
 	};
 
@@ -574,6 +578,31 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
         return html;
     }
 	
+	// return the html string inside the .panel-body of the .altui-device#id panel
+    function _drawMultiString( device ) {
+        var html = "";
+        html += "<div class='btn-group pull-right'>";
+        html += " <button id='altui-allbtn-{0}' type='button' class='altui-window-btn btn btn-default btn-xs'>{1}</button>".format( device.altuiid,_T("All"));
+        html += " <button id='altui-morebtn-{0}' type='button' class='altui-window-btn btn btn-default btn-xs'>{1}</button>".format( device.altuiid,_T("More"));
+        html += "</div>";
+        html += "<div class='altui-multistring-text-div'>";
+        for (var v = 1; v <= 5 ; v++) {
+            var label = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:VContainer1', "VariableName" + v ); 
+            var value = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:VContainer1', "Variable" + v );
+            var style = "class='altui-multistring-text-some altui-multistring-text-1 text-muted'";
+            if (v > 3) { style = "class='altui-multistring-text-some altui-multistring-text-2 text-muted' style='display: none;'"; }
+            if (label != null && value != null) {
+                html += $(" <div " + style + "></div>").text(label + ": " + value).wrap( "<div></div>" ).parent().html()
+            }
+        }
+        html += "</div>";
+        html += "<script type='text/javascript'>";            
+        html += " $('button#altui-allbtn-{0}').on('click', function() { $('.altui-multistring-text-some').removeClass('altui-multistring-text-some').addClass('altui-multistring-text-all').show(); $('#altui-morebtn-{0}').html('Less'); });".format(device.altuiid);            
+        html += " $('button#altui-morebtn-{0}').on('click', function() { var ml = $(this).html(); if (ml == 'Less') { $('.altui-multistring-text-all').removeClass('altui-multistring-text-all').addClass('altui-multistring-text-some'); $('.altui-multistring-text-2').hide(); $('#altui-morebtn-{0}').html('More'); } else { $('.altui-multistring-text-1').toggle(); $('.altui-multistring-text-2').toggle(); } });".format(device.altuiid);            
+        html += "</script>";
+        return html;
+    }	
+	
 	function _drawTempLeak( device ) {
         var html = "";
         var armed = parseInt(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Armed' )); 
@@ -793,6 +822,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawTempLeak	: _drawTempLeak,
 	drawSysMonitor : _drawSysMonitor,
 	drawVeraAlerts  : _drawVeraAlerts,
+	drawMultiString : _drawMultiString,
 	drawSmoke 	   : _drawSmoke,
 	drawHumidity   : _drawHumidity,
 	drawLight   	: _drawLight,

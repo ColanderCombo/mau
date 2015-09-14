@@ -1139,7 +1139,10 @@ local function getDefaultConfig()
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawTempLeak"
 	}
-	
+	tbl["urn:schemas-upnp-org:device:VContainer:1"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawMultiString"
+	}
 	return tbl
 end
 
