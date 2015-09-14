@@ -581,9 +581,12 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	// return the html string inside the .panel-body of the .altui-device#id panel
     function _drawMultiString( device ) {
         var html = "";
+		var sMore = _T("More");
+		var sLess = _T("Less");
+		var sAll = _T("All");
         html += "<div class='btn-group pull-right'>";
-        html += " <button id='altui-allbtn-{0}' type='button' class='altui-window-btn btn btn-default btn-xs'>{1}</button>".format( device.altuiid,_T("All"));
-        html += " <button id='altui-morebtn-{0}' type='button' class='altui-window-btn btn btn-default btn-xs'>{1}</button>".format( device.altuiid,_T("More"));
+        html += " <button id='altui-allbtn-{0}' type='button' class='altui-window-btn btn btn-default btn-xs'>{1}</button>".format( device.altuiid,sAll);
+        html += " <button id='altui-morebtn-{0}' type='button' class='altui-window-btn btn btn-default btn-xs'>{1}</button>".format( device.altuiid,sMore);
         html += "</div>";
         html += "<div class='altui-multistring-text-div'>";
         for (var v = 1; v <= 5 ; v++) {
@@ -597,8 +600,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
         }
         html += "</div>";
         html += "<script type='text/javascript'>";            
-        html += " $('button#altui-allbtn-{0}').on('click', function() { $('.altui-multistring-text-some').removeClass('altui-multistring-text-some').addClass('altui-multistring-text-all').show(); $('#altui-morebtn-{0}').html('Less'); });".format(device.altuiid);            
-        html += " $('button#altui-morebtn-{0}').on('click', function() { var ml = $(this).html(); if (ml == 'Less') { $('.altui-multistring-text-all').removeClass('altui-multistring-text-all').addClass('altui-multistring-text-some'); $('.altui-multistring-text-2').hide(); $('#altui-morebtn-{0}').html('More'); } else { $('.altui-multistring-text-1').toggle(); $('.altui-multistring-text-2').toggle(); } });".format(device.altuiid);            
+        html += " $('button#altui-allbtn-{0}').on('click', function() { $('.altui-multistring-text-some').removeClass('altui-multistring-text-some').addClass('altui-multistring-text-all').show(); $('#altui-morebtn-{0}').html('{1}'); });".format(device.altuiid,sLess);            
+        html += " $('button#altui-morebtn-{0}').on('click', function() { var ml = $(this).html(); if (ml == '{1}') { $('.altui-multistring-text-all').removeClass('altui-multistring-text-all').addClass('altui-multistring-text-some'); $('.altui-multistring-text-2').hide(); $('#altui-morebtn-{0}').html('{2}'); } else { $('.altui-multistring-text-1').toggle(); $('.altui-multistring-text-2').toggle(); } });".format(device.altuiid,sLess,sMore);
         html += "</script>";
         return html;
     }	

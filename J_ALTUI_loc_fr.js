@@ -264,5 +264,7 @@ Localization.init( {
 	"Device Variable Watches":"Suivi des Variables de Périphérique",
 	"Watch":"Suivi des Variables",
 	"LUA Expression with x=variable":"Expression LUA avec x=variable",
-	"Expression with x as the variable and lua operators like <   >   <=  >=  ==  ~=":"Expression avec x comme variable et des operateurs lua comme <   >   <=  >=  ==  ~="
+	"Expression with x as the variable and lua operators like <   >   <=  >=  ==  ~=":"Expression avec x comme variable et des operateurs lua comme <   >   <=  >=  ==  ~=",
+	"Logs":"Logs",
+	"Play":"Jouer"
 });
