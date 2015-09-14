@@ -7860,7 +7860,7 @@ var UIManager  = ( function( window, undefined ) {
 					// console.log("device {0},{1} id_parent:{2}-{3}".format(device.name, device.altuiid,controllerid,device.id_parent));
 					_addNode({ 
 						id:device.altuiid, 
-						name:device.name, 
+						name:device.name+", "+device.altuiid, 
 						color:color[device.device_type] ,
 						id_parent: "{0}-{1}".format(controllerid,device.id_parent || 0),
 						children: []
@@ -8011,7 +8011,7 @@ var UIManager  = ( function( window, undefined ) {
 					groups.append("text")					
 						.attr("dx", 15)
 						.attr("dy", ".35em")
-						.text(function (d) { return d.name; });	
+						.text(function (d) { return d.name });	
 			};		
 			_updateChart(data);
 		};
