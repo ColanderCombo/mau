@@ -270,6 +270,7 @@ var styles ="					\
 	}						\
 	.altui-pausescene {		\
 		padding-right: 3px;	\
+		cursor: pointer;	\
 	}				\
 	img.altui-plugin-icon { 			\
 		font-size: 1.5em;			\
@@ -389,6 +390,7 @@ var styles ="					\
 	}							\
 	.altui-favorite  {		\
 		padding-right: 3px;	\
+		cursor: pointer;	\
 	}				\
 	.paused {		\
 	  color: red	\
@@ -422,6 +424,7 @@ var styles ="					\
 		padding-right: 3px;	\
 	}				\
 	.altui-device-icon {			\
+		cursor: pointer;	\
 		margin-left: 0px;	\
 		margin-right: 0px;	\
 		height: 50px;		\
