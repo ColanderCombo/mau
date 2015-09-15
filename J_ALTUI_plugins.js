@@ -45,6 +45,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
         style += ".altui-multistring-text-some { font-size: 11px; }";
         style += ".altui-multistring-text-all { font-size: 7px; }";
 		style += ".altui-multistring-text-1, .altui-multistring-text-2 { }";
+		style += ".altui-upnpproxy-text { font-size: 11px; margin-left: 2px; margin-top: 22px; }";
 		return style;
 	};
 
@@ -615,6 +616,16 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
         return html;
     }
 	
+    // return the html string inside the .panel-body of the .altui-device#id panel
+    function _drawPnPProxy( device ) {
+        var html = "";
+        var status = MultiBox.getStatus( device, 'urn:futzle-com:serviceId:UPnPProxy1', 'StatusText' );
+        if (status != null) {
+            html += "<div class='altui-upnpproxy-text text-muted'>Status: {0}</div>".format(status);
+        }
+        return html;
+    }
+	
 	function _drawTempLeak( device ) {
         var html = "";
         var armed = parseInt(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Armed' )); 
@@ -835,6 +846,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawSysMonitor : _drawSysMonitor,
 	drawVeraAlerts  : _drawVeraAlerts,
 	drawMultiString : _drawMultiString,
+	drawPnPProxy	: _drawPnPProxy,
 	drawSmoke 	   : _drawSmoke,
 	drawHumidity   : _drawHumidity,
 	drawLight   	: _drawLight,
