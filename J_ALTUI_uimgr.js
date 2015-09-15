@@ -8411,8 +8411,11 @@ var UIManager  = ( function( window, undefined ) {
 		
 		$("button.altui-housemode").click( function() {
 			var div = $(this).find(".housemode");
+			// console.log("set mode="+mode);
 			var id = $(div).prop('id');
-			$(div).html( MultiBox.getHouseModeSwitchDelay() );
+			var mode = id.substr("altui-mode".length);
+
+			$(div).html( (mode==1) ? 3 : MultiBox.getHouseModeSwitchDelay() );
 			var interval = setInterval( function(div) {
 				var val = parseInt( $(div).html() );
 				if (val==1) {
@@ -8423,8 +8426,6 @@ var UIManager  = ( function( window, undefined ) {
 					$(div).html( val-1 );					
 				}
 			}, 1000, div);
-			// console.log("set mode="+mode);
-			var mode = id.substr("altui-mode".length);
 			MultiBox.setHouseMode(mode);
 		});
 
