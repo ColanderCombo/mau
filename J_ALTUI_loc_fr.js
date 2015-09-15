@@ -266,5 +266,8 @@ Localization.init( {
 	"LUA Expression with new=newvalue and old=oldvalue":"Expression LUA avec new=nouvelle valeur et old=ancienne valeur",
 	"Expression with old new as variables and lua operators like <  >  <= >= == ~=":"Expression avec les variables old,new et les opérateurs logiques LUA comme < > <= >= == ~=",
 	"Logs":"Logs",
-	"Play":"Jouer"
+	"Play":"Jouer",
+	"Night,Day":"Nuit,Jour",
+	"Show Weather on home page":"Gadget Météo sur la page principale",
+	"Weather Temp Unit (UI5)":"Unité de température (UI5)"
 });
