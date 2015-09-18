@@ -426,7 +426,7 @@ var styles ="					\
 		font-size: 12px;	\
 		text-transform: capitalize;	\
 	}				\
-	.altui-plugin-version {		\
+	input.altui-plugin-version {		\
 		display: inline;	\
 		width: 44px; \
 		padding-left: 3px;	\
