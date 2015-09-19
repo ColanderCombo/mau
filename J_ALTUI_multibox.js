@@ -161,7 +161,7 @@ var MultiBox = ( function( window, undefined ) {
 	};
 	function _getIpAddr(altuiid) {
 		var elems = altuiid.split("-");
-		return _controllers[elems[0]].controller.getIpAddr();
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getIpAddr();
 	};	
 	function _isUI5(controller) {
 		if (controller==0)
@@ -214,7 +214,7 @@ var MultiBox = ( function( window, undefined ) {
 	};
 	function _getRoomByAltuiID( altuiid ) {
 		var elems = altuiid.split("-");
-		return _controllers[ elems[0] ].controller.getRoomByID( elems[1] );
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[ elems[0] ].controller.getRoomByID( elems[1] );
 	};
 	function _getUsers(func , filterfunc, endfunc) {
 		var arr=[];
@@ -255,7 +255,7 @@ var MultiBox = ( function( window, undefined ) {
 	
 	function _deleteRoom(room) {
 		var elems = room.altuiid.split("-");
-		return _controllers[elems[0]].controller.deleteRoom(elems[1]);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.deleteRoom(elems[1]);
 	};
 	function _createRoom(controllerid, name, cbfunc ) {
 		return _controllers[controllerid].controller.createRoom(name, cbfunc);
@@ -268,11 +268,11 @@ var MultiBox = ( function( window, undefined ) {
 	};
 	function _renameDevice( device, newname, roomid ) {
 		var elems = device.altuiid.split("-");
-		return _controllers[elems[0]].controller.renameDevice( device, newname, roomid);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.renameDevice( device, newname, roomid);
 	};
 	function _deleteDevice(device) {
 		var elems = device.altuiid.split("-");
-		return _controllers[elems[0]].controller.deleteDevice(elems[1]);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.deleteDevice(elems[1]);
 	};
 	function _getDevices( func , filterfunc, endfunc ) {
 		var arr=[];
@@ -297,14 +297,14 @@ var MultiBox = ( function( window, undefined ) {
 	};
 	function _getDeviceBatteryLevel(device) {
 		var elems = device.altuiid.split("-");
-		return _controllers[elems[0]].controller.getDeviceBatteryLevel(device);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getDeviceBatteryLevel(device);
 	};
 	function _getDeviceByAltuiID( devid ) {
 		var elems = devid.split("-");
-		return _controllers[ elems[0] ].controller.getDeviceByID( elems[1] );
+		return (_controllers[elems[0]]==undefined)  ? null :_controllers[ elems[0] ].controller.getDeviceByID( elems[1] );
 	};
 	function _getDeviceByID( controllerid , devid ) {
-		return _controllers[controllerid].controller.getDeviceByID( devid );
+		return (_controllers[controllerid]==undefined)  ? null : _controllers[controllerid].controller.getDeviceByID( devid );
 	};
 	function _getDeviceByAltID( controllerid, parentdevid , altid ) {
 		var id = controllerid || 0;
@@ -318,26 +318,26 @@ var MultiBox = ( function( window, undefined ) {
 			cbfunc([]);
 		else {
 			var elems = device.altuiid.split("-");
-			return _controllers[elems[0]].controller.getDeviceActions(device,cbfunc);
+			return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getDeviceActions(device,cbfunc);
 		}
 		return [];
 	};
 	function _getDeviceEvents(device) {
 		if (device==null) return [];
 		var elems = device.altuiid.split("-");
-		return _controllers[elems[0]].controller.getDeviceEvents(device);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getDeviceEvents(device);
 	};
 	function _getDeviceDependants(device) {
 		var elems = device.altuiid.split("-");
-		return _controllers[elems[0]].controller.getDeviceDependants(device);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getDeviceDependants(device);
 	};
 	function _getDeviceVariableHistory( device, varidx, cbfunc) {
 		var elems = device.altuiid.split("-");
-		return _controllers[elems[0]].controller.getDeviceVariableHistory( device, varidx, cbfunc);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getDeviceVariableHistory( device, varidx, cbfunc);
 	};
 	function _getStatesByAltuiID(altuiid) {
 		var elems = altuiid.split("-");
-		return _controllers[elems[0]].controller.getStates( elems[1]  );
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getStates( elems[1]  );
 	};
 	function _getStateByID( altuiid, id ) {
 		id = parseInt(id);
@@ -354,40 +354,40 @@ var MultiBox = ( function( window, undefined ) {
 	function _getStates( device ) {
 		if (device==null) return null;
 		var elems = device.altuiid.split("-");
-		return _controllers[elems[0]].controller.getStates( elems[1]  );
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getStates( elems[1]  );
 	};
 	function _getStatus( device, service, variable ) {
 		if (device==null) return null;
 		var elems = device.altuiid.split("-");
-		return _controllers[elems[0]].controller.getStatus( elems[1], service, variable );
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getStatus( elems[1], service, variable );
 	};
 	function _setStatus( device, service, variable, value, dynamic ) {
 		var elems = device.altuiid.split("-");
-		return _controllers[elems[0]].controller.setStatus( elems[1], service, variable, value, dynamic );
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.setStatus( elems[1], service, variable, value, dynamic );
 	};
 	function _getJobStatus( controllerid, jobid , cbfunc )
 	{
-		return _controllers[controllerid].controller.getJobStatus( jobid, cbfunc );
+		return (_controllers[controllerid]==undefined)  ? null : _controllers[controllerid].controller.getJobStatus( jobid, cbfunc );
 	};
 	function _runAction(device, service, action, params,cbfunc) {
 		var elems = device.altuiid.split("-");
-		return _controllers[elems[0]].controller.getUPnPHelper().UPnPAction(elems[1], service, action, params,cbfunc);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getUPnPHelper().UPnPAction(elems[1], service, action, params,cbfunc);
 	};
 	function _runActionByAltuiID(altuiid, service, action, params,cbfunc) {
 		var elems = altuiid.split("-");
-		return _controllers[elems[0]].controller.getUPnPHelper().UPnPAction(elems[1], service, action, params,cbfunc);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getUPnPHelper().UPnPAction(elems[1], service, action, params,cbfunc);
 	};
 	function _setAttr(device, attribute, value,cbfunc) {
 		var elems = device.altuiid.split("-");
-		return _controllers[elems[0]].controller.getUPnPHelper().UPnPSetAttr(elems[1], attribute, value,cbfunc);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getUPnPHelper().UPnPSetAttr(elems[1], attribute, value,cbfunc);
 	};
 	function _isDeviceZwave(device) {
 		var elems = device.altuiid.split("-");
-		return _controllers[elems[0]].controller.isDeviceZwave(device);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.isDeviceZwave(device);
 	};
 	function _updateNeighbors(device) {
 		var elems = device.altuiid.split("-");
-		return _controllers[elems[0]].controller.updateNeighbors(elems[1]);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.updateNeighbors(elems[1]);
 	};
 	function _getCategories( cbfunc, filterfunc, endfunc ) {
 		var dfd = $.Deferred();
@@ -424,7 +424,7 @@ var MultiBox = ( function( window, undefined ) {
 	};
 	function _evaluateConditions(device,devsubcat,conditions) {
 		var elems = device.altuiid.split("-");
-		return _controllers[elems[0]].controller.evaluateConditions(elems[1],devsubcat,conditions);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.evaluateConditions(elems[1],devsubcat,conditions);
 	};
 	function _getWeatherSettings() {
 		return _controllers[0].controller.getWeatherSettings();
@@ -439,7 +439,7 @@ var MultiBox = ( function( window, undefined ) {
 	};
 	function _deleteScene(scene) {
 		var elems = scene.altuiid.split("-");
-		return _controllers[elems[0]].controller.deleteScene(elems[1]);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.deleteScene(elems[1]);
 	};
 	function _getNewSceneID(controllerid) {
 		var id = controllerid || 0;
@@ -471,27 +471,27 @@ var MultiBox = ( function( window, undefined ) {
 		return arr;
 	};	
 	function _getSceneByID(controllerid,sceneid) {
-		return _controllers[controllerid].controller.getSceneByID(sceneid)
+		return (_controllers[controllerid]==undefined)  ? null : _controllers[controllerid].controller.getSceneByID(sceneid)
 	};
 	function _getSceneByAltuiID(altuiid) {
 		var elems = altuiid.split("-");
-		return _controllers[elems[0]].controller.getSceneByID(elems[1])
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getSceneByID(elems[1])
 	};
 	function _getSceneHistory( scene, cbfunc) {
 		var elems = scene.altuiid.split("-");
-		return _controllers[elems[0]].controller.getSceneHistory( elems[1], cbfunc);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getSceneHistory( elems[1], cbfunc);
 	};
 	function _editScene(altuiid,scenejson,cbfunc) {
 		var elems = altuiid.split("-");
-		return _controllers[elems[0]].controller.editScene(elems[1],scenejson,cbfunc);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.editScene(elems[1],scenejson,cbfunc);
 	};
 	function _runScene(scene) {
 		var elems = scene.altuiid.split("-");
-		return _controllers[elems[0]].controller.runScene(elems[1]);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.runScene(elems[1]);
 	};
 	function _runSceneByAltuiID(altuiid) {
 		var elems = altuiid.split("-");
-		return _controllers[elems[0]].controller.runScene(elems[1]);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.runScene(elems[1]);
 	};
 	function _runLua(controllerid, code, cbfunc) {
 		var id = controllerid || 0;
@@ -533,15 +533,15 @@ var MultiBox = ( function( window, undefined ) {
 	};
 	function _deletePlugin( altuiid, cbfunc) {
 		var elems = altuiid.split("-");
-		return _controllers[elems[0]].controller.getUPnPHelper().UPnPDeletePlugin(elems[1],cbfunc);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getUPnPHelper().UPnPDeletePlugin(elems[1],cbfunc);
 	};
 	function _updatePlugin( altuiid, cbfunc) {
 		var elems = altuiid.split("-");
-		return _controllers[elems[0]].controller.getUPnPHelper().UPnPUpdatePlugin(elems[1],cbfunc);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getUPnPHelper().UPnPUpdatePlugin(elems[1],cbfunc);
 	};
 	function _updatePluginVersion( altuiid, ver, cbfunc) {
 		var elems = altuiid.split("-");
-		return _controllers[elems[0]].controller.getUPnPHelper().UPnPUpdatePluginVersion(elems[1],ver,cbfunc);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getUPnPHelper().UPnPUpdatePluginVersion(elems[1],ver,cbfunc);
 	};
 	function _getFileContent(controllerid, filename , cbfunc) {
 		var id = controllerid || 0;
@@ -597,7 +597,7 @@ var MultiBox = ( function( window, undefined ) {
 	};
 	function _buildUPnPGetFileUrl(altuiid,name) {
 		var elems = altuiid.split("-");
-		return _controllers[elems[0]].controller.getUPnPHelper().buildUPnPGetFileUrl(name);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getUPnPHelper().buildUPnPGetFileUrl(name);
 	};
 	
   return {
