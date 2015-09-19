@@ -592,8 +592,8 @@ var MultiBox = ( function( window, undefined ) {
 		var id = controllerid || 0;
 		return _controllers[id].controller.getIcon( imgpath , cbfunc );
 	};
-	function _triggerAltUIUpgrade(urlsuffix) {
-		return _controllers[0].controller.triggerAltUIUpgrade(urlsuffix);
+	function _triggerAltUIUpgrade(urlsuffix,newrev) {
+		return _controllers[0].controller.triggerAltUIUpgrade(urlsuffix,newrev);
 	};
 	function _buildUPnPGetFileUrl(altuiid,name) {
 		var elems = altuiid.split("-");
@@ -729,7 +729,7 @@ var MultiBox = ( function( window, undefined ) {
 	buildUPnPGetFileUrl : _buildUPnPGetFileUrl,	// (name)
 	
 	// Upgrade
-	triggerAltUIUpgrade	: _triggerAltUIUpgrade,		//(url suffix)
+	triggerAltUIUpgrade : _triggerAltUIUpgrade,	// (suffix,newrev)  : newrev number in TRAC
 
 	// DEBUG
 	

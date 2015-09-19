@@ -625,7 +625,8 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		return jqxhr;
 	};
 	
-	function _triggerAltUIUpgrade(urlsuffix) {
+	function _triggerAltUIUpgrade(urlsuffix,newrev) {
+		urlsuffix += "&TracRev="+newrev;
 		return _httpGet(urlsuffix,{}).always( function() {
 			PageMessage.message(_T("Upgrade Request succeeded, a Luup reload will happen"),"success");
 		});
@@ -1722,7 +1723,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	getUPnPHelper	: _getUPnPHelper,
 	getIpAddr		: _getIpAddr,
 	getUrlHead		: _getUrlHead,
-	triggerAltUIUpgrade : _triggerAltUIUpgrade,	// (suffix)
+	triggerAltUIUpgrade : _triggerAltUIUpgrade,	// (suffix,newrev)  : newrev number in TRAC
 	getIconPath		: _getIconPath,		// ( src )
 	getIcon			: _getIcon, 		// workaround to get image from vera box
 	getWeatherSettings : _getWeatherSettings,

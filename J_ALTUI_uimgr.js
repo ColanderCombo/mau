@@ -4269,7 +4269,7 @@ var UIManager  = ( function( window, undefined ) {
 			if (newrev > jsrevision) {
 				DialogManager.confirmDialog(_T("a newer version #{0} of ALTUI is available, do you want to upgrade ?").format(newrev),function(result) {
 					if (result==true)
-						MultiBox.triggerAltUIUpgrade(elems[2]);
+						MultiBox.triggerAltUIUpgrade(elems[2],newrev);
 				});
 				var html ="<ul>";
 				html += $.map(newfeatures,function(e) { return "<li>"+e+"</li>"} ).join('');
