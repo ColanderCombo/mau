@@ -87,6 +87,9 @@ var cameraURI="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAMAAAANIil
 var defaultIconSrc="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAASJSURBVHja7Jp7aI5RHMff123CMOYyMmFY5LZYI5umFmHhD2pyyYzYkju5hCWX0jZKM9rEkCy5tJostxWRIteZe5FLyW2Y68z35Pfq9Os8z573eT3vu9fOr76d5zzn8jyf59x+57yvu6amxlWfrIGrnpkG1sAaWANrYA2sgTWwBnbKGnmT2e12/7MHb8vOaYhgEJQA9YN6Qj2g5lCoSFu4eNF1K3V5sx9o5M+vC0jxvCRoKjQOalmnW9gH0BYI5kKLoE5B06Vttug8KBMKqyX7S+g+9Ab6SGHwAAN2MIICqL9BlifQMegcdAHj9X1QtjBAxcy2BNoENWbJ1VARtAO6BMiaoO7SgG2C4AA0SZF8CFoDyMf/xRgGbCsExVA8S3oEzQJomUG5AQgSoSFQNNSZlqZ4q8uS34Hx0s0MYA+KSQsv/pHlD0eQQctTVFC1MDkQRQrYtQDdoOgFa6F0qGmwdun10Fh2Lx2wOxnseAS7ofZGDhP0DHoAVUJvnQB2e+OWcdcSEKMRnGTZlgN2K+sBWdACRZXfoBPQYeg8ytmC9IrBLjB5T+VQFynLXrz0TDZrC5gJrKrv0HYoG/lf+dpq/vKlMxnsbRqbcsuqYC9B0wH6MGi2h4CJRDCfjT+x9HyR7mUpYIXDkRAoWF9aeBXzovIAcUX6IBMVYzYTedZb+JghCCIo+gFl3gV00sILtcalGHchdPsr1B0v9lJaeiqgjlLRXKRnmED2QpAGjYH6iEdJyeJZp6FCEarcUW8Y7HTpKRKssD0eWLLVDPYqbQtVoGFQAX2gZVBfBuuiuoSDUgpdRv4Yf4/haSxewDyodLZZSMUH+a6AFXDCdUxVQBpZrJj0UHamX4DxoDb0UI/dAsw1KZ5KfrDH9iP9pqKe3mLdhSJtvLNY6vbYhfa2hRNZmRKWPoPFtxhMSkehcJb0ArpRi2THJA91DXR6lo5j8dMSSFeacDx2Ea17T1HHQpbPRSccscj/3KR3tUVwl7V0LjTMyRaOZnG5O49gacUGrbtUUe8KM1iyHKgduzcUdSY62cK9pOvXzPftx/JeUJRPUnRl8dEO03L3t8VRd7X0oUYpJkuPpdAxkSPAHaTrpyytG4uXK8onKO7FsAM74YWJQ4EqyWffZfJO8U526VA27mRrK13/NPCQult4xmyUrZLiG6GuJvmjnOzS8oa+QnG6USZ5XyprVkv9wiM7L3XlOOaz+8zgVWYzXxhp+Raq+GSSJjb/K9kEl2/BKfkRkEM8i3bfJC0NH61SioufYdawPJsVK0V5XQY+S742t32ALWU95jWC4+yIKFpRtszx/bAPVqaY3V+RM2Lm0rYkJ0NlhX4707J5eDCHLTPF1PJmNhJKVtwvQU8YW2d/LiXLJydiOMWTDWBqs0oLM3jAu7QYm78QTHb9+UXCromZOcXOzzYB+csDHRiMoMMBb004NMmoo8RfBwD/Cvo57XTWQZ8tFjsi3E6UPeW3My0njDYOU+hMS/jWEZL7egc6Q4cJqu2mcwfx/4Pp/2lpYA2sgTWwBtbAGlgDO2W/BRgADRV6RjlErQoAAAAASUVORK5CYII="
 
 var styles ="					\
+	.blocklyTreeLabel {			\
+		color: black;			\
+	}							\
 	#altui-background {			\
 		position:fixed;			\
 		top:0;					\
@@ -773,6 +776,27 @@ var DialogManager = ( function() {
 		$(dialog).find(".row-fluid").append(propertyline);
 	};
 
+	function _dlgAddBlockly(dialog, name, label, value,help, options)
+	{
+		var optstr = _optionsToString($.extend( {type:'text'},options));
+		value = (value==undefined) ? '' : value ;
+		var placeholder = ((options !=undefined) && (options.placeholder==undefined)) ? "placeholder:'enter "+name+"'" : "";
+		var propertyline = "";
+		propertyline += "<div class='form-group'>";
+		propertyline += "	<label for='altui-widget-"+name+"' title='"+(help || '')+"'>"+label+"</label>";
+		if (help)
+			propertyline += "	<span title='"+(help || '')+"'>"+helpGlyph+"</span>";
+		
+		propertyline += "<div class='input-group'>";
+			propertyline += "<input id='altui-widget-"+name+"' class='form-control' "+optstr+" value='"+value+"' "+placeholder+" ></input>";
+			propertyline += "<span class='input-group-btn'>";
+				propertyline += buttonTemplate.format( "altui-edit-LuaExpression", 'btn-default', editGlyph,_T('Edit Watch Expression'));
+			propertyline += "</span>";
+		propertyline += "</div>";
+		propertyline += "</div>";
+		$(dialog).find(".row-fluid").append(propertyline);
+	}
+	
 	function _dlgAddLine(dialog, name, label, value,help, options)
 	{
 		var optstr = _optionsToString($.extend( {type:'text'},options));
@@ -1135,6 +1159,7 @@ var DialogManager = ( function() {
 		dlgAddCheck:_dlgAddCheck,
 		dlgAddColorPicker : _dlgAddColorPicker,	//(dialog, name, label, help, value, options)
 		dlgAddLine:_dlgAddLine,
+		dlgAddBlockly: _dlgAddBlockly,	//(dialog, name, label, value )
 		dlgAddSelect: _dlgAddSelect,
 		dlgAddVariables:_dlgAddVariables,
 		dlgAddDevices:_dlgAddDevices,
@@ -1367,6 +1392,26 @@ var SceneEditor = function (scene) {
 		} );
 	};
 	
+	function _editLuaExpression(watch) {
+		// hide scene & scene editor accordeon
+		$(".altui-scene").toggle(false);
+		$(".altui-scene-editor").toggle(false);
+		
+		// show blockly editor
+		$(".altui-blockly-editor").toggle(true);
+		$(".blocklyToolboxDiv").toggle(true);
+		
+		// inject Blockly if needed
+		 if ( $(".altui-blockly-editor svg").length == 0) {
+			var workspace = Blockly.inject('blocklyDiv',{toolbox: document.getElementById('toolbox')});			 
+			function myUpdateFunction() {
+			  var code = Blockly.JavaScript.workspaceToCode(workspace);
+			  $("#blocklyDivCode").text(code);
+			}
+			workspace.addChangeListener(myUpdateFunction);
+		 }
+	};
+	
 	function _editWatch( idx, jqButton) {
 		var watch =  (idx!=-1) ? _getWatchLineParams( scenewatches[idx] ) : "";
 		var dialog = DialogManager.createPropertyDialog(_T('Watch'));
@@ -1381,7 +1426,9 @@ var SceneEditor = function (scene) {
 					variable:	watch.variable
 				}
 				DialogManager.dlgAddVariables(dialog, widget, function() {
-					DialogManager.dlgAddLine( dialog , "LuaExpression", _T("LUA Expression with new=newvalue and old=oldvalue"), watch.luaexpr , _T("Expression with old new as variables and lua operators like <  >  <= >= == ~="), {required:''} ); 
+					// DialogManager.dlgAddLine( dialog , "LuaExpression", _T("LUA Expression with new=newvalue and old=oldvalue"), watch.luaexpr , _T("Expression with old new as variables and lua operators like <  >  <= >= == ~="), {required:''} ); 
+					DialogManager.dlgAddBlockly( dialog , "LuaExpression", _T("LUA Expression with new=newvalue and old=oldvalue"), watch.luaexpr , _T("Expression with old new as variables and lua operators like <  >  <= >= == ~="), {required:''} ); 
+					// DialogManager.dlgAddBlockly( dialog , "LuaExpression2", _T("Blockly Value"), "" ); 
 					$('div#dialogModal').modal();
 				});
 			},
@@ -1390,7 +1437,7 @@ var SceneEditor = function (scene) {
 			}
 		);
 		
-		$('div#dialogs').on( 'submit',"div#dialogModal form",  function( event ) {	
+		function _getWatchDialogValues() {
 			// get new values
 			var altuiid = $("#altui-select-device").val();
 			var state = MultiBox.getStateByID( altuiid,$("#altui-select-variable").val() );
@@ -1410,14 +1457,24 @@ var SceneEditor = function (scene) {
 				$(jqButton).closest("tr[data-watch-idx='"+idx+"']").replaceWith( _displayWatch(idx,newwatch) );
 			}
 			else {
+				idx = scenewatches.length;
 				scenewatches.push( _setWatchLineParams( newwatch ) );				
 				var parent = $(jqButton).closest("tr")
-				parent.before(  _displayWatch(scenewatches.length-1 , newwatch) );
+				parent.before(  _displayWatch(idx , newwatch) );
 			}
-
-			_showSaveNeeded();
-			PageMessage.message( "Change in Watches will require a LUUP reload after you save the scene", "info", true);
-		});
+			return idx;
+		};
+		
+		$('div#dialogs')
+			.on('click',"#altui-edit-LuaExpression", function(event) {
+				var idxwatch = _getWatchDialogValues();
+				_editLuaExpression( scenewatches[idxwatch] );
+			})
+			.on( 'submit',"div#dialogModal form",  function( event ) {	
+				_getWatchDialogValues();
+				_showSaveNeeded();
+				PageMessage.message( "Change in Watches will require a LUUP reload after you save the scene", "info", true);
+			});
 	}
 	
 	function _displayWatch(idx,watch) {
@@ -1904,7 +1961,7 @@ var SceneEditor = function (scene) {
 		function _createAccordeon(panels) {
 			var bFirst = true;
 			var html="";
-			html += "<div class='bs-example'>";
+			html += "<div class='altui-scene-editor'>";
 			html += "    <div class='panel-group' id='accordion'>";
 			$.each( panels, function (idx,panel){
 				html += "        <div class='panel panel-default' id='"+panel.id+"'>";
@@ -1923,6 +1980,246 @@ var SceneEditor = function (scene) {
 				bFirst = false;
 			})
 			html += "    </div>";
+			html += "</div>";
+			return html
+		};
+		function _createBlocklyArea()
+		{
+			var html="";
+			html += "<div class='altui-blockly-editor' style='display: none;' >";
+				html += "<div class='panel panel-default'>";
+				html += "  <div class='panel-heading'>";
+				html += "    <h3 class='panel-title'>Watch Expression</h3>";
+				html += "  </div>";
+				html += "  <div class='panel-body'>";
+html+="<xml id='toolbox' style='display: none'>";
+html+="    <category name='Variable'>";
+	html+="  <block type='variables_get'>";
+	html+="    <field name='VAR'>new</field>";
+	html+="  </block>";
+	html+="  <block type='variables_get'>";
+	html+="    <field name='VAR'>old</field>";
+	html+="  </block>";
+html+="    </category>";
+html+="    <category name='Logic'>";
+// html+="      <block type='controls_if'></block>";
+html+="      <block type='logic_compare'></block>";
+html+="      <block type='logic_operation'></block>";
+html+="      <block type='logic_negate'></block>";
+html+="      <block type='logic_boolean'></block>";
+html+="      <block type='logic_null'></block>";
+// html+="      <block type='logic_ternary'></block>";
+html+="    </category>";
+// html+="    <category id='catLoops'>";
+// html+="      <block type='controls_repeat_ext'>";
+// html+="        <value name='TIMES'>";
+// html+="          <block type='math_number'>";
+// html+="            <field name='NUM'>10</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="      </block>";
+// html+="      <block type='controls_whileUntil'></block>";
+// html+="      <block type='controls_for'>";
+// html+="        <value name='FROM'>";
+// html+="          <block type='math_number'>";
+// html+="            <field name='NUM'>1</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="        <value name='TO'>";
+// html+="          <block type='math_number'>";
+// html+="            <field name='NUM'>10</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="        <value name='BY'>";
+// html+="          <block type='math_number'>";
+// html+="            <field name='NUM'>1</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="      </block>";
+// html+="      <block type='controls_forEach'></block>";
+// html+="      <block type='controls_flow_statements'></block>";
+// html+="    </category>";
+html+="    <category name='Math'>";
+html+="      <block type='math_number'></block>";
+html+="      <block type='math_arithmetic'></block>";
+html+="      <block type='math_single'></block>";
+html+="      <block type='math_trig'></block>";
+html+="      <block type='math_constant'></block>";
+html+="      <block type='math_number_property'></block>";
+// html+="      <block type='math_change'>";
+// html+="        <value name='DELTA'>";
+// html+="          <block type='math_number'>";
+// html+="            <field name='NUM'>1</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="      </block>";
+html+="      <block type='math_round'></block>";
+// html+="      <block type='math_on_list'></block>";
+html+="      <block type='math_modulo'></block>";
+// html+="      <block type='math_constrain'>";
+// html+="        <value name='LOW'>";
+// html+="          <block type='math_number'>";
+// html+="            <field name='NUM'>1</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="        <value name='HIGH'>";
+// html+="          <block type='math_number'>";
+// html+="            <field name='NUM'>100</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="      </block>";
+// html+="      <block type='math_random_int'>";
+// html+="        <value name='FROM'>";
+// html+="          <block type='math_number'>";
+// html+="            <field name='NUM'>1</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="        <value name='TO'>";
+// html+="          <block type='math_number'>";
+// html+="            <field name='NUM'>100</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="      </block>";
+// html+="      <block type='math_random_float'></block>";
+html+="    </category>";
+html+="    <category name='Text'>";
+html+="      <block type='text'></block>";
+html+="      <block type='text_join'></block>";
+html+="      <block type='text_append'>";
+html+="        <value name='TEXT'>";
+html+="          <block type='text'></block>";
+html+="        </value>";
+html+="      </block>";
+html+="      <block type='text_length'></block>";
+html+="      <block type='text_isEmpty'></block>";
+html+="      <block type='text_indexOf'>";
+html+="        <value name='VALUE'>";
+html+="          <block type='variables_get'>";
+html+="            <field name='VAR' class='textVar'>...</field>";
+html+="          </block>";
+html+="        </value>";
+html+="      </block>";
+html+="      <block type='text_charAt'>";
+html+="        <value name='VALUE'>";
+html+="          <block type='variables_get'>";
+html+="            <field name='VAR' class='textVar'>...</field>";
+html+="          </block>";
+html+="        </value>";
+html+="      </block>";
+html+="      <block type='text_getSubstring'>";
+html+="        <value name='STRING'>";
+html+="          <block type='variables_get'>";
+html+="            <field name='VAR' class='textVar'>...</field>";
+html+="          </block>";
+html+="        </value>";
+html+="      </block>";
+html+="      <block type='text_changeCase'></block>";
+html+="      <block type='text_trim'></block>";
+// html+="      <block type='text_print'></block>";
+// html+="      <block type='text_prompt_ext'>";
+// html+="        <value name='TEXT'>";
+// html+="          <block type='text'></block>";
+// html+="        </value>";
+// html+="      </block>";
+html+="    </category>";
+// html+="    <category id='catLists'>";
+// html+="      <block type='lists_create_empty'></block>";
+// html+="      <block type='lists_create_with'></block>";
+// html+="      <block type='lists_repeat'>";
+// html+="        <value name='NUM'>";
+// html+="          <block type='math_number'>";
+// html+="            <field name='NUM'>5</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="      </block>";
+// html+="      <block type='lists_length'></block>";
+// html+="      <block type='lists_isEmpty'></block>";
+// html+="      <block type='lists_indexOf'>";
+// html+="        <value name='VALUE'>";
+// html+="          <block type='variables_get'>";
+// html+="            <field name='VAR' class='listVar'>...</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="      </block>";
+// html+="      <block type='lists_getIndex'>";
+// html+="        <value name='VALUE'>";
+// html+="          <block type='variables_get'>";
+// html+="            <field name='VAR' class='listVar'>...</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="      </block>";
+// html+="      <block type='lists_setIndex'>";
+// html+="        <value name='LIST'>";
+// html+="          <block type='variables_get'>";
+// html+="            <field name='VAR' class='listVar'>...</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="      </block>";
+// html+="      <block type='lists_getSublist'>";
+// html+="        <value name='LIST'>";
+// html+="          <block type='variables_get'>";
+// html+="            <field name='VAR' class='listVar'>...</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="      </block>";
+// html+="      <block type='lists_split'>";
+// html+="        <value name='DELIM'>";
+// html+="          <block type='text'>";
+// html+="            <field name='TEXT'>,</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="      </block>";
+// html+="    </category>";
+// html+="    <category id='catColour'>";
+// html+="      <block type='colour_picker'></block>";
+// html+="      <block type='colour_random'></block>";
+// html+="      <block type='colour_rgb'>";
+// html+="        <value name='RED'>";
+// html+="          <block type='math_number'>";
+// html+="            <field name='NUM'>100</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="        <value name='GREEN'>";
+// html+="          <block type='math_number'>";
+// html+="            <field name='NUM'>50</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="        <value name='BLUE'>";
+// html+="          <block type='math_number'>";
+// html+="            <field name='NUM'>0</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="      </block>";
+// html+="      <block type='colour_blend'>";
+// html+="        <value name='COLOUR1'>";
+// html+="          <block type='colour_picker'>";
+// html+="            <field name='COLOUR'>#ff0000</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="        <value name='COLOUR2'>";
+// html+="          <block type='colour_picker'>";
+// html+="            <field name='COLOUR'>#3333ff</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="        <value name='RATIO'>";
+// html+="          <block type='math_number'>";
+// html+="            <field name='NUM'>0.5</field>";
+// html+="          </block>";
+// html+="        </value>";
+// html+="      </block>";
+// html+="    </category
+// html+="    <sep></sep>";
+// html+="    <category id='catVariables' custom='VARIABLE'></category>";
+// html+="    <category id='catFunctions' custom='PROCEDURE'></category>";
+html+="  </xml>";
+					html += "Watch Formula";
+					html += "<div id='blocklyDiv' style='height: 280px; width: 100%;'></div>";
+					// html += "<div id='blocklyDiv' style='height: 480px; width: 600px;'></div>";
+					html += "Generated code";
+					html += "<pre id='blocklyDivCode'></pre>";
+					html += buttonTemplate.format( 'altui-save-blockly', '', _T('OK'),'default');
+				html += "  </div>";
+				html += "</div>";
 			html += "</div>";
 			return html
 		};
@@ -2066,6 +2363,7 @@ var SceneEditor = function (scene) {
 		var htmlSceneEditButton = "  <button type='submit' class='btn btn-default altui-scene-editbutton'>"+_T("Submit")+"</button>";
 		var html="";
 		html += _createAccordeon(panels);
+		html += _createBlocklyArea();
 		html +=  htmlSceneEditButton;
 		return html;
 	};
@@ -2114,6 +2412,12 @@ var SceneEditor = function (scene) {
 			.on("click",".altui-triggertimerestrict",function() { 
 				var id = parseInt($(this).prop('id'));
 				_editTriggerRestrict( id , $(this) );
+			})
+			.on("click","#altui-save-blockly",function() { 
+				$(".altui-scene").toggle(true);
+				$(".altui-scene-editor").toggle(true);
+				$(".altui-blockly-editor").toggle(false);
+				$(".blocklyToolboxDiv").toggle(false);
 			});
 		
 		$(".altui-toggle-json").click( function() {
@@ -4553,6 +4857,17 @@ var UIManager  = ( function( window, undefined ) {
 		});
 	};
 	
+	function _initBlockly() {
+		_loadScript("blockly/blockly_compressed.js",function() {
+			_loadScript("blockly/blocks_compressed.js",function() {
+				_loadScript("blockly/msg/js/en.js",function() {
+					_loadScript("blockly/javascript_compressed.js",function() {
+					});
+				});
+			});
+		});
+	};
+	
 	function _initUIEngine(css) {
 		$("title").before("<style type='text/css'>{0}</style>".format(css));
 	};
@@ -4563,6 +4878,7 @@ var UIManager  = ( function( window, undefined ) {
 		_initDB(devicetypes,cbfunc);
 		if (themecss && (themecss.trim()!="") )
 			$("title").after("<link rel='stylesheet' href='"+themecss+"'>");
+		_initBlockly();
 	};
 
 	function _initCustomPages( custompages ) {
