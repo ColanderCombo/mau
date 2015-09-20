@@ -7184,6 +7184,7 @@ var UIManager  = ( function( window, undefined ) {
 			["Bootstrap Validator","https://github.com/1000hz/bootstrap-validator","Form validator in Bootstrap 3 style"],
 			["D3js","http://d3js.org/","D3 Data Driven Documents & Les Miserables tutorial"],
 			["Bootgrid","http://www.jquery-bootgrid.com/","Jquery Bootstrap Grid"],
+			["Blockly","https://developers.google.com/blockly/","Blockly Library"],
 			["amg0","http://forum.micasaverde.com/","reachable as amg0 on this forum "]
 		];
 		var html = "<dl>";
