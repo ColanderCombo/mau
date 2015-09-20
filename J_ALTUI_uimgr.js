@@ -1403,12 +1403,13 @@ var SceneEditor = function (scene) {
 		// hide scene & scene editor accordeon
 		$(".altui-scene").toggle(false);
 		$(".altui-scene-editor").toggle(false);
-		
+		$(".altui-scene-editbutton").toggle(false);
+
 		// show blockly editor
 		$(".altui-blockly-editor").toggle(true);
 		
 		// inject Blockly if needed
-		 if ( $(".altui-blockly-editor svg").length == 0) {
+		 if ($(".altui-blockly-editor svg").length == 0)  {
 			var workspace = Blockly.inject('blocklyDiv',{toolbox: document.getElementById('toolbox')});	
 			if (watch.xml != "") {
 				var xml = Blockly.Xml.textToDom(watch.xml || "");
@@ -1421,8 +1422,8 @@ var SceneEditor = function (scene) {
 			}
 			workspace.addChangeListener(myUpdateFunction);
 			$(".altui-blockly-editor").data('workspace',workspace);
-			$(".altui-blockly-editor").data('idxwatch',idxwatch);
 		 }
+		$(".altui-blockly-editor").data('idxwatch',idxwatch);
 	};
 	
 	function _editWatch( idx, jqButton) {
@@ -1481,6 +1482,8 @@ var SceneEditor = function (scene) {
 		
 		$('div#dialogs')
 			.on('click',"#altui-edit-LuaExpression", function(event) {
+				if (typeof Blockly == "undefined")
+					return;
 				var idxwatch = _getWatchDialogValues();
 				_editLuaExpression( idxwatch );
 			})
@@ -2226,12 +2229,12 @@ html+="    </category>";
 // html+="    <category id='catVariables' custom='VARIABLE'></category>";
 // html+="    <category id='catFunctions' custom='PROCEDURE'></category>";
 html+="  </xml>";
-					html += "Watch Formula";
+					html += _T("Watch Formula");
 					html += "<div id='blocklyDiv' style='height: 280px; width: 100%;'></div>";
 					// html += "<div id='blocklyDiv' style='height: 480px; width: 600px;'></div>";
-					html += "Generated code";
+					html += _T("Generated code");
 					html += "<pre id='blocklyDivCode'></pre>";
-					html += buttonTemplate.format( 'altui-save-blockly', '', _T('OK'),'default');
+					html += buttonTemplate.format( 'altui-save-blockly', '', _T('Submit'),'default');
 				html += "  </div>";
 				html += "</div>";
 			html += "</div>";
@@ -2437,6 +2440,7 @@ html+="  </xml>";
 				scenewatches[idxwatch] = _setWatchLineParams(watch);
 
 				$(".altui-scene-editor").toggle(true);
+				$(".altui-scene-editbutton").toggle(true);				
 				$("tr[data-watch-idx='"+idxwatch+"']").replaceWith( _displayWatch(idxwatch,watch) );
 				_showSaveNeeded();
 
@@ -2444,6 +2448,7 @@ html+="  </xml>";
 				$(".altui-blockly-editor").data('workspace',null);
 				$("#blocklyDivCode").text("");
 				$(".altui-blockly-editor").toggle(false);
+
 
 				// $(".blocklyWidgetDiv").remove();
 				// $(".blocklyTooltipDiv").remove();
@@ -4896,16 +4901,21 @@ var UIManager  = ( function( window, undefined ) {
 	};
 	
 	function _initBlockly() {
-		_loadScript("blockly/blockly_compressed.js",function() {
-			_loadScript("blockly/blocks_compressed.js",function() {
-				_loadScript("blockly/msg/js/en.js",function() {
-					_loadScript("blockly/javascript_compressed.js",function() {
-						_loadScript("blockly/lua_compressed.js",function() {
+		var language = getQueryStringValue("lang") || window.navigator.userLanguage || window.navigator.language;
+		language = language.substring(0, 2);
+		var len = $('script[src="J_ALTUI_b_lua_compressed.js"]').length;
+		if (len==0) {
+			_loadScript("J_ALTUI_b_blockly_compressed.js",function() {
+				_loadScript("J_ALTUI_b_blocks_compressed.js",function() {
+					_loadScript("J_ALTUI_b_"+language+".js",function() {
+						_loadScript("J_ALTUI_b_javascript_compressed.js",function() {
+							_loadScript("J_ALTUI_b_lua_compressed.js",function() {
+							});
 						});
 					});
 				});
 			});
-		});
+		}
 	};
 	
 	function _initUIEngine(css) {

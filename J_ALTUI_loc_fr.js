@@ -269,5 +269,8 @@ Localization.init( {
 	"Play":"Jouer",
 	"Night,Day":"Nuit,Jour",
 	"Show Weather on home page":"Gadget Météo sur la page principale",
-	"Weather Temp Unit (UI5)":"Unité de température (UI5)"
+	"Weather Temp Unit (UI5)":"Unité de température (UI5)",
+	"Watch Formula":"Formule du Suivi de variable",
+	"Generated code":"Code Généré",
+	"Edit Watch Expression":"Editer l'expression du Suivi de Variable"
 });

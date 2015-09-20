@@ -269,5 +269,7 @@ Localization.init( {
 	"Play":"Play",
 	"Night,Day":"Night,Day",
 	"Show Weather on home page":"Show Weather on home page",
-	"Weather Temp Unit (UI5)":"Weather Temp Unit (UI5)"
+	"Weather Temp Unit (UI5)":"Weather Temp Unit (UI5)",
+	"Watch Formula":"Watch Formula","Generated code":"Generated code",
+	"Edit Watch Expression":"Edit Watch Expression"
 	});

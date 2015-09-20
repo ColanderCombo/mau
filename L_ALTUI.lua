@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.77"
+local version = "v0.78"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -718,8 +718,9 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				-- scripts[idx] = "J_ALTUI_utils.js"
 				-- loaded[scripts[idx]]=true
 				-- idx = idx+1
+				local lang=""
 				if ( (lul_parameters["lang"]~=nil) and (lul_parameters["lang"]~="en") ) then
-					local lang = string.sub( (lul_parameters["lang"].."    "),1,2)
+					lang = string.sub( (lul_parameters["lang"].."    "),1,2)
 					scripts[idx] = "J_ALTUI_loc_"..lang..".js"
 					loaded[scripts[idx]]=true
 					idx = idx+1
@@ -735,10 +736,17 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 							styles[v["ScriptFile"]] = v["StyleFunc"]
 						end
 					end
-				end				
-				scripts[idx] = "J_ALTUI_jquery.ui.touch-punch.min.js"
-				loaded[scripts[idx]]=true
-				idx = idx+1
+				end			
+
+				if (lang=="") then
+					lang="en"
+				end
+				for k,v in pairs({"J_ALTUI_jquery.ui.touch-punch.min.js","J_ALTUI_b_blockly_compressed.js","J_ALTUI_b_blocks_compressed.js","J_ALTUI_b_"..lang..".js","J_ALTUI_b_javascript_compressed.js","J_ALTUI_b_lua_compressed.js"}) do
+					scripts[idx] = v
+					loaded[scripts[idx]]=true
+					idx = idx+1
+				end							
+							
 				-- scripts[idx] = "J_ALTUI_verabox.js"
 				-- loaded[scripts[idx]]=true
 				-- idx = idx+1
