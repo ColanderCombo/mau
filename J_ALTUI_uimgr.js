@@ -1392,23 +1392,24 @@ var SceneEditor = function (scene) {
 		} );
 	};
 	
-	function _editLuaExpression(watch) {
+	function _editLuaExpression(idxwatch) {
 		// hide scene & scene editor accordeon
 		$(".altui-scene").toggle(false);
 		$(".altui-scene-editor").toggle(false);
 		
 		// show blockly editor
 		$(".altui-blockly-editor").toggle(true);
-		$(".blocklyToolboxDiv").toggle(true);
 		
 		// inject Blockly if needed
 		 if ( $(".altui-blockly-editor svg").length == 0) {
 			var workspace = Blockly.inject('blocklyDiv',{toolbox: document.getElementById('toolbox')});			 
 			function myUpdateFunction() {
-			  var code = Blockly.JavaScript.workspaceToCode(workspace);
+			  var code = Blockly.Lua.workspaceToCode(workspace);
 			  $("#blocklyDivCode").text(code);
 			}
 			workspace.addChangeListener(myUpdateFunction);
+			$(".altui-blockly-editor").data('workspace',workspace);
+			$(".altui-blockly-editor").data('idxwatch',idxwatch);
 		 }
 	};
 	
@@ -1468,7 +1469,7 @@ var SceneEditor = function (scene) {
 		$('div#dialogs')
 			.on('click',"#altui-edit-LuaExpression", function(event) {
 				var idxwatch = _getWatchDialogValues();
-				_editLuaExpression( scenewatches[idxwatch] );
+				_editLuaExpression( idxwatch );
 			})
 			.on( 'submit',"div#dialogModal form",  function( event ) {	
 				_getWatchDialogValues();
@@ -2416,8 +2417,20 @@ html+="  </xml>";
 			.on("click","#altui-save-blockly",function() { 
 				$(".altui-scene").toggle(true);
 				$(".altui-scene-editor").toggle(true);
+				$(".altui-blockly-editor #blocklyDiv").empty();
+				$(".altui-blockly-editor").data('workspace',null);
+				var idxwatch = $(".altui-blockly-editor ").data('idxwatch');
+				var watch = _getWatchLineParams(scenewatches[idxwatch]);
+				watch.luaexpr = $("#blocklyDivCode").text();
+				scenewatches[idxwatch] = _setWatchLineParams(watch);
+				$("tr[data-watch-idx='"+idxwatch+"']").replaceWith( _displayWatch(idxwatch,watch) );
+				_showSaveNeeded();
+				$("#blocklyDivCode").text("");
 				$(".altui-blockly-editor").toggle(false);
-				$(".blocklyToolboxDiv").toggle(false);
+
+				$(".blocklyWidgetDiv").remove();
+				$(".blocklyTooltipDiv").remove();
+				$(".blocklyToolboxDiv").remove();
 			});
 		
 		$(".altui-toggle-json").click( function() {
@@ -4684,6 +4697,14 @@ var UIManager  = ( function( window, undefined ) {
 						status==1 ? "text-success" : "text-danger"
 					);
 					break;
+				case "urn:schemas-upnp-org:device:cplus:1":
+					var status = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:cplus1', 'Present' ); 
+					status = parseInt(status);
+					html += "<span class='{1}'>{0}</span>".format(
+						status==1 ? "On" : "Off",
+						status==1 ? "text-success" : "text-danger"
+					);
+					break;
 				case "urn:schemas-micasaverde-com:device:WindowCovering:1"	:
 				case "urn:schemas-upnp-org:device:DimmableLight:1":
 					var loadLevelStatus = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:Dimming1', 'LoadLevelStatus' ); 
@@ -4862,6 +4883,8 @@ var UIManager  = ( function( window, undefined ) {
 			_loadScript("blockly/blocks_compressed.js",function() {
 				_loadScript("blockly/msg/js/en.js",function() {
 					_loadScript("blockly/javascript_compressed.js",function() {
+						_loadScript("blockly/lua_compressed.js",function() {
+						});
 					});
 				});
 			});
@@ -5737,6 +5760,10 @@ var UIManager  = ( function( window, undefined ) {
 		// elements outside of the layout
 		$("#dialogs").off().empty();
 		$(".altui-scripts").remove();
+		// remove Blockly				
+		$(".blocklyWidgetDiv").remove();
+		$(".blocklyTooltipDiv").remove();
+		$(".blocklyToolboxDiv").remove();
 		$("body").append("<div class='altui-scripts'></div>");
 	},
 	
@@ -5784,6 +5811,11 @@ var UIManager  = ( function( window, undefined ) {
 						break;
 					case "urn:schemas-upnp-org:device:VSwitch:1":
 						MultiBox.runAction( device, "urn:upnp-org:serviceId:VSwitch1","ToggleState", {} );
+						break;
+					case "urn:schemas-upnp-org:device:cplus:1":
+						var status = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:cplus1', 'Present' ); 
+						status = parseInt(status);
+						MultiBox.runAction( device, "urn:upnp-org:serviceId:cplus1","SetPower", {newPowerState: 1-status} );
 						break;
 					default:
 						break;
