@@ -779,6 +779,7 @@ var DialogManager = ( function() {
 	function _dlgAddBlockly(dialog, name, label, value, xml, help, options)
 	{
 		var optstr = _optionsToString($.extend( {type:'text'},options));
+		xml = xml || "";
 		value = (value==undefined) ? '' : value ;
 		var placeholder = ((options !=undefined) && (options.placeholder==undefined)) ? "placeholder:'enter "+name+"'" : "";
 		var propertyline = "";
@@ -1482,7 +1483,7 @@ var SceneEditor = function (scene) {
 		
 		$('div#dialogs')
 			.on('click',"#altui-edit-LuaExpression", function(event) {
-				if (typeof Blockly == "undefined")
+				if ((typeof Blockly == "undefined") || ($("#altui-select-device").val()==0))
 					return;
 				var idxwatch = _getWatchDialogValues();
 				_editLuaExpression( idxwatch );
