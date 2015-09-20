@@ -4746,7 +4746,7 @@ var UIManager  = ( function( window, undefined ) {
 					break;			
 				case "urn:schemas-micasaverde-com:device:MotionSensor:1":
 					var tripped = parseInt(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Tripped' )); 
-					html += ("<span>{0}</span>".format( (tripped==true) ? "<span class='glyphicon glyphicon-flash text-danger' aria-hidden='true'></span>" : ""));
+					html += ("<span>{0}</span>".format( (tripped==true) ? "<span class='glyphicon glyphicon-flash text-danger' aria-hidden='true'></span>" : " "));
 					break;
 				case "urn:schemas-upnp-org:device:VSwitch:1":
 					var status = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:VSwitch1', 'Status' ); 
@@ -5846,6 +5846,7 @@ var UIManager  = ( function( window, undefined ) {
 						MultiBox.runAction( device, "urn:upnp-org:serviceId:cplus1","SetPower", {newPowerState: 1-status} );
 						break;
 					default:
+						UIManager.pageControlPanel(altuiid);
 						break;
 				}	
 			});
