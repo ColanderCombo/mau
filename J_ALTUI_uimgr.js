@@ -776,7 +776,7 @@ var DialogManager = ( function() {
 		$(dialog).find(".row-fluid").append(propertyline);
 	};
 
-	function _dlgAddBlockly(dialog, name, label, value,help, options)
+	function _dlgAddBlockly(dialog, name, label, value, xml, help, options)
 	{
 		var optstr = _optionsToString($.extend( {type:'text'},options));
 		value = (value==undefined) ? '' : value ;
@@ -790,11 +790,16 @@ var DialogManager = ( function() {
 		propertyline += "<div class='input-group'>";
 			propertyline += "<input id='altui-widget-"+name+"' class='form-control' "+optstr+" value='"+value+"' "+placeholder+" ></input>";
 			propertyline += "<span class='input-group-btn'>";
-				propertyline += buttonTemplate.format( "altui-edit-LuaExpression", 'btn-default', editGlyph,_T('Edit Watch Expression'));
+				propertyline += buttonTemplate.format( "altui-edit-"+name, 'btn-default', "Blockly "+editGlyph,_T('Edit Watch Expression'));
 			propertyline += "</span>";
+			propertyline += "<input type='hidden' id='altui-xml-"+name+"' class='form-control' value='"+xml.escapeXml()+"' ></input>";
 		propertyline += "</div>";
 		propertyline += "</div>";
 		$(dialog).find(".row-fluid").append(propertyline);
+		
+		$("#altui-widget-LuaExpression").on("change",function() {
+			$("#altui-xml-LuaExpression").val( "" );
+		});
 	}
 	
 	function _dlgAddLine(dialog, name, label, value,help, options)
@@ -1293,11 +1298,12 @@ var SceneEditor = function (scene) {
 			variable : params[1],
 			deviceid : params[2],
 			sceneid : params[3],
-			luaexpr : params[4]
+			luaexpr : params[4],
+			xml		: params[5] || ''
 		};
 	}
 	function _setWatchLineParams(watch) {
-		return "{0},{1},{2},{3},{4}".format( watch.service, watch.variable, watch.deviceid, watch.sceneid, watch.luaexpr);
+		return "{0},{1},{2},{3},{4},{5}".format( watch.service, watch.variable, watch.deviceid, watch.sceneid, watch.luaexpr, watch.xml || "");
 	}
 	var scenewatches = $.grep( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToWatch" ) || "").split(';'),function(w) {
 		var watch = _getWatchLineParams(w);
@@ -1393,6 +1399,7 @@ var SceneEditor = function (scene) {
 	};
 	
 	function _editLuaExpression(idxwatch) {
+		var watch = _getWatchLineParams( scenewatches[idxwatch]);
 		// hide scene & scene editor accordeon
 		$(".altui-scene").toggle(false);
 		$(".altui-scene-editor").toggle(false);
@@ -1402,7 +1409,12 @@ var SceneEditor = function (scene) {
 		
 		// inject Blockly if needed
 		 if ( $(".altui-blockly-editor svg").length == 0) {
-			var workspace = Blockly.inject('blocklyDiv',{toolbox: document.getElementById('toolbox')});			 
+			var workspace = Blockly.inject('blocklyDiv',{toolbox: document.getElementById('toolbox')});	
+			if (watch.xml != "") {
+				var xml = Blockly.Xml.textToDom(watch.xml || "");
+				Blockly.Xml.domToWorkspace(workspace, xml);
+			}
+			
 			function myUpdateFunction() {
 			  var code = Blockly.Lua.workspaceToCode(workspace);
 			  $("#blocklyDivCode").text(code);
@@ -1428,7 +1440,7 @@ var SceneEditor = function (scene) {
 				}
 				DialogManager.dlgAddVariables(dialog, widget, function() {
 					// DialogManager.dlgAddLine( dialog , "LuaExpression", _T("LUA Expression with new=newvalue and old=oldvalue"), watch.luaexpr , _T("Expression with old new as variables and lua operators like <  >  <= >= == ~="), {required:''} ); 
-					DialogManager.dlgAddBlockly( dialog , "LuaExpression", _T("LUA Expression with new=newvalue and old=oldvalue"), watch.luaexpr , _T("Expression with old new as variables and lua operators like <  >  <= >= == ~="), {required:''} ); 
+					DialogManager.dlgAddBlockly( dialog , "LuaExpression", _T("LUA Expression with new=newvalue and old=oldvalue"), watch.luaexpr, watch.xml, _T("Expression with old new as variables and lua operators like <  >  <= >= == ~="), {required:''} ); 
 					// DialogManager.dlgAddBlockly( dialog , "LuaExpression2", _T("Blockly Value"), "" ); 
 					$('div#dialogModal').modal();
 				});
@@ -1448,7 +1460,8 @@ var SceneEditor = function (scene) {
 				variable:state.variable,
 				deviceid:MultiBox.controllerOf(altuiid).id,
 				sceneid:scene.id,  
-				luaexpr:$("#altui-widget-LuaExpression").val()
+				luaexpr:$("#altui-widget-LuaExpression").val(),
+				xml:$("#altui-xml-LuaExpression").val()
 			};
 			$('div#dialogModal').modal('hide');
 
@@ -2416,20 +2429,24 @@ html+="  </xml>";
 			})
 			.on("click","#altui-save-blockly",function() { 
 				$(".altui-scene").toggle(true);
-				$(".altui-scene-editor").toggle(true);
-				$(".altui-blockly-editor #blocklyDiv").empty();
-				$(".altui-blockly-editor").data('workspace',null);
 				var idxwatch = $(".altui-blockly-editor ").data('idxwatch');
 				var watch = _getWatchLineParams(scenewatches[idxwatch]);
+				var workspace = $(".altui-blockly-editor ").data('workspace');
 				watch.luaexpr = $("#blocklyDivCode").text();
+				watch.xml = Blockly.Xml.domToText( Blockly.Xml.workspaceToDom(workspace) );
 				scenewatches[idxwatch] = _setWatchLineParams(watch);
+
+				$(".altui-scene-editor").toggle(true);
 				$("tr[data-watch-idx='"+idxwatch+"']").replaceWith( _displayWatch(idxwatch,watch) );
 				_showSaveNeeded();
+
+				$(".altui-blockly-editor #blocklyDiv").empty();
+				$(".altui-blockly-editor").data('workspace',null);
 				$("#blocklyDivCode").text("");
 				$(".altui-blockly-editor").toggle(false);
 
-				$(".blocklyWidgetDiv").remove();
-				$(".blocklyTooltipDiv").remove();
+				// $(".blocklyWidgetDiv").remove();
+				// $(".blocklyTooltipDiv").remove();
 				$(".blocklyToolboxDiv").remove();
 			});
 		
@@ -5761,8 +5778,8 @@ var UIManager  = ( function( window, undefined ) {
 		$("#dialogs").off().empty();
 		$(".altui-scripts").remove();
 		// remove Blockly				
-		$(".blocklyWidgetDiv").remove();
-		$(".blocklyTooltipDiv").remove();
+		// $(".blocklyWidgetDiv").remove();
+		// $(".blocklyTooltipDiv").remove();
 		$(".blocklyToolboxDiv").remove();
 		$("body").append("<div class='altui-scripts'></div>");
 	},

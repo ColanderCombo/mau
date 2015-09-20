@@ -31,19 +31,6 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 	var _urlhead = (_ipaddr=='') ? window.location.pathname : ("http://{0}/port_3480/data_request".format(ip_addr));
 	// var _proxyhead = "/port_3480/data_request?id=action&output_format=json&DeviceNum={0}&serviceId=urn:upnp-org:serviceId:altui1&resultName={1}&action=ProxyGet&newUrl=".format(g_MyDeviceID,_proxyresultarea);
 	var _proxyhead = "?id=lr_ALTUI_Handler&command=proxyget&resultName=none&newUrl=";
-	var XML_CHAR_MAP = {
-		'<': '&lt;',
-		'>': '&gt;',
-		'&': '&amp;',
-		'"': '&quot;',
-		"'": '&apos;'
-	};
- 
-	function escapeXml (s) {
-		return s.replace(/[<>&"']/g, function (ch) {
-			return XML_CHAR_MAP[ch];
-		});
-	}
 
 	// return "/port_3480/data_request?id=action&output_format=json&DeviceNum={0}&serviceId=urn:upnp-org:serviceId:altui1&resultName=altuictrl{1}&action=ProxyGet&newUrl=http://{2}/port_3480/data_request"
 	// 		.format(g_MyDeviceID,idx,box.ip);	// ALTUI device for proxy if needed (secondary vera)
@@ -399,7 +386,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		xml +="   <s:Body>";
 		xml +="      <u:ModifyUserData xmlns:u='urn:schemas-micasaverde-org:service:HomeAutomationGateway:1'>";
 		xml +="         <inUserData>";
-		xml +=				escapeXml(JSON.stringify(target));
+		xml +=				JSON.stringify(target).escapeXml();
 		xml +="		 	</inUserData>";
 		xml +="         <DataFormat>json</DataFormat>";
 		xml +="      </u:ModifyUserData>";
@@ -500,6 +487,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		//---------------------------------------------------------
 		// Public  functions
 		//---------------------------------------------------------
+		 
 		getIpAddr		: function () 	{ return _ipaddr; },
 		reloadEngine	: _reloadEngine,
 		getUrlHead		: _getUrlHead,

@@ -166,6 +166,23 @@ if (typeof String.prototype.escapeQuotes != 'function') {
   };
 };
 
+if (typeof String.prototype.escapeXml != 'function') {
+  // see below for better implementation!
+  String.prototype.escapeXml = function (){
+	var XML_CHAR_MAP = {
+		'<': '&lt;',
+		'>': '&gt;',
+		'&': '&amp;',
+		'"': '&quot;',
+		"'": '&apos;'
+	};
+	var content = this;
+	return content.replace(/[<>&"']/g, function (ch) {
+		return XML_CHAR_MAP[ch];
+	});
+  };
+};
+
 if (typeof String.prototype.format == 'undefined') {
 	String.prototype.format = function()
 	{
