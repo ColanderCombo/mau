@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("708,Add TracRev parameter to auto-update http url for openLuup;Fix plugin version number width field on plugin page,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28898")
+UIManager.checkAltuiUpdate("718,Blocky integration for watch Lua expression,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=28922")
