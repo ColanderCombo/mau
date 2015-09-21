@@ -64,3 +64,16 @@ Blockly.Lua.text_changeCase=function(a){var b=a.getTitleValue("CASE");a=Blockly.
 Blockly.Lua.text_print=function(a){return"print("+(Blockly.Lua.valueToCode(a,"TEXT",Blockly.Lua.ORDER_NONE)||"''")+")\n"};Blockly.Lua.text_prompt=function(a){var b=Blockly.Lua.provideFunction_("text_prompt",["function "+Blockly.Lua.FUNCTION_NAME_PLACEHOLDER_+"(msg)","  io.write(msg)","  io.flush()","  return io.read()","end"]);a=Blockly.Lua.quote_(a.getTitleValue("TEXT"));return[b+"("+a+")",Blockly.Lua.ORDER_HIGH]};Blockly.Lua.variables={};Blockly.Lua.variables_get=function(a){return[Blockly.Lua.variableDB_.getName(a.getTitleValue("VAR"),Blockly.Variables.NAME_TYPE),Blockly.Lua.ORDER_ATOMIC]};Blockly.Lua.variables_set=function(a){var b=Blockly.Lua.valueToCode(a,"VALUE",Blockly.Lua.ORDER_NONE)||"0";return Blockly.Lua.variableDB_.getName(a.getTitleValue("VAR"),Blockly.Variables.NAME_TYPE)+" = "+b+"\n"};
 Blockly.Lua.variables_set_two=function(a){var b=Blockly.Lua.valueToCode(a,"VALUE",Blockly.Lua.ORDER_NONE)||"nil, nil",c=Blockly.Lua.variableDB_.getName(a.getTitleValue("VAR1"),Blockly.Variables.NAME_TYPE);a=Blockly.Lua.variableDB_.getName(a.getTitleValue("VAR2"),Blockly.Variables.NAME_TYPE);return c+", "+a+" = "+b+"\n"};
 Blockly.Lua.variables_set_three=function(a){var b=Blockly.Lua.valueToCode(a,"VALUE",Blockly.Lua.ORDER_NONE)||"nil, nil, nil",c=Blockly.Lua.variableDB_.getName(a.getTitleValue("VAR1"),Blockly.Variables.NAME_TYPE),d=Blockly.Lua.variableDB_.getName(a.getTitleValue("VAR2"),Blockly.Variables.NAME_TYPE);a=Blockly.Lua.variableDB_.getName(a.getTitleValue("VAR3"),Blockly.Variables.NAME_TYPE);return c+", "+d+", "+a+" = "+b+"\n"};
+
+Blockly.Lua['new_value'] = function(block) {
+  // TODO: Assemble JavaScript into code variable.
+  var code = 'new';
+  // TODO: Change ORDER_NONE to the correct strength.
+  return [code, Blockly.Lua.ORDER_ATOMIC];
+};
+Blockly.Lua['old_value'] = function(block) {
+  // TODO: Assemble JavaScript into code variable.
+  var code = 'old';
+  // TODO: Change ORDER_NONE to the correct strength.
+  return [code, Blockly.Lua.ORDER_ATOMIC];
+};
