@@ -46,6 +46,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
         style += ".altui-multistring-text-all { font-size: 7px; }";
 		style += ".altui-multistring-text-1, .altui-multistring-text-2 { }";
 		style += ".altui-upnpproxy-text { font-size: 11px; margin-left: 2px; margin-top: 22px; }";
+		style += ".altui-plts-btn-div { margin-top: 4px; height: 48px; overflow:hidden; } .altui-plts-btn { width: 50px; font-size: 11px; line-height: 1.5; } .altui-plts-btn-on { color: white; background-color: #006C44; } .altui-plts-btn-on:hover, .altui-plts-btn-on:focus, .altui-plts-btn-on:active, .altui-plts-btn-on:active:focus, .altui-plts-btn-on.active:focus { color: white; background-color: #006C44; outline: 0 none; box-shadow: none; } .altui-plts-time-text-div { float: left; margin-left: 6px; margin-top: 5px; font-size: 9px; overflow: hidden; }";
 		return style;
 	};
 
@@ -625,7 +626,43 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
         }
         return html;
     }
-	
+    function _drawProgLogicTimerSwitch( device ) {
+        var html = "";
+        var onoff = MultiBox.getStatus(device, 'urn:rts-services-com:serviceId:ProgramLogicTS', 'Status');
+        var armed = MultiBox.getStatus(device, 'urn:rts-services-com:serviceId:ProgramLogicTS', 'Armed');
+        var state = MultiBox.getStatus(device, 'urn:rts-services-com:serviceId:ProgramLogicTS', 'State');
+        var rtime = MultiBox.getStatus(device, 'urn:rts-services-com:serviceId:ProgramLogicTS', 'TimeRemaining');
+        html += "<div class='pull-right altui-plts-btn-div'>";
+        html += " <div class='btn-group'>";
+        html += "  <button id='altui-armbtn-{0}' type='button' class='altui-plts-btn btn btn-default btn-xs {2}'>{1}</button>".format(device.altuiid, _T("Arm"), armed==1?'altui-plts-btn-on':'');
+        html += "  <button id='altui-bypassbtn-{0}' type='button' class='altui-plts-btn btn btn-default btn-xs {2}'>{1}</button>".format(device.altuiid, _T("Bypass"), armed==0?'altui-plts-btn-on':'');
+        html += "  <button id='altui-triggerbtn-{0}' type='button' class='altui-plts-btn btn btn-default btn-xs'>{1}</button>".format(device.altuiid, _T("Trigger"));
+        html += "  <button id='altui-restartbtn-{0}' type='button' class='altui-plts-btn btn btn-default btn-xs'>{1}</button>".format(device.altuiid, _T("Restart"));
+        html += " </div><br>";
+        html += " <div class='btn-group'>";
+        html += "  <button id='altui-onbtn-{0}' type='button' class='altui-plts-btn btn btn-default btn-xs {2}'>{1}</button>".format(device.altuiid, _T("On"), onoff==1?'altui-plts-btn-on':'');
+        html += "  <button id='altui-offbtn-{0}' type='button' class='altui-plts-btn btn btn-default btn-xs {2}'>{1}</button>".format(device.altuiid, _T("Off"), onoff==0?'altui-plts-btn-on':'');
+        html += "  <button id='altui-resetbtn-{0}' type='button' class='altui-plts-btn btn btn-default btn-xs {2}'>{1}</button>".format(device.altuiid, _T("Reset"), state==0?'altui-plts-btn-on':'');
+        if (state == 3 && rtime != null) {
+            var h = '00'; var m = '00'; var s = '00'; var hms = rtime.split(':');
+            if ( hms.length == 3) { h = hms[0]; m = hms[1]; s = hms[2] } else if ( hms.length == 2) { m = hms[0]; s = hms[1] } else { s = hms[0] }
+            html += "<div id='altui-plts-rtime' class='altui-plts-time-text-div text-muted'>" + "{0}:{1}:{2}".format(h,m,s) + "</div>";            
+        }
+        html += " </div>";
+        html += "</div>";
+        html += "<script type='text/javascript'>";
+        html += " function resizepltbtn() { var w = $('div.altui-device-body').width(); w=w<250?(w-50)/4:50; $('button.altui-plts-btn').css('width', w); $('#altui-plts-rtime').css('width', w-8).css('overflow', 'hidden'); }; resizepltbtn();";
+        html += " $(window).resize(function(){ resizepltbtn(); });"
+        html += " $('button#altui-restartbtn-{0}').on('click', function() { var device = MultiBox.getDeviceByAltuiID('{0}'); var state = MultiBox.getStatus(device, 'urn:rts-services-com:serviceId:ProgramLogicTS', 'State'); if (state==3) { MultiBox.runActionByAltuiID('{0}','urn:rts-services-com:serviceId:ProgramLogicTS','SetState',{'newStateValue':'2'}); $('button#altui-restartbtn-{0}').addClass('altui-plts-btn-on'); } });".format(device.altuiid);
+        html += " $('button#altui-triggerbtn-{0}').on('click', function() { MultiBox.runActionByAltuiID('{0}','urn:rts-services-com:serviceId:ProgramLogicTS','SetState',{'newStateValue':'1'}); $('button#altui-triggerbtn-{0}').addClass('altui-plts-btn-on'); });".format(device.altuiid);
+        html += " $('button#altui-bypassbtn-{0}').on('click', function() { MultiBox.runActionByAltuiID('{0}','urn:rts-services-com:serviceId:ProgramLogicTS','SetArmed',{'newArmedValue':'0'}); $('button#altui-bypassbtn-{0}').addClass('altui-plts-btn-on'); $('button#altui-armbtn-{0}').removeClass('altui-plts-btn-on'); });".format(device.altuiid);
+        html += " $('button#altui-armbtn-{0}').on('click', function() { MultiBox.runActionByAltuiID('{0}','urn:rts-services-com:serviceId:ProgramLogicTS','SetArmed',{'newArmedValue':'1'}); $('button#altui-armbtn-{0}').addClass('altui-plts-btn-on'); $('button#altui-bypassbtn-{0}').removeClass('altui-plts-btn-on'); });".format(device.altuiid);
+        html += " $('button#altui-resetbtn-{0}').on('click', function() { MultiBox.runActionByAltuiID('{0}','urn:rts-services-com:serviceId:ProgramLogicTS','SetState',{'newStateValue':'0'}); $('button#altui-resetbtn-{0}').addClass('altui-plts-btn-on'); });".format(device.altuiid);
+        html += " $('button#altui-offbtn-{0}').on('click', function() { MultiBox.runActionByAltuiID('{0}','urn:rts-services-com:serviceId:ProgramLogicTS','SetTarget',{'newTargetValue':'0'}); $('button#altui-offbtn-{0}').addClass('altui-plts-btn-on'); $('button#altui-onbtn-{0}').removeClass('altui-plts-btn-on'); });".format(device.altuiid);
+        html += " $('button#altui-onbtn-{0}').on('click', function() { MultiBox.runActionByAltuiID('{0}','urn:rts-services-com:serviceId:ProgramLogicTS','SetTarget',{'newTargetValue':'1'}); $('button#altui-onbtn-{0}').addClass('altui-plts-btn-on'); $('button#altui-offbtn-{0}').removeClass('altui-plts-btn-on'); });".format(device.altuiid);
+        html += "</script>";
+        return html;
+    }	
 	function _drawTempLeak( device ) {
         var html = "";
         var armed = parseInt(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Armed' )); 
@@ -847,6 +884,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawVeraAlerts  : _drawVeraAlerts,
 	drawMultiString : _drawMultiString,
 	drawPnPProxy	: _drawPnPProxy,
+	drawProgLogicTimerSwitch: _drawProgLogicTimerSwitch,
 	drawSmoke 	   : _drawSmoke,
 	drawHumidity   : _drawHumidity,
 	drawLight   	: _drawLight,
