@@ -1200,11 +1200,6 @@ end
 ------------------------------------------------
 -- STARTUP Sequence
 ------------------------------------------------
-function evalWatch(cond,delay)
-	delay = delay or 0
-	debug(string.format("evalWatch(%s,%d)",tostring(cond),delay))
-	return cond
-end
 
 function getWatchParams(str)
 	local params = str:split("#")
@@ -1230,23 +1225,68 @@ function findWatch( devid, service, variable )
 	return registeredWatches[devid][service][variable]
 end
 
-function evaluateExpression(expr,old, new, scene)
-	debug(string.format("evaluateExpression(%s,%s,%s,%s)",expr,old,new,scene))
-	local str = "local old=".. old .."; local new=".. new .."; return ("..expr..")"
-	debug(string.format("loadstring(%s)",str))
-	local f,msg = loadstring(str)
+function sinceWatch(cond,delay)
+	delay = delay or 0
+	debug(string.format("sinceWatch(%s,%d)",tostring(cond),delay))
+	return -delay
+end
+
+function watchTimer(lul_data)
+	debug(string.format("watchTimer(%s)",lul_data))
+	local tbl = lul_data:split('#')
+	local watch = findWatch( tbl[1], tbl[2], tbl[3] )
+	watch['Expressions'][tbl[4]]["PendingTimer"]=nil
+	debug(string.format("updated watches %s",json.encode(registeredWatches)))
+end
+
+function evaluateExpression(lul_device, lul_service, lul_variable,expr,old, new, scene)
+	debug(string.format("evaluateExpression(%s,%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,expr,old, new, scene))
+	local code = [[
+		return function(lul_device, lul_service, lul_variable, expr)
+			local old=%s
+			local new=%s
+			local res = (%s)
+			local watch = findWatch( lul_device, lul_service, lul_variable )
+			if (res==nil) then
+				return nil
+			elseif (tonumber(res)~=nil) and (tonumber(res)<0) then
+				local delay = -tonumber(res)
+				if (watch['Expressions'][expr]["PendingTimer"]==nil) then
+					luup.log("preparing timer watchTimer with delay "..delay)
+					local tbl = {lul_device, lul_service, lul_variable,expr}
+					local timer = luup.call_delay("watchTimer",delay, table.concat(tbl, "#") ) or 1
+					if (timer==0) then
+						watch['Expressions'][expr]["PendingTimer"]=1
+					else
+						luup.log("luup.call_delay failed !")
+						watch['Expressions'][expr]["PendingTimer"]=nil
+					end
+				else
+					-- already a running timer
+				end
+				return nil
+			end
+			return res
+		end
+	]]
+	code = string.format(code,old,new,expr)
+	debug(string.format("loadstring(%s)",code))
+
+	local f,msg = loadstring(code)
 	if (f==nil) then
-		error(string.format("loadstring %s failed to compile, msg=%s",str,msg))
+		error(string.format("loadstring %s failed to compile, msg=%s",code,msg))
 	else
-		local err= f()	-- call it
+		local func = f()	-- call it
+		err = func(lul_device, lul_service, lul_variable,expr)
 		debug(string.format("expression %s returned %s",expr,tostring(err or 'nil')))
+		
 		if (err == true ) or ((tonumber(err) == 1 )) then
 			local err = run_scene(scene)
 			if (err==-1) then
-				error(string.format("evaluateExpression(%s,%s,%s,%s) Failed to run the scene",expr,old,new,scene))
+				error(string.format("Failed to run the scene %s",scene))
 			end
 		else
-			warning(string.format("evaluateExpression(%s,%s,%s,%s) ignoring watch trigger, loadstring %s returned %s",expr,old,new,scene,str,tostring(err or 'nil')))
+			warning(string.format("ignoring watch trigger, loadstring returned %s",tostring(err or 'nil')))
 		end
 		return err
 	end
@@ -1266,44 +1306,10 @@ function variableWatchCallback(lul_device, lul_service, lul_variable, lul_value_
 		for k,v  in pairs(watch['Expressions']) do
 			-- k is expression
 			-- v is an object
-			watch['Expressions'][k]["LastEval"] = evaluateExpression(k,lul_value_old, lul_value_new, v["SceneID"])
+			watch['Expressions'][k]["LastEval"] = evaluateExpression(lul_device, lul_service, lul_variable,k,lul_value_old, lul_value_new, v["SceneID"])
 		end
 	end
 	debug(string.format("registeredWatches: %s",json.encode(registeredWatches)))
-end
-
-function oldvariableWatchCallback(lul_device, lul_service, lul_variable, lul_value_old, lul_value_new)
-	debug(string.format("variableWatchCallback(%s,%s,%s,old:'%s',new:'%s')",lul_device, lul_service, lul_variable, lul_value_old, lul_value_new))
-	local altuiDeviceID = findALTUIDevice()
-	local variableWatchString = getSetVariable(service, "VariablesToWatch", altuiDeviceID, "")	-- service,variable,deviceid,sceneid;service,variable,deviceid,sceneid
-	debug(string.format("variableWatchString = %s",variableWatchString))
-	
-	-- for all watches for this service variable
-	-- execute the scene
-	local watches = variableWatchString:split(";")
-	for k,v  in pairs(watches) do
-		local service,variable,device,scene,expr = getWatchParams(v)
-		if ( (service==lul_service) and (variable==lul_variable) and (device== tonumber(lul_device)) ) then
-			-- init the local old new vars and evaluate the boolean expression expr
-			local str = "local old = ".. lul_value_old .."; local new = ".. lul_value_new .."; return ("..expr..")"
-			debug("loading code = "..str)
-			local f,msg = loadstring(str)
-			if (f==nil) then
-				error(string.format("loadstring %s failed to compile, msg=%s",str,msg))
-			else
-				local err= f()	-- call it
-				debug(string.format("loadstring %s returned %s",expr,tostring(err or 'nil')))
-				if (err == true ) or ((tonumber(err) == 1 )) then
-					local err = run_scene(scene)
-					if (err==-1) then
-						error(string.format("variableWatchCallback(%s,%s,%s,old:'%s',new:'%s') failed to run the scene %s",lul_device, lul_service, lul_variable, lul_value_old, lul_value_new,scene))
-					end
-				else
-					warning(string.format("ignoring watch trigger, loadstring %s returned %s",str,tostring(err or 'nil')))
-				end
-			end
-		end
-	end
 end
 
 function addWatch( devid, service, variable, expression, scene )
