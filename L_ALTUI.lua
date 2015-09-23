@@ -1200,12 +1200,79 @@ end
 ------------------------------------------------
 -- STARTUP Sequence
 ------------------------------------------------
+function evalWatch(cond,delay)
+	delay = delay or 0
+	debug(string.format("evalWatch(%s,%d)",tostring(cond),delay))
+	return cond
+end
+
 function getWatchParams(str)
-	local params = str:split(",")
+	local params = str:split("#")
 	return params[1],params[2],tonumber(params[3]),tonumber(params[4]),params[5]	-- service,variable,deviceid,sceneid,lua_expr;service,variable,deviceid,sceneid,lua_expr
 end
 
+local registeredWatches = {}
+function findWatch( devid, service, variable )
+	local watch = nil
+	devid = tostring(devid)
+	debug(string.format("findWatch(%s,%s,%s)",devid, service, variable))
+	debug(string.format("registeredWatches: %s",json.encode(registeredWatches)))
+	if (registeredWatches[devid] == nil) then
+		return nil
+	end
+	if (registeredWatches[devid][service] == nil) then
+		return nil
+	end
+	if (registeredWatches[devid][service][variable] == nil) then
+		return nil
+	end
+	debug(string.format("registeredWatches found a match"))
+	return registeredWatches[devid][service][variable]
+end
+
+function evaluateExpression(expr,old, new, scene)
+	debug(string.format("evaluateExpression(%s,%s,%s,%s)",expr,old,new,scene))
+	local str = "local old=".. old .."; local new=".. new .."; return ("..expr..")"
+	debug(string.format("loadstring(%s)",str))
+	local f,msg = loadstring(str)
+	if (f==nil) then
+		error(string.format("loadstring %s failed to compile, msg=%s",str,msg))
+	else
+		local err= f()	-- call it
+		debug(string.format("expression %s returned %s",expr,tostring(err or 'nil')))
+		if (err == true ) or ((tonumber(err) == 1 )) then
+			local err = run_scene(scene)
+			if (err==-1) then
+				error(string.format("evaluateExpression(%s,%s,%s,%s) Failed to run the scene",expr,old,new,scene))
+			end
+		else
+			warning(string.format("evaluateExpression(%s,%s,%s,%s) ignoring watch trigger, loadstring %s returned %s",expr,old,new,scene,str,tostring(err or 'nil')))
+		end
+		return err
+	end
+	return nil
+end
+
 function variableWatchCallback(lul_device, lul_service, lul_variable, lul_value_old, lul_value_new)
+	debug(string.format("variableWatchCallback(%s,%s,%s,old:'%s',new:'%s')",lul_device, lul_service, lul_variable, lul_value_old, lul_value_new))
+	local watch = findWatch( lul_device, lul_service, lul_variable )
+	if (watch==nil) or (watch['Expressions']==nil )then
+		warning(string.format("ignoring unexpected watch callback, variableWatchCallback(%s,%s,%s,old:'%s',new:'%s')",lul_device, lul_service, lul_variable, lul_value_old, lul_value_new))
+		return
+	else
+		watch["LastOld"] = lul_value_old
+		watch["LastNew"] = lul_value_new
+		watch["LastTime"] = os.time()
+		for k,v  in pairs(watch['Expressions']) do
+			-- k is expression
+			-- v is an object
+			watch['Expressions'][k]["LastEval"] = evaluateExpression(k,lul_value_old, lul_value_new, v["SceneID"])
+		end
+	end
+	debug(string.format("registeredWatches: %s",json.encode(registeredWatches)))
+end
+
+function oldvariableWatchCallback(lul_device, lul_service, lul_variable, lul_value_old, lul_value_new)
 	debug(string.format("variableWatchCallback(%s,%s,%s,old:'%s',new:'%s')",lul_device, lul_service, lul_variable, lul_value_old, lul_value_new))
 	local altuiDeviceID = findALTUIDevice()
 	local variableWatchString = getSetVariable(service, "VariablesToWatch", altuiDeviceID, "")	-- service,variable,deviceid,sceneid;service,variable,deviceid,sceneid
@@ -1239,18 +1306,50 @@ function variableWatchCallback(lul_device, lul_service, lul_variable, lul_value_
 	end
 end
 
+function addWatch( devid, service, variable, expression, scene )
+	debug(string.format("addWatch(%s,%s,%s,%s,%s)",devid, service, variable, expression, scene))
+	devidstr = tostring(devid)	 -- to inssure it is not a indexed array , but hash table
+	local bDuplicateWatch = false
+	if (registeredWatches[devidstr] == nil) then
+		registeredWatches[devidstr]={}
+	end
+	if (registeredWatches[devidstr][service] == nil) then
+		registeredWatches[devidstr][service]={}
+	end
+	if (registeredWatches[devidstr][service][variable] == nil) then
+		registeredWatches[devidstr][service][variable] = {
+			["LastOld"] = nil,
+			["LastNew"] = nil,
+			["LastTime"] = nil
+		}
+	else
+		-- a watch was already there
+		bDuplicateWatch = true
+	end
+	if (registeredWatches[devidstr][service][variable]['Expressions'] == nil) then
+		registeredWatches[devidstr][service][variable]['Expressions']={}
+	end
+	if (registeredWatches[devidstr][service][variable]['Expressions'][expression] == nil) then
+		registeredWatches[devidstr][service][variable]['Expressions'][expression] = {
+			["LastEval"] = nil,
+			["SceneID"] = scene
+		}
+	end
+	if (bDuplicateWatch==true) then
+		debug(string.format("Ignoring duplicate watch for %s-%s",service,variable))
+	else
+		luup.variable_watch("variableWatchCallback", service,variable,devid)
+	end
+	debug(string.format("registeredWatches: %s",json.encode(registeredWatches)))
+end
+
 function initVariableWatches( variableWatchString )
 	debug(string.format("initVariableWatches(%s)",variableWatchString))
 	local watches = variableWatchString:split(";")
 	local done = {}
 	for k,v  in pairs(watches) do
-		local service,variable,device,scene = getWatchParams(v)
-		if (done[service.."_"..variable]==nil) then
-			luup.variable_watch("variableWatchCallback", service,variable,device)
-			done[service.."_"..variable] = true
-		else
-			debug(string.format("Ignoring duplicate watch for %s-%s",service,variable))
-		end
+		local service,variable,device,scene,expression  = getWatchParams(v)
+		addWatch( device, service, variable, expression, scene )
 	end
 end
 

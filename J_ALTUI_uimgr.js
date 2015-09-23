@@ -1292,7 +1292,7 @@ var SceneEditor = function (scene) {
 	var altuidevice = MultiBox.getDeviceByID( 0, g_MyDeviceID );
 	
 	function _getWatchLineParams(watchLine) {
-		var params = watchLine.split(',');
+		var params = watchLine.split('#');
 		//service,variable,deviceid,sceneid,lua_expr
 		return {
 			service : params[0],
@@ -1304,7 +1304,7 @@ var SceneEditor = function (scene) {
 		};
 	}
 	function _setWatchLineParams(watch) {
-		return "{0},{1},{2},{3},{4},{5}".format( watch.service, watch.variable, watch.deviceid, watch.sceneid, watch.luaexpr, watch.xml || "");
+		return "{0}#{1}#{2}#{3}#{4}#{5}".format( watch.service, watch.variable, watch.deviceid, watch.sceneid, watch.luaexpr, watch.xml || "");
 	}
 	var scenewatches = $.grep( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToWatch" ) || "").split(';'),function(w) {
 		var watch = _getWatchLineParams(w);
