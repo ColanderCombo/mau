@@ -1228,7 +1228,7 @@ end
 function sinceWatch(cond,delay)
 	delay = delay or 0
 	debug(string.format("sinceWatch(%s,%d)",tostring(cond),delay))
-	return -delay
+	return cond,delay
 end
 
 function watchTimer(lul_data)
@@ -1245,13 +1245,13 @@ function evaluateExpression(lul_device, lul_service, lul_variable,expr,old, new,
 		return function(lul_device, lul_service, lul_variable, expr)
 			local old=%s
 			local new=%s
-			local res = (%s)
-			local watch = findWatch( lul_device, lul_service, lul_variable )
-			if (res==nil) then
-				return nil
-			elseif (tonumber(res)~=nil) and (tonumber(res)<0) then
-				local delay = -tonumber(res)
+			local results= {%s}
+			local res,delay = results[1] or nil, results[2] or nil
+			luup.log("res: ".. tostring(res or 'nil').." delay:"..tostring(delay or 'nil'))
+			if (delay ~=nil ) then
+				local watch = findWatch( lul_device, lul_service, lul_variable )
 				if (watch['Expressions'][expr]["PendingTimer"]==nil) then
+					-- new timer
 					luup.log("preparing timer watchTimer with delay "..delay)
 					local tbl = {lul_device, lul_service, lul_variable,expr}
 					local timer = luup.call_delay("watchTimer",delay, table.concat(tbl, "#") ) or 1
@@ -1264,12 +1264,11 @@ function evaluateExpression(lul_device, lul_service, lul_variable,expr,old, new,
 				else
 					-- already a running timer
 				end
-				return nil
 			end
 			return res
 		end
 	]]
-	code = string.format(code,old,new,expr)
+	code = string.format(code,old,new,expr,expr)
 	debug(string.format("loadstring(%s)",code))
 
 	local f,msg = loadstring(code)
