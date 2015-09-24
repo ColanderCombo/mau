@@ -1198,15 +1198,24 @@ function registerPlugin(lul_device,newDeviceType,newScriptFile,newDeviceDrawFunc
 end
 
 ------------------------------------------------
--- STARTUP Sequence
+-- User Level API functions for watches
 ------------------------------------------------
+function sinceWatch(cond,delay)
+	delay = delay or 0
+	debug(string.format("sinceWatch(%s,%d)",tostring(cond),delay))
+	return cond,delay
+end
+
+------------------------------------------------
+-- Watch Management
+------------------------------------------------
+local registeredWatches = {}
 
 function getWatchParams(str)
 	local params = str:split("#")
 	return params[1],params[2],tonumber(params[3]),tonumber(params[4]),params[5]	-- service,variable,deviceid,sceneid,lua_expr;service,variable,deviceid,sceneid,lua_expr
 end
 
-local registeredWatches = {}
 function findWatch( devid, service, variable )
 	local watch = nil
 	devid = tostring(devid)
@@ -1225,71 +1234,99 @@ function findWatch( devid, service, variable )
 	return registeredWatches[devid][service][variable]
 end
 
-function sinceWatch(cond,delay)
-	delay = delay or 0
-	debug(string.format("sinceWatch(%s,%d)",tostring(cond),delay))
-	return cond,delay
+function cancelExpressionTimer(lul_device, lul_service, lul_variable,expr)
+	debug(string.format("cancelExpressionTimer(%s,%s,%s,%s)",lul_device, lul_service, lul_variable,expr))
+	local watch = findWatch( lul_device, lul_service, lul_variable )
+	watch['Expressions'][expr]["PendingTimer"] = nil
+	return watch
 end
 
-function watchTimer(lul_data)
-	debug(string.format("watchTimer(%s)",lul_data))
+function watchTimerCB(lul_data)
+	debug(string.format("watchTimerCB(%s)",lul_data))
 	local tbl = lul_data:split('#')
+	
+	-- if the timer was cancelled,  ignore
 	local watch = findWatch( tbl[1], tbl[2], tbl[3] )
-	watch['Expressions'][tbl[4]]["PendingTimer"]=nil
+	local expr = tbl[4]
+	if (watch['Expressions'][expr]["PendingTimer"] == nil) then
+		debug(string.format("Ignoring timer callback, timer was cancelled for expression %s",expr))
+	else
+		-- otherwise cancel it now
+		watch['Expressions'][expr]["PendingTimer"] = nil
+		-- if we are here , nobody cancelled the timer so it is assumed the condition is true
+		local scene = watch['Expressions'][expr]["SceneID"]
+		local res = run_scene(scene)
+		if (res==-1) then
+			error(string.format("Failed to run the scene %s",scene))
+		end
+	end
+	
 	debug(string.format("updated watches %s",json.encode(registeredWatches)))
 end
 
-function evaluateExpression(lul_device, lul_service, lul_variable,expr,old, new, scene)
-	debug(string.format("evaluateExpression(%s,%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,expr,old, new, scene))
+function _evaluateUserExpression(old,new,expr)
+	debug(string.format("_evaluateUserExpression(%s,%s,%s)",old,new,expr))
+	local results = {}
 	local code = [[
 		return function(lul_device, lul_service, lul_variable, expr)
 			local old=%s
 			local new=%s
-			local results= {%s}
-			local res,delay = results[1] or nil, results[2] or nil
-			luup.log("res: ".. tostring(res or 'nil').." delay:"..tostring(delay or 'nil'))
-			if (delay ~=nil ) then
-				local watch = findWatch( lul_device, lul_service, lul_variable )
-				if (watch['Expressions'][expr]["PendingTimer"]==nil) then
-					-- new timer
-					luup.log("preparing timer watchTimer with delay "..delay)
-					local tbl = {lul_device, lul_service, lul_variable,expr}
-					local timer = luup.call_delay("watchTimer",delay, table.concat(tbl, "#") ) or 1
-					if (timer==0) then
-						watch['Expressions'][expr]["PendingTimer"]=1
-					else
-						luup.log("luup.call_delay failed !")
-						watch['Expressions'][expr]["PendingTimer"]=nil
-					end
-				else
-					-- already a running timer
-				end
-			end
-			return res
+			local results= {%s}	-- eventually returns 2 results, cond and delay
+			return results
 		end
 	]]
-	code = string.format(code,old,new,expr,expr)
-	debug(string.format("loadstring(%s)",code))
-
+	code = string.format(code,old,new,expr)
 	local f,msg = loadstring(code)
 	if (f==nil) then
 		error(string.format("loadstring %s failed to compile, msg=%s",code,msg))
 	else
 		local func = f()	-- call it
-		err = func(lul_device, lul_service, lul_variable,expr)
-		debug(string.format("expression %s returned %s",expr,tostring(err or 'nil')))
-		
-		if (err == true ) or ((tonumber(err) == 1 )) then
-			local err = run_scene(scene)
-			if (err==-1) then
-				error(string.format("Failed to run the scene %s",scene))
+		results = func(lul_device, lul_service, lul_variable,expr)
+		debug(string.format("Evaluation of user watch expression returned: %s",json.encode(results)))
+	end
+	return results
+end
+
+
+function evaluateExpression(lul_device, lul_service, lul_variable,expr,old, new, scene)
+	debug(string.format("evaluateExpression(%s,%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,expr,old, new, scene))
+	local results = _evaluateUserExpression(old,new,expr)
+	local res,delay = results[1] or nil, results[2] or nil
+	
+	-- if it evaluates as FALSE , do not do anything & cancel timer
+	if (res==nil or res==false or tonumber(res)==0) then
+		debug(string.format("ignoring watch trigger, loadstring returned %s",tostring(res or 'nil')))
+		cancelExpressionTimer(lul_device, lul_service, lul_variable,expr)
+	else
+		-- if it evaluates as TRUE, 
+		if (delay ~=nil ) then
+			-- if it is a defered response, 
+			local watch = findWatch( lul_device, lul_service, lul_variable )
+			if (watch['Expressions'][expr]["PendingTimer"]==nil) then
+				-- if new timer
+				local tbl = {lul_device, lul_service, lul_variable,expr}
+				local timer = luup.call_delay("watchTimerCB",delay, table.concat(tbl, "#") ) or 1
+				if (timer==0) then
+					debug("preparing timer watchTimerCB with delay "..delay)
+					watch['Expressions'][expr]["PendingTimer"]=1
+				else
+					error("luup.call_delay failed !")
+					watch['Expressions'][expr]["PendingTimer"]=nil
+				end
+			else
+				-- already a running timer, still true, do nothing wait for the timer
+				debug("already a running timer, still true, do nothing wait for the timer")
 			end
 		else
-			warning(string.format("ignoring watch trigger, loadstring returned %s",tostring(err or 'nil')))
+			-- if it is a immediate response, then run the scene
+			local res = run_scene(scene)
+			if (res==-1) then
+				error(string.format("Failed to run the scene %s",scene))
+			end
 		end
-		return err
 	end
-	return nil
+	debug(string.format("evaluateExpression() returns %s",tostring(res or 'nil')))
+	return res
 end
 
 function variableWatchCallback(lul_device, lul_service, lul_variable, lul_value_old, lul_value_new)
@@ -1358,6 +1395,9 @@ function initVariableWatches( variableWatchString )
 	end
 end
 
+------------------------------------------------
+-- STARTUP Sequence
+------------------------------------------------
 function startupDeferred(lul_device)
 	lul_device = tonumber(lul_device)
 	log("startupDeferred, called on behalf of device:"..lul_device)
