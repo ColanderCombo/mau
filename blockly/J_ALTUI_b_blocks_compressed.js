@@ -160,7 +160,18 @@ Blockly.Blocks['old_value'] = {
     this.setHelpUrl('http://forum.micasaverde.com/index.php?board=78.0');
   }
 };
-Blockly.Blocks['truesince'] = {
+Blockly.Blocks['when'] = {
+  init: function() {
+    this.appendValueInput("Condition")
+        .setCheck("Boolean")
+        .appendField("When");
+	this.setInputsInline(true);
+    this.setColour(120);
+    this.setTooltip('When condition is true');
+    this.setHelpUrl('http://forum.micasaverde.com/index.php?board=78.0');
+  }
+};
+Blockly.Blocks['whensince'] = {
   init: function() {
     this.appendValueInput("Condition")
         .setCheck("Boolean")
@@ -171,8 +182,8 @@ Blockly.Blocks['truesince'] = {
     this.appendDummyInput()
         .appendField("sec");
 	this.setInputsInline(true);
-    this.setColour(210);
-    this.setTooltip('');
+    this.setColour(120);
+    this.setTooltip('When condition is true since n seconds');
     this.setHelpUrl('http://forum.micasaverde.com/index.php?board=78.0');
   }
 };

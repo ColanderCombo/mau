@@ -2011,6 +2011,10 @@ var SceneEditor = function (scene) {
 				html += "  </div>";
 				html += "  <div class='panel-body'>";
 html+="<xml id='toolbox' style='display: none'>";
+html+="    <category name='Watch Types'>";
+html+="      <block type='when'></block>";
+html+="      <block type='whensince'></block>";
+html+="    </category>";
 html+="    <category name='Variable'>";
 	html+="  <block type='new_value'></block>";
 	html+="  <block type='old_value'></block>";
@@ -2023,7 +2027,6 @@ html+="    <category name='Variable'>";
 html+="    </category>";
 html+="    <category name='Logic'>";
 // html+="      <block type='controls_if'></block>";
-html+="      <block type='truesince'></block>";
 html+="      <block type='logic_compare'></block>";
 html+="      <block type='logic_operation'></block>";
 html+="      <block type='logic_negate'></block>";
