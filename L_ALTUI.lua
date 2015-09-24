@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.79"
+local version = "v0.80"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -1249,7 +1249,7 @@ function watchTimerCB(lul_data)
 	local watch = findWatch( tbl[1], tbl[2], tbl[3] )
 	local expr = tbl[4]
 	if (watch['Expressions'][expr]["PendingTimer"] == nil) then
-		debug(string.format("Ignoring timer callback, timer was cancelled for expression %s",expr))
+		warning(string.format("Ignoring timer callback, timer was cancelled for expression %s",expr))
 	else
 		-- otherwise cancel it now
 		watch['Expressions'][expr]["PendingTimer"] = nil
