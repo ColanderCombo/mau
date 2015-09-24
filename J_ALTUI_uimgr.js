@@ -2023,6 +2023,7 @@ html+="    <category name='Variable'>";
 html+="    </category>";
 html+="    <category name='Logic'>";
 // html+="      <block type='controls_if'></block>";
+html+="      <block type='truesince'></block>";
 html+="      <block type='logic_compare'></block>";
 html+="      <block type='logic_operation'></block>";
 html+="      <block type='logic_negate'></block>";

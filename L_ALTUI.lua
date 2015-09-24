@@ -1200,7 +1200,7 @@ end
 ------------------------------------------------
 -- User Level API functions for watches
 ------------------------------------------------
-function sinceWatch(cond,delay)
+function trueSince(cond,delay)
 	delay = delay or 0
 	debug(string.format("sinceWatch(%s,%d)",tostring(cond),delay))
 	return cond,delay

@@ -160,3 +160,19 @@ Blockly.Blocks['old_value'] = {
     this.setHelpUrl('http://forum.micasaverde.com/index.php?board=78.0');
   }
 };
+Blockly.Blocks['truesince'] = {
+  init: function() {
+    this.appendValueInput("Condition")
+        .setCheck("Boolean")
+        .appendField("When");
+    this.appendValueInput("Duration")
+        .setCheck("Number")
+        .appendField("Since");
+    this.appendDummyInput()
+        .appendField("sec");
+	this.setInputsInline(true);
+    this.setColour(210);
+    this.setTooltip('');
+    this.setHelpUrl('http://forum.micasaverde.com/index.php?board=78.0');
+  }
+};
