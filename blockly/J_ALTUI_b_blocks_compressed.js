@@ -160,6 +160,26 @@ Blockly.Blocks['old_value'] = {
     this.setHelpUrl('http://forum.micasaverde.com/index.php?board=78.0');
   }
 };
+Blockly.Blocks['now_value'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("now");
+    this.setOutput(true);
+    this.setColour(330);
+    this.setTooltip('');
+    this.setHelpUrl('http://forum.micasaverde.com/index.php?board=78.0');
+  }
+};
+Blockly.Blocks['lastupdate_value'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("lastupdate");
+    this.setOutput(true);
+    this.setColour(330);
+    this.setTooltip('');
+    this.setHelpUrl('http://forum.micasaverde.com/index.php?board=78.0');
+  }
+};
 Blockly.Blocks['when'] = {
   init: function() {
     this.appendValueInput("Condition")

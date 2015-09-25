@@ -92,6 +92,18 @@ Blockly.JavaScript['old_value'] = function(block) {
   // TODO: Change ORDER_NONE to the correct strength.
   return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
+Blockly.JavaScript['now_value'] = function(block) {
+  // TODO: Assemble JavaScript into code variable.
+  var code = 'now';
+  // TODO: Change ORDER_NONE to the correct strength.
+  return [code, Blockly.JavaScript.ORDER_ATOMIC];
+};
+Blockly.JavaScript['lastupdate_value'] = function(block) {
+  // TODO: Assemble JavaScript into code variable.
+  var code = 'lastupdate';
+  // TODO: Change ORDER_NONE to the correct strength.
+  return [code, Blockly.JavaScript.ORDER_ATOMIC];
+};
 Blockly.JavaScript['when'] = function(block) {
   var value_condition = Blockly.JavaScript.valueToCode(block, 'Condition', Blockly.JavaScript.ORDER_ATOMIC);
   // TODO: Assemble JavaScript into code variable.

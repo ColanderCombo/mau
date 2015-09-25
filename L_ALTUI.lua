@@ -1264,18 +1264,20 @@ function watchTimerCB(lul_data)
 	debug(string.format("updated watches %s",json.encode(registeredWatches)))
 end
 
-function _evaluateUserExpression(old,new,expr)
-	debug(string.format("_evaluateUserExpression(%s,%s,%s)",old,new,expr))
+function _evaluateUserExpression(old,new,lastupdate,expr)
+	debug(string.format("_evaluateUserExpression(%s,%s,%s,%s)",old,new,tostring(lastupdate),expr))
 	local results = {}
 	local code = [[
 		return function(lul_device, lul_service, lul_variable, expr)
 			local old=%s
 			local new=%s
+			local lastupdate=%s
+			local now=os.time()
 			local results= {%s}	-- eventually returns 2 results, cond and delay
 			return results
 		end
 	]]
-	code = string.format(code,old,new,expr)
+	code = string.format(code,old,new,lastupdate,expr)
 	local f,msg = loadstring(code)
 	if (f==nil) then
 		error(string.format("loadstring %s failed to compile, msg=%s",code,msg))
@@ -1288,9 +1290,9 @@ function _evaluateUserExpression(old,new,expr)
 end
 
 
-function evaluateExpression(lul_device, lul_service, lul_variable,expr,old, new, scene)
-	debug(string.format("evaluateExpression(%s,%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,expr,old, new, scene))
-	local results = _evaluateUserExpression(old,new,expr)
+function evaluateExpression(lul_device, lul_service, lul_variable,expr,old, new, lastupdate, scene)
+	debug(string.format("evaluateExpression(%s,%s,%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,expr,old, new, tostring(lastupdate),scene))
+	local results = _evaluateUserExpression(old,new,lastupdate,expr)
 	local res,delay = results[1] or nil, results[2] or nil
 	
 	-- if it evaluates as FALSE , do not do anything & cancel timer
@@ -1338,11 +1340,11 @@ function variableWatchCallback(lul_device, lul_service, lul_variable, lul_value_
 	else
 		watch["LastOld"] = lul_value_old
 		watch["LastNew"] = lul_value_new
-		watch["LastTime"] = os.time()
+		watch["LastUpdate"] = os.time()
 		for k,v  in pairs(watch['Expressions']) do
 			-- k is expression
 			-- v is an object
-			watch['Expressions'][k]["LastEval"] = evaluateExpression(lul_device, lul_service, lul_variable,k,lul_value_old, lul_value_new, v["SceneID"])
+			watch['Expressions'][k]["LastEval"] = evaluateExpression(lul_device, lul_service, lul_variable,k,lul_value_old, lul_value_new, watch["LastUpdate"], v["SceneID"])
 		end
 	end
 	debug(string.format("registeredWatches: %s",json.encode(registeredWatches)))
@@ -1362,7 +1364,7 @@ function addWatch( devid, service, variable, expression, scene )
 		registeredWatches[devidstr][service][variable] = {
 			["LastOld"] = nil,
 			["LastNew"] = nil,
-			["LastTime"] = nil
+			["LastUpdate"] = nil
 		}
 	else
 		-- a watch was already there
