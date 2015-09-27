@@ -7238,7 +7238,9 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		UIManager.clearPage(_T('LuaTest'),_T("LUA Code Test"),UIManager.oneColumnLayout);
 		$(".altui-mainpanel").append("<p>This test code will succeed if it is syntactically correct and does not return false. an error in the code or a return false will trigger a failure</p>");
-		UIManager.pageEditorForm("Lua Test Code","return true",_T("Submit"),function(lua) {
+		var lastOne = MyLocalStorage.getSettings("LastOne_LuaTest") || "return true";
+		UIManager.pageEditorForm("Lua Test Code",lastOne,_T("Submit"),function(lua) {
+			MyLocalStorage.setSettings("LastOne_LuaTest",lua);
 			MultiBox.runLua(0,lua, function(result) {
 				if ( result == "Passed")
 					PageMessage.message( _T("Code execution succeeded"), "success");
