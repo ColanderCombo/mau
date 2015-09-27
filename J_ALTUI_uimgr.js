@@ -1210,10 +1210,9 @@ function _formatTrigger(controller,trigger)
 {
 	function _findEventFromTriggerTemplate(controller,device,template)
 	{
-		var devtype = device.device_type;
-		var _devicetypesDB = MultiBox.getDeviceTypesDB(controller);
+		var static_data = MultiBox.getDeviceStaticData(device);
 		var event = null;
-		$.each( _devicetypesDB[devtype].ui_static_data.eventList2, function( idx,e) {
+		$.each(static_data.eventList2, function( idx,e) {
 			if (e.id == template) {
 				event = e;
 				return false;
@@ -3560,8 +3559,8 @@ var UIManager  = ( function( window, undefined ) {
 	};
 	
 // icons http://192.168.1.16/cmh/skins/default/img/devices/device_states/binary_light_default.png
-//_devicetypesDB[ device.device_type ].ui_static_data.flashicon
-//_devicetypesDB[ device.device_type ].ui_static_data.default_icon
+//_devicetypesDB[ device.device_type ][json].ui_static_data.flashicon
+//_devicetypesDB[ device.device_type ][json].ui_static_data.default_icon
 //
 //192.168.1.5/cmh/skins/default/img/devices/device_states/../../../icons/intro.png
 //192.168.1.16/cmh/skins/default/img/devices/device_states/../../../icons/intro.png
@@ -3570,7 +3569,7 @@ var UIManager  = ( function( window, undefined ) {
 		var id = device.altuiid;
 		var controller = MultiBox.controllerOf(id).controller;
 		var ui5 = MultiBox.isUI5( controller );
-		var _devicetypesDB = MultiBox.getDeviceTypesDB(controller);
+		// var _devicetypesDB = MultiBox.getDeviceTypesDB(controller);
 		var icon='';
 		switch( device.device_type ) {
 			case 'urn:schemas-futzle-com:device:CountdownTimer:1': 
@@ -3579,17 +3578,18 @@ var UIManager  = ( function( window, undefined ) {
 			default:
 				var str = "";
 				var src = defaultIconSrc;
-				var dt = _devicetypesDB[ device.device_type ];
+				var ui_static_data = MultiBox.getDeviceStaticData(device);
+				// var dt = _devicetypesDB[ device.device_type ];
 				AltuiDebug.debug("Icon for device altuiid:"+device.altuiid+"  device.type:"+device.device_type);
-				if ((dt != undefined) && (dt.ui_static_data!=undefined))
+				if (ui_static_data!=null)
 				{
 					//dt.ui_static_data.DisplayStatus
 					//dt.ui_static_data.state_icons
 					
 					// check if there are objects in dt.ui_static_data.state_icons
-					if (dt.ui_static_data.state_icons !=undefined)	//  some state icons found
+					if (ui_static_data.state_icons !=undefined)	//  some state icons found
 					{
-						var si = dt.ui_static_data.state_icons;
+						var si = ui_static_data.state_icons;
 						if (_hasObjectProperty(si) == true )	// UI7 style
 						{
 							// enumerate each object until a condition is met true
@@ -3609,7 +3609,7 @@ var UIManager  = ( function( window, undefined ) {
 							// in UI7 if icon path starts with .. it is relative to skins/default/img/devices/device_states/
 						}
 						else	// UI5 style
-							if (dt.ui_static_data.flashicon != undefined)
+							if (ui_static_data.flashicon != undefined)
 							{
 								//The filename in flashicon undergoes a special transformation for variable icons. 
 								//The extension ".png" is changed to "_0.png", "_25.png", "_50.png", "_75.png" or "_100.png" 
@@ -3618,7 +3618,7 @@ var UIManager  = ( function( window, undefined ) {
 								// For images which are not found (for instance, if the web server returns 404 Not Found) the default image is used.
 								
 								// mostlikely in UI5 icons are not located in devicestates folder, so let's fix it
-								var baseIconName = dt.ui_static_data.flashicon;
+								var baseIconName = ui_static_data.flashicon;
 								AltuiDebug.debug("UI5 style static baseIconName:"+baseIconName);
 								var dot = baseIconName.lastIndexOf('.');
 								if (dot >=0)
@@ -3628,7 +3628,7 @@ var UIManager  = ( function( window, undefined ) {
 									baseIconName = "../../../"+baseIconName;
 								}
 								AltuiDebug.debug("UI5 style static baseIconName modified :"+baseIconName);
-								var ds = dt.ui_static_data.DisplayStatus;
+								var ds = ui_static_data.DisplayStatus;
 								if ((ds.Service != undefined) && (ds.Variable != undefined))
 								{
 									var variable = MultiBox.getStatus( device, ds.Service, ds.Variable );
@@ -3649,13 +3649,13 @@ var UIManager  = ( function( window, undefined ) {
 						// no state icons found
 						//str = (dt.ui_static_data.default_icon != undefined) ? dt.ui_static_data.default_icon : dt.ui_static_data.flashicon;
 						if (ui5==true)
-							str = (dt.ui_static_data.flashicon != undefined) ? dt.ui_static_data.flashicon : dt.ui_static_data.default_icon;
+							str = (ui_static_data.flashicon != undefined) ? ui_static_data.flashicon : ui_static_data.default_icon;
 						else
-							str = (dt.ui_static_data.default_icon != undefined) ? dt.ui_static_data.default_icon : dt.ui_static_data.flashicon;
+							str = (ui_static_data.default_icon != undefined) ? ui_static_data.default_icon : ui_static_data.flashicon;
 						AltuiDebug.debug("Icon for device id:"+id+"  string from json:"+str);
 						if (str == undefined) {
 							AltuiDebug.debug("Undefined icon in ui_static_data, device.type:"+device.device_type);
-							AltuiDebug.debug("dt.ui_static_data:"+JSON.stringify(dt.ui_static_data));
+							AltuiDebug.debug("ui_static_data:"+JSON.stringify(ui_static_data));
 							AltuiDebug.debug("Setting default icon");
 							str = "icons/generic_sensor.png";
 						}
@@ -4335,10 +4335,8 @@ var UIManager  = ( function( window, undefined ) {
 		else if (tabidx>0) {
 			// on the contrary, UI5/7 static definition file is part of the controller specific device type DB 
 			// so real controller this time
-			var controller = MultiBox.controllerOf(device.altuiid).controller;
-			var _devicetypesDB = MultiBox.getDeviceTypesDB(controller);	// Master controller
-			var dt = _devicetypesDB[device.device_type];
-			var tab = dt.ui_static_data.Tabs[tabidx-1];
+			var ui_static_data = MultiBox.getDeviceStaticData(device);
+			var tab = ui_static_data.Tabs[tabidx-1];
 			if ((tab.TabType!="javascript") || (tab.ScriptName!="shared.js")) {
 				if ( tab.TabType=="flash") {
 					_deviceDrawControlPanelTab( device, tab, parent );		// row for Flash Panel
@@ -4374,7 +4372,6 @@ var UIManager  = ( function( window, undefined ) {
 
 	function _deviceDrawControlPanel( device, container ) {
 		var controller = MultiBox.controllerOf(device.altuiid).controller;
-		var _devicetypesDB = MultiBox.getDeviceTypesDB(controller);		// for MCV display info
 
 		function _deviceDrawDeviceUsedIn( device, container ) {
 			var usedin_objects = MultiBox.getDeviceDependants(device);
@@ -4529,9 +4526,9 @@ var UIManager  = ( function( window, undefined ) {
 
 				container = container.find(".panel-body");	
 				var _altuitypesDB = MultiBox.getALTUITypesDB();					// for ALTUI plugin info
-				var dt = _devicetypesDB[device.device_type];
+				var ui_static_data = MultiBox.getDeviceStaticData(device);
 				var bExtraTab = (_altuitypesDB[device.device_type] && _altuitypesDB[device.device_type].ControlPanelFunc!=null);
-				$(container).append( "<div class='row'>" + _createDeviceTabs( device, bExtraTab, dt.ui_static_data.Tabs ) + "</div>" );
+				$(container).append( "<div class='row'>" + _createDeviceTabs( device, bExtraTab, ui_static_data.Tabs ) + "</div>" );
 
 				$(container).find("li a").first().tab('show');	// activate first tab
 				var activeTabIdx = _getActiveDeviceTabIdx();
@@ -4545,7 +4542,7 @@ var UIManager  = ( function( window, undefined ) {
 				}
 
 				if (AltuiDebug.IsDebug()) {
-					$("div.altui-debug-div").append( "<pre>"+JSON.stringify(dt.ui_static_data.Tabs)+"</pre>" );				
+					$("div.altui-debug-div").append( "<pre>"+JSON.stringify(ui_static_data.Tabs)+"</pre>" );				
 				}
 				
 			}
@@ -4555,12 +4552,11 @@ var UIManager  = ( function( window, undefined ) {
 		_deviceDrawControlPanelAttributes( device, container ); 				// row for attributes
 		_deviceDrawDeviceUsedIn( device, container );							// row for device 'used in' info
 		_deviceDrawWireFrame(device,container);
-				
-		var dt = _devicetypesDB[ device.device_type ];
-		if ((dt != undefined) && (dt.ui_static_data!=undefined)) {
+		var ui_static_data = MultiBox.getDeviceStaticData(device);		
+		if (ui_static_data!=undefined) {
 			// load scripts
 			var scripts = {};
-			$.each( dt.ui_static_data.Tabs, function( idx,tab) {
+			$.each( ui_static_data.Tabs, function( idx,tab) {
 				if (tab.TabType=="javascript" && tab.ScriptName!="shared.js")
 				{
 					var script = tab.ScriptName;
@@ -6643,19 +6639,21 @@ var UIManager  = ( function( window, undefined ) {
 			var dtdb = MultiBox.getDeviceTypesDB(controller);
 			var dt = dtdb[devicetype];
 			var scripts = {};
-			if ( dt.ui_static_data && dt.ui_static_data.Tabs )
-			{
-				$.each( dt.ui_static_data.Tabs, function( idx,tab) {
-					if (tab.TabType=="javascript" && tab.ScriptName!="shared.js")
-					{
-						var script = tab.ScriptName;
-						var func = tab.Function;
-						if (scripts[script] == undefined)
-							scripts[script]=[];
-						scripts[script].push( func );
-					}
-				});
-			}
+			$.each(dt,function(idx,ui_static_data){
+				if ( ui_static_data && ui_static_data.Tabs )
+				{
+					$.each( ui_static_data.Tabs, function( idx,tab) {
+						if (tab.TabType=="javascript" && tab.ScriptName!="shared.js")
+						{
+							var script = tab.ScriptName;
+							var func = tab.Function;
+							if (scripts[script] == undefined)
+								scripts[script]=[];
+							scripts[script].push( func );
+						}
+					});
+				}
+			});
 			return scripts;
 		};
 		

@@ -93,10 +93,18 @@ var MultiBox = ( function( window, undefined ) {
 		if (_devicetypesDB[controllerid][devtype]==null) {
 			_devicetypesDB[controllerid][devtype]={};
 		};
-		_devicetypesDB[controllerid][devtype].ui_static_data = $.extend(_devicetypesDB[controllerid][devtype].ui_static_data,ui_definitions);
-		// _devicetypesDB[controllerid][devtype].ui_static_data = ui_definitions;
+		var json = ui_definitions.device_json || 'nil';
+		if (_devicetypesDB[controllerid][devtype][json]==null)
+			_devicetypesDB[controllerid][devtype][json]={};
+		_devicetypesDB[controllerid][devtype][json].ui_static_data = ui_definitions;
 	};
-
+	function _getDeviceStaticData(device) {
+		if ((device==null)||(device.device_type==null))
+			return null;
+		var elems = device.altuiid.split("-");
+		var json = device.device_json || 'nil';
+		return _devicetypesDB[elems[0]][device.device_type][json].ui_static_data;
+	}
 	function  _getAllEvents(name) {
 		return $.map( _controllers , function(o,i) {return name+"_"+i } );
 	};
@@ -625,7 +633,7 @@ var MultiBox = ( function( window, undefined ) {
 	addDeviceType 			: _addDeviceType,			// (devtype, obj)				update devitetype plugin function calls ( from LUA )
 	updateDeviceTypeUPnpDB	: _updateDeviceTypeUPnpDB,	//( controllerid, devtype, Dfilename )		update devicetype UPNP information ( from D_xx S_xx files )
 	updateDeviceTypeUIDB 	: _updateDeviceTypeUIDB,	//( controllerid, devtype, ui_definitions)		update devicetype UI static infos ( from user_data )
-	
+	getDeviceStaticData		: _getDeviceStaticData,		//(device)
 	// Access & Modes
 	isRemoteAccess	: function() 	{ 	return window.location.href.indexOf("mios.com")!=-1; /*return true;*/ },
 	getBoxInfo		: function() 	{	return _controllers[0].controller.getBoxInfo(); },

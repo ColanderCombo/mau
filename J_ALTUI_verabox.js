@@ -1079,6 +1079,313 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 					plugin.altuiid = "{0}-{1}".format(_uniqID,plugin.id);
 				});
 			// update the static ui information for the future displays
+			_user_data.static_data.push({
+    "default_icon": "glass_break_sensor_untripped.png",
+    "state_icons": [
+      {
+        "img": "glass_break_sensor_tripped.png",
+        "conditions": [
+          {
+            "service": "urn:micasaverde-com:serviceId:SecuritySensor1",
+            "variable": "Tripped",
+            "operator": "==",
+            "value": 1,
+            "subcategory_num": 6
+          }
+        ]
+      },
+      {
+        "img": "glass_break_sensor_untripped.png",
+        "conditions": [
+          {
+            "service": "urn:micasaverde-com:serviceId:SecuritySensor1",
+            "variable": "Tripped",
+            "operator": "==",
+            "value": 0,
+            "subcategory_num": 6
+          }
+        ]
+      }
+    ],
+    "inScene": "1",
+    "ToggleButton": 1,
+    "Tabs": [
+      {
+        "Label": {
+          "lang_tag": "ui7_tabname_control",
+          "text": "Control"
+        },
+        "Position": "0",
+        "TabType": "flash",
+        "top_navigation_tab": 1,
+        "ControlGroup": [
+          {
+            "id": "1",
+            "isSingle": "1",
+            "scenegroup": "1"
+          },
+          {
+            "id": "2",
+            "isSingle": "1",
+            "scenegroup": "1"
+          }
+        ],
+        "SceneGroup": [
+          {
+            "id": "1",
+            "top": "2",
+            "left": "0",
+            "x": "2",
+            "y": "1"
+          }
+        ],
+        "Control": [
+          {
+            "ControlGroup": "1",
+            "ControlType": "multi_state_button",
+            "top": "0",
+            "left": "1",
+            "states": [
+              {
+                "Label": {
+                  "lang_tag": "ui7_cmd_arm",
+                  "text": "Armed"
+                },
+                "ControlGroup": "1",
+                "Display": {
+                  "Service": "urn:micasaverde-com:serviceId:SecuritySensor1",
+                  "Variable": "Armed",
+                  "Value": "1"
+                },
+                "Command": {
+                  "Service": "urn:micasaverde-com:serviceId:SecuritySensor1",
+                  "Action": "SetArmed",
+                  "Parameters": [
+                    {
+                      "Name": "newArmedValue",
+                      "Value": "1"
+                    }
+                  ]
+                },
+                "ControlCode": "arm"
+              },
+              {
+                "Label": {
+                  "lang_tag": "ui7_cmd_bypass",
+                  "text": "Disarmed"
+                },
+                "ControlGroup": "1",
+                "Display": {
+                  "Service": "urn:micasaverde-com:serviceId:SecuritySensor1",
+                  "Variable": "Armed",
+                  "Value": "0"
+                },
+                "Command": {
+                  "Service": "urn:micasaverde-com:serviceId:SecuritySensor1",
+                  "Action": "SetArmed",
+                  "Parameters": [
+                    {
+                      "Name": "newArmedValue",
+                      "Value": "0"
+                    }
+                  ]
+                },
+                "ControlCode": "bypass"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "Label": {
+          "lang_tag": "ui7_settings",
+          "text": "Settings"
+        },
+        "Position": "1",
+        "TabType": "javascript",
+        "ScriptName": "shared.js",
+        "Function": "simple_device"
+      },
+      {
+        "Label": {
+          "lang_tag": "ui7_advanced",
+          "text": "Advanced"
+        },
+        "Position": "2",
+        "TabType": "javascript",
+        "ScriptName": "shared.js",
+        "Function": "advanced_device"
+      },
+      {
+        "Label": {
+          "lang_tag": "ui7_device_options",
+          "text": "Device Options"
+        },
+        "Position": "3",
+        "TabType": "javascript",
+        "ScriptName": "shared.js",
+        "Function": "device_zwave_options"
+      },
+      {
+        "Label": {
+          "lang_tag": "ui7_logs",
+          "text": "Logs"
+        },
+        "Position": "4",
+        "TabType": "javascript",
+        "ScriptName": "shared.js",
+        "Function": "device_logs"
+      },
+      {
+        "Label": {
+          "lang_tag": "ui7_notifications",
+          "text": "Notifications"
+        },
+        "Position": "5",
+        "TabType": "javascript",
+        "ScriptName": "shared.js",
+        "Function": "device_notifications"
+      },
+      {
+        "Label": {
+          "lang_tag": "ui7_device_scenes",
+          "text": "Scenes"
+        },
+        "Position": "6",
+        "TabType": "javascript",
+        "ScriptName": "shared.js",
+        "Function": "device_scenes"
+      }
+    ],
+    "sceneList": {
+      "group_1": {
+        "cmd_1": {
+          "label": "Arm",
+          "serviceId": "urn:micasaverde-com:serviceId:SecuritySensor1",
+          "action": "SetArmed",
+          "arguments": {
+            "newArmedValue": "1"
+          },
+          "display": {
+            "service": "urn:micasaverde-com:serviceId:SecuritySensor1",
+            "variable": "Armed",
+            "value": "1"
+          }
+        },
+        "cmd_2": {
+          "label": "Bypass",
+          "serviceId": "urn:micasaverde-com:serviceId:SecuritySensor1",
+          "action": "SetArmed",
+          "arguments": {
+            "newArmedValue": "0"
+          },
+          "display": {
+            "service": "urn:micasaverde-com:serviceId:SecuritySensor1",
+            "variable": "Armed",
+            "value": "0"
+          }
+        }
+      }
+    },
+    "eventList2": [
+      {
+        "id": 1,
+        "label": {
+          "lang_tag": "ui7_an_armed_glass_break_sensor_is_tripped",
+          "text": "Whenever _DEVICE_NAME_ is armed and detects glass break\/vibration"
+        },
+        "serviceId": "urn:micasaverde-com:serviceId:SecuritySensor1",
+        "serviceStateTable": {
+          "Armed": {
+            "value": "1",
+            "comparisson": "="
+          },
+          "Tripped": {
+            "value": "1",
+            "comparisson": "="
+          }
+        }
+      },
+      {
+        "id": 2,
+        "label": {
+          "lang_tag": "ui7_an_armed_glass_break_sensor_is_not_tripped",
+          "text": "Whenever _DEVICE_NAME_ is armed and stops detecting glass break\/vibration"
+        },
+        "serviceId": "urn:micasaverde-com:serviceId:SecuritySensor1",
+        "serviceStateTable": {
+          "Armed": {
+            "value": "1",
+            "comparisson": "="
+          },
+          "Tripped": {
+            "value": "0",
+            "comparisson": "="
+          }
+        }
+      },
+      {
+        "id": 3,
+        "label": {
+          "lang_tag": "ui7_glass_break_sensor_is_tripped",
+          "text": "Whenever _DEVICE_NAME_ detects glass break\/vibration whether is armed or disarmed"
+        },
+        "serviceId": "urn:micasaverde-com:serviceId:SecuritySensor1",
+        "serviceStateTable": {
+          "Tripped": {
+            "value": "1",
+            "comparisson": "="
+          }
+        }
+      },
+      {
+        "id": 4,
+        "label": {
+          "lang_tag": "ui7_glass_break_sensor_is_not_tripped",
+          "text": "Whenever _DEVICE_NAME_ stops detecting glass break\/vibration whether is armed or disarmed"
+        },
+        "serviceId": "urn:micasaverde-com:serviceId:SecuritySensor1",
+        "serviceStateTable": {
+          "Tripped": {
+            "value": "0",
+            "comparisson": "="
+          }
+        }
+      },
+      {
+        "id": 5,
+        "label": {
+          "lang_tag": "ui7_battery_level_goes_below",
+          "text": "Battery level goes below"
+        },
+        "serviceId": "urn:micasaverde-com:serviceId:HaDevice1",
+        "argumentList": [
+          {
+            "id": 1,
+            "prefix": {
+              "lang_tag": "ui7_Level",
+              "text": "Level"
+            },
+            "dataType": "i4",
+            "name": "BatteryLevel",
+            "comparisson": "<",
+            "minValue": "1",
+            "maxValue": "99",
+            "suffix": {
+              "lang_tag": "ui7_percent_sign",
+              "text": "%"
+            },
+            "HumanFriendlyText": {
+              "lang_tag": "ui7_hft_battery_level_goes_below",
+              "text": "Battery level for _DEVICE_NAME_ goes below _ARGUMENT_VALUE_%"
+            }
+          }
+        ]
+      }
+    ],
+    "device_type": "urn:schemas-micasaverde-com:device:MotionSensor:1",
+    "device_json": "D_GlassBreakSensor.json"
+  });
 			$.each(_user_data.static_data || [], function(idx,ui_static_data) {
 				var dt = ui_static_data.device_type == undefined ? ui_static_data.DeviceType : ui_static_data.device_type;
 				if (dt!=undefined) {
@@ -1649,12 +1956,10 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	
 	function _getDeviceEvents(device) {
 		if (device && device.id!=0) {
-			var controller = MultiBox.controllerOf(device.altuiid).controller;
-			var _devicetypesDB = MultiBox.getDeviceTypesDB(controller);
-			var dt = _devicetypesDB[device.device_type];
-			if  ((dt.ui_static_data == undefined) || (dt.ui_static_data.eventList2==undefined))
+			var ui_static_data = MultiBox.getDeviceStaticData(device);
+			if  ((ui_static_data == undefined) || (ui_static_data.eventList2==undefined))
 				return [];
-			return dt.ui_static_data.eventList2;
+			return ui_static_data.eventList2;
 		}
 		return [];
 	};
@@ -2567,10 +2872,15 @@ var api = {
 	},
 	getEventDefinition: function(deviceType) {
 		var _devicetypesDB = MultiBox.getDeviceTypesDB(_JSAPI_ctx.controllerid);
-		var dt = _devicetypesDB[deviceType];
-		if  ((dt.ui_static_data == undefined) || (dt.ui_static_data.eventList2==undefined))
-			return [];
-		return dt.ui_static_data.eventList2;
+		var dt = _devicetypesDB[deviceType];	// is an associative array indexed by json name
+		// UI7 api seems flawed as it assumes only one JSON file per device type
+		// ALTUI will return a union of all
+		var eventList2 = {};
+		$.each(dt, function(idx,ui_static_data) {
+			if (ui_static_data.eventList2 != undefined)
+				eventList2 = $.extend(true,eventList2,ui_static_data.eventList2);
+		});
+		return eventList2;
 	},
 	setDeviceStateVariable: function (deviceId, service, variable, value, options) {
 		set_device_state(deviceId, service, variable, value, (options && (options.dynamic === true)) ? 1: 0);
