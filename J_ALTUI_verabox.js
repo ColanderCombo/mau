@@ -982,8 +982,8 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		});
 		var str = expressions.join(" && ");
 		AltuiDebug.debug("_evaluateConditions(deviceid:{0} devsubcat:{1} str:{2} conditions:{3})".format(deviceid,devsubcat,str,JSON.stringify(conditions)));
-		var bResult = eval(str);
-		return bResult;
+		var bResult = eval(str) ;
+		return (bResult==undefined) ? false : bResult ;
 	};
 
 	function _refreshEngine() {
@@ -1610,7 +1610,6 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			if ($.isFunction(cbfunc))
 				(cbfunc)(result);
 		})
-		return;
 	};
 
 	function _getDeviceActions(device,cbfunc) {

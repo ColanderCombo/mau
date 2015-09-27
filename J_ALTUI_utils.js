@@ -510,20 +510,21 @@ var PageManager = (function() {
 		// ];
 
 	function _fixMyPage(page) {
-		$.each(page.children, function(idx,child) {
-			if (child.properties.deviceid) {
-				if (child.properties.deviceid.indexOf('-') == -1) {
-					child.properties.deviceid = "0-"+child.properties.deviceid;
+		if (page.children)
+			$.each(page.children, function(idx,child) {
+				if (child.properties.deviceid) {
+					if (child.properties.deviceid.indexOf('-') == -1) {
+						child.properties.deviceid = "0-"+child.properties.deviceid;
+					}
 				}
-			}
-			if (child.properties.sceneid) {
-				if (child.properties.sceneid.indexOf('-') == -1) {
-					child.properties.sceneid = "0-"+child.properties.sceneid;
+				if (child.properties.sceneid) {
+					if (child.properties.sceneid.indexOf('-') == -1) {
+						child.properties.sceneid = "0-"+child.properties.sceneid;
+					}
 				}
-			}
-			if (child.zindex == undefined )
-				child.zindex = 0;
-		});
+				if (child.zindex == undefined )
+					child.zindex = 0;
+			});
 	};
 	
 	function _init(pages) {

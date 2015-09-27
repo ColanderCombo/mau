@@ -93,7 +93,8 @@ var MultiBox = ( function( window, undefined ) {
 		if (_devicetypesDB[controllerid][devtype]==null) {
 			_devicetypesDB[controllerid][devtype]={};
 		};
-		_devicetypesDB[controllerid][devtype].ui_static_data = ui_definitions;
+		_devicetypesDB[controllerid][devtype].ui_static_data = $.extend(_devicetypesDB[controllerid][devtype].ui_static_data,ui_definitions);
+		// _devicetypesDB[controllerid][devtype].ui_static_data = ui_definitions;
 	};
 
 	function  _getAllEvents(name) {
