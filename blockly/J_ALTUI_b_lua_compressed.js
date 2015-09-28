@@ -90,15 +90,15 @@ Blockly.Lua['lastupdate_value'] = function(block) {
   return [code, Blockly.Lua.ORDER_ATOMIC];
 };
 Blockly.Lua['when'] = function(block) {
-  var value_condition = Blockly.JavaScript.valueToCode(block, 'Condition', Blockly.JavaScript.ORDER_ATOMIC);
+  var value_condition = Blockly.Lua.valueToCode(block, 'Condition', Blockly.Lua.ORDER_ATOMIC);
   // TODO: Assemble JavaScript into code variable.
   var code = value_condition
   // TODO: Change ORDER_NONE to the correct strength.
   return [code, Blockly.Lua.ORDER_NONE];
 };
 Blockly.Lua['whensince'] = function(block) {
-  var value_condition = Blockly.JavaScript.valueToCode(block, 'Condition', Blockly.JavaScript.ORDER_ATOMIC);
-  var value_duration = Blockly.JavaScript.valueToCode(block, 'Duration', Blockly.JavaScript.ORDER_ATOMIC);
+  var value_condition = Blockly.Lua.valueToCode(block, 'Condition', Blockly.Lua.ORDER_ATOMIC);
+  var value_duration = Blockly.Lua.valueToCode(block, 'Duration', Blockly.Lua.ORDER_ATOMIC);
   // TODO: Assemble JavaScript into code variable.
   var code = 'trueSince({0}, {1})'.format(value_condition,value_duration);
   // TODO: Change ORDER_NONE to the correct strength.
