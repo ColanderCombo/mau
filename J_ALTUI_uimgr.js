@@ -7208,13 +7208,23 @@ var UIManager  = ( function( window, undefined ) {
 	},
 	
 
-	pageEditorForm: function (title,txt,button,onClickCB) {
+	pageEditorForm: function (title,txt,outputarea,button,onClickCB) {
 		var html = "";
 		html +="<form class='altui-editor-form col-sm-11' role='form' action='javascript:void(0);'>";
 		html +="  <div class='form-group'>";
 		html +="    <label for='altui-editor-text'>"+title+":</label>";
-		html +="    <textarea id='altui-editor-text' rows='20' class='form-control' placeholder='xxx'>"+txt.htmlEncode()+"</textarea>";
+		html +="    <textarea id='altui-editor-text' rows='15' class='form-control' placeholder='xxx'>"+txt.htmlEncode()+"</textarea>";
 		html +="  </div>";
+		if (outputarea!=null) {
+			html +="  <div class='form-group'>";
+			html +="    <label for='altui-editor-result'>"+_T("Return Result")+":</label>";
+			html +="    <pre id='altui-editor-result'></pre>";
+			html +="  </div>";			
+			html +="  <div class='form-group'>";
+			html +="    <label for='altui-editor-output'>"+_T("Console Output")+":</label>";
+			html +="    <pre id='altui-editor-output'></pre>";
+			html +="  </div>";			
+		}
 		html +="  <button id='altui-luaform-button' type='submit' class='btn btn-default'>"+button+"</button>";
 		html +="</form>";
 		$(".altui-mainpanel").append(html);
@@ -7228,7 +7238,7 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		UIManager.clearPage(_T('Editor'), filename,UIManager.oneColumnLayout);
 		$(".altui-mainpanel").append("<p> </p>");
-		UIManager.pageEditorForm(filename,txt,button,function(newtxt) {
+		UIManager.pageEditorForm(filename,txt,null,button,function(newtxt) {
 			if ($.isFunction(cbfunc)) 
 				cbfunc(newtxt);
 		});
@@ -7237,12 +7247,15 @@ var UIManager  = ( function( window, undefined ) {
 	pageLuaTest: function ()
 	{
 		UIManager.clearPage(_T('LuaTest'),_T("LUA Code Test"),UIManager.oneColumnLayout);
-		$(".altui-mainpanel").append("<p>This test code will succeed if it is syntactically correct and does not return false. an error in the code or a return false will trigger a failure</p>");
+		$(".altui-mainpanel").append("<p>This test code will succeed if it is syntactically correct. It must be the body of a function and can return something. The return object and console output will be displayed)</p>");
 		var lastOne = MyLocalStorage.getSettings("LastOne_LuaTest") || "return true";
-		UIManager.pageEditorForm("Lua Test Code",lastOne,_T("Submit"),function(lua) {
+		UIManager.pageEditorForm("Lua Test Code",lastOne,true,_T("Submit"),function(lua) {
 			MyLocalStorage.setSettings("LastOne_LuaTest",lua);
-			MultiBox.runLua(0,lua, function(result) {
-				if ( result == "Passed")
+			MultiBox.runLua(0,lua, function(res) {
+				res = $.extend({success:false, result:"",output:""},res);
+				$("#altui-editor-result").html(res.result);
+				$("#altui-editor-output").html(res.output);
+				if ( res.success ==true )
 					PageMessage.message( _T("Code execution succeeded"), "success");
 				else
 					PageMessage.message( _T("Code execution failed"), "danger");
@@ -7447,7 +7460,7 @@ var UIManager  = ( function( window, undefined ) {
 	{
 		function _prepareUI( ctrlid ) {
 			var lua = MultiBox.getLuaStartup(ctrlid );
-			UIManager.pageEditorForm("Lua Startup Code",lua,"Submit",function(newlua) {
+			UIManager.pageEditorForm("Lua Startup Code",lua,null,"Submit",function(newlua) {
 				if (newlua!=lua) {
 					DialogManager.confirmDialog(_T("do you want to change lua startup code ? if yes, it will generate a LUA reload, be patient..."),function(result) {
 						if (result==true) {
@@ -9003,7 +9016,7 @@ var UIManager  = ( function( window, undefined ) {
 				$("#altui-grid-btn").click( function() {
 					$('#altui-grid').table2CSV({
 						delivery : function(data) {
-							UIManager.pageEditorForm("CSV text",data,_T("Copy to clipboard"),function(text,that) {
+							UIManager.pageEditorForm("CSV text",data,null,_T("Copy to clipboard"),function(text,that) {
 								$(that).prev(".form-group").find("#altui-editor-text").select();
 								document.execCommand('copy');
 								$(that).parents("form").remove();

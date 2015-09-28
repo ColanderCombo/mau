@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.81"
+local version = "v0.82"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -510,6 +510,37 @@ local function getDataFor( deviceID,name )
 	return result
 end
 
+local printResult = ""
+function myPrint (...)
+	for i,v in ipairs(arg) do
+		printResult = printResult .. tostring(v) .. "\t"
+	end
+		printResult = printResult .. "\n"
+end
+	
+function runLua(deviceID,lua)
+	debug(string.format("runLua(%d,%s)",tonumber(deviceID),lua))
+	
+	-- prepare print result and override print function
+	printResult = ""
+	local old = _G.print
+	_G.print = myPrint
+	
+	-- prepare execution 
+	local errcode = 0
+	local results = nil
+	local f,msg = loadstring(lua)
+	if (f==nil) then
+		error(string.format("loadstring %s failed to compile, msg=%s",lua,msg))
+	else
+		results = f()	-- call it
+		debug(string.format("Evaluation of lua code returned: %s",json.encode(results)))
+		errcode=1
+	end
+	_G.print = old
+	return errcode,results,printResult
+end
+
 ------------------------------------------------------------------------------------------------
 -- Http handlers : Communication FROM ALTUI
 -- http://192.168.1.5:3480/data_request?id=lr_ALTUI_Handler&command=xxx
@@ -839,6 +870,13 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 					var = luup.variable_get(service, variablename,  deviceID)
 				end
 				return "ok", "text/plain"
+			end,
+		["run_lua"] = 
+			function(params)
+				local lua = lul_parameters["lua"]
+				code,result,output = runLua(deviceID,lua)
+				local res = string.format("%d||%s||%s",code,json.encode(result),output);
+				return res, "text/plain"
 			end,
 		["proxysoap"] = 
 			function(params)
