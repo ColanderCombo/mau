@@ -271,5 +271,9 @@ Localization.init( {
 	"Show Weather on home page":"Show Weather on home page",
 	"Weather Temp Unit (UI5)":"Weather Temp Unit (UI5)",
 	"Watch Formula":"Watch Formula","Generated code":"Generated code",
-	"Edit Watch Expression":"Edit Watch Expression"
+	"Edit Watch Expression":"Edit Watch Expression",
+	"Return Result":"Return Result",
+	"Console Output":"Console Output",
+	"Lua execution succeeded":"Lua execution succeeded",
+	"This test code will succeed if it is syntactically correct. It must be the body of a function and can return something. The return object and console output will be displayed)":"This test code will succeed if it is syntactically correct. It must be the body of a function and can return something. The return object and console output will be displayed)"
 	});

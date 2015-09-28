@@ -7207,7 +7207,6 @@ var UIManager  = ( function( window, undefined ) {
 		$(".altui-mainpanel").append(html);
 	},
 	
-
 	pageEditorForm: function (title,txt,outputarea,button,onClickCB) {
 		var html = "";
 		html +="<form class='altui-editor-form col-sm-11' role='form' action='javascript:void(0);'>";
@@ -7216,18 +7215,29 @@ var UIManager  = ( function( window, undefined ) {
 		html +="    <textarea id='altui-editor-text' rows='15' class='form-control' placeholder='xxx'>"+txt.htmlEncode()+"</textarea>";
 		html +="  </div>";
 		if (outputarea!=null) {
+			var glyph = glyphTemplate.format('save',_T("Copy to clipboard"), '');
 			html +="  <div class='form-group'>";
 			html +="    <label for='altui-editor-result'>"+_T("Return Result")+":</label>";
+			html +=  buttonTemplate.format( 'altui-copyresult-clipboard', 'altui-copy-clipboard', glyph,'default');
 			html +="    <pre id='altui-editor-result'></pre>";
 			html +="  </div>";			
 			html +="  <div class='form-group'>";
 			html +="    <label for='altui-editor-output'>"+_T("Console Output")+":</label>";
+			html +=  buttonTemplate.format( 'altui-copyoutput-clipboard', 'altui-copy-clipboard', glyph,'default');
 			html +="    <pre id='altui-editor-output'></pre>";
 			html +="  </div>";			
 		}
 		html +="  <button id='altui-luaform-button' type='submit' class='btn btn-default'>"+button+"</button>";
 		html +="</form>";
 		$(".altui-mainpanel").append(html);
+		$("#altui-copyresult-clipboard").click( function() {
+			Altui_SelectText( "altui-editor-result" );
+			document.execCommand('copy');
+		});
+		$("#altui-copyoutput-clipboard").click( function() {
+			Altui_SelectText( "altui-editor-output" );
+			document.execCommand('copy');
+		});
 		$("#altui-luaform-button").click( function() {
 			var txt = $("textarea#altui-editor-text").val();
 			onClickCB(txt,$(this));
@@ -7247,7 +7257,7 @@ var UIManager  = ( function( window, undefined ) {
 	pageLuaTest: function ()
 	{
 		UIManager.clearPage(_T('LuaTest'),_T("LUA Code Test"),UIManager.oneColumnLayout);
-		$(".altui-mainpanel").append("<p>This test code will succeed if it is syntactically correct. It must be the body of a function and can return something. The return object and console output will be displayed)</p>");
+		$(".altui-mainpanel").append("<p>"+_T("This test code will succeed if it is syntactically correct. It must be the body of a function and can return something. The return object and console output will be displayed)")+"</p>");
 		var lastOne = MyLocalStorage.getSettings("LastOne_LuaTest") || "return true";
 		UIManager.pageEditorForm("Lua Test Code",lastOne,true,_T("Submit"),function(lua) {
 			MyLocalStorage.setSettings("LastOne_LuaTest",lua);

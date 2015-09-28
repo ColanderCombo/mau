@@ -272,5 +272,9 @@ Localization.init( {
 	"Weather Temp Unit (UI5)":"Unité de température (UI5)",
 	"Watch Formula":"Formule du Suivi de variable",
 	"Generated code":"Code Généré",
-	"Edit Watch Expression":"Editer l'expression du Suivi de Variable"
+	"Edit Watch Expression":"Editer l'expression du Suivi de Variable",
+	"Return Result":"Résultat",
+	"Console Output":"Sortie Console",
+	"Lua execution succeeded":"Exécution Lua réussie",
+	"This test code will succeed if it is syntactically correct. It must be the body of a function and can return something. The return object and console output will be displayed)":"La syntaxe de ce code de test doit etre correcte. Cela doit etre le corps d'une fonction et peut retourner une valeur. L'objet de retour et la sortie de la console seront affichés)"
 });
