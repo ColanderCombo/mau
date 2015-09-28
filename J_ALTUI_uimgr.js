@@ -488,7 +488,7 @@ var LuaEditor = (function () {
 				.on("click touchend",".altui-luacode-test",function(){ 
 					var lua = $("#altui-luacode-text").val();
 					MultiBox.runLua(0,lua, function(result) {
-						alert(result);
+						alert(JSON.stringify(result));
 					});
 				})
 				.on("click touchend",".altui-luacode-save",function(){ 
