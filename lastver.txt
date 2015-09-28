@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("748,lastupdate & now variable watch variable and blockly block;GlassSensor issue;persistent luatest code,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29018")
+UIManager.checkAltuiUpdate("748,Lua Test code window improved (with return & output);lastupdate & now variable watch variable and blockly block;GlassSensor issue;persistent luatest code,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29018")
