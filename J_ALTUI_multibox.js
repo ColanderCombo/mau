@@ -103,7 +103,7 @@ var MultiBox = ( function( window, undefined ) {
 			return null;
 		var elems = device.altuiid.split("-");
 		var json = device.device_json || 'nil';
-		return _devicetypesDB[elems[0]][device.device_type][json].ui_static_data;
+		return (json != 'nil') ? _devicetypesDB[elems[0]][device.device_type][json].ui_static_data : null;
 	}
 	function  _getAllEvents(name) {
 		return $.map( _controllers , function(o,i) {return name+"_"+i } );

@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.83"
+local version = "v0.84"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -589,6 +589,8 @@ local htmlStyle = [[
 	</style>
 ]]
 
+local defaultBootstrapPath = "//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css"
+
 local htmlLocalCSSlinks = [[
 	<link rel="stylesheet" href="@localcdn@/jquery-ui.css">
 	<link rel="stylesheet" href="@localcdn@/bootstrap.min.css">
@@ -597,7 +599,7 @@ local htmlLocalCSSlinks = [[
 
 local htmlCSSlinks = [[
 	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
-	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<link rel="stylesheet" href="@localbootstrap@/bootstrap.min.css">
 	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jquery-bootgrid/1.2.0/jquery.bootgrid.min.css">
 ]]
 
@@ -814,9 +816,14 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				-- custompages = string.gsub(custompages,"'","\\x27")
 				-- custompages = string.gsub(custompages,"\"","\\x22")
 				local localcdn = getSetVariable(service, "LocalCDN", deviceID, "")
+				local localbootstrap = getSetVariable(service, "LocalBootstrap", lul_device, "")
+				if (localbootstrap == "") then	
+					localbootstrap=defaultBootstrapPath
+				end
 				local variables={}
 				variables["hostname"] = hostname
 				variables["localcdn"] = localcdn
+				variables["localbootstrap"] = localbootstrap
 				variables["devicetypes"] = json.encode(tbl)
 				variables["custompages"] = "["..table.concat(result_tbl, ",").."]"
 				variables["ThemeCSS"] = luup.variable_get(service, "ThemeCSS", deviceID) or ""
@@ -829,7 +836,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 					variables["csslinks"] = htmlLocalCSSlinks:template(variables)
 					variables["mandatory_scripts"] = htmlLocalScripts:template(variables)
 				else
-					variables["csslinks"] = htmlCSSlinks
+					variables["csslinks"] = htmlCSSlinks:template(variables)
 					variables["mandatory_scripts"] = htmlScripts
 				end
 				-- " becomes \x22
@@ -1452,8 +1459,12 @@ function startupDeferred(lul_device)
 	local remoteurl =getSetVariable(service,"RemoteAccess", lul_device, "https://vera-ui.strongcubedfitness.com/Veralogin.php")
 	local localurl = getSetVariableIfEmpty(service,"LocalHome", lul_device, "/port_3480/data_request?id=lr_ALTUI_Handler&command=home")
 	local css = getSetVariable(service,"ThemeCSS", lul_device, "")
-	local localcdn = getSetVariable(service, "LocalCDN", lul_device, "")
 	local extraController= getSetVariable(service, "ExtraController", lul_device, "")
+	local localcdn = getSetVariable(service, "LocalCDN", lul_device, "")
+	local localbootstrap = getSetVariable(service, "LocalBootstrap", lul_device, "")
+	if (localbootstrap == "") then	
+		localbootstrap=defaultBootstrapPath
+	end
 	
 	-- clean tmp area from our files
 	-- os.execute('rm /tmp/altui_*');
