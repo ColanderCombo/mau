@@ -1212,12 +1212,13 @@ function _formatTrigger(controller,trigger)
 	{
 		var static_data = MultiBox.getDeviceStaticData(device);
 		var event = null;
-		$.each(static_data.eventList2, function( idx,e) {
-			if (e.id == template) {
-				event = e;
-				return false;
-			}
-		});
+		if (static_data)
+			$.each(static_data.eventList2, function( idx,e) {
+				if (e.id == template) {
+					event = e;
+					return false;
+				}
+			});
 		return event;
 	};
 	var line = {};
@@ -4336,12 +4337,14 @@ var UIManager  = ( function( window, undefined ) {
 			// on the contrary, UI5/7 static definition file is part of the controller specific device type DB 
 			// so real controller this time
 			var ui_static_data = MultiBox.getDeviceStaticData(device);
-			var tab = ui_static_data.Tabs[tabidx-1];
-			if ((tab.TabType!="javascript") || (tab.ScriptName!="shared.js")) {
-				if ( tab.TabType=="flash") {
-					_deviceDrawControlPanelTab( device, tab, parent );		// row for Flash Panel
-				} else {
-					_deviceDrawControlPanelJSTab( device, tab, parent );
+			if (ui_static_data!=null) {
+				var tab = ui_static_data.Tabs[tabidx-1];
+				if ((tab.TabType!="javascript") || (tab.ScriptName!="shared.js")) {
+					if ( tab.TabType=="flash") {
+						_deviceDrawControlPanelTab( device, tab, parent );		// row for Flash Panel
+					} else {
+						_deviceDrawControlPanelJSTab( device, tab, parent );
+					}
 				}
 			}
 		}
@@ -4527,8 +4530,10 @@ var UIManager  = ( function( window, undefined ) {
 				container = container.find(".panel-body");	
 				var _altuitypesDB = MultiBox.getALTUITypesDB();					// for ALTUI plugin info
 				var ui_static_data = MultiBox.getDeviceStaticData(device);
-				var bExtraTab = (_altuitypesDB[device.device_type] && _altuitypesDB[device.device_type].ControlPanelFunc!=null);
-				$(container).append( "<div class='row'>" + _createDeviceTabs( device, bExtraTab, ui_static_data.Tabs ) + "</div>" );
+				if (ui_static_data!=null) {
+					var bExtraTab = (_altuitypesDB[device.device_type] && _altuitypesDB[device.device_type].ControlPanelFunc!=null);
+					$(container).append( "<div class='row'>" + _createDeviceTabs( device, bExtraTab, ui_static_data.Tabs ) + "</div>" );
+				}
 
 				$(container).find("li a").first().tab('show');	// activate first tab
 				var activeTabIdx = _getActiveDeviceTabIdx();
@@ -4541,7 +4546,7 @@ var UIManager  = ( function( window, undefined ) {
 					$(".altui-debug-div").toggle(false);					// hide
 				}
 
-				if (AltuiDebug.IsDebug()) {
+				if (ui_static_data && AltuiDebug.IsDebug()) {
 					$("div.altui-debug-div").append( "<pre>"+JSON.stringify(ui_static_data.Tabs)+"</pre>" );				
 				}
 				
@@ -4553,7 +4558,7 @@ var UIManager  = ( function( window, undefined ) {
 		_deviceDrawDeviceUsedIn( device, container );							// row for device 'used in' info
 		_deviceDrawWireFrame(device,container);
 		var ui_static_data = MultiBox.getDeviceStaticData(device);		
-		if (ui_static_data!=undefined) {
+		if (ui_static_data!=null) {
 			// load scripts
 			var scripts = {};
 			$.each( ui_static_data.Tabs, function( idx,tab) {
