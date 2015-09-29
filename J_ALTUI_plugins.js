@@ -662,7 +662,25 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
         html += " $('button#altui-onbtn-{0}').on('click', function() { MultiBox.runActionByAltuiID('{0}','urn:rts-services-com:serviceId:ProgramLogicTS','SetTarget',{'newTargetValue':'1'}); $('button#altui-onbtn-{0}').addClass('btn-info'); $('button#altui-offbtn-{0}').removeClass('btn-info'); });".format(device.altuiid);
         html += "</script>";
         return html;
-    }	
+    };
+	function _drawMySensors( device) {
+        var including = MultiBox.getStatus(device, 'urn:upnp-arduino-cc:serviceId:arduino1', 'InclusionMode');
+
+        var html = "";
+        html += "<div class='text-muted'>Press Start to include"
+
+        html += "<div class='pull-right'>";
+        html += ("<button id ='altui-arduino-include-start-{0}' type='button' class='altui-window-btn btn btn-default btn-sm {1}'>"+_T("Start")+"</button>").format(device.altuiid, (including==1) ? 'active' : '' );
+        html += ("<button id ='altui-arduino-include-stop-{0}'  type='button' class='altui-window-btn btn btn-default btn-sm {1}'>"+_T("Stop") +"</button>").format(device.altuiid, (including==0) ? 'active' : '' );
+        html += "</div></div>";
+
+        html += "<script type='text/javascript'>";
+        html += "$('button#altui-arduino-include-start-{0}').on('click', function() { MultiBox.runActionByAltuiID('{0}', 'urn:upnp-arduino-cc:serviceId:arduino1', 'StartInclusion', {}); } );".format(device.altuiid);
+        html += "$('button#altui-arduino-include-stop-{0}').on ('click', function() { MultiBox.runActionByAltuiID('{0}', 'urn:upnp-arduino-cc:serviceId:arduino1', 'StopInclusion',  {}); } );".format(device.altuiid);
+        html += "</script>";
+
+        return html;
+    };
 	function _drawTempLeak( device ) {
         var html = "";
         var armed = parseInt(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Armed' )); 
@@ -885,6 +903,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawMultiString : _drawMultiString,
 	drawPnPProxy	: _drawPnPProxy,
 	drawProgLogicTimerSwitch: _drawProgLogicTimerSwitch,
+	drawMySensors   : _drawMySensors,
 	drawSmoke 	   : _drawSmoke,
 	drawHumidity   : _drawHumidity,
 	drawLight   	: _drawLight,
