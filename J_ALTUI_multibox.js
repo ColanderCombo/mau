@@ -102,9 +102,8 @@ var MultiBox = ( function( window, undefined ) {
 		if ((device==null)||(device.device_type==null))
 			return null;
 		var elems = device.altuiid.split("-");
-		var json = device.device_json;
-		if ( (json==undefined) ||
-			 (_devicetypesDB[elems[0]][device.device_type][json]==undefined) ) {
+		var json = device.device_json || 'nil'; // fallback as on UI5 device_json is not defined
+		if ( (_devicetypesDB[elems[0]][device.device_type][json]==undefined) ) {
 			AltuiDebug.debug("_getDeviceStaticData({0}) does not find static data".format(device.altuiid));
 			AltuiDebug.debug("_devicetypesDB[{0}][{1}]=".format(elems[0],device.device_type)+JSON.stringify(_devicetypesDB[elems[0]][device.device_type]));
 			return null;
