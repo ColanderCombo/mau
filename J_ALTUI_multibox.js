@@ -102,8 +102,14 @@ var MultiBox = ( function( window, undefined ) {
 		if ((device==null)||(device.device_type==null))
 			return null;
 		var elems = device.altuiid.split("-");
-		var json = device.device_json || 'nil';
-		return (json != 'nil') ? _devicetypesDB[elems[0]][device.device_type][json].ui_static_data : null;
+		var json = device.device_json;
+		if ( (json==undefined) ||
+			 (_devicetypesDB[elems[0]][device.device_type][json]==undefined) ) {
+			AltuiDebug.debug("_getDeviceStaticData({0}) does not find static data".format(device.altuiid));
+			AltuiDebug.debug("_devicetypesDB[{0}][{1}]=".format(elems[0],device.device_type)+JSON.stringify(_devicetypesDB[elems[0]][device.device_type]));
+			return null;
+		 }
+		return _devicetypesDB[elems[0]][device.device_type][json].ui_static_data;
 	}
 	function  _getAllEvents(name) {
 		return $.map( _controllers , function(o,i) {return name+"_"+i } );
