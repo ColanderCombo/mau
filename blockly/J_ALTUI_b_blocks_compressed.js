@@ -207,3 +207,67 @@ Blockly.Blocks['whensince'] = {
     this.setHelpUrl('http://forum.micasaverde.com/index.php?board=78.0');
   }
 };
+
+function dynamicNames() {
+  var options=[];
+  $.each(MultiBox.getDevicesSync(), function(idx,d) {
+	 options.push([d.name,d.altuiid]); 
+  });
+  return options;
+}
+
+Blockly.Blocks['device'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Device");
+    this.appendDummyInput()
+        .appendField("Name");
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown(dynamicNames,function newName(name) {
+			this.sourceBlock_.updateService_(name);
+		}), "Name");
+    this.appendDummyInput()
+        .appendField("Service");
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([["...",""]],function newService(service) {
+			this.sourceBlock_.updateVariable_(service);
+		}), "Service");
+    this.appendDummyInput()
+        .appendField("Variable");
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([["...",""]]), "Variable");
+    this.setInputsInline(true);
+    this.setOutput(true, "String");
+    this.setColour(330);
+    this.setTooltip('Device Variable value');
+    this.setHelpUrl('http://forum.micasaverde.com/index.php?board=78.0');
+  },
+  updateService_: function(name) {
+	var serviceDropdown = this.getField('Service');
+	var serviceOptions = serviceDropdown.getOptions_();
+	serviceOptions.splice(0, serviceOptions.length);
+	serviceOptions.push(["...",""]);
+	var states = MultiBox.getStatesByAltuiID(name);
+	var services={};
+	$.each(states, function(idx,s) {
+		services[s.service]=true;
+	});
+	$.each(services,function(k,v){
+		serviceOptions.push([k,k]);
+	})
+	serviceDropdown.setValue("");
+	this.getField('Variable').setValue("");
+  },
+  updateVariable_: function(service) {
+	var name = this.getFieldValue('Name');
+	var variableDropdown = this.getField('Variable');
+	var variableOptions = variableDropdown.getOptions_();
+	variableOptions.splice(0, variableOptions.length);
+	variableOptions.push(["...",""]);
+	var states = $.grep(MultiBox.getStatesByAltuiID(name),function(s) {return s.service==service});
+	$.each(states,function(idx,state){
+		variableOptions.push([state.variable,state.variable]);
+	})
+	variableDropdown.setValue("");
+  }
+};

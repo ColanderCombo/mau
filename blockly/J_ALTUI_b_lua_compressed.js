@@ -104,4 +104,15 @@ Blockly.Lua['whensince'] = function(block) {
   // TODO: Change ORDER_NONE to the correct strength.
   return [code, Blockly.Lua.ORDER_NONE];
 };
+Blockly.Lua['device'] = function(block) {
+  var dropdown_name = block.getFieldValue('Name');
+  var dropdown_service = block.getFieldValue('Service');
+  var dropdown_variable = block.getFieldValue('Variable');
+  var elems = dropdown_name.split("-");
+  // TODO: Assemble JavaScript into code variable.
+  var code = 'luup.variable_get("{0}", "{1}", {2})'.format(dropdown_service,dropdown_variable,parseInt(elems[1]));
+
+  // TODO: Change ORDER_NONE to the correct strength.
+  return [code, Blockly.Lua.ORDER_NONE];
+};
 

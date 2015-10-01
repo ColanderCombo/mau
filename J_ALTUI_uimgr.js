@@ -2020,6 +2020,7 @@ html+="    <category name='Variable'>";
 	html+="  <block type='old_value'></block>";
 	html+="  <block type='now_value'></block>";
 	html+="  <block type='lastupdate_value'></block>";
+	html+="  <block type='device'></block>";
 	// html+="  <block type='variables_get'>";
 	// html+="    <field name='VAR'>new</field>";
 	// html+="  </block>";
