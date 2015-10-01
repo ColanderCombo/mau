@@ -104,6 +104,11 @@ var MultiBox = ( function( window, undefined ) {
 		var elems = device.altuiid.split("-");
 		var json = device.device_json || 'nil'; // fallback as on UI5 device_json is not defined
 		if ( (_devicetypesDB[elems[0]][device.device_type][json]==undefined) ) {
+			// try with nil and use this if ok
+			if (_devicetypesDB[elems[0]][device.device_type]['nil']!=undefined) {
+				return _devicetypesDB[elems[0]][device.device_type]['nil'].ui_static_data
+			}
+			// really not there
 			AltuiDebug.debug("_getDeviceStaticData({0}) does not find static data".format(device.altuiid));
 			AltuiDebug.debug("_devicetypesDB[{0}][{1}]=".format(elems[0],device.device_type)+JSON.stringify(_devicetypesDB[elems[0]][device.device_type]));
 			return null;
