@@ -2421,7 +2421,10 @@ html+="  </xml>";
 		//
 		// actions
 		//
+		
 		_updateAccordeonHeaders();
+		$('#blocklyDiv').data("scenecontroller",scenecontroller);	// indicates to Blockly which scene controller to filter on
+		
 		$(".altui-json-code").hide();
 		$(".altui-mainpanel")
 			.on("click",".altui-luatrigger",function() { 
@@ -6623,8 +6626,8 @@ var UIManager  = ( function( window, undefined ) {
 			html += UIManager.sceneDraw( scene, true);	// draw scene
 			html += editor.sceneEditDraw();					// draw editor
 		html += "</div>";
-		$(".altui-mainpanel").append(  html );
 		
+		$(".altui-mainpanel").append(  html );
 		editor.runActions(  );	
 	},
 

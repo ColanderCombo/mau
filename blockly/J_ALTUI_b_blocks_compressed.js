@@ -209,11 +209,15 @@ Blockly.Blocks['whensince'] = {
 };
 
 function dynamicRooms() {
-  var options=[];
-  $.each(MultiBox.getRoomsSync(), function(idx,d) {
-	 options.push([d.name,d.altuiid]); 
-  });
-  return options;
+	var options=[];
+	var scenecontroller = $('#blocklyDiv').data("scenecontroller");
+	var rooms = $.grep( MultiBox.getRoomsSync(), function(room,idx) {
+		return ( MultiBox.controllerOf(room.altuiid).controller == scenecontroller );
+	});	
+	$.each(rooms, function(idx,d) {
+		options.push([d.name,d.altuiid]); 
+	});
+	return options;
 }
 
 function dynamicNames() {
