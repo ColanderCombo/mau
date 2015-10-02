@@ -964,12 +964,23 @@ var DialogManager = ( function() {
 	{
 		var select = $("<select id='altui-select-device' class='form-control'></select>");
 		select.append("<option value='0' {0}>Select ...</option>".format( deviceid==NULL_DEVICE ? 'selected' : ''));
-		MultiBox.getDevices( 
-			function(idx,device) {
-				select.append('<option value={0} {3}>{1} -- #{2}</option>'.format( device.altuiid, device.name, device.altuiid, deviceid==device.altuiid ? 'selected' : ''));
+		var rooms = {};
+		MultiBox.getDevices(
+			function(idx,device){
+				var devicecontroller = MultiBox.controllerOf(device.altuiid).controller;
+				var deviceroom = MultiBox.getRoomByID(devicecontroller,device.room) || {name:_T('No Room')};
+				if (rooms[deviceroom.name]==undefined)
+					rooms[deviceroom.name]=[];
+				rooms[deviceroom.name].push(device);
 			},
 			$.isFunction(filterfunc) ? filterfunc : null,
 			function () {
+				$.each(Object.keys(rooms).sort(), function(i,name) {
+					select.append("<optgroup label='"+name+"'>");
+					$.each(rooms[name], function(idx,device) {
+						select.append('<option value={0} {3}>#{2} {1}</option>'.format( device.altuiid, device.name, device.altuiid, deviceid==device.altuiid ? 'selected' : ''));
+					});
+				});
 				// all devices are enumarated
 				var propertyline = "";
 				propertyline += "<div class='form-group'>";
@@ -5957,7 +5968,7 @@ var UIManager  = ( function( window, undefined ) {
 		var roomListTemplate = "<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td></tr>";	
 		MultiBox.getRooms( null,null,function( rooms) {
 			if (rooms) {
-				$.each(rooms.sort(sortByName), function(idx,room) {
+				$.each(rooms.sort(altuiSortByName), function(idx,room) {
 					var id = room.altuiid;
 					var delButtonHtml = smallbuttonTemplate.format( id, 'altui-delroom', deleteGlyph);
 					$(".altui-mainpanel tbody").append( roomListTemplate.format(id,(room!=null) ? room.name : "No Room",_roomSummary(room),delButtonHtml) );
