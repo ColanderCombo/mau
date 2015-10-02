@@ -208,6 +208,14 @@ Blockly.Blocks['whensince'] = {
   }
 };
 
+function dynamicRooms() {
+  var options=[];
+  $.each(MultiBox.getRoomsSync(), function(idx,d) {
+	 options.push([d.name,d.altuiid]); 
+  });
+  return options;
+}
+
 function dynamicNames() {
   var options=[];
   $.each(MultiBox.getDevicesSync(), function(idx,d) {
@@ -221,9 +229,15 @@ Blockly.Blocks['device'] = {
     this.appendDummyInput()
         .appendField("Device");
     this.appendDummyInput()
+        .appendField("Room");
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown(dynamicRooms,function newRoom(room) {
+			this.sourceBlock_.updateName_(room);
+		}), "Room");
+    this.appendDummyInput()
         .appendField("Name");
     this.appendDummyInput()
-        .appendField(new Blockly.FieldDropdown(dynamicNames,function newName(name) {
+        .appendField(new Blockly.FieldDropdown([["...",""]],function newName(name) {
 			this.sourceBlock_.updateService_(name);
 		}), "Name");
     this.appendDummyInput()
@@ -241,6 +255,22 @@ Blockly.Blocks['device'] = {
     this.setColour(330);
     this.setTooltip('Device Variable value');
     this.setHelpUrl('http://forum.micasaverde.com/index.php?board=78.0');
+  },
+  updateName_: function(room) {
+	var elems = room.split("-");
+	var nameDropdown = this.getField('Name');
+	var nameOptions = nameDropdown.getOptions_();
+	nameOptions.splice(0, nameOptions.length);
+	nameOptions.push(["...",""]);
+	var devices = $.grep( MultiBox.getDevicesSync() , function(d) {
+		return d.room==elems[1];
+	} );
+	$.each(devices , function(idx,d) {
+		nameOptions.push([d.name,d.altuiid]);
+	});
+	this.getField('Service').setValue("");
+	this.getField('Variable').setValue("");
+	nameDropdown.setValue("");
   },
   updateService_: function(name) {
 	var serviceDropdown = this.getField('Service');
