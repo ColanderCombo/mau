@@ -1481,7 +1481,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		return (bi.BuildVersion==undefined) || (bi.BuildVersion.startsWith("*1.5.")) || ((_uniqID==0)&&(UIManager.UI7Check()==false));
 	};
 	function _getLuaStartup() {
-		return _user_data.StartupCode;
+		return _user_data.StartupCode or "";
 	};
 	
 	function _createDevice( param , cbfunc ) {
