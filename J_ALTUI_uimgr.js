@@ -435,7 +435,7 @@ var styles ="					\
 		padding-left: 3px;	\
 		padding-right: 3px;	\
 	}				\
-	.altui-device-icon {			\
+	}.altui-device-icon {			\
 		cursor: pointer;	\
 		margin-left: 0px;	\
 		margin-right: 0px;	\
@@ -978,7 +978,7 @@ var DialogManager = ( function() {
 				$.each(Object.keys(rooms).sort(), function(i,name) {
 					select.append("<optgroup label='"+name+"'>");
 					$.each(rooms[name], function(idx,device) {
-						select.append('<option value={0} {3}>#{2} {1}</option>'.format( device.altuiid, device.name, device.altuiid, deviceid==device.altuiid ? 'selected' : ''));
+						select.append('<option value={0} {3}>&nbsp;&nbsp;&nbsp;&nbsp;#{2} {1}</option>'.format( device.altuiid, device.name, device.altuiid, deviceid==device.altuiid ? 'selected' : ''));
 					});
 				});
 				// all devices are enumarated
