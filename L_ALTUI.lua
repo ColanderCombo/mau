@@ -54,6 +54,10 @@ local function dumpString(str)
 	end
 end
 
+function string.starts(String,Start)
+   return string.sub(String,1,string.len(Start))==Start
+end
+
 function file_exists(name)
    local f=io.open(name,"r")
    if f~=nil then io.close(f) return true else return false end
@@ -1464,6 +1468,12 @@ function startupDeferred(lul_device)
 	local localbootstrap = getSetVariable(service, "LocalBootstrap", lul_device, "")
 	if (localbootstrap == "") then	
 		localbootstrap=defaultBootstrapPath
+	else
+		-- verify this starts by ../ to make sure it works for remote access
+		if (string.starts(localbootstrap,"../") == false) then 
+			localbootstrap = "../"..localbootstrap
+			luup.variable_set(service, "LocalBootstrap", localbootstrap, lul_device)
+		end
 	end
 	
 	-- clean tmp area from our files
