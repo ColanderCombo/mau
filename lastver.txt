@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("775,Indentation of room/device in select lists;Blockly device variable;fix for null lua startup;fix for static_data searching,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29078")
+UIManager.checkAltuiUpdate("783,Icon size fix;timeOf() and Blockly HMS for timestamp comparison in watches;fix for localBootstrap in remote access mode,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29090")
