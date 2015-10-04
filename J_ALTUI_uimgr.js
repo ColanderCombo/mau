@@ -8,7 +8,7 @@
 // written devagreement from amg0 / alexis . mermet @ gmail . com
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE .
   
 /*The MIT License (MIT)
 BOOTGRID: Copyright (c) 2014-2015 Rafael J. Staib
@@ -2029,15 +2029,21 @@ html+="    </category>";
 html+="    <category name='Variable'>";
 	html+="  <block type='new_value'></block>";
 	html+="  <block type='old_value'></block>";
-	html+="  <block type='now_value'></block>";
-	html+="  <block type='lastupdate_value'></block>";
-	html+="  <block type='device'></block>";
 	// html+="  <block type='variables_get'>";
 	// html+="    <field name='VAR'>new</field>";
 	// html+="  </block>";
 	// html+="  <block type='variables_get'>";
 	// html+="    <field name='VAR'>old</field>";
 	// html+="  </block>";
+html+="    </category>";
+html+="    <category name='Time'>";
+	html+="  <block type='now_value'></block>";
+	html+="  <block type='lastupdate_value'></block>";
+	html+="  <block type='duration'></block>";
+	html+="  <block type='duration_value'></block>";
+html+="    </category>";
+html+="    <category name='Luup'>";
+	html+="  <block type='device'></block>";
 html+="    </category>";
 html+="    <category name='Logic'>";
 // html+="      <block type='controls_if'></block>";
@@ -2046,7 +2052,7 @@ html+="      <block type='logic_operation'></block>";
 html+="      <block type='logic_negate'></block>";
 html+="      <block type='logic_boolean'></block>";
 html+="      <block type='logic_null'></block>";
-// html+="      <block type='logic_ternary'></block>";
+html+="      <block type='logic_ternary'></block>";
 html+="    </category>";
 // html+="    <category id='catLoops'>";
 // html+="      <block type='controls_repeat_ext'>";

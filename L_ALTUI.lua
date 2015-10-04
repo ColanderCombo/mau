@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.84"
+local version = "v0.85"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -1285,7 +1285,17 @@ function trueSince(cond,delay)
 	debug(string.format("sinceWatch(%s,%d)",tostring(cond),delay))
 	return cond,delay
 end
-
+function midnight(timestamp)
+	local t = os.date('*t',timestamp)
+	t.hour=0
+	t.min=0
+	t.sec=0
+	return os.time(t)
+end
+function timeOf(timestamp)
+  local t2= midnight(timestamp)
+  return os.difftime(timestamp,t2)
+end
 ------------------------------------------------
 -- Watch Management
 ------------------------------------------------

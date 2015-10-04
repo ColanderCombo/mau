@@ -305,3 +305,28 @@ Blockly.Blocks['device'] = {
 	variableDropdown.setValue("");
   }
 };
+Blockly.Blocks['duration'] = {
+  init: function() {
+    this.appendValueInput("HMS")
+        .setCheck("Number")
+        .appendField("TimeOf");
+    this.setOutput(true, "Number");
+    this.setColour(290);
+    this.setTooltip('H M S part of a timestamp');
+    this.setHelpUrl('http://forum.micasaverde.com/index.php?board=78.0');
+  }
+};
+Blockly.Blocks['duration_value'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldTextInput("Hours"), "Hours")
+        .appendField(":")
+        .appendField(new Blockly.FieldTextInput("Mins"), "Mins")
+        .appendField(":")
+        .appendField(new Blockly.FieldTextInput("Secs"), "Secs");
+    this.setOutput(true, "Number");
+    this.setColour(330);
+    this.setTooltip('H M S duration in seconds');
+    this.setHelpUrl('http://forum.micasaverde.com/index.php?board=78.0');
+  }
+};

@@ -115,4 +115,19 @@ Blockly.Lua['device'] = function(block) {
   // TODO: Change ORDER_NONE to the correct strength.
   return [code, Blockly.Lua.ORDER_NONE];
 };
-
+Blockly.Lua['duration'] = function(block) {
+  var value_hms = Blockly.Lua.valueToCode(block, 'HMS', Blockly.Lua.ORDER_ATOMIC);
+  // TODO: Assemble JavaScript into code variable.
+  var code = 'timeOf({0})'.format(value_hms);
+  // TODO: Change ORDER_NONE to the correct strength.
+  return [code, Blockly.Lua.ORDER_NONE];
+};
+Blockly.Lua['duration_value'] = function(block) {
+  var text_hours = block.getFieldValue('Hours');
+  var text_mins = block.getFieldValue('Mins');
+  var text_secs = block.getFieldValue('Secs');
+  // TODO: Assemble JavaScript into code variable.
+  var code = text_hours+'*3600+'+text_mins+'*60+'+text_secs;
+  // TODO: Change ORDER_NONE to the correct strength.
+  return [code, Blockly.Lua.ORDER_NONE];
+};
