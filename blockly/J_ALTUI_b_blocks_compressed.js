@@ -312,7 +312,7 @@ Blockly.Blocks['duration'] = {
         .appendField("TimeOf");
     this.setOutput(true, "Number");
     this.setColour(290);
-    this.setTooltip('H M S part of a timestamp');
+    this.setTooltip(_T('H M S part of a timestamp'));
     this.setHelpUrl('http://forum.micasaverde.com/index.php?board=78.0');
   }
 };
@@ -326,7 +326,18 @@ Blockly.Blocks['duration_value'] = {
         .appendField(new Blockly.FieldTextInput("Secs"), "Secs");
     this.setOutput(true, "Number");
     this.setColour(330);
-    this.setTooltip('H M S duration in seconds');
+    this.setTooltip(_T('H M S duration in seconds'));
+    this.setHelpUrl('http://forum.micasaverde.com/index.php?board=78.0');
+  }
+};
+Blockly.Blocks['text_tonumber'] = {
+  init: function() {
+    this.appendValueInput("Text")
+        .setCheck("String")
+        .appendField("ToNumber");
+    this.setOutput(true, "Number");
+    this.setColour(160);
+    this.setTooltip(_T('Convert text to number'));
     this.setHelpUrl('http://forum.micasaverde.com/index.php?board=78.0');
   }
 };

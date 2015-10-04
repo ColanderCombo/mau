@@ -131,3 +131,10 @@ Blockly.Lua['duration_value'] = function(block) {
   // TODO: Change ORDER_NONE to the correct strength.
   return [code, Blockly.Lua.ORDER_NONE];
 };
+Blockly.Lua['text_tonumber'] = function(block) {
+  var value_text = Blockly.Lua.valueToCode(block, 'Text', Blockly.Lua.ORDER_ATOMIC);
+  // TODO: Assemble JavaScript into code variable.
+  var code = 'tonumber({0})'.format(value_text);
+  // TODO: Change ORDER_NONE to the correct strength.
+  return [code, Blockly.Lua.ORDER_NONE];
+};

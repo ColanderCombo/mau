@@ -276,5 +276,8 @@ Localization.init( {
 	"Return Result":"Résultat",
 	"Console Output":"Sortie Console",
 	"Lua execution succeeded":"Exécution Lua réussie",
-	"This test code will succeed if it is syntactically correct. It must be the body of a function and can return something. The return object and console output will be displayed)":"La syntaxe de ce code de test doit etre correcte. Cela doit etre le corps d'une fonction et peut retourner une valeur. L'objet de retour et la sortie de la console seront affichés)"
+	"This test code will succeed if it is syntactically correct. It must be the body of a function and can return something. The return object and console output will be displayed)":"La syntaxe de ce code de test doit etre correcte. Cela doit etre le corps d'une fonction et peut retourner une valeur. L'objet de retour et la sortie de la console seront affichés)",
+	"H M S part of a timestamp":"partie H M S d'un timestamp",
+	"H M S duration in seconds":"duree H M S en secondes",
+	"Convert text to number":"Conversion en nombre"
 });
