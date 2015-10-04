@@ -435,7 +435,7 @@ var styles ="					\
 		padding-left: 3px;	\
 		padding-right: 3px;	\
 	}				\
-	}.altui-device-icon {			\
+	.altui-device-icon {			\
 		cursor: pointer;	\
 		margin-left: 0px;	\
 		margin-right: 0px;	\
