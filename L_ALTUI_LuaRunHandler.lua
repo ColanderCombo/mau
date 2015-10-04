@@ -10,13 +10,18 @@
 -- AKbooer contribution
 
 local json = require("L_ALTUIjson")
-local printResult = ""
+local printResult = {}
+
+function table.pack(...)
+  return { n = select("#", ...), ... }
+end
 
 function myPrint (...)
-	for i,v in ipairs(arg) do
-		printResult = printResult .. tostring(v) .. "\t"
+	local arg = table.pack(...)
+	for i = 1,arg.n do
+		arg[i] = tostring(arg[i])
 	end
-		printResult = printResult .. "\n"
+	table.insert (printResult, table.concat (arg, "\t"))
 end
 
 function _G.ALTUI_LuaRunHandler(lul_request, lul_parameters, lul_outputformat)
@@ -26,7 +31,7 @@ function _G.ALTUI_LuaRunHandler(lul_request, lul_parameters, lul_outputformat)
 	luup.log(string.format("ALTUI: runLua(%s)",lua),50)
 	
 	-- prepare print result and override print function
-	printResult = ""
+	printResult = {}
 	local old = _G.print
 	_G.print = myPrint
 	
@@ -43,6 +48,7 @@ function _G.ALTUI_LuaRunHandler(lul_request, lul_parameters, lul_outputformat)
 	end
 	_G.print = old
 	
+	printResult = table.concat (printResult, "\n")
 	return string.format("%d||%s||%s",errcode,json.encode(results),printResult);
 end
 
