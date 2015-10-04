@@ -514,37 +514,6 @@ local function getDataFor( deviceID,name )
 	return result
 end
 
-local printResult = ""
-function myPrint (...)
-	for i,v in ipairs(arg) do
-		printResult = printResult .. tostring(v) .. "\t"
-	end
-		printResult = printResult .. "\n"
-end
-	
-function runLua(deviceID,lua)
-	debug(string.format("runLua(%d,%s)",tonumber(deviceID),lua))
-	
-	-- prepare print result and override print function
-	printResult = ""
-	local old = _G.print
-	_G.print = myPrint
-	
-	-- prepare execution 
-	local errcode = 0
-	local results = nil
-	local f,msg = loadstring(lua)
-	if (f==nil) then
-		error(string.format("loadstring %s failed to compile, msg=%s",lua,msg))
-	else
-		results = f()	-- call it
-		debug(string.format("Evaluation of lua code returned: %s",json.encode(results)))
-		errcode=1
-	end
-	_G.print = old
-	return errcode,results,printResult
-end
-
 ------------------------------------------------------------------------------------------------
 -- Http handlers : Communication FROM ALTUI
 -- http://192.168.1.5:3480/data_request?id=lr_ALTUI_Handler&command=xxx
@@ -705,7 +674,7 @@ function inTable(tbl, item)
     return false
 end
 
-function myALTUI_LuaRunHandler(lul_request, lul_parameters, lul_outputformat)
+function _G.myALTUI_LuaRunHandler(lul_request, lul_parameters, lul_outputformat)
 
 	-- local oldlog = 	_G.log
 	-- _G.log = luup.log
@@ -909,13 +878,13 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				end
 				return "ok", "text/plain"
 			end,
-		["run_lua"] = 
-			function(params)
-				local lua = lul_parameters["lua"]
-				code,result,output = runLua(deviceID,lua)
-				local res = string.format("%d||%s||%s",code,json.encode(result),output);
-				return res, "text/plain"
-			end,
+		-- ["run_lua"] = 
+			-- function(params)
+				-- local lua = lul_parameters["lua"]
+				-- code,result,output = runLua(deviceID,lua)
+				-- local res = string.format("%d||%s||%s",code,json.encode(result),output);
+				-- return res, "text/plain"
+			-- end,
 		["proxysoap"] = 
 			function(params)
 				local newUrl = lul_parameters["newUrl"]
@@ -1492,16 +1461,13 @@ end
 ------------------------------------------------
 function registerHandlers()
 	luup.register_handler("myALTUI_Handler","ALTUI_Handler")
-	-- local resultCode, resultString, job, returnArguments = luup.call_action("urn:micasaverde-com:serviceId:HomeAutomationGateway1", "RunLua", {Code = code}, 0)
-	-- return resultCode, resultString, job, returnArguments
-	local code = "luup.register_handler('myALTUI_LuaRunHandler','ALTUI_LuaRunHandler')"
-	local url = string.format("http://127.0.0.1:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunLua&Code=%s",code)
-	local timeout = 30
-	local httpcode,content = luup.inet.wget(url,timeout)
-	if (httpcode==0) then
-		debug("content="..content)
-		return
-	end
+	
+	local url = require "socket.url"
+	local req = "http://127.0.0.1:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunLua&Code="
+	code = "require 'L_ALTUI_LuaRunHandler'\n"
+	req = req .. url.escape(code)
+	local httpcode,content = luup.inet.wget(req)
+	return httpcode
 end
 
 function startupDeferred(lul_device)

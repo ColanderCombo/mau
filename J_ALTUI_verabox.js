@@ -919,7 +919,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			
 			// if dynamic ==0 permits the user to save
 			if (dynamic==0) {
-				// if (_isUI5() ) {	
+				if (_isUI5() ) {	
 					// on UI5 cache until the user presses SAVE button
 					var target = {};
 					target.devices={};
@@ -929,10 +929,10 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 						"value": value
 					};
 					_updateChangeCache( target );
-				// } else {
+				} else {
 					// on UI7, do it asynchronously
-					// promise =  _upnpHelper.UPnPSet( deviceid, service, variable, value );					
-				// }
+					promise =  _upnpHelper.UPnPSet( deviceid, service, variable, value );					
+				}
 			}
 		}
 		else {
@@ -1560,8 +1560,8 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			// if ($.isFunction( cbfunc )) 
 				// cbfunc(res);
 		// });
-		// var jqxhr = _httpGet( "?id=lr_ALTUI_LuaRunHandler&command=run_lua&lua={0}".format( encodeURIComponent(code) ), {}, function(data, textStatus, jqXHR) {
-		var jqxhr = _httpGet( "?id=lr_ALTUI_Handler&command=run_lua&lua={0}".format( encodeURIComponent(code) ), {}, function(data, textStatus, jqXHR) {
+		// var jqxhr = _httpGet( "?id=lr_ALTUI_Handler&command=run_lua&lua={0}".format( encodeURIComponent(code) ), {}, function(data, textStatus, jqXHR) {
+		var jqxhr = _httpGet( "?id=lr_ALTUI_LuaRunHandler&command=run_lua&lua={0}".format( encodeURIComponent(code) ), {}, function(data, textStatus, jqXHR) {
 			if (data!=null) {
 				var lines = data.split('||');
 				var success = (lines[0]=="1");
