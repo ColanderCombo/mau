@@ -705,6 +705,33 @@ function inTable(tbl, item)
     return false
 end
 
+function myALTUI_LuaRunHandler(lul_request, lul_parameters, lul_outputformat)
+
+	-- local oldlog = 	_G.log
+	-- _G.log = luup.log
+	-- local olddebug = _G.debug
+	-- _G.debug = luup.log
+	-- local oldwarning = _G.warning
+	-- _G.warning = luup.log
+
+	-- log('myALTUI_LuaRunHandler: request is: '..tostring(lul_request))
+	-- log('myALTUI_LuaRunHandler: parameters is: '..json.encode(lul_parameters))
+	-- log('myALTUI_LuaRunHandler: outputformat is: '..json.encode(lul_outputformat))
+	-- debug("hostname="..hostname)
+	-- if (hostname=="") then
+		-- hostname = getIP()
+		-- debug("now hostname="..hostname)
+	-- end
+	-- local lua = lul_parameters["lua"]
+	-- code,result,output = runLua(deviceID,lua)
+	-- local res = string.format("%d||%s||%s",code,json.encode(result),output);
+	-- _G.log = oldlog
+	-- _G.debug = olddebug
+	-- _G.warning = oldwarning
+	res="1||all is ok||all is ok"
+	return res, "text/plain"
+end
+
 function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 	log('ALTUI_Handler: request is: '..tostring(lul_request))
 	log('ALTUI_Handler: parameters is: '..json.encode(lul_parameters))
@@ -1453,6 +1480,20 @@ end
 ------------------------------------------------
 -- STARTUP Sequence
 ------------------------------------------------
+function registerHandlers()
+	luup.register_handler("myALTUI_Handler","ALTUI_Handler")
+	-- local resultCode, resultString, job, returnArguments = luup.call_action("urn:micasaverde-com:serviceId:HomeAutomationGateway1", "RunLua", {Code = code}, 0)
+	-- return resultCode, resultString, job, returnArguments
+	local code = "luup.register_handler('myALTUI_LuaRunHandler','ALTUI_LuaRunHandler')"
+	local url = string.format("http://127.0.0.1:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunLua&Code=%s",code)
+	local timeout = 30
+	local httpcode,content = luup.inet.wget(url,timeout)
+	if (httpcode==0) then
+		debug("content="..content)
+		return
+	end
+end
+
 function startupDeferred(lul_device)
 	lul_device = tonumber(lul_device)
 	log("startupDeferred, called on behalf of device:"..lul_device)
@@ -1518,6 +1559,7 @@ function startupDeferred(lul_device)
 	else
 		luup.set_failure(false,lul_device)	-- should be 0 in UI7
 	end
+	registerHandlers()
 	log("startup completed")
 end
 		
@@ -1529,7 +1571,6 @@ function initstatus(lul_device)
 	local delay = 1		-- delaying first refresh by x seconds
 	debug("initstatus("..lul_device..") startup for Root device, delay:"..delay)
 	-- http://192.168.1.5:3480/data_request?id=lr_IPX800_Handler
-	luup.register_handler("myALTUI_Handler","ALTUI_Handler")
 	luup.call_delay("startupDeferred", delay, tostring(lul_device))		
 end
  
