@@ -4721,9 +4721,9 @@ var UIManager  = ( function( window, undefined ) {
 			// var first = $($(".altui-favorites-device")[0]);
 			// var width = first.innerWidth() 
 			var margin = 2*2+4;	// margin + border
-			var width = $(".altui-favorites").innerWidth();
+			var width = $(".altui-favorites").innerWidth()-30;
 			var nperlines = (width>=1200) ? 10 : (width>=992) ? 8 : (width>=768) ? 6 : (width>=500) ? 4 : 3;
-			width = ($(".altui-favorites").innerWidth())/nperlines-margin;
+			width = width/nperlines-margin;
 			// console.log("width="+width);
 			$(".altui-favorites-device").each(function(idx,elem){
 				$(elem).outerWidth( width );
