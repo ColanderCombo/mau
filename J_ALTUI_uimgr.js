@@ -313,7 +313,7 @@ var styles ="					\
 		white-space: nowrap; overflow: hidden; text-overflow: ellipsis;		\
 		width: 100%; max-width: 100% 	\
 	}		\
-	.altui-housemode{				\
+	.btn.altui-housemode{				\
 		padding-left: 0px;		\
 		padding-right: 0px;		\
 	}								\
@@ -5773,7 +5773,7 @@ var UIManager  = ( function( window, undefined ) {
 		var body="";
 		body+="	<div class='altui-layout row'>";
 		body+="		<div class='col-xs-12 col-sm-push-1 col-sm-10'>";
-		body+="			<h1 id='altui-pagetitle' >"+title+"</h1>";
+		body+="			<div class=''><h4 id='altui-pagetitle' >"+title+"</h4></div>";
 		body+="			<div class='altui-mainpanel row'>";
 		body+="			</div>";
 		body+="		</div>";
@@ -5785,7 +5785,7 @@ var UIManager  = ( function( window, undefined ) {
 		var body="";
 		body+="	<div class='altui-layout row'>";
 		body+="		<div class='col-sm-10 col-sm-push-2'>";
-		body+="			<h1 id='altui-pagetitle' >"+title+"</h1>";
+		body+="			<h3 id='altui-pagetitle' >"+title+"</h3>";
 		body+="			<div class='altui-mainpanel row'>";
 		body+="			</div>";
 		body+="		</div>";
@@ -5829,7 +5829,7 @@ var UIManager  = ( function( window, undefined ) {
 	//window.open("data_request?id=lr_ALTUI_Handler&command=home","_self");
 	pageHome : function()
 	{
-		UIManager.clearPage(_T('Home'),_T("Welcome to VERA Alternate UI"),UIManager.oneColumnLayout);
+		UIManager.clearPage(_T('Home'),_T("Welcome to ALTUI"),UIManager.oneColumnLayout);
 		if ( MyLocalStorage.getSettings('ShowWeather') )
 		// if(0)
 		{                                                            
@@ -5838,7 +5838,7 @@ var UIManager  = ( function( window, undefined ) {
 			if ((ws.tempFormat==undefined) || (ws.tempFormat==""))
 				ws.tempFormat=MyLocalStorage.getSettings('TempUnitOverride'); 
 			var html="";
-			html ="<div class='altui-weather-widget col-sm-6'>";
+			html ="<div class='altui-weather-widget col-sm-5 col-md-6 hidden-xs'>";
 			// html +='<a href="//www.accuweather.com/fr/fr/meylan/1097583/weather-forecast/1097583" class="aw-widget-legal">';
 			html +='<a href="//www.accuweather.com/" class="aw-widget-legal">';
 			html +=('</a><div id="awcc1439296613816" class="aw-widget-current"  data-locationkey="1097583" data-unit="'+ws.tempFormat.toLowerCase()+'" data-language="'+language.substring(0, 2)+'" data-useip="true" data-uid="awcc1439296613816"></div><script type="text/javascript" src="//oap.accuweather.com/launch.js"></script>');
@@ -8824,7 +8824,7 @@ var UIManager  = ( function( window, undefined ) {
 		// http://192.168.1.5/cmh/skins/default/img/other/spritemap_640_480_preset_modes.png
 
 		var html = "";				
-		html +="<div class='col-sm-6'>";
+		html +="<div class='col-xs-12 col-sm-7 col-md-6'>";
 		html +="	<div class='altui-housemode row'>";
 
 		if (_ui7Check==true) {
