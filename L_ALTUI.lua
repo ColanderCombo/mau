@@ -5,12 +5,12 @@
 -- // written agreement from amg0 / alexis . mermet @ gmail . com
 -- // This program is distributed in the hope that it will be useful,
 -- // but WITHOUT ANY WARRANTY; without even the implied warranty of
--- // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+-- // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE . 
 local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.85"
+local version = "v0.87"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -19,6 +19,52 @@ local http = require("socket.http")
 local ltn12 = require("ltn12")
 local tmpprefix = "/tmp/altui_"		-- prefix for tmp files
 hostname = ""
+
+--------------------------------------------------------------------------
+-- LUA TEST HANDLER : here until I resolve the issue with the MCV store
+--------------------------------------------------------------------------
+local printResult = {}
+
+function table.pack(...)
+  return { n = select("#", ...), ... }
+end
+
+function myPrint (...)
+	local arg = table.pack(...)
+	for i = 1,arg.n do
+		arg[i] = tostring(arg[i])
+	end
+	table.insert (printResult, table.concat (arg, "\t"))
+end
+
+function _G.ALTUI_LuaRunHandler(lul_request, lul_parameters, lul_outputformat)
+	-- res="1||all is ok||all is ok"
+	-- return res, "text/plain"
+	local lua = lul_parameters["lua"]
+	luup.log(string.format("ALTUI: runLua(%s)",lua),50)
+	
+	-- prepare print result and override print function
+	printResult = {}
+	local old = _G.print
+	_G.print = myPrint
+	
+	-- prepare execution 
+	local errcode = 0
+	local results = nil
+	local f,msg = loadstring(lua)
+	if (f==nil) then
+		luup.log(string.format("ALTUI: loadstring %s failed to compile, msg=%s",lua,msg),1)
+	else
+		results = f()	-- call it
+		luup.log(string.format("ALTUI: Evaluation of lua code returned: %s",json.encode(results)),50)
+		errcode=1
+	end
+	_G.print = old
+	
+	printResult = table.concat (printResult, "\n")
+	return string.format("%d||%s||%s",errcode,json.encode(results),printResult);
+end
+
 
 --calling a function from HTTP in the device context
 --http://192.168.1.5/port_3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunLua&DeviceNum=81&Code=getMapUrl(81)
@@ -816,7 +862,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				-- custompages = string.gsub(custompages,"'","\\x27")
 				-- custompages = string.gsub(custompages,"\"","\\x22")
 				local localcdn = getSetVariable(service, "LocalCDN", deviceID, "")
-				local localbootstrap = getSetVariable(service, "LocalBootstrap", lul_device, "")
+				local localbootstrap = getSetVariable(service, "LocalBootstrap", deviceID, "")
 				if (localbootstrap == "") then	
 					localbootstrap=defaultBootstrapPath
 				end
@@ -1461,13 +1507,14 @@ end
 ------------------------------------------------
 function registerHandlers()
 	luup.register_handler("myALTUI_Handler","ALTUI_Handler")
-	
-	local url = require "socket.url"
-	local req = "http://127.0.0.1:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunLua&Code="
-	code = "require 'L_ALTUI_LuaRunHandler'\n"
-	req = req .. url.escape(code)
-	local httpcode,content = luup.inet.wget(req)
-	return httpcode
+	luup.register_handler('ALTUI_LuaRunHandler','ALTUI_LuaRunHandler')
+
+	-- local url = require "socket.url"
+	-- local req = "http://127.0.0.1:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunLua&Code="
+	-- code = "require 'L_ALTUI_LuaRunHandler'\n"
+	-- req = req .. url.escape(code)
+	-- local httpcode,content = luup.inet.wget(req)
+	-- return httpcode
 end
 
 function startupDeferred(lul_device)
