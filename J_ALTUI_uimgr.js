@@ -1899,8 +1899,8 @@ var SceneEditor = function (scene) {
 		if (idx>0) {
 			// Group IDX 0 : is the "Immediate" group, it cannot be deleted
 			html += smallbuttonTemplate.format( idx, 'altui-delgroup', deleteGlyph, 'Delete group');
-			html += smallbuttonTemplate.format( idx, 'altui-editgroup', editGlyph, 'Edit group');
 		}
+		html += smallbuttonTemplate.format( idx, 'altui-editgroup', editGlyph, 'Edit group');
 		html +="</td>";			
 		html += "<td>";
 		html +="<table class='table table-condensed' data-group-idx='"+idx+"'>";
@@ -1951,8 +1951,7 @@ var SceneEditor = function (scene) {
 						
 						// now update UI
 						var parent = event.data.button.closest("tr");
-						if (idx>0) {
-							// Edit
+						if ($(event.data.button).hasClass("altui-editgroup")) {
 							parent.replaceWith( _displayGroup(group,idx) );
 						} else {
 							// Add 
