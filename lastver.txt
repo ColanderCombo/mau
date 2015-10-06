@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("783,Icon size fix;timeOf() and Blockly HMS for timestamp comparison in watches;fix for localBootstrap in remote access mode,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29090")
+UIManager.checkAltuiUpdate("790,ToNumber Block for watches;small screen optimization;Lua test runs in its own context;device variable save on UI7 does not require a reload,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29096")
