@@ -54,6 +54,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		return _proxify(url);
 	}
 	
+	//http://192.168.1.16/port_3480/data_request?id=lu_variableset&DeviceNum=208&serviceId=urn%3Amicasaverde-com%3AserviceId%3AZWaveDevice1&Variable=VariablesSet&Value=3%2Cm%2C&rand=0.6049749343656003
 	function _buildVariableSetUrl( deviceID, service, varName, varValue)
 	{
 		var url = _getUrlHead()+'?id=variableset&DeviceNum='+deviceID+'&serviceId='+service+'&Variable='+varName+'&Value='+encodeURIComponent(varValue);
