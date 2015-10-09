@@ -25,41 +25,67 @@ hostname = ""
 --------------------------------------------------------------------------
 local printResult = {}
 
-function table.pack(...)
-  return { n = select("#", ...), ... }
-end
-
-function myPrint (...)
-	local arg = table.pack(...)
-	for i = 1,arg.n do
-		arg[i] = tostring(arg[i])
+local function myPrint (...)
+	local arg = {}
+	for i = 1, select("#", ...) do
+    local x = select(i, ...)
+		arg[i] = tostring(x)
 	end
 	table.insert (printResult, table.concat (arg, "\t"))
 end
 
+-- pretty (), pretty-print for Lua, 2014.06.26  @akbooer
+local function pretty (Lua)
+  local indent = '  '   -- for line indent
+  local encoding = {}   -- set of tables currently being encoded (to avoid infinite self-reference loop)
+  local function ctrl (y) return ("\\%03d"): format (y:byte ()) end     -- deal with escapes, etc.
+  local function string_object (x) return table.concat {'"', x:gsub ("[\001-\031]", ctrl), '"'} end
+  local function bracketed_index(x) return '['..x..']' end
+  local function string_index(x) 
+    if x:match "^[%a_][%w_]*" then return x else return bracketed_index(string_object (x)) end; 
+  end
+  local function format (options, x) return (options [type(x)] or tostring) (x) end 
+  local function value (x, depth) 
+    local function table_object (x)
+      local index, items, done, crlf = {}, {}, {}, ''
+      if encoding[x] then return table.concat {"{CIRCULAR_REF = ", tostring (x), "}"} end
+      encoding[x] = true                                                    -- start encoding this table
+      for i in pairs (x) do index[#index+1] = i end
+      table.sort (index, function (a,b) return tostring(a) < tostring (b) end)
+      for i,j in ipairs (x) do items[i], done[i] = value (j, depth+1), true end  -- contiguous array from [1]
+      if #done > 0 then items = {table.concat (items, ',')} end
+      if #index - #done > 1 then crlf = '\n'.. indent:rep(depth) end  -- indent the line for pretty print
+      for i,j in ipairs (index) do
+        if not done[j] then items[#items+1] = format ({number = bracketed_index, string = string_index}, (j)) .." = ".. value (x[j], depth+1) end
+      end
+      encoding [x] = nil                                                    -- finished encoding this table
+      return table.concat {'{', table.concat {crlf, table.concat (items, ','..crlf) }, '}'}
+    end
+    return format ({table = table_object, string = string_object}, x)      
+    end  
+  return value(Lua, 1)  
+end 
+
+
 function _G.ALTUI_LuaRunHandler(lul_request, lul_parameters, lul_outputformat)
-	-- res="1||all is ok||all is ok"
-	-- return res, "text/plain"
 	local lua = lul_parameters["lua"]
 	luup.log(string.format("ALTUI: runLua(%s)",lua),50)
 	
 	-- prepare print result and override print function
 	printResult = {}
-	local old = _G.print
-	_G.print = myPrint
 	
 	-- prepare execution 
 	local errcode = 0
-	local results = nil
-	local f,msg = loadstring(lua)
+	local f,results = loadstring(lua)
 	if (f==nil) then
-		luup.log(string.format("ALTUI: loadstring %s failed to compile, msg=%s",lua,msg),1)
+		luup.log(string.format("ALTUI: loadstring %s failed to compile, msg=%s",lua,results),1)
 	else
-		results = f()	-- call it
+    setfenv (f, setmetatable ({print=myPrint, pretty=pretty}, {__index = _G, __newindex = _G}))
+    local ok
+		ok, results = pcall (f)	-- call it
 		luup.log(string.format("ALTUI: Evaluation of lua code returned: %s",json.encode(results)),50)
 		errcode=1
 	end
-	_G.print = old
 	
 	printResult = table.concat (printResult, "\n")
 	return string.format("%d||%s||%s",errcode,json.encode(results),printResult);
@@ -720,7 +746,7 @@ function inTable(tbl, item)
     return false
 end
 
-function _G.myALTUI_LuaRunHandler(lul_request, lul_parameters, lul_outputformat)
+function myALTUI_LuaRunHandler(lul_request, lul_parameters, lul_outputformat)
 
 	-- local oldlog = 	_G.log
 	-- _G.log = luup.log
