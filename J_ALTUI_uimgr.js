@@ -32,7 +32,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-// Blakc iphone6 //drive.google.com/uc?id=0B6TVdm2A9rnNdHk3Nkd1OVJmTlE&authuser=0&export=download
+// Blakc iphone6 //drive.google.com/uc?id=0B6TVdm2A9rnNakxEdDdYVWVxMnM&authuser=0&export=download
 // Black : //docs.google.com/uc?authuser=0&id=0B6TVdm2A9rnNLWlIeEZDN1ZGU0k&export=download    
 // Transparent : //drive.google.com/uc?id=0B6TVdm2A9rnNMkx5M0FsLWk2djg&authuser=0&export=download
 
@@ -3816,11 +3816,15 @@ var UIManager  = ( function( window, undefined ) {
 			// get ALTUI plugins definition, this is allways on master controller, so controller 0 !
 			//
 			var _devicetypesDB = MultiBox.getALTUITypesDB();	// master controller / Plugin information
+			var devicetype = device.device_type;
 			if (device.device_type.startsWith('urn:schemas-dcineco-com:device:MSwitch')) {
-				devicebodyHtml+=ALTUI_PluginDisplays.drawMultiswitch(device);
-			} else if (_devicetypesDB[ device.device_type ]!=null && _devicetypesDB[ device.device_type ].DeviceDrawFunc!=null) {
-				//drawfunction = eval( _devicetypesDB[ device.device_type ].DeviceDrawFunc );
-				devicebodyHtml+= Altui_ExecuteFunctionByName(_devicetypesDB[ device.device_type ].DeviceDrawFunc, window, device);
+				// replace MSwitchxxxxx by MSwitch
+				var elems = device.device_type.split(':');
+				elems[3] = "MSwitch";
+				devicetype = elems.join(':');
+			} 
+			if (_devicetypesDB[ devicetype ]!=null && _devicetypesDB[ devicetype ].DeviceDrawFunc!=null) {
+				devicebodyHtml+= Altui_ExecuteFunctionByName(_devicetypesDB[ devicetype ].DeviceDrawFunc, window, device);
 			}
 			else {
 				devicebodyHtml+= _defaultDeviceDraw(device);
