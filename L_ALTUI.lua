@@ -634,7 +634,7 @@ local htmlStyle = [[
 	</style>
 ]]
 
-local defaultBootstrapPath = "//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css"
+local defaultBootstrapPath = "//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"
 
 local htmlLocalCSSlinks = [[
 	<link rel="stylesheet" href="@localcdn@/jquery-ui.css">
@@ -644,7 +644,7 @@ local htmlLocalCSSlinks = [[
 
 local htmlCSSlinks = [[
 	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
-	<link rel="stylesheet" href="@localbootstrap@/bootstrap.min.css">
+	<link rel="stylesheet" href="@localbootstrap@">
 	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jquery-bootgrid/1.2.0/jquery.bootgrid.min.css">
 ]]
 
@@ -1565,7 +1565,11 @@ function startupDeferred(lul_device)
 	else
 		-- verify this starts by ../ to make sure it works for remote access
 		if (string.starts(localbootstrap,"../") == false) then 
-			localbootstrap = "../"..localbootstrap
+			if (string.starts(localbootstrap,"/") == false) then 
+				localbootstrap = ".."..localbootstrap
+			else
+				localbootstrap = "../"..localbootstrap
+			end
 			luup.variable_set(service, "LocalBootstrap", localbootstrap, lul_device)
 		end
 	end

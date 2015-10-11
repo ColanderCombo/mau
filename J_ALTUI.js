@@ -109,6 +109,7 @@ function altui_Settings(deviceID) {
 	var themecss = get_device_state(deviceID,  altui_Svs, 'ThemeCSS',1);
 	var localhome = get_device_state(deviceID,  altui_Svs, 'LocalHome',1);
 	var localcdn = get_device_state(deviceID,  altui_Svs, 'LocalCDN',1);
+	var localbootstrap = get_device_state(deviceID,  altui_Svs, 'LocalBootstrap',1);
 	var extraCtrl = get_device_state(deviceID,  altui_Svs, 'ExtraController',1);
 	var style='	<style>\
 	  table.altui_table td:first-child {\
@@ -132,6 +133,7 @@ function altui_Settings(deviceID) {
 	var htmlTheme = '<input id="altui-theme" class="altui-ui-input form-control"></input>';
 	var htmlHome = '<input id="altui-home" class="altui-ui-input form-control"></input>';
 	var htmlCDN = '<input id="altui-cdn" class="altui-ui-input form-control" placeholder="optional localcdn pathname, uses internet otherwise"></input>';
+	var htmlBootstrap = '<input id="altui-localbootstrap" class="altui-ui-input form-control" placeholder="optional local bootstrap relative url, use internet otherwise"></input>';
 	var htmlCTRL = '<input id="altui-ctrl" class="altui-ui-input form-control" placeholder="Comma separated list of ip_addr for extra controllers"></input>';
 	var htmlSetConfig= '<button id="altui-setconfig">Set Configuration</button>';
 	var htmlResetConfig= '<button id="altui-resetconfig">Default Configuration</button>';
@@ -145,6 +147,7 @@ function altui_Settings(deviceID) {
 		'<tr><td>Home Page</td><td> '+htmlHome+' </td></tr>' +
 		'<tr><td>url options</td><td><ul><li><b>home</b>=(pageHome , pageRooms , pageDevices , pageScenes , pageSceneEdit , pagePlugins , pageUsePages , pageEditPages , pageCredits , pageLuaTest , pageLuaStart , pageOptions , pageEditor , pageZwave , pageLocalization , pagePower , pageChildren , pageRoutes , pageQuality , pageTblDevices , pageOsCommand)</li><li><b>lang</b>=(en , fr , it)</li></ul></td></tr>' +
 		'<tr><td>Local CDN ?</td><td> '+htmlCDN+' </td></tr>' +
+		'<tr><td>Local Bootstrap ?</td><td> '+htmlBootstrap+' </td></tr>' +
 		'<tr><td>Extra Controllers</td><td> '+htmlCTRL+' </td></tr>' +
 		'<tr><td>Config</td><td> '+htmlConfig+' </td></tr>' +
 		'<tr><td>Actions</td><td> '+htmlViewJson+htmlSetConfig+htmlResetConfig+' </td></tr>' +
@@ -156,6 +159,7 @@ function altui_Settings(deviceID) {
 	jQuery( "#altui-theme" ).val(themecss);
 	jQuery( "#altui-home" ).val(localhome);
 	jQuery( "#altui-cdn" ).val(localcdn);
+	jQuery( "#altui-localbootstrap" ).val(localbootstrap);
 	jQuery( "#altui-ctrl" ).val(extraCtrl);
 	//
 	// test isregistered
@@ -172,6 +176,10 @@ function altui_Settings(deviceID) {
 	jQuery( "#altui-cdn" ).change( function() {
 		var cdn = jQuery(this).val();
 		saveVar(deviceID,  altui_Svs, "LocalCDN", cdn, true);
+	});
+	jQuery( "#altui-localbootstrap" ).change( function() {
+		var bootstrap = jQuery(this).val();
+		saveVar(deviceID,  altui_Svs, "LocalBootstrap", bootstrap, true);
 	});
 	jQuery( "#altui-ctrl" ).change( function() {
 		var ctrl = jQuery(this).val();
