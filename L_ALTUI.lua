@@ -20,84 +20,10 @@ local ltn12 = require("ltn12")
 local tmpprefix = "/tmp/altui_"		-- prefix for tmp files
 hostname = ""
 
---------------------------------------------------------------------------
--- LUA TEST HANDLER : here until I resolve the issue with the MCV store
---------------------------------------------------------------------------
-local printResult = {}
-
-local function myPrint (...)
-	local arg = {}
-	for i = 1, select("#", ...) do
-    local x = select(i, ...)
-		arg[i] = tostring(x)
-	end
-	table.insert (printResult, table.concat (arg, "\t"))
-end
-
--- pretty (), pretty-print for Lua, 2014.06.26  @akbooer
-local function pretty (Lua)
-  local indent = '  '   -- for line indent
-  local encoding = {}   -- set of tables currently being encoded (to avoid infinite self-reference loop)
-  local function ctrl (y) return ("\\%03d"): format (y:byte ()) end     -- deal with escapes, etc.
-  local function string_object (x) return table.concat {'"', x:gsub ("[\001-\031]", ctrl), '"'} end
-  local function bracketed_index(x) return '['..x..']' end
-  local function string_index(x) 
-    if x:match "^[%a_][%w_]*" then return x else return bracketed_index(string_object (x)) end; 
-  end
-  local function format (options, x) return (options [type(x)] or tostring) (x) end 
-  local function value (x, depth) 
-    local function table_object (x)
-      local index, items, done, crlf = {}, {}, {}, ''
-      if encoding[x] then return table.concat {"{CIRCULAR_REF = ", tostring (x), "}"} end
-      encoding[x] = true                                                    -- start encoding this table
-      for i in pairs (x) do index[#index+1] = i end
-      table.sort (index, function (a,b) return tostring(a) < tostring (b) end)
-      for i,j in ipairs (x) do items[i], done[i] = value (j, depth+1), true end  -- contiguous array from [1]
-      if #done > 0 then items = {table.concat (items, ',')} end
-      if #index - #done > 1 then crlf = '\n'.. indent:rep(depth) end  -- indent the line for pretty print
-      for i,j in ipairs (index) do
-        if not done[j] then items[#items+1] = format ({number = bracketed_index, string = string_index}, (j)) .." = ".. value (x[j], depth+1) end
-      end
-      encoding [x] = nil                                                    -- finished encoding this table
-      return table.concat {'{', table.concat {crlf, table.concat (items, ','..crlf) }, '}'}
-    end
-    return format ({table = table_object, string = string_object}, x)      
-    end  
-  return value(Lua, 1)  
-end 
-
-
-function _G.ALTUI_LuaRunHandler(lul_request, lul_parameters, lul_outputformat)
-	local lua = lul_parameters["lua"]
-	luup.log(string.format("ALTUI: runLua(%s)",lua),50)
-	
-	-- prepare print result and override print function
-	printResult = {}
-	
-	-- prepare execution 
-	local errcode = 0
-	local f,results = loadstring(lua)
-	if (f==nil) then
-		luup.log(string.format("ALTUI: loadstring %s failed to compile, msg=%s",lua,results),1)
-	else
-    setfenv (f, setmetatable ({print=myPrint, pretty=pretty}, {__index = _G, __newindex = _G}))
-    local ok
-		ok, results = pcall (f)	-- call it
-		luup.log(string.format("ALTUI: Evaluation of lua code returned: %s",json.encode(results)),50)
-		errcode=1
-	end
-	
-	printResult = table.concat (printResult, "\n")
-	return string.format("%d||%s||%s",errcode,json.encode(results),printResult);
-end
-
 
 --calling a function from HTTP in the device context
 --http://192.168.1.5/port_3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunLua&DeviceNum=81&Code=getMapUrl(81)
 
-------------------------------------------------
--- XPATH Stuff --
-------------------------------------------------
 
 ------------------------------------------------
 -- Debug --
@@ -1537,14 +1463,81 @@ end
 ------------------------------------------------
 function registerHandlers()
 	luup.register_handler("myALTUI_Handler","ALTUI_Handler")
-	luup.register_handler('ALTUI_LuaRunHandler','ALTUI_LuaRunHandler')
+	-- luup.register_handler('ALTUI_LuaRunHandler','ALTUI_LuaRunHandler')
 
-	-- local url = require "socket.url"
-	-- local req = "http://127.0.0.1:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunLua&Code="
+	local code = [[
+	local json = require("L_ALTUIjson")
+	local printResult = {}
+	local function myPrint (...)
+		local arg = {}
+		for i = 1, select("#", ...) do
+		local x = select(i, ...)
+			arg[i] = tostring(x)
+		end
+		table.insert (printResult, table.concat (arg, "\t"))
+	end
+	-- pretty (), pretty-print for Lua, 2014.06.26  @akbooer
+	local function pretty (Lua)
+	  local indent = '  '   -- for line indent
+	  local encoding = {}   -- set of tables currently being encoded (to avoid infinite self-reference loop)
+	  local function ctrl (y) return ("\\%03d"): format (y:byte ()) end     -- deal with escapes, etc.
+	  local function string_object (x) return table.concat {'"', x:gsub ("[\001-\031]", ctrl), '"'} end
+	  local function bracketed_index(x) return '['..x..']' end
+	  local function string_index(x) 
+		if x:match "^[%a_][%w_]*" then return x else return bracketed_index(string_object (x)) end; 
+	  end
+	  local function format (options, x) return (options [type(x)] or tostring) (x) end 
+	  local function value (x, depth) 
+		local function table_object (x)
+		  local index, items, done, crlf = {}, {}, {}, ''
+		  if encoding[x] then return table.concat {"{CIRCULAR_REF = ", tostring (x), "}"} end
+		  encoding[x] = true                                                    -- start encoding this table
+		  for i in pairs (x) do index[#index+1] = i end
+		  table.sort (index, function (a,b) return tostring(a) < tostring (b) end)
+		  for i,j in ipairs (x) do items[i], done[i] = value (j, depth+1), true end  -- contiguous array from [1]
+		  if #done > 0 then items = {table.concat (items, ',')} end
+		  if #index - #done > 1 then crlf = '\n'.. indent:rep(depth) end  -- indent the line for pretty print
+		  for i,j in ipairs (index) do
+			if not done[j] then items[#items+1] = format ({number = bracketed_index, string = string_index}, (j)) .." = ".. value (x[j], depth+1) end
+		  end
+		  encoding [x] = nil                                                    -- finished encoding this table
+		  return table.concat {'{', table.concat {crlf, table.concat (items, ','..crlf) }, '}'}
+		end
+		return format ({table = table_object, string = string_object}, x)      
+		end  
+	  return value(Lua, 1)  
+	end 
+	function ALTUI_LuaRunHandler(lul_request, lul_parameters, lul_outputformat)
+		local lua = lul_parameters["lua"]
+		luup.log(string.format("ALTUI: runLua(%s)",lua),50)
+		
+		-- prepare print result and override print function
+		printResult = {}
+		
+		-- prepare execution 
+		local errcode = 0
+		local f,results = loadstring(lua)
+		if (f==nil) then
+			luup.log(string.format("ALTUI: loadstring %s failed to compile, msg=%s",lua,results),1)
+		else
+			setfenv (f, setmetatable ({print=myPrint, pretty=pretty}, {__index = _G, __newindex = _G}))
+			local ok
+				ok, results = pcall (f)	-- call it
+				luup.log(string.format("ALTUI: Evaluation of lua code returned: %s",json.encode(results)),50)
+				errcode=1
+		end
+		printResult = table.concat (printResult, "\n")
+		return string.format("%d||%s||%s",errcode,json.encode(results),printResult);
+	end
+	luup.register_handler('ALTUI_LuaRunHandler','ALTUI_LuaRunHandler')
+	]]	
+
+	local url = require "socket.url"
+	local req = "http://127.0.0.1:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunLua&Code="
 	-- code = "require 'L_ALTUI_LuaRunHandler'\n"
-	-- req = req .. url.escape(code)
-	-- local httpcode,content = luup.inet.wget(req)
-	-- return httpcode
+	req = req .. url.escape(code)
+	local httpcode,content = luup.inet.wget(req)
+	return httpcode
 end
 
 function startupDeferred(lul_device)
