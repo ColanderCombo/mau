@@ -4399,9 +4399,80 @@ var UIManager  = ( function( window, undefined ) {
 		}
 	};
 
+	function _displayConfigVariable( device,varnum,lengthtype,value ) {
+		var html ="";
+		html += "<tr>";
+		html += "<td>";
+		html += varnum;
+		html += "</td>";
+		html += "<td>";
+		html += lengthtype;
+		html += "</td>";
+		html += "<td>";
+		html += value;
+		html += "</td>";
+		html += "</tr>";		
+		return html;
+	};
 	function _deviceDrawControlPanel( device, container ) {
 		var controller = MultiBox.controllerOf(device.altuiid).controller;
 
+		function _drawDeviceLastUpdateStats( device ) {
+			var variables = [
+				{ service:"urn:micasaverde-com:serviceId:HaDevice1", name:"FirstConfigured" },
+				{ service:"urn:micasaverde-com:serviceId:HaDevice1", name:"LastUpdate" },
+				{ service:"urn:micasaverde-com:serviceId:HaDevice1", name:"BatteryDate" },
+				{ service:"urn:micasaverde-com:serviceId:ZWaveDevice1", name:"LastWakeup" },
+				{ service:"urn:micasaverde-com:serviceId:ZWaveDevice1", name:"LastRouteUpdate" },
+				{ service:"urn:micasaverde-com:serviceId:SecuritySensor1", name:"LastTrip" },
+			];
+			// var html = "<div class='col-xs-12'>";
+			var html = "";
+			html += "<div class='panel panel-default'><div class='panel-body altui-device-keyvariables bg-info'>";
+			html += "<div class='row'>";
+			$.each(variables, function(idx,variable) {
+				var value = MultiBox.getStatus( device, variable.service, variable.name);
+				if ((value !=null) && (value !="")) {
+					html += "<div class='col-sm-6 col-md-4'><b>{0}</b>: {1}</div>".format(variable.name,_enhanceValue(value));
+				}
+			});
+			html += "</div>";
+			html +="</div></div>";		// panel
+			// html += "</div>";			// col
+			return html;
+		};
+
+		function _deviceDrawDeviceConfig( device, container ) {
+			var variables = MultiBox.getStatus(device, "urn:micasaverde-com:serviceId:ZWaveDevice1", "ConfiguredVariable");
+			if (variables==null)
+				return;
+			var html ="";
+			html +="<div class='row'>";
+			html += "<div id='altui-device-config-"+device.altuiid+"' class='col-xs-12 altui-device-config'>"
+			html += _drawDeviceLastUpdateStats( device );
+			html += "<table class='table table-condensed'>";
+			html += "<thead>";
+			html += "<tr>";
+			html += "<th>";
+			html += "Var</th>";
+			html += "<th>";
+			html += "Length Type</th>";
+			html += "<th>";
+			html += "Value</th>";
+			html += "</tr>";
+			html += "</thead>";
+			html += "<tbody>";
+			var elems = variables.split(',');
+			for (i=0;i<elems.length;i+=3) {
+				html += _displayConfigVariable( device,elems[i],elems[i+1],elems[i+2] );
+			}
+			html += "</tbody>";
+			html += "</table>";
+			html += "</div>";	// row
+			html += "</div>";	// row
+			$(container).append( html );			
+		};
+		
 		function _deviceDrawDeviceUsedIn( device, container ) {
 			var usedin_objects = MultiBox.getDeviceDependants(device);
 			var html ="";
@@ -4553,7 +4624,7 @@ var UIManager  = ( function( window, undefined ) {
 			if (_toLoad==0) {
 				$(container).append( "<div class='row'><div class='altui-debug-div'></div></div>" );	// Draw hidden debug panel
 
-				container = container.find(".panel-body");	
+				container = container.find(".altui-device-controlpanel .panel-body");	
 				var _altuitypesDB = MultiBox.getALTUITypesDB();					// for ALTUI plugin info
 				var ui_static_data = MultiBox.getDeviceStaticData(device);
 				if (ui_static_data!=null) {
@@ -4581,6 +4652,7 @@ var UIManager  = ( function( window, undefined ) {
 
 		var _toLoad = 0;
 		_deviceDrawControlPanelAttributes( device, container ); 				// row for attributes
+		_deviceDrawDeviceConfig( device, container );							// row for device 'config' info
 		_deviceDrawDeviceUsedIn( device, container );							// row for device 'used in' info
 		_deviceDrawWireFrame(device,container);
 		var ui_static_data = MultiBox.getDeviceStaticData(device);		
@@ -6010,43 +6082,18 @@ var UIManager  = ( function( window, undefined ) {
 
 	pageControlPanel: function( altuiid ) 
 	{
-		function _drawDeviceLastUpdateStats( device ) {
-			var variables = [
-				{ service:"urn:micasaverde-com:serviceId:HaDevice1", name:"FirstConfigured" },
-				{ service:"urn:micasaverde-com:serviceId:HaDevice1", name:"LastUpdate" },
-				{ service:"urn:micasaverde-com:serviceId:HaDevice1", name:"BatteryDate" },
-				{ service:"urn:micasaverde-com:serviceId:ZWaveDevice1", name:"LastWakeup" },
-				{ service:"urn:micasaverde-com:serviceId:ZWaveDevice1", name:"LastRouteUpdate" },
-				{ service:"urn:micasaverde-com:serviceId:SecuritySensor1", name:"LastTrip" },
-			];
-			var html = "<div class='col-xs-12'>";
-			html += "<div class='panel panel-default'><div class='panel-body altui-device-keyvariables bg-info'>";
-			html += "<div class='row'>";
-			$.each(variables, function(idx,variable) {
-				var value = MultiBox.getStatus( device, variable.service, variable.name);
-				if ((value !=null) && (value !="")) {
-					html += "<div class='col-sm-6 col-md-4'><b>{0}</b>: {1}</div>".format(variable.name,_enhanceValue(value));
-				}
-			});
-			html += "</div>";
-			html +="</div></div>";		// panel
-			html += "</div>";			// col
-			return html;
-		};
-		
 		// var rooms = MultiBox.getRoomsSync();
 		var device = MultiBox.getDeviceByAltuiID( altuiid );
 		var controllerid = MultiBox.controllerOf(altuiid).controller;
 		var category = MultiBox.getCategoryTitle( device.category_num );
 
-		UIManager.clearPage(_T('Control Panel'),"{0} <small>{1} <small>#{2}</small></small>".format( device.name , category ,altuiid),UIManager.oneColumnLayout);
-		
-		$(".altui-mainpanel").append( _drawDeviceLastUpdateStats(device) );
+		UIManager.clearPage(_T('Control Panel'),"{0} {1} <small>#{2}</small>".format( device.name , category ,altuiid),UIManager.oneColumnLayout);
 		
 		var html = "<div class='form-inline col-xs-12'>";
 		html += "<button type='button' class='btn btn-default' id='altui-toggle-attributes' >"+_T("Attributes")+"<span class='caret'></span></button>";
 		html += "<button type='button' class='btn btn-default altui-device-variables' id='"+altuiid+"'>"+_T("Variables")+"</button>";
 		html += "<button type='button' class='btn btn-default altui-device-actions' id='"+altuiid+"' >"+_T("Actions")+"</button>";
+		html += "<button type='button' class='btn btn-default' id='altui-device-config' >"+_T("Configuration")+"<span class='caret'></span></button>";
 		html += "<button type='button' class='btn btn-default' id='altui-device-usedin' >"+_T("Used in")+"<span class='caret'></span></button>";
 		html += "<button type='button' class='btn btn-default' id='altui-device-trigger' >"+plusGlyph+_T("Notification")+"</button>";
 		if (AltuiDebug.IsDebug())
@@ -6064,7 +6111,8 @@ var UIManager  = ( function( window, undefined ) {
 		//
 		// Manage interactions
 		//
-		$("#altui-device-attributes-"+altuiid).toggle(false);			// hide them by default;
+		$("#altui-device-attributes-"+altuiid).toggle(false);		// hide them by default;
+		$("#altui-device-config-"+altuiid).toggle(false);			// hide them by default;
 		$("#altui-device-usedin-"+altuiid).toggle(false);			// hide them by default;
 		$(".altui-debug-div").toggle(false);						// hide
 		$(container).off('click','.altui-deldevice')
@@ -6086,7 +6134,10 @@ var UIManager  = ( function( window, undefined ) {
 			$("#altui-device-usedin-"+altuiid).toggle();		// toogle attribute box
 			$("#altui-device-usedin span.caret").toggleClass( "caret-reversed" );
 		});
-		
+		$("#altui-device-config").click( function() {
+			$("#altui-device-config-"+altuiid).toggle();		// toogle attribute box
+			$("#altui-device-config span.caret").toggleClass( "caret-reversed" );
+		});		
 		$("#altui-device-trigger").click( function() {
 			var info = MultiBox.controllerOf(altuiid);
 			var trigger = {
