@@ -4444,31 +4444,32 @@ var UIManager  = ( function( window, undefined ) {
 
 		function _deviceDrawDeviceConfig( device, container ) {
 			var variables = MultiBox.getStatus(device, "urn:micasaverde-com:serviceId:ZWaveDevice1", "ConfiguredVariable");
-			if (variables==null)
-				return;
 			var html ="";
 			html +="<div class='row'>";
 			html += "<div id='altui-device-config-"+device.altuiid+"' class='col-xs-12 altui-device-config'>"
 			html += _drawDeviceLastUpdateStats( device );
-			html += "<table class='table table-condensed'>";
-			html += "<thead>";
-			html += "<tr>";
-			html += "<th>";
-			html += "Var</th>";
-			html += "<th>";
-			html += "Length Type</th>";
-			html += "<th>";
-			html += "Value</th>";
-			html += "</tr>";
-			html += "</thead>";
-			html += "<tbody>";
-			var elems = variables.split(',');
-			for (i=0;i<elems.length;i+=3) {
-				html += _displayConfigVariable( device,elems[i],elems[i+1],elems[i+2] );
-			}
-			html += "</tbody>";
-			html += "</table>";
-			html += "</div>";	// row
+			if (isNullOrEmpty(variables) == false) {
+				html += "<table class='table table-condensed'>";
+				html +="<caption>{0}</caption>".format(_T("Device zWave Parameters"));
+				html += "<thead>";
+				html += "<tr>";
+				html += "<th>";
+				html += "Var</th>";
+				html += "<th>";
+				html += "Length Type</th>";
+				html += "<th>";
+				html += "Value</th>";
+				html += "</tr>";
+				html += "</thead>";
+				html += "<tbody>";
+				var elems = variables.split(',');
+				for (i=0;i<elems.length;i+=3) {
+					html += _displayConfigVariable( device,elems[i],elems[i+1],elems[i+2] );
+				}
+				html += "</tbody>";
+				html += "</table>";
+			}	
+			html += "</div>";	// device-config
 			html += "</div>";	// row
 			$(container).append( html );			
 		};
