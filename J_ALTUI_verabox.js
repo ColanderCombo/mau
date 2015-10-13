@@ -1887,7 +1887,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		
 	function _getSceneHistory( id, cbfunc) {
 		// var cmd = "cat /var/log/cmh/LuaUPnP.log | grep \"Device_Variable::m_szValue_set device: {0}.*;1m{1}\"".format(device.id,state.variable);
-		var cmd = "cat /var/log/cmh/LuaUPnP.log | grep 'Scene::RunScene running {0}'".format(id);
+		var cmd = "cat /var/log/cmh/LuaUPnP.log | grep '"+'\t'+"Scene::RunScene running {0} '".format(id);
 		return _osCommand(cmd,function(str) {
 			var result = {
 				lines:[],
