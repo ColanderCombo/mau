@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("800,pretty() for lua test output - akbooer;localboostrap variable must point to a css file;multiswitch - dklinkman,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29126")
+UIManager.checkAltuiUpdate("808,zWave parameter configuration in device control panel;RunScene History Fix;Lua handler in global context,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29144")
