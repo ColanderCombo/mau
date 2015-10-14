@@ -4420,7 +4420,8 @@ var UIManager  = ( function( window, undefined ) {
 		var html ="";
 		html += "<tr>";
 		html += "<td>";
-		html += "<div class='col-xs-4'><input required type='number' min='1' class='form-control input-sm' value='{0}'></input></div>".format(varnum);;
+		html += "<div class='col-xs-4'><input required type='number' min='1' class='form-control input-sm' value='{0}'></input></div>".format(varnum);
+		html += smallbuttonTemplate.format( 'altui-deletevar-'+varnum, 'altui-delete-variable', deleteGlyph ,'Delete');
 		html += "</td>";
 		html += "<td>";
 		html += sel.wrap("div").parent().html();
@@ -4475,7 +4476,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			html += "<div id='altui-device-config-"+device.altuiid+"' class='col-xs-12 altui-device-config'>"
 			html += _drawDeviceLastUpdateStats( device );
 			if (isNullOrEmpty(variables) == false) {
-				html += "<form action='javascript:void(0);' role='form' data-toggle='validator'>";
+				html += "<form id='myform' data-toggle='validator' role='form' action='javascript:void(0);' >";
 				html += "<table class='table table-condensed altui-config-variables'>";
 				html +=("<caption>{0} <button id='"+device.altuiid+"' type='submit' class='btn btn-sm btn-primary altui-device-config-save'>{1}</button></caption>").format(_T("Device zWave Parameters"),_T('Save Changes'));
 				html += "<thead>";
@@ -4497,29 +4498,55 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				for (i=0;i<elems.length;i+=3) {
 					html += _displayConfigVariable( device,elems[i],elems[i+1],elems[i+2],curelems[i+2] );
 				}
+				html += "<tr>";
+				html += "<td colspan='4'>";
+				html += smallbuttonTemplate.format( 'altui-addvar', 'altui-add-variable', plusGlyph ,'Add');
+				html += "</td>";
+				html += "</tr>";
 				html += "</tbody>";
 				html += "</table>";
 			}	
 			html += "</div>";	// device-config
 			html += "</div>";	// row
 			$(container).append( html );		
-			$(".altui-device-config-save").click(function() {
-				var altuiid = $(this).prop('id');
-				var controllerid = MultiBox.controllerOf(altuiid).controller;
-				var device = MultiBox.getDeviceByAltuiID(altuiid);
-				var rows = $(this).closest("table").find("tbody tr");
-				var variables = [];
-				$(rows).each(function(idx,row) {
-					var tds = $(row).find("td");
-					variables.push("{0},{1},{2}".format( 
-						$(tds[0]).find("input").val(),
-						$(tds[1]).find("select :selected").val(),
-						$(tds[2]).find("input").val() )
-					);
+			$(".altui-device-config")
+				.on('click',".altui-add-variable", function() {
+					var tr = $(this).closest('tr');	// remove the line purely
+					$(tr).before( _displayConfigVariable( device,'0','m','','' ) );
+				})
+				.on('click',".altui-delete-variable",function(){
+					var id = $(this).prop('id');
+					var tr = $(this).closest('tr').remove();	// remove the line purely
 				});
-				MultiBox.setStatus( device, "urn:micasaverde-com:serviceId:ZWaveDevice1", "VariablesSet", variables.join(",") );
-				MultiBox.reloadEngine( controllerid );
-				PageMessage.message( "Device zWave parameter saved, a reload will now happen", "info");
+				// .on('click',".altui-device-config-save",function() {
+					// var result = $('#myform').validator('validate');
+					// $("#myform").submit();
+				// });
+			$("#myform").on('submit', function(e) {
+				if (e.isDefaultPrevented()) {
+					// handle the invalid form...
+				} else {
+					// everything looks good!
+					e.preventDefault();
+					// var result = $('#myform').validator('validate');
+					var altuiid = $('#myform .altui-device-config-save').prop('id');
+					var controllerid = MultiBox.controllerOf(altuiid).controller;
+					var device = MultiBox.getDeviceByAltuiID(altuiid);
+					var rows = $(this).closest("table").find("tbody tr").not(":last-child");
+					var variables = [];
+					$(rows).each(function(idx,row) {
+						var tds = $(row).find("td");
+						variables.push("{0},{1},{2}".format( 
+							$(tds[0]).find("input").val(),
+							$(tds[1]).find("select :selected").val(),
+							$(tds[2]).find("input").val() )
+						);
+					});
+					MultiBox.setStatus( device, "urn:micasaverde-com:serviceId:ZWaveDevice1", "VariablesSet", variables.join(",") );
+					MultiBox.reloadEngine( controllerid );
+					PageMessage.message( "Device zWave parameter saved, a reload will now happen", "info");
+				}
+				return false;
 			});
 		};
 		
