@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.88"
+local version = "v0.89"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -1523,11 +1523,11 @@ function registerHandlers()
 			setfenv (f, setmetatable ({print=myPrint, pretty=pretty}, {__index = _G, __newindex = _G}))
 			local ok
 				ok, results = pcall (f)	-- call it
-				luup.log(string.format("ALTUI: Evaluation of lua code returned: %s",L_ALTUIjson.encode(results)),50)
+				luup.log(string.format("ALTUI: Evaluation of lua code returned: %s",tostring(results)),50)
 				errcode=1
 		end
 		printResult = table.concat (printResult, "\n")
-		return string.format("%d||%s||%s",errcode,L_ALTUIjson.encode(results),printResult);
+		return string.format("%d||%s||%s",errcode,tostring(results),printResult);
 	end
 	luup.register_handler('ALTUI_LuaRunHandler','ALTUI_LuaRunHandler')
 	]]	

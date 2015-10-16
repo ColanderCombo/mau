@@ -4471,6 +4471,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			*/
 			var curvariables = MultiBox.getStatus(device, "urn:micasaverde-com:serviceId:ZWaveDevice1", "ConfiguredVariable");
 			var variables = MultiBox.getStatus(device, "urn:micasaverde-com:serviceId:ZWaveDevice1", "VariablesSet");
+			if (isNullOrEmpty(variables))
+				variables = curvariables;
 			var html ="";
 			html +="<div class='row'>";
 			html += "<div id='altui-device-config-"+device.altuiid+"' class='col-xs-12 altui-device-config'>"
