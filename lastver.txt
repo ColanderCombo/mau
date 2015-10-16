@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("808,zWave parameter configuration in device control panel (partial);RunScene History Fix;Lua handler in global context,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29144")
+UIManager.checkAltuiUpdate("813,Add Delete zWave parameters;important bug fix : Remove JSON from Lua handler,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29168")
