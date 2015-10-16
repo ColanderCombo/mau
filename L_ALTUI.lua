@@ -1466,7 +1466,7 @@ function registerHandlers()
 	-- luup.register_handler('ALTUI_LuaRunHandler','ALTUI_LuaRunHandler')
 
 	local code = [[
-	local json = require("L_ALTUIjson")
+	-- local altuijson = require("L_ALTUIjson")
 	local printResult = {}
 	local function myPrint (...)
 		local arg = {}
@@ -1523,11 +1523,11 @@ function registerHandlers()
 			setfenv (f, setmetatable ({print=myPrint, pretty=pretty}, {__index = _G, __newindex = _G}))
 			local ok
 				ok, results = pcall (f)	-- call it
-				luup.log(string.format("ALTUI: Evaluation of lua code returned: %s",json.encode(results)),50)
+				luup.log(string.format("ALTUI: Evaluation of lua code returned: %s",L_ALTUIjson.encode(results)),50)
 				errcode=1
 		end
 		printResult = table.concat (printResult, "\n")
-		return string.format("%d||%s||%s",errcode,json.encode(results),printResult);
+		return string.format("%d||%s||%s",errcode,L_ALTUIjson.encode(results),printResult);
 	end
 	luup.register_handler('ALTUI_LuaRunHandler','ALTUI_LuaRunHandler')
 	]]	
