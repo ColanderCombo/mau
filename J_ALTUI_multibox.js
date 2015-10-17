@@ -398,7 +398,7 @@ var MultiBox = ( function( window, undefined ) {
 	};
 	function _setAttr(device, attribute, value,cbfunc) {
 		var elems = device.altuiid.split("-");
-		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getUPnPHelper().UPnPSetAttr(elems[1], attribute, value,cbfunc);
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.setAttr(elems[1], attribute, value,cbfunc);
 	};
 	function _isDeviceZwave(device) {
 		var elems = device.altuiid.split("-");
