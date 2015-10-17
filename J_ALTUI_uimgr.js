@@ -6028,10 +6028,10 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 						MultiBox.runAction( device, "urn:upnp-org:serviceId:VSwitch1","ToggleState", {} );
 						break;
 					case "urn:schemas-upnp-org:device:cplus:1":
-						var status = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:cplus1', 'Present' ); 
-						status = parseInt(status);
-						MultiBox.runAction( device, "urn:upnp-org:serviceId:cplus1","SetPower", {newPowerState: 1-status} );
-						break;
+						// var status = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:cplus1', 'Present' ); 
+						// status = parseInt(status);
+						// MultiBox.runAction( device, "urn:upnp-org:serviceId:cplus1","SetPower", {newPowerState: 1-status} );
+						// break;
 					default:
 						UIManager.pageControlPanel(altuiid);
 						break;
