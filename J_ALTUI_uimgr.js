@@ -2873,6 +2873,7 @@ var UIManager  = ( function( window, undefined ) {
 		{ id:'ShowVideoThumbnail', type:'checkbox', label:"Show Video Thumbnail in Local mode", _default:1 },
 		{ id:'FixedLeftButtonBar', type:'checkbox', label:"Left Buttons are fixed on the page", _default:1 },
 		{ id:'ShowWeather', type:'checkbox', label:"Show Weather on home page", _default:1 },
+		{ id:'UseVeraFavorites', type:'checkbox', label:"Use Vera Favorites", _default:0 },
 		{ id:'Menu2ColumnLimit', type:'number', label:"2-columns Menu's limit", _default:15, min:2, max:30  },
 		{ id:'TempUnitOverride', type:'select', label:"Weather Temp Unit (UI5)", _default:'c', choices:'c|f'  },
 	];

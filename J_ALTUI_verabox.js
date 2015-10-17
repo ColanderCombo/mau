@@ -1187,8 +1187,11 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		};
 	};
 	function _isUI5() {
+		if (_uniqID==0)
+			return (UIManager.UI7Check()==false);
+		
 		var bi = _getBoxInfo()
-		return (bi.BuildVersion==undefined) || (bi.BuildVersion.startsWith("*1.5.")) || ((_uniqID==0)&&(UIManager.UI7Check()==false));
+		return (bi.BuildVersion==undefined) || (bi.BuildVersion.startsWith("*1.5."));
 	};
 	function _getLuaStartup() {
 		return _user_data.StartupCode || "";

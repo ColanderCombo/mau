@@ -388,9 +388,33 @@ var Favorites = ( function (undefined) {
 	
 	function _set(type, id, bFavorite) {
 		_favorites[type][id]=bFavorite;
+		if (MyLocalStorage.getSettings('UseVeraFavorites')==true) {
+			switch(type) {
+				case "device":
+					var device = MultiBox.getDeviceByAltuiID( id );
+					MultiBox.setAttr(device, "onDashboard", bFavorite ? 1 : 0 );
+					break;
+				case "scene":
+					var scene = MultiBox.getSceneByAltuiID( id );
+					scene.onDashboard = (bFavorite ? 1 : 0);
+					MultiBox.editScene(scene.altuiid,scene);
+					break;
+			}
+		}
 		MyLocalStorage.setSettings("Favorites",_favorites);
 	};		
 	function _get(type, id) {
+		if (MyLocalStorage.getSettings('UseVeraFavorites')==true) {
+			switch(type) {
+				case "device":
+					var device = MultiBox.getDeviceByAltuiID( id );
+					_favorites[type][id] = (device.onDashboard==1);
+					break;
+				case "scene":
+					var scene = MultiBox.getSceneByAltuiID( id );
+					_favorites[type][id] = ( scene.onDashboard==1);
+			}
+		}
 		return _favorites[type][id] || false;
 	};
 	
