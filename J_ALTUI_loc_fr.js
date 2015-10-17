@@ -14,7 +14,6 @@ Localization.init( {
 	"Away":"Distant",
 	"Night":"Nuit",
 	"Vacation":"Vacances",
-	"Welcome to VERA Alternate UI": "Bienvenue dans AltUI pour VERA",
 	"Room": "Pièce",
 	"Rooms": "Pièces",
 	"Device": "Périphérique",
@@ -279,5 +278,7 @@ Localization.init( {
 	"This test code will succeed if it is syntactically correct. It must be the body of a function and can return something. The return object and console output will be displayed)":"La syntaxe de ce code de test doit etre correcte. Cela doit etre le corps d'une fonction et peut retourner une valeur. L'objet de retour et la sortie de la console seront affichés)",
 	"H M S part of a timestamp":"partie H M S d'un timestamp",
 	"H M S duration in seconds":"duree H M S en secondes",
-	"Convert text to number":"Conversion en nombre"
+	"Convert text to number":"Conversion en nombre",
+	"Welcome to ALTUI":"Bienvenue dans ALTUI",
+	"Use Vera Favorites":"Utiliser les Favoris en mode Vera"
 });

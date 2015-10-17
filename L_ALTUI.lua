@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.89"
+local version = "v0.90"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -645,6 +645,7 @@ local htmlLayout = [[
 		var g_CustomPages = @custompages@;
 		var g_CustomTheme = '@ThemeCSS@';
 		var g_MyDeviceID = @mydeviceid@;
+		var g_Options = '@ServerOptions@';
 		var g_ExtraController = '@extracontroller@';
 		var g_FirstUserData = @firstuserdata@;
 		// -->
@@ -813,6 +814,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				-- local custompages = luup.variable_get(service, "CustomPages", deviceID) or "[]"
 				-- custompages = string.gsub(custompages,"'","\\x27")
 				-- custompages = string.gsub(custompages,"\"","\\x22")
+				local serverOptions= getSetVariable(service, "ServerOptions", lul_device, "")	
 				local localcdn = getSetVariable(service, "LocalCDN", deviceID, "")
 				local localbootstrap = getSetVariable(service, "LocalBootstrap", deviceID, "")
 				if (localbootstrap == "") then	
@@ -825,6 +827,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				variables["devicetypes"] = json.encode(tbl)
 				variables["custompages"] = "["..table.concat(result_tbl, ",").."]"
 				variables["ThemeCSS"] = luup.variable_get(service, "ThemeCSS", deviceID) or ""
+				variables["ServerOptions"] = serverOptions
 				variables["style"] = htmlStyle
 				variables["mydeviceid"] = deviceID
 				variables["extracontroller"] = getSetVariable(service, "ExtraController", deviceID, "")
@@ -1551,6 +1554,7 @@ function startupDeferred(lul_device)
 	local localurl = getSetVariableIfEmpty(service,"LocalHome", lul_device, "/port_3480/data_request?id=lr_ALTUI_Handler&command=home")
 	local css = getSetVariable(service,"ThemeCSS", lul_device, "")
 	local extraController= getSetVariable(service, "ExtraController", lul_device, "")
+	local serverOptions= getSetVariable(service, "ServerOptions", lul_device, "")	
 	local localcdn = getSetVariable(service, "LocalCDN", lul_device, "")
 	local localbootstrap = getSetVariable(service, "LocalBootstrap", lul_device, "")
 	if (localbootstrap == "") then	

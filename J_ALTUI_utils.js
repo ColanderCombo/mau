@@ -285,6 +285,12 @@ function _array2Table(arr,idcolumn,viscols) {
 	return html;
 };
 
+
+function isObject(obj)
+{
+	return (Object.prototype.toString.call(obj)== "[object Object]");
+};
+	
 function isInteger(data) {
     return (data === parseInt(data, 10));
 };
@@ -386,9 +392,13 @@ var Favorites = ( function (undefined) {
 	var _favorites = $.extend( {'device':{}, 'scene':{} }, MyLocalStorage.getSettings("Favorites") );
 	MyLocalStorage.setSettings("Favorites",_favorites);
 	
+	function _save() {
+		MyLocalStorage.setSettings("Favorites",_favorites);
+	};
+
 	function _set(type, id, bFavorite) {
 		_favorites[type][id]=bFavorite;
-		if (MyLocalStorage.getSettings('UseVeraFavorites')==true) {
+		if (MyLocalStorage.getSettings('UseVeraFavorites')==1) {
 			switch(type) {
 				case "device":
 					var device = MultiBox.getDeviceByAltuiID( id );
@@ -401,10 +411,10 @@ var Favorites = ( function (undefined) {
 					break;
 			}
 		}
-		MyLocalStorage.setSettings("Favorites",_favorites);
+		_save();
 	};		
 	function _get(type, id) {
-		if (MyLocalStorage.getSettings('UseVeraFavorites')==true) {
+		if (MyLocalStorage.getSettings('UseVeraFavorites')==1) {
 			switch(type) {
 				case "device":
 					var device = MultiBox.getDeviceByAltuiID( id );
@@ -416,10 +426,6 @@ var Favorites = ( function (undefined) {
 			}
 		}
 		return _favorites[type][id] || false;
-	};
-	
-	function _save() {
-		MyLocalStorage.setSettings("Favorites",_favorites);
 	};
 	
 	return {

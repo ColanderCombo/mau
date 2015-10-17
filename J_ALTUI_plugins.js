@@ -119,7 +119,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	
 	// return the html string inside the .panel-body of the .altui-device#id panel
 	function _drawCamera( device ) {
-		var video = MyLocalStorage.getSettings('ShowVideoThumbnail') || "";
+		var video = (MyLocalStorage.getSettings('ShowVideoThumbnail') || 0)==1;
 		var urlHead = MultiBox.getUrlHead(device.altuiid) 
 		if ( MultiBox.isRemoteAccess() || (video==false) ) {
 			var img = $("<img class='altui-camera-picture'></img>")

@@ -14,7 +14,6 @@ Localization.init( {
 	"Away":"Away",
 	"Night":"Night",
 	"Vacation":"Vacation",
-	"Welcome to VERA Alternate UI": "Benvenuti a VERA UI Alternativo",
 	"Room": "Stanze",
 	"Rooms": "Stanze",
 	"Device":"Device",
@@ -278,5 +277,7 @@ Localization.init( {
 	"This test code will succeed if it is syntactically correct. It must be the body of a function and can return something. The return object and console output will be displayed)":"This test code will succeed if it is syntactically correct. It must be the body of a function and can return something. The return object and console output will be displayed)",
 	"H M S part of a timestamp":"H M S part of a timestamp",
 	"H M S duration in seconds":"H M S duration in seconds",
-	"Convert text to number":"Convert text to number"
+	"Convert text to number":"Convert text to number",
+	"Welcome to ALTUI":"Benvenuti a VERA UI Alternativo",
+	"Use Vera Favorites":"Use Vera Favorites"
 	});
