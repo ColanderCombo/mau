@@ -618,9 +618,9 @@ var DialogManager = ( function() {
 		var warningpic = "<div class='altui-warningicon pull-left'>{0}</div>".format(questionGlyph);
 		var dialog = DialogManager.registerDialog('dialogModal',
 						defaultDialogModalTemplate.format( 
-								warningpic+_T("Are you Sure ?"), 			// title
-								message						// body
-								));
+								warningpic+_T("Are you Sure ?"), 	// title
+								message,							// body
+								""));								// size
 		DialogManager.dlgAddDialogButton(dialog, true, _T("Yes"));
 		// buttons
 		$('div#dialogs')		
@@ -717,7 +717,8 @@ var DialogManager = ( function() {
 		var dialog =  DialogManager.registerDialog('dialogModal',
 						defaultDialogModalTemplate.format( 
 								title, 			// title
-								""				// body
+								"",				// body
+								"modal-lg"
 							));
 		DialogManager.dlgAddDialogButton(dialog, true, _T("Save Changes"));
 		return dialog; 
@@ -5248,7 +5249,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		var dialog = DialogManager.registerDialog('dialogModal',
 						defaultDialogModalTemplate.format( 
 						'Image Properties',																// title
-						"<form>"+propertyline.format( widget.properties.url.htmlEncode() )+"</form>"	// body
+						"<form>"+propertyline.format( widget.properties.url.htmlEncode() )+"</form>",				// body
+						"modal-lg"	// body
 					));
 
 		DialogManager.dlgAddDialogButton($('div#dialogModal'), true, _T("Save Changes"));				
@@ -6701,7 +6703,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 						var dialog =  DialogManager.registerDialog('dialogModal',
 							defaultDialogModalTemplate.format( 
 							_T("Scene History"), 			// title
-							""				// body
+							"",				// body
+							"modal-lg"		// size
 							));
 						MultiBox.getSceneHistory( scene, function(history) {
 							var html="";
@@ -7076,7 +7079,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			var dialog = DialogManager.registerDialog('dialogModal',
 							defaultDialogModalTemplate.format( 
 							'Page Properties',					// title
-							"<form>"+propertyline+"</form>"		// body
+							"<form>"+propertyline+"</form>",	// body
+							"modal-lg"		// size
 						));
 
 			DialogManager.dlgAddDialogButton($('div#dialogModal'), true, _T("Save Changes"));							
@@ -7569,7 +7573,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				var dialog = DialogManager.registerDialog('dialogModal',
 								defaultDialogModalTemplate.format( 
 								_T('Command Parameters'),		// title
-								"<form></form>"					// body
+								"<form></form>",				// body
+								"modal-lg"		// size
 							));
 				var lastOne = MyLocalStorage.getSettings("LastOne_"+'param0') || "";
 				DialogManager.dlgAddLine(dialog, 'param0', _T('Parameter'), lastOne,"", {required:''} );
@@ -9023,7 +9028,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			var dialog = DialogManager.registerDialog('dialogModal',
 							defaultDialogModalTemplate.format( 
 							_T('Command Parameters'),		// title
-							"<form></form>"					// body
+							"<form></form>",				// body
+							"modal-lg"		// size
 						));
 			var lastOne = MyLocalStorage.getSettings("LastOne_"+name) || "";
 			DialogManager.dlgAddLine(dialog, name, label, lastOne,"", {required:''} );
@@ -9536,9 +9542,9 @@ $(document).ready(function() {
 		deviceActionModalTemplate += "  </div><!-- /.modal-dialog -->";
 		deviceActionModalTemplate += "</div><!-- /.modal -->";
 
-		// 0: title, 1: body, 2: primary button text like _T("Save Changes")
+		// 0: title, 1: body, 2: class size
 		defaultDialogModalTemplate = "<div id='dialogModal' class='modal fade'>";
-		defaultDialogModalTemplate += "  <div class='modal-dialog modal-lg'>";
+		defaultDialogModalTemplate += "  <div class='modal-dialog {2}'>";
 		defaultDialogModalTemplate += "    <form class='form' data-toggle='validator' onsubmit='return false;'>";
 		defaultDialogModalTemplate += "    <div class='modal-content'>";
 		defaultDialogModalTemplate += "      <div class='modal-header'>";
