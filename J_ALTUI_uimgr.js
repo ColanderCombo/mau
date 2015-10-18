@@ -62,6 +62,7 @@ var optHorGlyph="";
 var refreshGlyph="";
 var removeGlyph="";
 var calendarGlyph="";
+var signalGlyph="";
 var searchGlyph = "";
 var questionGlyph = "";
 var staremtpyGlyph = "";
@@ -103,7 +104,7 @@ var styles ="					\
 	.altui-variable-value-history td:first-child {	\
 		width:170px;	\
 	}					\
-	button.altui-variable-history {	\
+	button.altui-variable-history,button.altui-variable-push {	\
 		padding-top: 	1px;	\
 		padding-bottom: 1px;	\
 	}					\
@@ -3297,14 +3298,39 @@ var UIManager  = ( function( window, undefined ) {
 		return "<input {2} id='{0}' class='form-control' type='text' value='{1}'></input>".format(id,value,extradata);
 	};
 		
+	// -- urn:micasaverde-com:serviceId:SceneController1#LastSceneID#208#thingspeak#key=U1F7T31MHB5O8HZI&field1=%s
+	function _getPushLineParams(pushLine) {
+		var key="";
+		var fieldnum=0;
+		var params = pushLine.split('#');
+		var re = /^key=([^\&]+)&field(\d)=.*$/; 
+		var m;
+		 
+		if ((m = re.exec(params[5])) !== null) {
+			if (m.index === re.lastIndex) {
+				re.lastIndex++;
+			}
+			// View your result using the m-variable.
+			key = m[1];
+			fieldnum=parseInt(m[2]);
+		}
+		//service,variable,deviceid,provider,data 
+		return {
+			service : params[0],
+			variable : params[1],
+			deviceid : params[2],
+			provider : params[3],
+			channelid : params[4],
+			key : key,
+			fieldnum : fieldnum
+		};
+	}
+	
+	function _setPushLineParams(push) {
+		return "{0}#{1}#{2}#{3}#{4}#{5}".format( push.service, push.variable, push.deviceid, push.provider, push.channelid, "key={0}&field{1}=%s".format(push.key,push.fieldnum));
+	}
+
 	function _deviceDrawVariables(device) {
-		// 0: variable , 1: value , 2: service
-		var deviceVariableLineTemplate = "  <tr>";
-		// deviceVariableLineTemplate += "         <th scope='row'>1</th>";
-		deviceVariableLineTemplate += "         <td><span title='{2}'>{0}</span></td>";
-		deviceVariableLineTemplate += 	("<td>"+smallbuttonTemplate.format( '{3}', 'altui-variable-history', calendarGlyph,'History')+"</td>");
-		deviceVariableLineTemplate += "         <td id='{3}' class='altui-variable-value' >{1}</td>";
-		deviceVariableLineTemplate += "     </tr>";
 
 		function _clickOnValue() {
 			var id = $(this).prop('id');	// idx in variable state array
@@ -3331,6 +3357,14 @@ var UIManager  = ( function( window, undefined ) {
 				$(this).replaceWith(_enhanceValue(val));					
 			});
 		};
+
+		// 0: variable , 1: value , 2: service
+		var deviceVariableLineTemplate = "  <tr>";
+		// deviceVariableLineTemplate += "         <th scope='row'>1</th>";
+		deviceVariableLineTemplate += "         <td><span title='{2}'>{0}</span></td>";
+		deviceVariableLineTemplate += 	("<td>"+smallbuttonTemplate.format( '{3}', 'altui-variable-history', calendarGlyph,'History')+smallbuttonTemplate.format( '{3}', 'altui-variable-push', signalGlyph,'Graph')+"</td>");
+		deviceVariableLineTemplate += "         <td id='{3}' class='altui-variable-value' >{1}</td>";
+		deviceVariableLineTemplate += "     </tr>";
 			
 		// prepare the text for the modal .. .for each variable do a line, add lines to template
 		// var device = MultiBox.getDeviceByID( devid );
@@ -3345,9 +3379,89 @@ var UIManager  = ( function( window, undefined ) {
 					);
 				lines.push(  str );
 			});
+			var altuidevice = MultiBox.getDeviceByID( 0, g_MyDeviceID );
 
 			// update modal with new text
 			DialogManager.registerDialog('deviceModal',deviceModalTemplate.format( lines.join(''), device.name, device.altuiid ));
+			$("button.altui-variable-push").click( function() {
+				var tr = $(this).closest("tr");
+				var varidx = tr.find("td.altui-variable-value").prop('id');
+				var devicestates = MultiBox.getStates(device);
+				var state = devicestates[varidx];
+				var form = $(this).closest("tbody").find("form#form_"+varidx);
+				if (form.length==0) {
+					var varPushes = {};
+					$.each( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend" ) || "").split(';'),function(idx,pushLine) {
+						var push = _getPushLineParams(pushLine);
+						if (device.altuiid == ("0-"+push.deviceid)) {	//ctrl 0 only for now !
+							varPushes[push.service+':'+push.variable]=push;
+						}
+					});
+					var pushData = varPushes[state.service+':'+state.variable];
+					var html = "<tr><td colspan='3'>";
+						html += "<div class='panel panel-default'> <div class='panel-body'>";
+							html += "<div class='checkbox'>"
+								html += "<label><input type='checkbox' id='enablePush_{0}' {1}>Enable Push to Thingspeak</label>".format(
+									varidx, 
+									(pushData!=null) ? 'checked' : ''
+								);
+							html += "</div>"
+							html += "<form id='form_{0}' class='form-inline'>".format(varidx);
+								html += "<div class='form-group'>";
+									html += "<label for='apiKey_{0}'>Write API Key: </label>".format(varidx);
+									html += "<input type='text' class='form-control' id='apiKey_{0}' placeholder='Write key' value='{1}'></input>".format(
+										varidx,
+										(pushData!=null) ? pushData.key : ''
+									)
+								html += "</div>"
+								html += "<div class='form-group'>";
+									html += "<label for='channelID_{0}'>Channel ID: </label>".format(varidx);
+									html += "<input type='number' min=1 class='form-control' id='channelID_{0}' placeholder='ID' value='{1}'></input>".format(
+										varidx,
+										(pushData!=null) ? pushData.channelid : ''
+									)
+								html += "</div>"
+								html += "<div class='form-group'>";
+									html += "<label for='fieldNum_{0}'>Field Number: </label>".format(varidx);
+									html += "<input type='number' min=1 max=8 class='form-control' id='fieldNum_{0}' placeholder='number' value='{1}'></input>".format(
+										varidx,
+										(pushData!=null) ? pushData.fieldnum : ''
+									)
+								html += "</div>"
+							html += "</form>"
+						html += "</div></div>";
+					html += "</td></tr>";
+					tr.after(html);
+				} else {
+					//TODO
+					// get all data from fields
+					// Save into ALTUI device Variable
+					
+					// first keep the other ones
+					var varPushesToSave = [];
+					$.each( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend" ) || "").split(';'),function(idx,pushLine) {
+						var push = _getPushLineParams(pushLine);
+						if ((device.altuiid != ("0-"+push.deviceid)) || (push.service!=state.service) || (push.variable != state.variable)) {	//ctrl 0 only for now !
+							varPushesToSave.push(pushLine);
+						}
+					});
+					var nexttr = tr.next("tr");
+					if (nexttr.find("input#enablePush_"+varidx).prop('checked') ==true ) {
+						var push = {
+							service : state.service,
+							variable : state.variable,
+							deviceid : MultiBox.controllerOf(device.altuiid).id,
+							provider : "thingspeak",
+							channelid : form.find("input#channelID_"+varidx).val(),
+							key : form.find("input#apiKey_"+varidx).val(),
+							fieldnum : form.find("input#fieldNum_"+varidx).val()
+						};
+						varPushesToSave.push( _setPushLineParams(push) );
+						MultiBox.setStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend", varPushesToSave.join(';') );
+					}
+					form.closest("tr").remove();
+				}
+			});
 			$("button.altui-variable-history").click( function() {
 				var tr = $(this).closest("tr");
 				var varidx = tr.find("td.altui-variable-value").prop('id');
@@ -9570,6 +9684,7 @@ $(document).ready(function() {
 		questionGlyph=glyphTemplate.format( "question-sign", _T("Question"), "text-warning" );
 		searchGlyph=glyphTemplate.format( "search", _T("Search"), "" );
 		optHorGlyph=glyphTemplate.format( "option-horizontal", _T("Option"), "pull-left" );
+		signalGlyph=glyphTemplate.format( "signal", _T("Graph"), "" );
 		calendarGlyph=glyphTemplate.format( "calendar", _T("History"), "" );
 		refreshGlyph=glyphTemplate.format( "refresh", _T("Refresh"), "text-warning" );
 		removeGlyph=glyphTemplate.format( "remove", _T("Remove"), "" );
