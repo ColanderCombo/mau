@@ -3272,6 +3272,8 @@ var UIManager  = ( function( window, undefined ) {
 	function _enhanceValue(value) 
 	{
 		//try to guess what is the value
+		if (value==null)
+			return "";
 		var valuetype = $.type(value);
 		if ($.isNumeric(value)) {
 			if ( value>=1035615941 && value <= 4035615941) {
