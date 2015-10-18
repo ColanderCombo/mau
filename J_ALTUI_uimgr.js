@@ -4194,7 +4194,7 @@ var UIManager  = ( function( window, undefined ) {
 						  min: parseFloat(control.Display.MinValue || 0 ),
 						  max: parseFloat(control.Display.MaxValue || 100),
 						  value: val ,
-						  step: 1,
+						  step: 0.1,
 						  slide: function( event, ui ) {
 							$("#altui-slider-horizontal-value-"+uniqid).html(ui.value+symbol);
 						  },
