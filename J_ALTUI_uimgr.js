@@ -1303,6 +1303,10 @@ var SceneEditor = function (scene) {
 	// var scenealtuiid = scene.altuiid;
 	var scenecontroller = MultiBox.controllerOf(scene.altuiid).controller;
 	var altuidevice = MultiBox.getDeviceByID( 0, g_MyDeviceID );
+	var scenewatches = $.grep( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToWatch" ) || "").split(';'),function(w) {
+		var watch = _getWatchLineParams(w);
+		return (watch.sceneid == scene.id) && (scenecontroller==0);
+	});	
 	
 	function _getWatchLineParams(watchLine) {
 		var params = watchLine.split('#');
@@ -1319,11 +1323,6 @@ var SceneEditor = function (scene) {
 	function _setWatchLineParams(watch) {
 		return "{0}#{1}#{2}#{3}#{4}#{5}".format( watch.service, watch.variable, watch.deviceid, watch.sceneid, watch.luaexpr, watch.xml || "");
 	}
-	var scenewatches = $.grep( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToWatch" ) || "").split(';'),function(w) {
-		var watch = _getWatchLineParams(w);
-		return (watch.sceneid == scene.id) && (scenecontroller==0);
-	});
-		
 	function _makeAltuiid(controllerid,id) {
 		return controllerid+"-"+id;
 	}

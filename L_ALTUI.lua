@@ -16,6 +16,7 @@ local json = require("L_ALTUIjson")
 local mime = require("mime")
 local socket = require("socket")
 local http = require("socket.http")
+local https = require ("ssl.https")
 local ltn12 = require("ltn12")
 local tmpprefix = "/tmp/altui_"		-- prefix for tmp files
 hostname = ""
@@ -54,6 +55,10 @@ end
 
 function string.starts(String,Start)
    return string.sub(String,1,string.len(Start))==Start
+end
+
+local function isempty(s)
+  return s == nil or s == ''
 end
 
 function file_exists(name)
@@ -1275,9 +1280,17 @@ end
 ------------------------------------------------
 local registeredWatches = {}
 
+-- service#variable#deviceid#sceneid#lua_expr#blockly xml;service#variable#deviceid#sceneid#lua_expr#blockly xml
 function getWatchParams(str)
 	local params = str:split("#")
-	return params[1],params[2],tonumber(params[3]),tonumber(params[4]),params[5]	-- service,variable,deviceid,sceneid,lua_expr;service,variable,deviceid,sceneid,lua_expr
+	return params[1],params[2],tonumber(params[3]),tonumber(params[4]),params[5]	
+end
+
+-- service#variable#deviceid#provider#data line which is a template sprintf string for params
+-- urn:micasaverde-com:serviceId:SceneController1#LastSceneID#208#thingspeak#key=U1F7T31MHB5O8HZI&field1=0
+function getPushParams(str)
+	local params = str:split("#")
+	return params[1],params[2],tonumber(params[3]),params[4],params[5]
 end
 
 function findWatch( devid, service, variable )
@@ -1285,24 +1298,11 @@ function findWatch( devid, service, variable )
 	devid = tostring(devid)
 	debug(string.format("findWatch(%s,%s,%s)",devid, service, variable))
 	debug(string.format("registeredWatches: %s",json.encode(registeredWatches)))
-	if (registeredWatches[devid] == nil) then
-		return nil
+	if (registeredWatches[devid] ~= nil) and (registeredWatches[devid][service] ~= nil) and (registeredWatches[devid][service][variable] ~= nil) then
+		return registeredWatches[devid][service][variable]
 	end
-	if (registeredWatches[devid][service] == nil) then
-		return nil
-	end
-	if (registeredWatches[devid][service][variable] == nil) then
-		return nil
-	end
-	debug(string.format("registeredWatches found a match"))
-	return registeredWatches[devid][service][variable]
-end
-
-function cancelExpressionTimer(lul_device, lul_service, lul_variable,expr)
-	debug(string.format("cancelExpressionTimer(%s,%s,%s,%s)",lul_device, lul_service, lul_variable,expr))
-	local watch = findWatch( lul_device, lul_service, lul_variable )
-	watch['Expressions'][expr]["PendingTimer"] = nil
-	return watch
+	warning(string.format("findWatch(%s,%s,%s) did not find a match",devid, service, variable))
+	return nil
 end
 
 function watchTimerCB(lul_data)
@@ -1353,21 +1353,52 @@ function _evaluateUserExpression(old,new,lastupdate,expr)
 	return results
 end
 
+--https://api.thingspeak.com/update?key=U1F7T31MHB5O8HZI&field1=0
+function sendValueToStorage(watch,lul_device, lul_service, lul_variable,old, new, lastupdate)
+	debug(string.format("sendValueToStorage(%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,old, new, lastupdate))
+	for provider,v  in pairs(watch['DataProviders']) do
+		local template = v['Data']
+		if (isempty(template==nil)==false) then
+			local data = string.format(template,new)
+			local response_body = {}
+			debug(string.format("Provider:%s Url:%s",provider,data))
+			local response, status, headers = https.request{
+				method="POST",
+				url="https://api.thingspeak.com/update",
+				headers = {
+					["Content-Type"] = "application/x-www-form-urlencoded",
+					["Content-Length"] = string.len(data),
+					-- ["X-THINGSPEAKAPIKEY"] = api_write_key
+				},
+				source = ltn12.source.string(data),
+				sink = ltn12.sink.table(response_body)
+			}
+			debug("https Response=" .. json.encode({res=response,sta=status,hea=headers}) )	
+			return response or 0
+		end
+	end
+	return 0
+end
 
 function evaluateExpression(lul_device, lul_service, lul_variable,expr,old, new, lastupdate, scene)
 	debug(string.format("evaluateExpression(%s,%s,%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,expr,old, new, tostring(lastupdate),scene))
+	local watch = findWatch( lul_device, lul_service, lul_variable )
+	if (watch==nil) then
+		return
+	end
+	
 	local results = _evaluateUserExpression(old,new,lastupdate,expr)
 	local res,delay = results[1] or nil, results[2] or nil
 	
 	-- if it evaluates as FALSE , do not do anything & cancel timer
 	if (res==nil or res==false or tonumber(res)==0) then
 		debug(string.format("ignoring watch trigger, loadstring returned %s",tostring(res or 'nil')))
-		cancelExpressionTimer(lul_device, lul_service, lul_variable,expr)
+		-- cancelling the timer for that expression as the condition is false now before the timer expired
+		watch['Expressions'][expr]["PendingTimer"] = nil
 	else
 		-- if it evaluates as TRUE, 
 		if (delay ~=nil ) then
 			-- if it is a defered response, 
-			local watch = findWatch( lul_device, lul_service, lul_variable )
 			if (watch['Expressions'][expr]["PendingTimer"]==nil) then
 				-- if new timer
 				local tbl = {lul_device, lul_service, lul_variable,expr}
@@ -1385,9 +1416,11 @@ function evaluateExpression(lul_device, lul_service, lul_variable,expr,old, new,
 			end
 		else
 			-- if it is a immediate response, then run the scene
-			local res = run_scene(scene)
-			if (res==-1) then
-				error(string.format("Failed to run the scene %s",scene))
+			if (scene ~= -1 ) then
+				res = run_scene(scene)
+				if (res==-1) then
+					error(string.format("Failed to run the scene %s",scene))
+				end
 			end
 		end
 	end
@@ -1405,17 +1438,23 @@ function variableWatchCallback(lul_device, lul_service, lul_variable, lul_value_
 		watch["LastOld"] = lul_value_old
 		watch["LastNew"] = lul_value_new
 		watch["LastUpdate"] = os.time()
+		debug(string.format("-----> evaluateExpression()"))
 		for k,v  in pairs(watch['Expressions']) do
 			-- k is expression
 			-- v is an object
 			watch['Expressions'][k]["LastEval"] = evaluateExpression(lul_device, lul_service, lul_variable,k,lul_value_old, lul_value_new, watch["LastUpdate"], v["SceneID"])
 		end
+		debug(string.format("-----> DataProviders()"))
+		for k,v  in pairs(watch['DataProviders']) do
+			debug(string.format("Data Provider watch k:%s v:%s",k,json.encode(v)))
+			sendValueToStorage(watch,lul_device, lul_service, lul_variable,lul_value_old, lul_value_new, watch["LastUpdate"])
+		end
 	end
 	debug(string.format("registeredWatches: %s",json.encode(registeredWatches)))
 end
 
-function addWatch( devid, service, variable, expression, scene )
-	debug(string.format("addWatch(%s,%s,%s,%s,%s)",devid, service, variable, expression, scene))
+function addWatch( devid, service, variable, expression, scene , provider, data )
+	debug(string.format("addWatch(%s,%s,%s,%s,%s,%s,%s)",devid, service, variable, expression, scene, provider or "", data or ""))
 	devidstr = tostring(devid)	 -- to inssure it is not a indexed array , but hash table
 	local bDuplicateWatch = false
 	if (registeredWatches[devidstr] == nil) then
@@ -1434,14 +1473,28 @@ function addWatch( devid, service, variable, expression, scene )
 		-- a watch was already there
 		bDuplicateWatch = true
 	end
-	if (registeredWatches[devidstr][service][variable]['Expressions'] == nil) then
-		registeredWatches[devidstr][service][variable]['Expressions']={}
-	end
-	if (registeredWatches[devidstr][service][variable]['Expressions'][expression] == nil) then
-		registeredWatches[devidstr][service][variable]['Expressions'][expression] = {
-			["LastEval"] = nil,
-			["SceneID"] = scene
-		}
+	if (scene==-1) then
+		if (provider=="thingspeak") and ( isempty(data)==false ) then
+			if (registeredWatches[devidstr][service][variable]['DataProviders'] == nil) then
+				registeredWatches[devidstr][service][variable]['DataProviders']={}
+			end
+			if (registeredWatches[devidstr][service][variable]['DataProviders'][provider] == nil) then
+				registeredWatches[devidstr][service][variable]['DataProviders'][provider]={}
+			end
+			registeredWatches[devidstr][service][variable]['DataProviders'][provider]['Data']=data
+		else
+			warning(string.format("Unknown data push provider:%s data:%s",provider or"", data or ""))
+		end
+	else
+		if (registeredWatches[devidstr][service][variable]['Expressions'] == nil) then
+			registeredWatches[devidstr][service][variable]['Expressions']={}
+		end
+		if (registeredWatches[devidstr][service][variable]['Expressions'][expression] == nil) then
+			registeredWatches[devidstr][service][variable]['Expressions'][expression] = {
+				["LastEval"] = nil,
+				["SceneID"] = scene
+			}
+		end
 	end
 	if (bDuplicateWatch==true) then
 		debug(string.format("Ignoring duplicate watch for %s-%s",service,variable))
@@ -1451,14 +1504,46 @@ function addWatch( devid, service, variable, expression, scene )
 	debug(string.format("registeredWatches: %s",json.encode(registeredWatches)))
 end
 
-function initVariableWatches( variableWatchString )
-	debug(string.format("initVariableWatches(%s)",variableWatchString))
+function initVariableWatches( variableWatchString , dataPushString)
+	debug(string.format("initVariableWatches(%s,%s)",variableWatchString,dataPushString))
 	local watches = variableWatchString:split(";")
-	local done = {}
 	for k,v  in pairs(watches) do
 		local service,variable,device,scene,expression  = getWatchParams(v)
 		addWatch( device, service, variable, expression, scene )
 	end
+	-- urn:micasaverde-com:serviceId:SceneController1#LastSceneID#208#thingspeak#key=U1F7T31MHB5O8HZI&field1=0
+	local watches = dataPushString:split(";")
+	for k,v  in pairs(watches) do
+		local service,variable,device,provider,data  = getPushParams(v)
+		addWatch( device, service, variable, "true", -1, provider, data )
+	end
+end
+
+------------------------------------------------
+-- THINGSPEAK integration
+------------------------------------------------
+-- data : https://thingspeak.com/docs/channels#api_keys
+function sendToDataStorage(api_write_key,data)
+	require('ltn12')
+	local socket = require("socket")
+	local http = require("socket.http")
+	
+	local base_url = "http://api.thingspeak.com/update"
+	local method = "POST"
+	 
+	local response_body = {}
+	local response, status, header = http.request{
+		method = method,
+		url = base_url,
+		headers = {
+			["Content-Type"] = "application/x-www-form-urlencoded",
+			["Content-Length"] = string.len(data),
+			["X-THINGSPEAKAPIKEY"] = api_write_key
+		},
+		source = ltn12.source.string(data),
+		sink = ltn12.sink.table(response_body)
+	}
+	return response
 end
 
 ------------------------------------------------
@@ -1604,8 +1689,11 @@ function startupDeferred(lul_device)
 	end	
 	
 	-- init watches
-	local variableWatch = getSetVariable(service, "VariablesToWatch", lul_device, "")	-- service,variable,deviceid,sceneid;service,variable,deviceid,sceneid
-	initVariableWatches( variableWatch )
+	-- init data storages
+	local variableWatch = getSetVariable(service, "VariablesToWatch", lul_device, "")	-- service#variable#deviceid#sceneid;service#variable#deviceid#sceneid
+	local dataPushes= getSetVariable(service, "VariablesToSend", lul_device, "")	-- service#variable#deviceid#providername; ...
+	initVariableWatches( variableWatch, dataPushes )
+
 	
 	-- NOTHING to start 
 	if( luup.version_branch == 1 and luup.version_major == 7) then
