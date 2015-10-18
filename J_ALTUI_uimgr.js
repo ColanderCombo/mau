@@ -3308,7 +3308,7 @@ var UIManager  = ( function( window, undefined ) {
 		var re = /^key=([^\&]+)&field(\d)=.*$/; 
 		var m;
 		 
-		if ((m = re.exec(params[5])) !== null) {
+		if ((m = re.exec(params[6])) !== null) {
 			if (m.index === re.lastIndex) {
 				re.lastIndex++;
 			}
@@ -3323,13 +3323,14 @@ var UIManager  = ( function( window, undefined ) {
 			deviceid : params[2],
 			provider : params[3],
 			channelid : params[4],
+			readkey : params[5],
 			key : key,
 			fieldnum : fieldnum
 		};
 	}
 	
 	function _setPushLineParams(push) {
-		return "{0}#{1}#{2}#{3}#{4}#{5}".format( push.service, push.variable, push.deviceid, push.provider, push.channelid, "key={0}&field{1}=%s".format(push.key,push.fieldnum));
+		return "{0}#{1}#{2}#{3}#{4}#{5}#{6}".format( push.service, push.variable, push.deviceid, push.provider, push.channelid, push.readkey, "key={0}&field{1}=%s".format(push.key,push.fieldnum));
 	}
 
 	function _deviceDrawVariables(device) {
@@ -3402,6 +3403,9 @@ var UIManager  = ( function( window, undefined ) {
 					var pushData = varPushes[state.service+':'+state.variable];
 					var html = "<tr><td colspan='3'>";
 						html += "<div class='panel panel-default'> <div class='panel-body'>";
+							if (pushData!=null) {
+								html += "<iframe width='450' height='260' style='border: 1px solid #cccccc;' src='http://api.thingspeak.com/channels/{0}/charts/1?key={1}&width=450&height=260&results=60&dynamic=true' ></iframe>".format(pushData.channelid,pushData.readkey);
+							}
 							html += "<div class='checkbox'>"
 								html += "<label><input type='checkbox' id='enablePush_{0}' {1}>Enable Push to Thingspeak</label>".format(
 									varidx, 
@@ -3414,6 +3418,13 @@ var UIManager  = ( function( window, undefined ) {
 									html += "<input type='text' class='form-control' id='apiKey_{0}' placeholder='Write key' value='{1}'></input>".format(
 										varidx,
 										(pushData!=null) ? pushData.key : ''
+									)
+								html += "</div>"
+								html += "<div class='form-group'>";
+									html += "<label for='readApiKey_{0}'>Read API Key: </label>".format(varidx);
+									html += "<input type='text' class='form-control' id='readApiKey_{0}' placeholder='Read key' value='{1}'></input>".format(
+										varidx,
+										(pushData!=null) ? pushData.readkey : ''
 									)
 								html += "</div>"
 								html += "<div class='form-group'>";
@@ -3455,6 +3466,7 @@ var UIManager  = ( function( window, undefined ) {
 							deviceid : MultiBox.controllerOf(device.altuiid).id,
 							provider : "thingspeak",
 							channelid : form.find("input#channelID_"+varidx).val(),
+							readkey : form.find("input#readApiKey_"+varidx).val(),
 							key : form.find("input#apiKey_"+varidx).val(),
 							fieldnum : form.find("input#fieldNum_"+varidx).val()
 						};

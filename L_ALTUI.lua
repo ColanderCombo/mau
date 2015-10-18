@@ -1290,7 +1290,7 @@ end
 -- urn:micasaverde-com:serviceId:SceneController1#LastSceneID#208#thingspeak#61186#key=U1F7T31MHB5O8HZI&field1=0
 function getPushParams(str)
 	local params = str:split("#")
-	return params[1],params[2],tonumber(params[3]),params[4],params[5],params[6]
+	return params[1],params[2],tonumber(params[3]),params[4],params[5],params[6],params[7]
 end
 
 function findWatch( devid, service, variable )
@@ -1514,7 +1514,7 @@ function initVariableWatches( variableWatchString , dataPushString)
 	-- urn:micasaverde-com:serviceId:SceneController1#LastSceneID#208#thingspeak#key=U1F7T31MHB5O8HZI&field1=0
 	local watches = dataPushString:split(";")
 	for k,v  in pairs(watches) do
-		local service,variable,device,provider,channel,data  = getPushParams(v)
+		local service,variable,device,provider,channel,readk,data  = getPushParams(v)
 		addWatch( device, service, variable, "true", -1, provider, data )
 	end
 end
