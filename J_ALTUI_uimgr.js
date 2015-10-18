@@ -3457,8 +3457,8 @@ var UIManager  = ( function( window, undefined ) {
 							fieldnum : form.find("input#fieldNum_"+varidx).val()
 						};
 						varPushesToSave.push( _setPushLineParams(push) );
-						MultiBox.setStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend", varPushesToSave.join(';') );
 					}
+					MultiBox.setStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend", varPushesToSave.join(';') );
 					form.closest("tr").remove();
 				}
 			});
