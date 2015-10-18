@@ -188,6 +188,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			));
 		};
 		var HVAC_INCREMENT = 1;	
+		var controller = MultiBox.controllerOf(device.altuiid).controller;
+		var isUI5 = MultiBox.isUI5(controller);
 		var ws = MultiBox.getWeatherSettings();
 		if (ws.tempFormat==undefined)
 			ws.tempFormat="";
@@ -195,7 +197,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var status = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSensor1', 'CurrentTemperature' ); 
 		var allsetpoints = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1', 'AllSetpoints' ); 
 		var heatsetpoint=null, coldsetpoint=null, autosetpoint=null, currentmodesetpoint=null;
-		if (allsetpoints==null) {
+		if ((isUI5==true ) || (allsetpoints==null)) {
 			heatsetpoint = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Heat', 'CurrentSetpoint' ); 
 			coldsetpoint = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Cool', 'CurrentSetpoint' ); 
 		}
@@ -253,7 +255,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 					}
 				html += "</div>";
 				html += "<div class='col-xs-3'>"; 
-					if (allsetpoints==null) {
+					if ((isUI5==true ) || (allsetpoints==null)) {
 						//UI5
 						html += _button(device.altuiid, "altui-red", upGlyph, 
 									"urn:upnp-org:serviceId:TemperatureSetpoint1_Heat",
@@ -279,7 +281,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 					}
 				html += "</div>";
 				html += "<div class='col-xs-3'>";
-					if (allsetpoints==null) {
+					if ((isUI5==true ) || (allsetpoints==null)) {
 						//UI5
 						html += _button(device.altuiid, "altui-blue", upGlyph, 
 									"urn:upnp-org:serviceId:TemperatureSetpoint1_Cool",
