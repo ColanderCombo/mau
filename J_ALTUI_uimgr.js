@@ -3403,9 +3403,13 @@ var UIManager  = ( function( window, undefined ) {
 					var pushData = varPushes[state.service+':'+state.variable];
 					var html = "<tr><td colspan='3'>";
 						html += "<div class='panel panel-default'> <div class='panel-body'>";
+						html += "<div class='row'>";
 							if (pushData!=null) {
-								html += "<iframe width='450' height='260' style='border: 1px solid #cccccc;' src='http://api.thingspeak.com/channels/{0}/charts/{2}?key={1}&width=450&height=260&results=60&dynamic=true' ></iframe>".format(pushData.channelid,pushData.readkey,pushData.fieldnum);
+								html += "<div class='col-md-8'>";
+								html += "<iframe width='100%' height='260' style='border: 1px solid #cccccc;' src='http://api.thingspeak.com/channels/{0}/charts/{2}?key={1}&width=450&height=260&results=60&dynamic=true' ></iframe>".format(pushData.channelid,pushData.readkey,pushData.fieldnum);
+								html += "</div>";
 							}
+							html += "<div class='col-md-4'>";
 							html += "<div class='checkbox'>"
 								html += "<label><input type='checkbox' id='enablePush_{0}' {1}>Enable Push to Thingspeak</label>".format(
 									varidx, 
@@ -3442,6 +3446,8 @@ var UIManager  = ( function( window, undefined ) {
 									)
 								html += "</div>"
 							html += "</form>"
+							html += "</div>"; //col
+						html += "</div>";	//row
 						html += "</div></div>";
 					html += "</td></tr>";
 					tr.after(html);
