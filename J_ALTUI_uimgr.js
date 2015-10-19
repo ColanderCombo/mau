@@ -92,6 +92,18 @@ var styles ="					\
 	.blocklyTreeLabel {			\
 		color: black;			\
 	}							\
+	.altui-theme-label{			\
+		font-size: 12px;		\
+	}							\
+	.altui-theme-thumbnail{		\
+		padding-bottom: 5px;	\
+		padding-top: 5px;	\
+	}							\
+	.altui-theme-thumbnail:hover {		\
+		cursor: pointer;		\
+		border-width:2px;		\
+		border-color: green;		\
+	}							\
 	#altui-background {			\
 		position:fixed;			\
 		top:0;					\
@@ -5254,6 +5266,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		_initOptions(serveroptions);
 		_initUIEngine(styles);
 		_initDB(devicetypes,cbfunc);
+
 		if (themecss && (themecss.trim()!="") )
 			$("title").after("<link rel='stylesheet' href='"+themecss+"'>");
 		_initBlockly();
@@ -6034,6 +6047,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			{ id:23, title:_T('TblDevices'), onclick:'UIManager.pageTblDevices()', parent:0 },
 			{ id:24, title:_T('OsCommand'), onclick:'UIManager.pageOsCommand()', parent:0 },
 			{ id:25, title:_T('Triggers'), onclick:'UIManager.pageTriggers()', 	parent:6 },
+			{ id:26, title:_T('Themes'), onclick:'UIManager.pageThemes()', parent:0 },
 		];
 
 		function _parentsOf(child) {
@@ -9346,6 +9360,51 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		);
 	},
 	
+	pageThemes: function() {
+		UIManager.clearPage(_T('Themes'),_T("Themes"),UIManager.oneColumnLayout);
+		PageMessage.message( "Select a theme by clicking on it and refresh your browser", "info");
+		var resetButton = buttonTemplate.format( "altui-theme-reset", 'btn-default', _T("Reset"),_T('Reset Theme Override'));
+		var html = "";
+		html += "<div class='col-xs-12'>";
+		html +="<div class='panel panel-default'>";
+		html +="  <div class='panel-heading'>"+_T("Themes")+" Bootswatch.com "+resetButton+"</div>";
+		html +="  <div class='panel-body'>";
+		html += "<div id='altui-themes' class='row'>";
+		html +="</div>"; 	//row
+		html +="</div>";	//body
+		html +="</div>";	//panel
+		html +="</div>";	//col-xs-12
+		$(".altui-mainpanel").append(html);
+		$.getJSON( "https://bootswatch.com/api/3.json", function( data ) {
+			$.each(data.themes,function(idx,theme) {
+				var html ="";
+				html += "<div class='altui-theme-thumbnail col-xs-6 col-md-4 col-lg-3' data-preview='{1}' data-href='{0}'>".format(theme.cssCdn,theme.preview);
+				html += "<label class='altui-theme-label'>{0} {1}</label>".format(
+					theme.description,
+					xsbuttonTemplate.format( '', 'altui-theme-preview', "<span class='glyphicon glyphicon-eye-open' aria-hidden='true'></span>",_T('Preview'))
+					);
+				html += "<img width='100%' src='{0}'></img>".format(theme.thumbnail);
+				html +="</div>";	//col-xs-12
+				$("#altui-themes").append(html);
+			});
+		});
+		$(".altui-mainpanel").on('click','.altui-theme-thumbnail',function() {
+			var href = $(this).closest('.altui-theme-thumbnail').data('href');
+			$("link[href='"+g_CustomTheme+"']").attr('href',href);
+			g_CustomTheme = href;
+			MyLocalStorage.setSettings("Theme",href);
+		}).on('click','.altui-theme-preview',function(e) {
+			var href = $(this).closest('.altui-theme-thumbnail').data('preview');
+			window.open(href, '_blank');
+			return false;
+		}).on('click','#altui-theme-reset',function(e) {
+			var href = g_OrgTheme;
+			$("link[href='"+g_CustomTheme+"']").attr('href',href);
+			g_CustomTheme = href;
+			MyLocalStorage.setSettings("Theme",null);			
+		});
+	},
+	
 	pageOptions: function() {
 		function _saveOption(name,value) {
 			MyLocalStorage.setSettings(name, value);
@@ -9559,6 +9618,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				.on( "click", "#altui-energy", UIManager.pagePower )	
 				.on( "click", "#altui-tbl-device", UIManager.pageTblDevices )
 				.on( "click", "#altui-optimize", UIManager.pageOptions )
+				.on( "click", "#altui-theme", UIManager.pageThemes )
 				.on( "click", "#altui-localize", UIManager.pageLocalization  )
 				.on( "click", "#altui-debugtools", UIManager.pageDebug  )
 				.on( "click", "#altui-debug-btn", function() {
@@ -9785,6 +9845,7 @@ $(document).ready(function() {
 		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>Admin</li>";
 		body+="			<li><a id='altui-optimize' href='#'>"+_T("Options")+"</a></li>";
+		body+="			<li><a id='altui-theme' href='#'>"+_T("Themes")+"</a></li>";
 		body+="			<li><a id='altui-localize' href='#'>"+_T("Localization")+"</a></li>";
 		body+="			<li><a id='altui-debugtools' href='#'>"+_T("Debug")+"</a></li>";
 		body+="			<li class='divider'></li>";
@@ -9801,6 +9862,11 @@ $(document).ready(function() {
 		body+="</div> <!-- /container -->";
 		body+="<div id='altui-background'></div>";
 		$("body").prepend(body);
+
+		// client side override of theme if defined
+		var clientsideThemecss= MyLocalStorage.getSettings("Theme");
+		if (clientsideThemecss != null)
+			g_CustomTheme = clientsideThemecss;
 		
 		UIManager.initEngine(styles.format(window.location.hostname), g_DeviceTypes, g_CustomTheme, g_Options, function() {
 			UIManager.initCustomPages(g_CustomPages);	

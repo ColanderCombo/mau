@@ -649,6 +649,7 @@ local htmlLayout = [[
 		var g_DeviceTypes =  JSON.parse('@devicetypes@');
 		var g_CustomPages = @custompages@;
 		var g_CustomTheme = '@ThemeCSS@';
+		var g_OrgTheme = g_CustomTheme;
 		var g_MyDeviceID = @mydeviceid@;
 		var g_Options = '@ServerOptions@';
 		var g_ExtraController = '@extracontroller@';
