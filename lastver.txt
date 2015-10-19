@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("833,Thingspeak Integration,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29191")
+UIManager.checkAltuiUpdate("837,Client side Themes;Bootswatch Integration;Thingspeak Integration,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29192")
