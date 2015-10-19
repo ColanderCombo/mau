@@ -820,7 +820,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				-- local custompages = luup.variable_get(service, "CustomPages", deviceID) or "[]"
 				-- custompages = string.gsub(custompages,"'","\\x27")
 				-- custompages = string.gsub(custompages,"\"","\\x22")
-				local serverOptions= getSetVariable(service, "ServerOptions", lul_device, "")	
+				local serverOptions= getSetVariable(service, "ServerOptions", deviceID, "")	
 				local localcdn = getSetVariable(service, "LocalCDN", deviceID, "")
 				local localbootstrap = getSetVariable(service, "LocalBootstrap", deviceID, "")
 				if (localbootstrap == "") then	
@@ -1329,8 +1329,8 @@ function watchTimerCB(lul_data)
 	debug(string.format("updated watches %s",json.encode(registeredWatches)))
 end
 
-function _evaluateUserExpression(old,new,lastupdate,expr)
-	debug(string.format("_evaluateUserExpression(%s,%s,%s,%s)",old,new,tostring(lastupdate),expr))
+function _evaluateUserExpression(lul_device, lul_service, lul_variable,old,new,lastupdate,expr)
+	debug(string.format("_evaluateUserExpression(%s,%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,old,new,tostring(lastupdate),expr))
 	local results = {}
 	local code = [[
 		return function(lul_device, lul_service, lul_variable, expr)
@@ -1388,7 +1388,7 @@ function evaluateExpression(lul_device, lul_service, lul_variable,expr,old, new,
 		return
 	end
 	
-	local results = _evaluateUserExpression(old,new,lastupdate,expr)
+	local results = _evaluateUserExpression(lul_device, lul_service, lul_variable,old,new,lastupdate,expr)
 	local res,delay = results[1] or nil, results[2] or nil
 	
 	-- if it evaluates as FALSE , do not do anything & cancel timer
