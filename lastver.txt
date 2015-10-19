@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("819,ServerOptions;Favorites optoin to use VERA Favorites or ALTUI Favorites;fix dialog box width;Device Set Attribute optimized for UI7;Add Delete zWave parameters;important bug fix : Remove JSON from Lua handler,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29180")
+UIManager.checkAltuiUpdate("833,Thingspeak Integration,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29191")
