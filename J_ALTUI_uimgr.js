@@ -3404,7 +3404,7 @@ var UIManager  = ( function( window, undefined ) {
 					var html = "<tr><td colspan='3'>";
 						html += "<div class='panel panel-default'> <div class='panel-body'>";
 							if (pushData!=null) {
-								html += "<iframe width='450' height='260' style='border: 1px solid #cccccc;' src='http://api.thingspeak.com/channels/{0}/charts/1?key={1}&width=450&height=260&results=60&dynamic=true' ></iframe>".format(pushData.channelid,pushData.readkey);
+								html += "<iframe width='450' height='260' style='border: 1px solid #cccccc;' src='http://api.thingspeak.com/channels/{0}/charts/{2}?key={1}&width=450&height=260&results=60&dynamic=true' ></iframe>".format(pushData.channelid,pushData.readkey,pushData.fieldnum);
 							}
 							html += "<div class='checkbox'>"
 								html += "<label><input type='checkbox' id='enablePush_{0}' {1}>Enable Push to Thingspeak</label>".format(

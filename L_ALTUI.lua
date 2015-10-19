@@ -1473,6 +1473,15 @@ function addWatch( devid, service, variable, expression, scene , provider, data 
 		-- a watch was already there
 		bDuplicateWatch = true
 	end
+	if (registeredWatches[devidstr][service][variable]['Expressions'] == nil) then
+		registeredWatches[devidstr][service][variable]['Expressions']={}
+	end
+	if (registeredWatches[devidstr][service][variable]['Expressions'][expression] == nil) then
+		registeredWatches[devidstr][service][variable]['Expressions'][expression] = {
+			["LastEval"] = nil,
+			["SceneID"] = scene
+		}
+	end
 	if (scene==-1) then
 		if (provider=="thingspeak") and ( isempty(data)==false ) then
 			if (registeredWatches[devidstr][service][variable]['DataProviders'] == nil) then
@@ -1484,16 +1493,6 @@ function addWatch( devid, service, variable, expression, scene , provider, data 
 			registeredWatches[devidstr][service][variable]['DataProviders'][provider]['Data']=data
 		else
 			warning(string.format("Unknown data push provider:%s data:%s",provider or"", data or ""))
-		end
-	else
-		if (registeredWatches[devidstr][service][variable]['Expressions'] == nil) then
-			registeredWatches[devidstr][service][variable]['Expressions']={}
-		end
-		if (registeredWatches[devidstr][service][variable]['Expressions'][expression] == nil) then
-			registeredWatches[devidstr][service][variable]['Expressions'][expression] = {
-				["LastEval"] = nil,
-				["SceneID"] = scene
-			}
 		end
 	end
 	if (bDuplicateWatch==true) then
