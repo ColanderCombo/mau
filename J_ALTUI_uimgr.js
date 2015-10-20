@@ -8,7 +8,7 @@
 // written devagreement from amg0 / alexis . mermet @ gmail . com
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE .
   
 /*The MIT License (MIT)
 BOOTGRID: Copyright (c) 2014-2015 Rafael J. Staib
@@ -804,7 +804,7 @@ var DialogManager = ( function() {
 			propertyline += "	<span title='"+(help || '')+"'>"+helpGlyph+"</span>";
 		
 		propertyline += "<div class='input-group'>";
-			propertyline += "<input id='altui-widget-"+name+"' class='form-control' "+optstr+" value='"+value+"' "+placeholder+" ></input>";
+			propertyline += "<input id='altui-widget-"+name+"' class='form-control' "+optstr+" value='"+value.escapeXml()+"' "+placeholder+" ></input>";
 			propertyline += "<span class='input-group-btn'>";
 				propertyline += buttonTemplate.format( "altui-edit-"+name, 'btn-default', "Blockly "+editGlyph,_T('Edit Watch Expression'));
 			propertyline += "</span>";

@@ -1334,8 +1334,8 @@ function _evaluateUserExpression(lul_device, lul_service, lul_variable,old,new,l
 	local results = {}
 	local code = [[
 		return function(lul_device, lul_service, lul_variable, expr)
-			local old=%s
-			local new=%s
+			local old='%s'
+			local new='%s'
 			local lastupdate=%s
 			local now=os.time()
 			local results= {%s}	-- eventually returns 2 results, cond and delay
