@@ -7499,8 +7499,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 	
 	pageCredits: function ()
 	{
-		UIManager.clearPage(_T('Credits'),_T("Credits"));
-		
+		UIManager.clearPage(_T('Credits'),_T("Credits"),UIManager.twoColumnLayout);
+		$("#altui-pagemessage").remove();
 		var tbl = [
 			["GetVera","http://getvera.com/","the zWave Getaway and backend platform"],
 			["Bootstrap","http://getbootstrap.com/","set of css and javascript components for responsive design user interfaces"],
@@ -7511,12 +7511,27 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			["D3js","http://d3js.org/","D3 Data Driven Documents & Les Miserables tutorial"],
 			["Bootgrid","http://www.jquery-bootgrid.com/","Jquery Bootstrap Grid"],
 			["Blockly","https://developers.google.com/blockly/","Blockly Library"],
+			["Bootswatch","https://bootswatch.com/","Bootstrap Themes"],
+			["ThingSpeak","https://thingspeak.com/","ThingSpeak Data platform for IoT"],
 			["amg0","http://forum.micasaverde.com/","reachable as amg0 on this forum "]
 		];
-		var html = "<dl>";
+		
+		var html = "";
+		html += "<nav>"
+		html += "<ul class='nav nav-pills nav-stacked' data-spy='affix'>";
+        // <li class='active'><a href='#section1'>Section 1</a></li>
 		$.each(tbl, function (idx,line) {
-			html +="<dt>{0} (<a href='{1}'>{1}</a>)</dt>".format(line[0],line[1]);
-			html +="<dd>{0}</dd><hr>".format(line[2]);
+			html += "<li><a href='#{0}'>{1}</a></li>".format(line[0].replace(' ','_'),line[0])
+		});
+		html += "</ul>"
+		html += "</nav>"
+		$(".altui-leftnav").append( html );
+		
+		html = "";
+		html += "<dl>";
+		$.each(tbl, function (idx,line) {
+			html +="<dt id='{0}'>{1}</dt>".format(line[0].replace(' ','_'),line[0]);
+			html +="<dd>{0}</dd>(<a href='{1}'>{1}</a>)<hr>".format(line[2],line[1]);
 		});
 		html +="</dl>";
 
@@ -7524,6 +7539,25 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		// html += UIManager.getPayPalButtonHtml( true );
 
 		$(".altui-mainpanel").append(html);
+		
+		$(".altui-leftnav a").on('click', function(e) {
+		   // prevent default anchor click behavior
+		   e.preventDefault();
+
+		   // store hash
+		   var hash = $(this).attr("href");
+
+		   // animate
+		   $('html, body').animate({
+			   scrollTop: $(hash).offset().top - $('.navbar-fixed-top').height()
+			 }, 300, function(){
+
+			   // when done, add hash to url
+			   // (default click behaviour)
+			   window.location.hash = hash;
+			 });
+
+		});
 	},
 	
 	pageEditorForm: function (title,txt,outputarea,button,onClickCB) {
