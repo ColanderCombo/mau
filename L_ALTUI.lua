@@ -1440,13 +1440,13 @@ function variableWatchCallback(lul_device, lul_service, lul_variable, lul_value_
 		watch["LastNew"] = lul_value_new
 		watch["LastUpdate"] = os.time()
 		debug(string.format("-----> evaluateExpression()"))
-		for k,v  in pairs(watch['Expressions']) do
+		for k,v  in pairs(watch['Expressions'] or {}) do
 			-- k is expression
 			-- v is an object
 			watch['Expressions'][k]["LastEval"] = evaluateExpression(lul_device, lul_service, lul_variable,k,lul_value_old, lul_value_new, watch["LastUpdate"], v["SceneID"])
 		end
 		debug(string.format("-----> DataProviders()"))
-		for k,v  in pairs(watch['DataProviders']) do
+		for k,v  in pairs(watch['DataProviders'] or {}) do
 			debug(string.format("Data Provider watch k:%s v:%s",k,json.encode(v)))
 			sendValueToStorage(watch,lul_device, lul_service, lul_variable,lul_value_old, lul_value_new, watch["LastUpdate"])
 		end
