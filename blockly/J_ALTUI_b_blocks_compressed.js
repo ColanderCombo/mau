@@ -144,9 +144,9 @@ Blockly.Blocks['new_value'] = {
   init: function() {
     this.appendDummyInput()
         .appendField("new");
-    this.setOutput(true);
+    this.setOutput(true, "String");
     this.setColour(330);
-    this.setTooltip('');
+    this.setTooltip('New value of the variable');
     this.setHelpUrl('http://forum.micasaverde.com/index.php?board=78.0');
   }
 };
@@ -154,9 +154,9 @@ Blockly.Blocks['old_value'] = {
   init: function() {
     this.appendDummyInput()
         .appendField("old");
-    this.setOutput(true);
+    this.setOutput(true, "String");
     this.setColour(330);
-    this.setTooltip('');
+    this.setTooltip('Previous value of the variable');
     this.setHelpUrl('http://forum.micasaverde.com/index.php?board=78.0');
   }
 };
@@ -164,7 +164,7 @@ Blockly.Blocks['now_value'] = {
   init: function() {
     this.appendDummyInput()
         .appendField("now");
-    this.setOutput(true);
+    this.setOutput(true, "Number");
     this.setColour(330);
     this.setTooltip('');
     this.setHelpUrl('http://forum.micasaverde.com/index.php?board=78.0');
@@ -174,7 +174,7 @@ Blockly.Blocks['lastupdate_value'] = {
   init: function() {
     this.appendDummyInput()
         .appendField("lastupdate");
-    this.setOutput(true);
+    this.setOutput(true, "Number");
     this.setColour(330);
     this.setTooltip('');
     this.setHelpUrl('http://forum.micasaverde.com/index.php?board=78.0');
