@@ -3418,7 +3418,7 @@ var UIManager  = ( function( window, undefined ) {
 						html += "<div class='row'>";
 							if (pushData!=null) {
 								html += "<div class='col-md-8'>";
-								html += "<iframe width='100%' height='260' style='border: 1px solid #cccccc;' src='http://api.thingspeak.com/channels/{0}/charts/{2}?key={1}&width=450&height=260&results=60&dynamic=true' ></iframe>".format(pushData.channelid,pushData.readkey,pushData.fieldnum);
+								html += "<iframe width='100%' height='260' style='border: 1px solid #cccccc;' src='//api.thingspeak.com/channels/{0}/charts/{2}?key={1}&width=450&height=260&results=60&dynamic=true' ></iframe>".format(pushData.channelid,pushData.readkey,pushData.fieldnum);
 								html += "</div>";
 							}
 							html += "<div class='col-md-4'>";
