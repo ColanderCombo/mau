@@ -3417,8 +3417,18 @@ var UIManager  = ( function( window, undefined ) {
 						html += "<div class='panel panel-default'> <div class='panel-body'>";
 						html += "<div class='row'>";
 							if (pushData!=null) {
+								var url = "//api.thingspeak.com/channels/{0}/charts/{2}?key={1}&width=450&height=260&results=60&dynamic=true".format(pushData.channelid,pushData.readkey,pushData.fieldnum);
 								html += "<div class='col-md-8'>";
-								html += "<iframe width='100%' height='260' style='border: 1px solid #cccccc;' src='//api.thingspeak.com/channels/{0}/charts/{2}?key={1}&width=450&height=260&results=60&dynamic=true' ></iframe>".format(pushData.channelid,pushData.readkey,pushData.fieldnum);
+								// html += "<form id='form_url_{0}' class='form-inline'>".format(varidx);
+								html += "<div class='form-group'>";
+									html += "<label for='graphUrl_{0}'>Visualization Url: </label> ".format(varidx);
+									html += "<input type='text' class='form-control input-sm' id='graphUrl_{0}' placeholder='Visualization Url' value='{1}'></input>".format(
+										varidx,
+										url.escapeXml()
+									)
+								html += "</div>"
+								// html += "</form>";
+								html += "<iframe class='altui-thingspeak-chart' width='100%' height='260' style='border: 1px solid #cccccc;' src='{0}' ></iframe>".format(url);
 								html += "</div>";
 							}
 							html += "<div class='col-md-4'>";
@@ -3430,39 +3440,60 @@ var UIManager  = ( function( window, undefined ) {
 							html += "</div>"
 							html += "<form id='form_{0}' class='form-inline'>".format(varidx);
 								html += "<div class='form-group'>";
-									html += "<label for='apiKey_{0}'>Write API Key: </label>".format(varidx);
-									html += "<input type='text' class='form-control' id='apiKey_{0}' placeholder='Write key' value='{1}'></input>".format(
-										varidx,
-										(pushData!=null) ? pushData.key : ''
-									)
-								html += "</div>"
-								html += "<div class='form-group'>";
-									html += "<label for='readApiKey_{0}'>Read API Key: </label>".format(varidx);
-									html += "<input type='text' class='form-control' id='readApiKey_{0}' placeholder='Read key' value='{1}'></input>".format(
-										varidx,
-										(pushData!=null) ? pushData.readkey : ''
-									)
-								html += "</div>"
-								html += "<div class='form-group'>";
 									html += "<label for='channelID_{0}'>Channel ID: </label>".format(varidx);
-									html += "<input type='number' min=1 class='form-control' id='channelID_{0}' placeholder='ID' value='{1}'></input>".format(
+									html += "<input type='number' min=1 class='form-control input-sm' id='channelID_{0}' placeholder='ID' value='{1}'></input>".format(
 										varidx,
 										(pushData!=null) ? pushData.channelid : ''
 									)
 								html += "</div>"
 								html += "<div class='form-group'>";
 									html += "<label for='fieldNum_{0}'>Field Number: </label>".format(varidx);
-									html += "<input type='number' min=1 max=8 class='form-control' id='fieldNum_{0}' placeholder='number' value='{1}'></input>".format(
+									html += "<input type='number' min=1 max=8 class='form-control input-sm' id='fieldNum_{0}' placeholder='number' value='{1}'></input>".format(
 										varidx,
 										(pushData!=null) ? pushData.fieldnum : ''
 									)
 								html += "</div>"
+								html += "<div class='form-group'>";
+									html += "<label for='apiKey_{0}'>Write API Key: </label>".format(varidx);
+									html += "<input type='text' class='form-control input-sm' id='apiKey_{0}' placeholder='Write key' value='{1}'></input>".format(
+										varidx,
+										(pushData!=null) ? pushData.key : ''
+									)
+								html += "</div>"
+								html += "<div class='form-group'>";
+									html += "<label for='readApiKey_{0}'>Read API Key: </label>".format(varidx);
+									html += "<input type='text' class='form-control input-sm' id='readApiKey_{0}' placeholder='Read key' value='{1}'></input>".format(
+										varidx,
+										(pushData!=null) ? pushData.readkey : ''
+									)
+								html += "</div>"
+
 							html += "</form>"
 							html += "</div>"; //col
 						html += "</div>";	//row
 						html += "</div></div>";
 					html += "</td></tr>";
 					tr.after(html);
+					var checked = $("#enablePush_"+varidx).is(':checked');
+					$("#form_"+varidx).toggle(checked);
+					$("#enablePush_"+varidx).change(function() {
+						var checked = $(this).is(':checked');
+						$("#form_"+varidx).toggle(checked);
+					});
+					$("#graphUrl_"+varidx).focusout( function() {
+						var url = $(this).val();
+						if (isNullOrEmpty(url) == false) {
+							var re = /(http:|https:)*\/\/(.*)/; 
+							var m;
+							 
+							if ((m = re.exec(url)) !== null) {
+								if (m.index === re.lastIndex) {
+									re.lastIndex++;
+								}
+								$(".altui-thingspeak-chart").attr("src","//"+m[2]);
+							}
+						}
+					});
 				} else {
 					//TODO
 					// get all data from fields
