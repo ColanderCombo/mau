@@ -280,5 +280,7 @@ Localization.init( {
 	"H M S duration in seconds":"duree H M S en secondes",
 	"Convert text to number":"Conversion en nombre",
 	"Welcome to ALTUI":"Bienvenue dans ALTUI",
-	"Use Vera Favorites":"Utiliser les Favoris en mode Vera"
+	"Use Vera Favorites":"Utiliser les Favoris en mode Vera",
+	"Graph":"Graphique",
+	"Themes":"Thèmes"
 });
