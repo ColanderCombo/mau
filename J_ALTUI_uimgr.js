@@ -3312,7 +3312,7 @@ var UIManager  = ( function( window, undefined ) {
 		return "<input {2} id='{0}' class='form-control' type='text' value='{1}'></input>".format(id,value,extradata);
 	};
 		
-	// -- urn:micasaverde-com:serviceId:SceneController1#LastSceneID#208#thingspeak#key=U1F7T31MHB5O8HZI&field1=%s
+	// -- urn:micasaverde-com:serviceId:SceneController1#LastSceneID#208#thingspeak#61666#U1F7T31MH#key=U1F7T31MHB5O8HZI&field1=%s#graphicurl
 	function _getPushLineParams(pushLine) {
 		var key="";
 		var fieldnum=0;
@@ -3320,7 +3320,7 @@ var UIManager  = ( function( window, undefined ) {
 		var re = /^key=([^\&]+)&field(\d)=.*$/; 
 		var m;
 		 
-		if ((m = re.exec(params[6])) !== null) {
+		if ((m = re.exec(params[6] || "")) !== null) {
 			if (m.index === re.lastIndex) {
 				re.lastIndex++;
 			}
@@ -3330,19 +3330,20 @@ var UIManager  = ( function( window, undefined ) {
 		}
 		//service,variable,deviceid,provider,data 
 		return {
-			service : params[0],
-			variable : params[1],
-			deviceid : params[2],
-			provider : params[3],
-			channelid : params[4],
-			readkey : params[5],
+			service : params[0] || "",
+			variable : params[1] || "",
+			deviceid : params[2] || "",
+			provider : params[3] || "",
+			channelid : params[4] || "",
+			readkey : params[5] || "",
 			key : key,
-			fieldnum : fieldnum
+			fieldnum : fieldnum,
+			graphicurl: params[7] || "",
 		};
 	}
 	
 	function _setPushLineParams(push) {
-		return "{0}#{1}#{2}#{3}#{4}#{5}#{6}".format( push.service, push.variable, push.deviceid, push.provider, push.channelid, push.readkey, "key={0}&field{1}=%s".format(push.key,push.fieldnum));
+		return "{0}#{1}#{2}#{3}#{4}#{5}#{6}#{7}".format( push.service, push.variable, push.deviceid, push.provider, push.channelid, push.readkey, "key={0}&field{1}=%s".format(push.key,push.fieldnum),push.graphicurl);
 	}
 
 	function _deviceDrawVariables(device) {
@@ -3401,10 +3402,13 @@ var UIManager  = ( function( window, undefined ) {
 			$("button.altui-variable-push").click( function() {
 				var tr = $(this).closest("tr");
 				var varidx = tr.find("td.altui-variable-value").prop('id');
+				var defaultgraphicurlTemplate="//api.thingspeak.com/channels/{0}/charts/{2}?key={1}&width=450&height=260&results=60&dynamic=true";
 				var devicestates = MultiBox.getStates(device);
 				var state = devicestates[varidx];
 				var form = $(this).closest("tbody").find("form#form_"+varidx);
 				if (form.length==0) {
+					// change color
+					$(this).removeClass("btn-default").addClass("btn-danger");
 					var varPushes = {};
 					$.each( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend" ) || "").split(';'),function(idx,pushLine) {
 						var push = _getPushLineParams(pushLine);
@@ -3413,15 +3417,17 @@ var UIManager  = ( function( window, undefined ) {
 						}
 					});
 					var pushData = varPushes[state.service+':'+state.variable];
+					var defaultgraphicurl = "";
 					var html = "<tr><td colspan='3'>";
 						html += "<div class='panel panel-default'> <div class='panel-body'>";
 						html += "<div class='row'>";
 							if (pushData!=null) {
-								var url = "//api.thingspeak.com/channels/{0}/charts/{2}?key={1}&width=450&height=260&results=60&dynamic=true".format(pushData.channelid,pushData.readkey,pushData.fieldnum);
+								defaultgraphicurl = defaultgraphicurlTemplate.format(pushData.channelid,pushData.readkey,pushData.fieldnum);
+								var url = (pushData.graphicurl == "") ?  defaultgraphicurl : pushData.graphicurl;
 								html += "<div class='col-md-8'>";
 								// html += "<form id='form_url_{0}' class='form-inline'>".format(varidx);
 								html += "<div class='form-group'>";
-									html += "<label for='graphUrl_{0}'>Visualization Url: </label> ".format(varidx);
+									html += "<label for='graphUrl_{0}' title='{1}'>Visualization Url: </label> ".format(varidx,_T("(use size=iframe in your matlab url)"));
 									html += "<input type='text' class='form-control input-sm' id='graphUrl_{0}' placeholder='Visualization Url' value='{1}'></input>".format(
 										varidx,
 										url.escapeXml()
@@ -3482,6 +3488,12 @@ var UIManager  = ( function( window, undefined ) {
 					});
 					$("#graphUrl_"+varidx).focusout( function() {
 						var url = $(this).val();
+						
+						if (isNullOrEmpty(url) == true) {
+							url = defaultgraphicurl;
+							$(this).val(url);
+						}
+
 						if (isNullOrEmpty(url) == false) {
 							var re = /(http:|https:)*\/\/(.*)/; 
 							var m;
@@ -3495,10 +3507,9 @@ var UIManager  = ( function( window, undefined ) {
 						}
 					});
 				} else {
-					//TODO
-					// get all data from fields
-					// Save into ALTUI device Variable
-					
+					//change color
+					$(this).addClass("btn-default").removeClass("btn-danger");
+
 					// first keep the other ones
 					var varPushesToSave = [];
 					$.each( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend" ) || "").split(';'),function(idx,pushLine) {
@@ -3517,7 +3528,8 @@ var UIManager  = ( function( window, undefined ) {
 							channelid : form.find("input#channelID_"+varidx).val(),
 							readkey : form.find("input#readApiKey_"+varidx).val(),
 							key : form.find("input#apiKey_"+varidx).val(),
-							fieldnum : form.find("input#fieldNum_"+varidx).val()
+							fieldnum : form.find("input#fieldNum_"+varidx).val(),
+							graphicurl : tr.closest("tbody").find("input#graphUrl_"+varidx).val()
 						};
 						varPushesToSave.push( _setPushLineParams(push) );
 					}

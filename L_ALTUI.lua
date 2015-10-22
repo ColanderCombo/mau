@@ -1288,10 +1288,10 @@ function getWatchParams(str)
 end
 
 -- service#variable#deviceid#provider#data line which is a template sprintf string for params
--- urn:micasaverde-com:serviceId:SceneController1#LastSceneID#208#thingspeak#61186#key=U1F7T31MHB5O8HZI&field1=0
+-- urn:micasaverde-com:serviceId:SceneController1#LastSceneID#208#thingspeak#61186#key=U1F7T31MHB5O8HZI&field1=0#graphic url
 function getPushParams(str)
 	local params = str:split("#")
-	return params[1],params[2],tonumber(params[3]),params[4],params[5],params[6],params[7]
+	return params[1],params[2],tonumber(params[3]),params[4],params[5],params[6],params[7],params[8] or ""
 end
 
 function findWatch( devid, service, variable )
@@ -1454,8 +1454,8 @@ function variableWatchCallback(lul_device, lul_service, lul_variable, lul_value_
 	debug(string.format("registeredWatches: %s",json.encode(registeredWatches)))
 end
 
-function addWatch( devid, service, variable, expression, scene , provider, data )
-	debug(string.format("addWatch(%s,%s,%s,%s,%s,%s,%s)",devid, service, variable, expression, scene, provider or "", data or ""))
+function addWatch( devid, service, variable, expression, scene , provider, data, graphicurl )
+	debug(string.format("addWatch(%s,%s,%s,%s,%s,%s,%s)",devid, service, variable, expression, scene, provider or "", data or "", graphicurl or ""))
 	devidstr = tostring(devid)	 -- to inssure it is not a indexed array , but hash table
 	local bDuplicateWatch = false
 	if (registeredWatches[devidstr] == nil) then
@@ -1514,8 +1514,8 @@ function initVariableWatches( variableWatchString , dataPushString)
 	-- urn:micasaverde-com:serviceId:SceneController1#LastSceneID#208#thingspeak#key=U1F7T31MHB5O8HZI&field1=0
 	local watches = dataPushString:split(";")
 	for k,v  in pairs(watches) do
-		local service,variable,device,provider,channel,readk,data  = getPushParams(v)
-		addWatch( device, service, variable, "true", -1, provider, data )
+		local service,variable,device,provider,channel,readk,data,graphicurl  = getPushParams(v)
+		addWatch( device, service, variable, "true", -1, provider, data,graphicurl )
 	end
 end
 
