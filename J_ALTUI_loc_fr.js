@@ -248,10 +248,10 @@ Localization.init( {
 	"Lua Startup code has been modified":"Le code LUA de démarrage a été modifié avec succès",
 	"Header":"Entête",
 	"Delay":"Délai",
-	"Edited Scene {0} successfully ":"La scène {0} est sauvegardée",
+	"Edited Scene {0} successfully":"La scène {0} est sauvegardée",
 	"Notification from {0}":"Notification de {0}",
 	"Notify Users":"Notifier ces Utilisateurs",
-	"Deleted Scene {0} successfully ":"La scène {0} est détruite",
+	"Deleted Scene {0} successfully":"La scène {0} est détruite",
 	"Left Buttons are fixed on the page":"Fixer la barre de boutons a gauche",
 	"See":"Voir",
 	"2-columns Menu's limit":"Limite pour les Menus a 2 colonnes",
@@ -282,5 +282,12 @@ Localization.init( {
 	"Welcome to ALTUI":"Bienvenue dans ALTUI",
 	"Use Vera Favorites":"Utiliser les Favoris en mode Vera",
 	"Graph":"Graphique",
-	"Themes":"Thèmes"
+	"Themes":"Thèmes",
+	"Arm":"Armer",
+	"Bypass":"Désarmer",
+	"Restart":"Redémarrer",
+	"On":"On","Off":"Off","Reset":"Reset",
+	"Create Device succeeded":"Périphérique créé",
+	"Configuration":"Configuration",
+	"Deleted Device {0} successfully":"Périphérique {0} effacé avec succès"
 });

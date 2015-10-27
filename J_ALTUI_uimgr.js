@@ -2805,31 +2805,34 @@ var PageMessage = (function(window, undefined ) {
 	{
 		var now = new Date();
 		var txt = "#{0}:{1}:{2}".format(job.id,device.name,job.comments);
-		var tr = $("div#altui-pagemessage tr[data-jobid='"+job.id+"']");
-		if (tr.length>0) {
-			var idx = $(tr).data('idx');
-			var badge = $(tr).find("span.badge");
-			$(tr).replaceWith( 
-				_messageRow(idx, 1, now.toLocaleString(),txt, "", UIManager.jobStatusToColor( job.status ), {
-					devid : device.id,	//device concerned
-					jobid : job.id	 	//message for this job, will replace old one
-				}) 
-			);
-			if (job.status==4)
-				setTimeout( function () { _clearMessage( idx ) }, 5000 );
-		}
-		else
-		{
-			// new message
-			_message(
-				txt,
-				UIManager.jobStatusToColor( job.status ),
-				false, 
-				{
-					devid : device.id,	//device concerned
-					jobid : job.id	 	//message for this job, will replace old one
-				}
-			);
+		if (job.id!=0) {
+			// seems createdevice generate a job ID 0 on zWave device. let's avoid that message to the user
+			var tr = $("div#altui-pagemessage tr[data-jobid='"+job.id+"']");
+			if (tr.length>0) {
+				var idx = $(tr).data('idx');
+				var badge = $(tr).find("span.badge");
+				$(tr).replaceWith( 
+					_messageRow(idx, 1, now.toLocaleString(),txt, "", UIManager.jobStatusToColor( job.status ), {
+						devid : device.id,	//device concerned
+						jobid : job.id	 	//message for this job, will replace old one
+					}) 
+				);
+				if (job.status==4)
+					setTimeout( function () { _clearMessage( idx ) }, 5000 );
+			}
+			else
+			{
+				// new message
+				_message(
+					txt,
+					UIManager.jobStatusToColor( job.status ),
+					false, 
+					{
+						devid : device.id,	//device concerned
+						jobid : job.id	 	//message for this job, will replace old one
+					}
+				);
+			}
 		}
 	};
 	
@@ -3604,8 +3607,8 @@ var UIManager  = ( function( window, undefined ) {
 						},
 						function ( newid ) {
 							$('#deviceCreateModal').modal('hide');
-							if (newid)
-								PageMessage.message( _T("Device {0} created successfully").format(newid), "success");
+							if (newid !=null)
+								PageMessage.message( _T("Device {0} created successfully").format(newid), "info");
 							else
 								PageMessage.message( _T("Device creation failed"), "danger");
 						}

@@ -303,49 +303,76 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 	function _createDevice( descr, dfile, ifile, roomnum, cbfunc )
 	{
 		AltuiDebug.debug("_createDevice( {0},{1},{2},{3} )".format( descr, dfile, ifile,roomnum));
-		var xml = "";
-		xml +="<s:Envelope xmlns:s='http://schemas.xmlsoap.org/soap/envelope/' s:encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'>";
-		xml +="   <s:Body>";
-			xml +="<u:CreateDevice xmlns:u='urn:schemas-micasaverde-org:service:HomeAutomationGateway:1'>";
-				xml +="<deviceType></deviceType>";
-				xml +="<internalID></internalID>";
-				xml +="<Description>{0}</Description>";
-				xml +="<UpnpDevFilename>{1}</UpnpDevFilename>";
-				xml +="<UpnpImplFilename>{2}</UpnpImplFilename>";
-				xml +="<IpAddress></IpAddress>";
-				xml +="<MacAddress></MacAddress>";
-				xml +="<DeviceNumParent>0</DeviceNumParent>";
-				xml +="<RoomNum>{3}</RoomNum>";
-			xml +="</u:CreateDevice>";
-		xml +="   </s:Body>";
-		xml +="</s:Envelope>";
+		if (0) {
+			var xml = "";
+			xml +="<s:Envelope xmlns:s='http://schemas.xmlsoap.org/soap/envelope/' s:encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'>";
+			xml +="   <s:Body>";
+				xml +="<u:CreateDevice xmlns:u='urn:schemas-micasaverde-org:service:HomeAutomationGateway:1'>";
+					xml +="<deviceType></deviceType>";
+					xml +="<internalID></internalID>";
+					xml +="<Description>{0}</Description>";
+					xml +="<UpnpDevFilename>{1}</UpnpDevFilename>";
+					xml +="<UpnpImplFilename>{2}</UpnpImplFilename>";
+					xml +="<IpAddress></IpAddress>";
+					xml +="<MacAddress></MacAddress>";
+					xml +="<DeviceNumParent>0</DeviceNumParent>";
+					xml +="<RoomNum>{3}</RoomNum>";
+				xml +="</u:CreateDevice>";
+			xml +="   </s:Body>";
+			xml +="</s:Envelope>";
 
-		var url = _buildHAGSoapUrl();
-		return $.ajax({
-			url: url,
-			type: "POST",
-			dataType: "text",
-			contentType: "text/xml;charset=UTF-8",
-			processData: false,
-			data:  xml.format( descr,dfile, ifile, roomnum  ),
-			headers: {
-				"SOAPACTION":'"urn:schemas-micasaverde-org:service:HomeAutomationGateway:1#CreateDevice"'
-			},
-		})
-		.done(function(data, textStatus, jqXHR) {
-			_unproxifyResult(data, textStatus, jqXHR, function(data,textStatus,jqXHR) {
+			var url = _buildHAGSoapUrl();
+			return $.ajax({
+				url: url,
+				type: "POST",
+				dataType: "text",
+				contentType: "text/xml;charset=UTF-8",
+				processData: false,
+				data:  xml.format( descr,dfile, ifile, roomnum  ),
+				headers: {
+					"SOAPACTION":'"urn:schemas-micasaverde-org:service:HomeAutomationGateway:1#CreateDevice"'
+				},
+			})
+			.done(function(data, textStatus, jqXHR) {
+				_unproxifyResult(data, textStatus, jqXHR, function(data,textStatus,jqXHR) {
+					if ($.isFunction( cbfunc ))
+					{
+						var re = /<DeviceNum>(\d+)<\/DeviceNum>/; 
+						var result = data.match(re);
+						cbfunc( ( result != null) && (result.length>=2) ? result[1] : null );		// device ID in call back
+					}
+				});
+			})
+			.fail(function(jqXHR, textStatus, errorThrown) {
 				if ($.isFunction( cbfunc ))
-				{
-					var re = /<DeviceNum>(\d+)<\/DeviceNum>/; 
-					var result = data.match(re);
-					cbfunc( ( result != null) && (result.length>=2) ? result[1] : null );		// device ID in call back
+					cbfunc(null);
+			});			
+		}
+		else {
+			//descr, dfile, ifile, roomnum
+			var params={};
+			params["Description"]=descr;
+			params["UpnpDevFilename"]=dfile;
+			params["UpnpImplFilename"]=ifile;
+			params["RoomNum"]=roomnum;
+			params["Reload"]=1;
+			return this.UPnPAction( 0, "urn:micasaverde-com:serviceId:HomeAutomationGateway1", "CreateDevice", params, function(data,jqXHR){
+				if (data!=null) {
+					PageMessage.message(_T("Create Device succeeded"),"success");
+					if ($.isFunction( cbfunc ))
+					{
+						// typical result { "u:CreateDeviceResponse": { "DeviceNum": "224" } }
+						var obj = JSON.parse(data);
+						cbfunc( obj["u:CreateDeviceResponse"]["DeviceNum"] );		// device ID in call back
+					}
+				}
+				else {
+					PageMessage.message(_T("Create Device failed"), "danger");
+					if ($.isFunction( cbfunc ))
+						cbfunc(null);
 				}
 			});
-		})
-		.fail(function(jqXHR, textStatus, errorThrown) {
-			if ($.isFunction( cbfunc ))
-				cbfunc(null);
-		});
+		}
 	}
 	
 // http://192.168.1.5/port_49451/upnp/control/hag
@@ -1021,22 +1048,24 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 					{
 						$.each(data.devices, function( idx, device) {
 							var userdata_device_idx = _findDeviceIdxByID(device.id);
-							_user_data.devices[userdata_device_idx].status = device.status;
-							_user_data.devices[userdata_device_idx].Jobs = device.Jobs;
-							_user_data.devices[userdata_device_idx].dirty = true;
+							if (userdata_device_idx!=-1) {								
+								_user_data.devices[userdata_device_idx].status = device.status;
+								_user_data.devices[userdata_device_idx].Jobs = device.Jobs;
+								_user_data.devices[userdata_device_idx].dirty = true;
 
-							if (device.states !=null) {
-								$.each(device.states, function( idx, state) {
-									$.each( _user_data.devices[userdata_device_idx].states , function( idx, userdata_state)
-									{
-										if ((userdata_state.service == state.service) && (userdata_state.variable == state.variable))
+								if (device.states !=null) {
+									$.each(device.states, function( idx, state) {
+										$.each( _user_data.devices[userdata_device_idx].states , function( idx, userdata_state)
 										{
-											_user_data.devices[userdata_device_idx].states[idx].value = state.value;
-											return false; // break from the $.each()
-										}
+											if ((userdata_state.service == state.service) && (userdata_state.variable == state.variable))
+											{
+												_user_data.devices[userdata_device_idx].states[idx].value = state.value;
+												return false; // break from the $.each()
+											}
+										});
 									});
-								});
-								EventBus.publishEvent("on_ui_deviceStatusChanged",_user_data.devices[userdata_device_idx]);
+									EventBus.publishEvent("on_ui_deviceStatusChanged",_user_data.devices[userdata_device_idx]);
+								}
 							}
 						});
 					}
@@ -1303,7 +1332,8 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	{
 		var jqxhr = _httpGet( "?id=device&action=delete&device="+id, {}, function(data, textStatus, jqXHR) {
 			if ( (data!=null) && (data!="ERROR") ) {
-				PageMessage.message(_T("Deleted Device {0} successfully ").format(id), "success", true);
+				PageMessage.message(_T("Deleted Device {0} successfully").format(id), "success");
+				MultiBox.reloadEngine( _uniqID );
 			}
 			else {
 				PageMessage.message(_T("Could not delete Device {0}").format(id), "warning");
@@ -1349,7 +1379,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		_deleteSceneUserData(id);
 		var jqxhr = _httpGet( "?id=scene&action=delete&scene="+id, {}, function(data, textStatus, jqXHR) {
 			if ( (data!=null) && (data!="ERROR") ) {
-				PageMessage.message(_T("Deleted Scene {0} successfully ").format(id), "success");
+				PageMessage.message(_T("Deleted Scene {0} successfully").format(id), "success");
 			}
 			else {
 				PageMessage.message(_T("Could not delete Scene {0}").format(id), "warning");
@@ -1405,7 +1435,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 				(cbfunc)(data);
 			else {
 				if ( (data!=null) && (data!="ERROR") ) {
-					PageMessage.message(_T("Edited Scene {0} successfully ").format(sceneid), "success");
+					PageMessage.message(_T("Edited Scene {0} successfully").format(sceneid), "success");
 				}
 				else {
 					PageMessage.message(_T("Could not edit Scene {0}").format(sceneid), "warning");
