@@ -2511,6 +2511,11 @@ html+="  </xml>";
 					_showSaveNeeded();
 				}
 			})
+			.on("change","#altui-scene-name-input",function() { 
+				if ( $("#altui-scene-name-input").val() != scene.name ) {
+					_showSaveNeeded();
+				}
+			})
 			.on("click",".altui-scene-editbutton",function(){ 
 				scene.lua = $("#altui-luascene").val();
 				scene.name = $("#altui-scene-name-input").val();
