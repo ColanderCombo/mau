@@ -4755,7 +4755,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				$.each(usedin_objects, function(idx,obj) {
 					var info= (obj.action) ? _formatAction(controller,obj.action) : _formatTrigger(controller,obj.trigger);
 					var smallbuttonTemplate = "<button id='{0}' type='button' class='{1} btn btn-default btn-sm' aria-label='tbd' title='{3}'>{2}</button>";
-					html += "<li>Scene #{0} <span class='text-info'>'{1}'</span>, {2} <span class='text-info'>'{3}'</span>  &nbsp;".format(
+					html += "<li id='{0}'>Scene #{0} <span class='text-info'>'{1}'</span>, {2} <span class='text-info'>'{3}'</span>  &nbsp;".format(
 						obj.scene, 
 						obj.name, 
 						obj.type, 
@@ -4780,6 +4780,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		};
 		function _deviceDrawDeviceTriggers( device, container ) {
 			var devicecontroller = MultiBox.controllerOf(device.altuiid).controller;
+			var users = MultiBox.getUsersSync(devicecontroller);
 			var html ="";
 			html +="<div class='row'>";
 			html += "<div id='altui-device-triggers-"+device.altuiid+"' class='col-xs-12 altui-device-triggers'>"
@@ -4788,14 +4789,22 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				var scenecontroller = MultiBox.controllerOf(scene.altuiid).controller;
 				return (scenecontroller==devicecontroller)&&(scene.notification_only == device.id)
 			});
-			if (scenes)
+			if (scenes) {
 				$.each(scenes, function(idx,scene) {
-					html += "<li>{0}:{1} {2}</li>".format(
+					var selectedusers = (scene.triggers[0].users || "").toString().split(",");
+					var names=[];
+					$.each(users, function(idx,user){
+						var inarray  = $.inArray(user.id.toString(),selectedusers);
+						if (inarray!=-1)
+							names.push(user.Name);
+					});
+					html += "<li>{0}:({1}) {2}</li>".format(
 						scene.name,
-						scene.triggers[0].users || "",
+						names.join(","),
 						buttonTemplate.format( scene.altuiid, 'btn-xs altui-device-deltrigger text-danger', deleteGlyph,'default')
 						);
 				});
+			}
 			html += "<li>{0}</li>".format(buttonTemplate.format( 'altui-device-createtrigger', 'altui-device-createtrigger', plusGlyph+_T("Create"),'default' ));
 			html += "</ul>";
 			html += "</div>";
