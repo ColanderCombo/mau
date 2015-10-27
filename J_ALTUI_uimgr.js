@@ -4778,7 +4778,30 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				UIManager.pageSceneEdit(altuiid);
 			});
 		};
-		
+		function _deviceDrawDeviceTriggers( device, container ) {
+			var devicecontroller = MultiBox.controllerOf(device.altuiid).controller;
+			var html ="";
+			html +="<div class='row'>";
+			html += "<div id='altui-device-triggers-"+device.altuiid+"' class='col-xs-12 altui-device-triggers'>"
+			html += "<ul>";
+			var scenes = $.grep(MultiBox.getScenesSync(), function(scene) {
+				var scenecontroller = MultiBox.controllerOf(scene.altuiid).controller;
+				return (scenecontroller==devicecontroller)&&(scene.notification_only == device.id)
+			});
+			if (scenes)
+				$.each(scenes, function(idx,scene) {
+					html += "<li>{0}:{1} {2}</li>".format(
+						scene.name,
+						scene.triggers[0].users || "",
+						buttonTemplate.format( scene.altuiid, 'btn-xs altui-device-deltrigger text-danger', deleteGlyph,'default')
+						);
+				});
+			html += "<li>{0}</li>".format(buttonTemplate.format( 'altui-device-createtrigger', 'altui-device-createtrigger', plusGlyph+_T("Create"),'default' ));
+			html += "</ul>";
+			html += "</div>";
+			html += "</div>";	// row			
+			$(container).append( html );
+		}
 		function _deviceDrawControlPanelAttributes(device, container ) {
 			var devid = device.altuiid;
 			// Draw hidding attribute panel
@@ -4926,6 +4949,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		_deviceDrawControlPanelAttributes( device, container ); 				// row for attributes
 		_deviceDrawDeviceConfig( device, container );							// row for device 'config' info
 		_deviceDrawDeviceUsedIn( device, container );							// row for device 'used in' info
+		_deviceDrawDeviceTriggers( device, container );							// row for device triggers info
 		_deviceDrawWireFrame(device,container);
 		var ui_static_data = MultiBox.getDeviceStaticData(device);		
 		if (ui_static_data!=null) {
@@ -6381,7 +6405,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		html += "<button type='button' class='btn btn-default altui-device-actions' id='"+altuiid+"' >"+_T("Actions")+"</button>";
 		html += "<button type='button' class='btn btn-default' id='altui-device-config' >"+_T("Configuration")+"<span class='caret'></span></button>";
 		html += "<button type='button' class='btn btn-default' id='altui-device-usedin' >"+_T("Used in")+"<span class='caret'></span></button>";
-		html += "<button type='button' class='btn btn-default' id='altui-device-trigger' >"+plusGlyph+_T("Notification")+"</button>";
+		html += "<button type='button' class='btn btn-default' id='altui-device-triggers' >"+_T("Notification")+"<span class='caret'></span></button>";
 		if (AltuiDebug.IsDebug())
 			html +=  buttonDebugHtml;
 		html += "</div>";
@@ -6400,6 +6424,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		$("#altui-device-attributes-"+altuiid).toggle(false);		// hide them by default;
 		$("#altui-device-config-"+altuiid).toggle(false);			// hide them by default;
 		$("#altui-device-usedin-"+altuiid).toggle(false);			// hide them by default;
+		$("#altui-device-triggers-"+altuiid).toggle(false);			// hide them by default;
 		$(".altui-debug-div").toggle(false);						// hide
 		$(container).off('click','.altui-deldevice')
 					.on('click','.altui-deldevice',  function(e) {
@@ -6420,11 +6445,22 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			$("#altui-device-usedin-"+altuiid).toggle();		// toogle attribute box
 			$("#altui-device-usedin span.caret").toggleClass( "caret-reversed" );
 		});
+		$("#altui-device-triggers").click( function() {
+			$("#altui-device-triggers-"+altuiid).toggle();		// toogle attribute box
+			$("#altui-device-triggers span.caret").toggleClass( "caret-reversed" );
+		});
 		$("#altui-device-config").click( function() {
 			$("#altui-device-config-"+altuiid).toggle();		// toogle attribute box
 			$("#altui-device-config span.caret").toggleClass( "caret-reversed" );
 		});		
-		$("#altui-device-trigger").click( function() {
+		
+		$(".altui-device-deltrigger").click( function() {
+			var altuiid = $(this).prop("id");
+			var scene = MultiBox.getSceneByAltuiID(altuiid);
+			MultiBox.deleteScene(scene);
+			$(this).closest("li").remove();
+		});
+		$(".altui-device-createtrigger").click( function() {
 			var info = MultiBox.controllerOf(altuiid);
 			var trigger = {
 							name: _T("Notification from {0}").format(device.name),
