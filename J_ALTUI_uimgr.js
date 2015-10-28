@@ -6900,7 +6900,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				_sceneID2RoomName[scene.altuiid] = _roomID2Name["{0}-{1}".format(controller,scene.room)];
 			}
 			return ( (_sceneFilter.room<0) || (scene!=null && _sceneID2RoomName[scene.altuiid]==_roomID2Name[_sceneFilter.room]) ) 
-				&& ( (_sceneFilter.room!=-2) || (scene.favorite==true) );
+				&& ( (_sceneFilter.room!=-2) || (scene.favorite==true) )
+				&& ( (scene.notification_only==0) || (scene.notification_only==undefined) ) ;
 		};
 		function _onClickRoomButton(htmlid,altuiid) {
 			_sceneFilter.room = (altuiid !="") ? altuiid : htmlid;
