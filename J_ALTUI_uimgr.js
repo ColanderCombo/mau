@@ -4748,8 +4748,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		function _deviceDrawDeviceUsedIn( device, container ) {
 			var usedin_objects = MultiBox.getDeviceDependants(device);
 			var html ="";
-			html +="<div class='row'>";
-			html += "<div id='altui-device-usedin-"+device.altuiid+"' class='col-xs-12 altui-device-usedin'>"
+			html +="<div class='row altui-device-usedin'>";
+			html += "<div id='altui-device-usedin-"+device.altuiid+"' class='col-xs-12'>"
 			html += "<ul>";
 			if (usedin_objects.length>0)
 				$.each(usedin_objects, function(idx,obj) {
@@ -4772,18 +4772,22 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			// html +=  "<span><pre>{0}</pre></span>".format( JSON.stringify(usedin_objects) );
 			html += "</div>";
 			html += "</div>";	// row
-			$(container).append( html );
-			$(".altui-scene-goto").click(function(){
-				var altuiid = $(this).prop("id");
-				UIManager.pageSceneEdit(altuiid);
-			});
+			var dom = $(container).find("div.altui-device-usedin");
+			if (dom.length==0)
+				$(container).append( html );
+			else {
+				var visible = $( dom ).is( ":visible" );
+				dom.replaceWith(html);
+				dom = $(container).find("div.altui-device-usedin");
+				dom.toggle(visible);
+			}
 		};
 		function _deviceDrawDeviceTriggers( device, container ) {
 			var devicecontroller = MultiBox.controllerOf(device.altuiid).controller;
 			var users = MultiBox.getUsersSync(devicecontroller);
 			var html ="";
-			html +="<div class='row'>";
-			html += "<div id='altui-device-triggers-"+device.altuiid+"' class='col-xs-12 altui-device-triggers'>"
+			html +="<div class='row altui-device-triggers'>";
+			html += "<div id='altui-device-triggers-"+device.altuiid+"' class='col-xs-12'>"
 			html += "<ul>";
 			var scenes = $.grep(MultiBox.getScenesSync(), function(scene) {
 				var scenecontroller = MultiBox.controllerOf(scene.altuiid).controller;
@@ -4798,9 +4802,10 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 						if (inarray!=-1)
 							names.push(user.Name);
 					});
-					html += "<li>{0}:({1}) {2}</li>".format(
+					html += "<li>{0}:({1}) {2} {3}</li>".format(
 						scene.name,
 						names.join(","),
+						buttonTemplate.format( scene.altuiid, 'btn-xs altui-scene-goto',searchGlyph,'default'),
 						buttonTemplate.format( scene.altuiid, 'btn-xs altui-device-deltrigger text-danger', deleteGlyph,'default')
 						);
 				});
@@ -4809,7 +4814,15 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			html += "</ul>";
 			html += "</div>";
 			html += "</div>";	// row			
-			$(container).append( html );
+			var dom = $(container).find("div.altui-device-triggers");
+			if (dom.length==0)
+				$(container).append( html );
+			else {
+				var visible = $( dom ).is( ":visible" );
+				dom.replaceWith(html);
+				dom = $(container).find("div.altui-device-triggers");
+				dom.toggle(visible);
+			}
 		}
 		function _deviceDrawControlPanelAttributes(device, container ) {
 			var devid = device.altuiid;
@@ -4928,22 +4941,22 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			if (_toLoad==0) {
 				$(container).append( "<div class='row'><div class='altui-debug-div'></div></div>" );	// Draw hidden debug panel
 
-				container = container.find(".altui-device-controlpanel .panel-body");	
+				var panel_body = container.find(".altui-device-controlpanel .panel-body");	
 				var _altuitypesDB = MultiBox.getALTUITypesDB();					// for ALTUI plugin info
 				var ui_static_data = MultiBox.getDeviceStaticData(device);
 				if (ui_static_data!=null) {
 					var bExtraTab = (_altuitypesDB[device.device_type] && _altuitypesDB[device.device_type].ControlPanelFunc!=null);
-					$(container).append( "<div class='row'>" + _createDeviceTabs( device, bExtraTab, ui_static_data.Tabs ) + "</div>" );
+					$(panel_body).append( "<div class='row'>" + _createDeviceTabs( device, bExtraTab, ui_static_data.Tabs ) + "</div>" );
 				}
 
-				$(container).find("li a").first().tab('show');	// activate first tab
+				$(panel_body).find("li a").first().tab('show');	// activate first tab
 				var activeTabIdx = _getActiveDeviceTabIdx();
 				var domparent  =  $('div#altui-devtab-content-'+activeTabIdx);
 				_displayActiveDeviceTab(activeTabIdx, device, domparent);
 
 				if (bAsync) {
 					$("#altui-device-attributes-"+device.altuiid).toggle(false);		// hide them by default;
-					$("#altui-device-usedin-"+device.altuiid).toggle(false);		// hide them by default;
+					// $("#altui-device-usedin-"+device.altuiid).toggle(false);		// hide them by default;
 					$(".altui-debug-div").toggle(false);					// hide
 				}
 
@@ -4954,12 +4967,58 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			}
 		};
 
+		function _deviceRefreshDevicePanel(device, container) {
+			_deviceDrawDeviceUsedIn( device, container );							// row for device 'used in' info
+			_deviceDrawDeviceTriggers( device, container );							// row for device triggers info
+		};
+		
 		var _toLoad = 0;
 		_deviceDrawControlPanelAttributes( device, container ); 				// row for attributes
-		_deviceDrawDeviceConfig( device, container );							// row for device 'config' info
-		_deviceDrawDeviceUsedIn( device, container );							// row for device 'used in' info
-		_deviceDrawDeviceTriggers( device, container );							// row for device triggers info
+		_deviceDrawDeviceConfig( device, container );	
+		_deviceRefreshDevicePanel(device, container)
+		// row for device 'config' info
 		_deviceDrawWireFrame(device,container);
+		$(".altui-device-controlpanel-container")
+			.on('click',".altui-scene-goto",function(){
+				var altuiid = $(this).prop("id");
+				UIManager.pageSceneEdit(altuiid);
+			})
+			.on('click',".altui-device-deltrigger",function(){
+				var altuiid = $(this).prop("id");
+				var scene = MultiBox.getSceneByAltuiID(altuiid);
+				MultiBox.deleteScene(scene);
+				_deviceRefreshDevicePanel(device, container)
+				//$(this).closest("li").remove();
+			})
+			.on('click',".altui-device-createtrigger",function(){
+				var info = MultiBox.controllerOf(device.altuiid);
+				var trigger = {
+								name: _T("Notification from {0}").format(device.name),
+								enabled:1,
+								template:'',
+								device:info.id,
+								arguments:[],
+								lua:''
+							};
+				DialogManager.triggerDialog( trigger, info.controller, function( trigger ) {
+					var newid = MultiBox.getNewSceneID( info.controller );
+					var scenetemplate = { 
+							notification_only: parseInt(device.id),
+							name:_T("Notification from {0}").format(device.name),
+							id: newid.id,
+							altuiid: newid.altuiid,
+							triggers: [trigger],
+							groups: [{"delay":0,"actions":[]}],
+							timers: [],
+							lua:"",
+							room:0
+					};
+
+					// clear page
+					UIManager.pageSceneEdit(NULL_SCENE,scenetemplate);
+				});		
+			});
+			
 		var ui_static_data = MultiBox.getDeviceStaticData(device);		
 		if (ui_static_data!=null) {
 			// load scripts
@@ -6403,7 +6462,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 	{
 		// var rooms = MultiBox.getRoomsSync();
 		var device = MultiBox.getDeviceByAltuiID( altuiid );
-		var controllerid = MultiBox.controllerOf(altuiid).controller;
+		// var controllerid = MultiBox.controllerOf(altuiid).controller;
 		var category = MultiBox.getCategoryTitle( device.category_num );
 
 		UIManager.clearPage(_T('Control Panel'),"{0} {1} <small>#{2}</small>".format( device.name , category ,altuiid),UIManager.oneColumnLayout);
@@ -6432,8 +6491,10 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		//
 		$("#altui-device-attributes-"+altuiid).toggle(false);		// hide them by default;
 		$("#altui-device-config-"+altuiid).toggle(false);			// hide them by default;
-		$("#altui-device-usedin-"+altuiid).toggle(false);			// hide them by default;
-		$("#altui-device-triggers-"+altuiid).toggle(false);			// hide them by default;
+		$(".altui-device-usedin").toggle(false);		// toogle attribute box
+		$(".altui-device-triggers").toggle(false);		// toogle attribute box
+		// $("#altui-device-usedin-"+altuiid).toggle(false);			// hide them by default;
+		// $("#altui-device-triggers-"+altuiid).toggle(false);			// hide them by default;
 		$(".altui-debug-div").toggle(false);						// hide
 		$(container).off('click','.altui-deldevice')
 					.on('click','.altui-deldevice',  function(e) {
@@ -6451,11 +6512,13 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		});
 		
 		$("#altui-device-usedin").click( function() {
-			$("#altui-device-usedin-"+altuiid).toggle();		// toogle attribute box
+			// $("#altui-device-usedin-"+altuiid).toggle();		// toogle attribute box
+			$(".altui-device-usedin").toggle();		// toogle attribute box
 			$("#altui-device-usedin span.caret").toggleClass( "caret-reversed" );
 		});
 		$("#altui-device-triggers").click( function() {
-			$("#altui-device-triggers-"+altuiid).toggle();		// toogle attribute box
+			// $("#altui-device-triggers-"+altuiid).toggle();		// toogle attribute box
+			$(".altui-device-triggers").toggle();		// toogle attribute box
 			$("#altui-device-triggers span.caret").toggleClass( "caret-reversed" );
 		});
 		$("#altui-device-config").click( function() {
@@ -6463,44 +6526,6 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			$("#altui-device-config span.caret").toggleClass( "caret-reversed" );
 		});		
 		
-		$(".altui-device-deltrigger").click( function() {
-			var altuiid = $(this).prop("id");
-			var scene = MultiBox.getSceneByAltuiID(altuiid);
-			MultiBox.deleteScene(scene);
-			$(this).closest("li").remove();
-		});
-		$(".altui-device-createtrigger").click( function() {
-			var info = MultiBox.controllerOf(altuiid);
-			var trigger = {
-							name: _T("Notification from {0}").format(device.name),
-							enabled:1,
-							template:'',
-							device:info.id,
-							arguments:[],
-							lua:''
-						};
-			DialogManager.triggerDialog( trigger, info.controller, function( trigger ) {
-				var info = MultiBox.controllerOf(altuiid);
-				var newid = MultiBox.getNewSceneID( info.controller );
-				var scenetemplate = { 
-						notification_only: parseInt(device.id),
-						name:_T("Notification from {0}").format(device.name),
-						id: newid.id,
-						altuiid: newid.altuiid,
-						triggers: [trigger],
-						groups: [{"delay":0,"actions":[]}],
-						timers: [],
-						lua:"",
-						room:0
-				};
-
-				// clear page
-				UIManager.pageSceneEdit(NULL_SCENE,scenetemplate);
-				// DialogManager.triggerUsersDialog( trigger, info.controller, function() {
-					// var scene = {};					
-				// });
-			});		
-		})
 		// resgister a handler on tab click to force a disaply & reload of JS tab , even if already loaded
 		$(container).off('click','.altui-device-controlpanel ul#altui-devtab-tabs a')
 					.on('click','.altui-device-controlpanel ul#altui-devtab-tabs a',  function(e) {
