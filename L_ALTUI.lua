@@ -553,6 +553,8 @@ local htmlScripts = [[
 	  src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["gauge","table"]}]}' >
 	</script>
 	<script src="J_ALTUI_utils.js" ></script>
+	<script src="J_ALTUI_api.js" ></script>
+	<script src="J_ALTUI_upnp.js" ></script>
 	<script src="J_ALTUI_verabox.js" ></script> 
 	<script src="J_ALTUI_multibox.js" ></script> 
 	<script src="J_ALTUI_uimgr.js" defer ></script> 
