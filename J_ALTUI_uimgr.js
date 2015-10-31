@@ -3399,7 +3399,7 @@ var UIManager  = ( function( window, undefined ) {
 					state.variable, 
 					_enhanceValue(state.value), 
 					state.service,
-					idx 
+					state.id 
 					);
 				lines.push(  str );
 			});
@@ -3409,11 +3409,10 @@ var UIManager  = ( function( window, undefined ) {
 			DialogManager.registerDialog('deviceModal',deviceModalTemplate.format( lines.join(''), device.name, device.altuiid ));
 			$("button.altui-variable-push").click( function() {
 				var tr = $(this).closest("tr");
-				var varidx = tr.find("td.altui-variable-value").prop('id');
+				var varid = tr.find("td.altui-variable-value").prop('id');
 				var defaultgraphicurlTemplate="//api.thingspeak.com/channels/{0}/charts/{2}?key={1}&width=450&height=260&results=60&dynamic=true";
-				var devicestates = MultiBox.getStates(device);
-				var state = devicestates[varidx];
-				var form = $(this).closest("tbody").find("form#form_"+varidx);
+				var state = MultiBox.getStateByID( device.altuiid, varid );
+				var form = $(this).closest("tbody").find("form#form_"+varid);
 				if (form.length==0) {
 					// change color
 					$(this).removeClass("btn-default").addClass("btn-danger");
@@ -3433,51 +3432,49 @@ var UIManager  = ( function( window, undefined ) {
 								defaultgraphicurl = defaultgraphicurlTemplate.format(pushData.channelid,pushData.readkey,pushData.fieldnum);
 								var url = (pushData.graphicurl == "") ?  defaultgraphicurl : pushData.graphicurl;
 								html += "<div class='col-md-8'>";
-								// html += "<form id='form_url_{0}' class='form-inline'>".format(varidx);
 								html += "<div class='form-group'>";
-									html += "<label for='graphUrl_{0}' title='{1}'>Visualization Url: </label> ".format(varidx,_T("(use size=iframe in your matlab url)"));
-									html += "<input type='text' class='form-control input-sm' id='graphUrl_{0}' placeholder='Visualization Url' value='{1}'></input>".format(
-										varidx,
+									html += "<label for='altui-graphUrl_{0}' title='{1}'>Visualization Url: </label> ".format(varid,_T("(use size=iframe in your matlab url)"));
+									html += "<input type='text' class='form-control input-sm' id='altui-graphUrl_{0}' placeholder='Visualization Url' value='{1}'></input>".format(
+										varid,
 										url.escapeXml()
 									)
 								html += "</div>"
-								// html += "</form>";
 								html += "<iframe class='altui-thingspeak-chart' width='100%' height='260' style='border: 1px solid #cccccc;' src='{0}' ></iframe>".format(url);
 								html += "</div>";
 							}
 							html += "<div class='col-md-4'>";
 							html += "<div class='checkbox'>"
 								html += "<label><input type='checkbox' id='enablePush_{0}' {1}>Enable Push to Thingspeak</label>".format(
-									varidx, 
+									varid, 
 									(pushData!=null) ? 'checked' : ''
 								);
 							html += "</div>"
-							html += "<form id='form_{0}' class='form-inline'>".format(varidx);
+							html += "<form id='form_{0}' class='form-inline'>".format(varid);
 								html += "<div class='form-group'>";
-									html += "<label for='channelID_{0}'>Channel ID: </label>".format(varidx);
+									html += "<label for='channelID_{0}'>Channel ID: </label>".format(varid);
 									html += "<input type='number' min=1 class='form-control input-sm' id='channelID_{0}' placeholder='ID' value='{1}'></input>".format(
-										varidx,
+										varid,
 										(pushData!=null) ? pushData.channelid : ''
 									)
 								html += "</div>"
 								html += "<div class='form-group'>";
-									html += "<label for='fieldNum_{0}'>Field Number: </label>".format(varidx);
+									html += "<label for='fieldNum_{0}'>Field Number: </label>".format(varid);
 									html += "<input type='number' min=1 max=8 class='form-control input-sm' id='fieldNum_{0}' placeholder='number' value='{1}'></input>".format(
-										varidx,
+										varid,
 										(pushData!=null) ? pushData.fieldnum : ''
 									)
 								html += "</div>"
 								html += "<div class='form-group'>";
-									html += "<label for='apiKey_{0}'>Write API Key: </label>".format(varidx);
+									html += "<label for='apiKey_{0}'>Write API Key: </label>".format(varid);
 									html += "<input type='text' class='form-control input-sm' id='apiKey_{0}' placeholder='Write key' value='{1}'></input>".format(
-										varidx,
+										varid,
 										(pushData!=null) ? pushData.key : ''
 									)
 								html += "</div>"
 								html += "<div class='form-group'>";
-									html += "<label for='readApiKey_{0}'>Read API Key: </label>".format(varidx);
+									html += "<label for='readApiKey_{0}'>Read API Key: </label>".format(varid);
 									html += "<input type='text' class='form-control input-sm' id='readApiKey_{0}' placeholder='Read key' value='{1}'></input>".format(
-										varidx,
+										varid,
 										(pushData!=null) ? pushData.readkey : ''
 									)
 								html += "</div>"
@@ -3488,13 +3485,13 @@ var UIManager  = ( function( window, undefined ) {
 						html += "</div></div>";
 					html += "</td></tr>";
 					tr.after(html);
-					var checked = $("#enablePush_"+varidx).is(':checked');
-					$("#form_"+varidx).toggle(checked);
-					$("#enablePush_"+varidx).change(function() {
+					var checked = $("#enablePush_"+varid).is(':checked');
+					$("#form_"+varid).toggle(checked);
+					$("#enablePush_"+varid).change(function() {
 						var checked = $(this).is(':checked');
-						$("#form_"+varidx).toggle(checked);
+						$("#form_"+varid).toggle(checked);
 					});
-					$("#graphUrl_"+varidx).focusout( function() {
+					$("#altui-graphUrl_"+varid).focusout( function() {
 						var url = $(this).val();
 						
 						if (isNullOrEmpty(url) == true) {
@@ -3527,17 +3524,17 @@ var UIManager  = ( function( window, undefined ) {
 						}
 					});
 					var nexttr = tr.next("tr");
-					if (nexttr.find("input#enablePush_"+varidx).prop('checked') ==true ) {
+					if (nexttr.find("input#enablePush_"+varid).prop('checked') ==true ) {
 						var push = {
 							service : state.service,
 							variable : state.variable,
 							deviceid : MultiBox.controllerOf(device.altuiid).id,
 							provider : "thingspeak",
-							channelid : form.find("input#channelID_"+varidx).val(),
-							readkey : form.find("input#readApiKey_"+varidx).val(),
-							key : form.find("input#apiKey_"+varidx).val(),
-							fieldnum : form.find("input#fieldNum_"+varidx).val(),
-							graphicurl : tr.closest("tbody").find("input#graphUrl_"+varidx).val()
+							channelid : form.find("input#channelID_"+varid).val(),
+							readkey : form.find("input#readApiKey_"+varid).val(),
+							key : form.find("input#apiKey_"+varid).val(),
+							fieldnum : form.find("input#fieldNum_"+varid).val(),
+							graphicurl : tr.closest("tbody").find("input#altui-graphUrl_"+varid).val()
 						};
 						varPushesToSave.push( _setPushLineParams(push) );
 					}
@@ -3547,16 +3544,16 @@ var UIManager  = ( function( window, undefined ) {
 			});
 			$("button.altui-variable-history").click( function() {
 				var tr = $(this).closest("tr");
-				var varidx = tr.find("td.altui-variable-value").prop('id');
-				var historypre = $(this).closest("tbody").find("table#"+varidx);
+				var varid = tr.find("td.altui-variable-value").prop('id');
+				var historypre = $(this).closest("tbody").find("table#"+varid);
 				var width = tr.width();
 				if (historypre.length==0) {
-					MultiBox.getDeviceVariableHistory( device, varidx, function(history) {
+					MultiBox.getDeviceVariableHistory( device, varid, function(history) {
 						AltuiDebug.debug("getDeviceVariableHistory returned :"+history.result); 
 						var html = "<tr><td colspan='3'>";
 						html += "<div class='panel panel-default'> <div class='panel-body'>";
 						// html += "<div class='table-responsive'>";
-						html +="<table id='{0}' class='table table-condensed altui-variable-value-history'>".format(varidx);
+						html +="<table id='{0}' class='table table-condensed altui-variable-value-history'>".format(varid);
 						html +="<thead>";
 						html += ("<tr><th>{0}</th><th>{1}</th><th>{2}</th></tr>".format(_T("Date"),_T("Old"),_T("New")));
 						html +="</thead>";

@@ -1090,9 +1090,9 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		});
 	};
 	
-	function _getDeviceVariableHistory( device, varidx, cbfunc) {
+	function _getDeviceVariableHistory( device, varid, cbfunc) {
 		var id = device.id;
-		var state = device.states[varidx];
+		var state = MultiBox.getStateByID(device.altuiid,varid);
 		// var cmd = "cat /var/log/cmh/LuaUPnP.log | grep \"Device_Variable::m_szValue_set device: {0}.*;1m{1}\"".format(device.id,state.variable);
 		// var cmd = "cat /var/log/cmh/LuaUPnP.log | grep $'Device_Variable::m_szValue_set device: {0}.*\033\[35;1m{1}\033\[0m'".format(device.id,state.variable);
 		// var cmd = "cat /var/log/cmh/LuaUPnP.log | grep $'\033\[35;1m{1}\033\[0m'".format(device.id,state.variable);
