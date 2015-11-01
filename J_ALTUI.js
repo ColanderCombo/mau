@@ -128,16 +128,16 @@ function altui_Settings(deviceID) {
 	  }\
 	  </style>';
 
-	var htmltest = '<button id="altui-open">Open Window</button>';
+	var htmltest = '<button class="btn btn-default btn-sm" id="altui-open">Open Window</button>';
 	var htmlConfig = '<textarea id="altui-config" rows="6" cols="50"></textarea>';
 	var htmlTheme = '<input id="altui-theme" class="altui-ui-input form-control"></input>';
 	var htmlHome = '<input id="altui-home" class="altui-ui-input form-control"></input>';
 	var htmlCDN = '<input id="altui-cdn" class="altui-ui-input form-control" placeholder="optional localcdn pathname, uses internet otherwise"></input>';
 	var htmlBootstrap = '<input id="altui-localbootstrap" class="altui-ui-input form-control" placeholder="optional local bootstrap relative url, use internet otherwise"></input>';
 	var htmlCTRL = '<input id="altui-ctrl" class="altui-ui-input form-control" placeholder="Comma separated list of ip_addr for extra controllers"></input>';
-	var htmlSetConfig= '<button id="altui-setconfig">Set Configuration</button>';
-	var htmlResetConfig= '<button id="altui-resetconfig">Default Configuration</button>';
-	var htmlViewJson = '<button id="altui-viewconfig">View Configuration</button>';
+	var htmlSetConfig= '<button class="btn btn-default btn-sm" id="altui-setconfig">Set Configuration</button>';
+	var htmlResetConfig= '<button class="btn btn-default btn-sm" id="altui-resetconfig">Default Configuration</button>';
+	var htmlViewJson = '<button class="btn btn-default btn-sm" id="altui-viewconfig">View Configuration</button>';
 	var html =
 		style+
 		'<div class="pane" id="pane"> '+ 
