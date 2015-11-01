@@ -8,7 +8,7 @@
 // written devagreement from amg0 / alexis . mermet @ gmail . com
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE . 
   
 /*The MIT License (MIT)
 BOOTGRID: Copyright (c) 2014-2015 Rafael J. Staib
@@ -806,7 +806,7 @@ var DialogManager = ( function() {
 		propertyline += "<div class='input-group'>";
 			propertyline += "<input id='altui-widget-"+name+"' class='form-control' "+optstr+" value='"+value.escapeXml()+"' "+placeholder+" ></input>";
 			propertyline += "<span class='input-group-btn'>";
-				propertyline += buttonTemplate.format( "altui-edit-"+name, 'btn-default', "Blockly "+editGlyph,_T('Edit Watch Expression'));
+				propertyline += buttonTemplate.format( "altui-edit-"+name, 'btn-default', "Blockly "+editGlyph,'default',_T('Edit Watch Expression'));
 			propertyline += "</span>";
 			propertyline += "<input type='hidden' id='altui-xml-"+name+"' class='form-control' value='"+xml.escapeXml()+"' ></input>";
 		propertyline += "</div>";
@@ -2275,7 +2275,7 @@ html+="  </xml>";
 					// html += "<div id='blocklyDiv' style='height: 480px; width: 600px;'></div>";
 					html += _T("Generated code");
 					html += "<pre id='blocklyDivCode'></pre>";
-					html += buttonTemplate.format( 'altui-save-blockly', '', _T('Submit'),'default');
+					html += buttonTemplate.format( 'altui-save-blockly', '', _T('Submit'),'default',_T('Save'));
 				html += "  </div>";
 				html += "</div>";
 			html += "</div>";
@@ -3647,7 +3647,7 @@ var UIManager  = ( function( window, undefined ) {
 			});
 			
 			// update modal with new text
-			var extrabuttons = MultiBox.isDeviceZwave(device) ? buttonTemplate.format( device.altuii, "altui-update-neighbors", _T("Update Neighbors"),"default") : "";
+			var extrabuttons = MultiBox.isDeviceZwave(device) ? buttonTemplate.format( device.altuii, "altui-update-neighbors", _T("Update Neighbors"),"default",_T("Update Neighbors")) : "";
 			DialogManager.registerDialog('deviceActionModal',deviceActionModalTemplate.format( lines.join(''), device.name, device.altuiid, extrabuttons ));
 
 			$('div#deviceActionModal button.altui-run-action').click( function() {
@@ -4803,12 +4803,12 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					html += "<li>{0}:({1}) {2} {3}</li>".format(
 						scene.name,
 						names.join(","),
-						buttonTemplate.format( scene.altuiid, 'btn-xs altui-scene-goto',searchGlyph,'default'),
-						buttonTemplate.format( scene.altuiid, 'btn-xs altui-device-deltrigger text-danger', deleteGlyph,'default')
+						buttonTemplate.format( scene.altuiid, 'btn-xs altui-scene-goto',searchGlyph,'default',_T("See")),
+						buttonTemplate.format( scene.altuiid, 'btn-xs altui-device-deltrigger text-danger', deleteGlyph,'default',_T("Delete"))
 						);
 				});
 			}
-			html += "<li>{0}</li>".format(buttonTemplate.format( 'altui-device-createtrigger', 'altui-device-createtrigger', plusGlyph+_T("Create"),'default' ));
+			html += "<li>{0}</li>".format(buttonTemplate.format( 'altui-device-createtrigger', 'altui-device-createtrigger', plusGlyph+_T("Create"),'default',_T("Create") ));
 			html += "</ul>";
 			html += "</div>";
 			html += "</div>";	// row			
@@ -4887,7 +4887,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 						});
 				htmlRoomSelect 	  += "</select>";
 		
-				var htmlDeleteButton= buttonTemplate.format( device.altuiid, 'btn-xs altui-deldevice pull-right', deleteGlyph,'default');;
+				var htmlDeleteButton= buttonTemplate.format( device.altuiid, 'btn-xs altui-deldevice pull-right', deleteGlyph,'default',_T("Delete"));
 				var html ="";
 				html+="<div class='row'>";
 					html +="<div id='altui-device-controlpanel-"+device.altuiid+"' class='col-xs-12 altui-device-controlpanel' data-altuiid='"+device.altuiid+"'>";
@@ -7709,12 +7709,12 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			var glyph = glyphTemplate.format('save',_T("Copy to clipboard"), '');
 			html +="  <div class='form-group'>";
 			html +="    <label for='altui-editor-result'>"+_T("Return Result")+":</label>";
-			html +=  buttonTemplate.format( 'altui-copyresult-clipboard', 'altui-copy-clipboard', glyph,'default');
+			html +=  buttonTemplate.format( 'altui-copyresult-clipboard', 'altui-copy-clipboard', glyph,'default',_T("Copy"));
 			html +="    <pre id='altui-editor-result'></pre>";
 			html +="  </div>";			
 			html +="  <div class='form-group'>";
 			html +="    <label for='altui-editor-output'>"+_T("Console Output")+":</label>";
-			html +=  buttonTemplate.format( 'altui-copyoutput-clipboard', 'altui-copy-clipboard', glyph,'default');
+			html +=  buttonTemplate.format( 'altui-copyoutput-clipboard', 'altui-copy-clipboard', glyph,'default',_T("Copy"));
 			html +="    <pre id='altui-editor-output'></pre>";
 			html +="  </div>";			
 		}
@@ -9424,7 +9424,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		html += "<div class='col-xs-12'>";
 			html+="<h3>"+_T("Output");
 			var glyph = glyphTemplate.format('save',_T("Copy to clipboard"), '');
-			html += buttonTemplate.format( 'altui-debug-clipboard', 'altui-copy-clipboard', glyph,'default');
+			html += buttonTemplate.format( 'altui-debug-clipboard', 'altui-copy-clipboard', glyph,'default',_T("Copy"));
 				// html += "<button class='btn btn-default altui-json-viewer' type='button' >{0}</button>".format(_T("Json Viewer"));
 			html+="</h3>";
 			html+="<pre id='altui-oscommand-result' class='pre-scrollable'></pre>";

@@ -271,7 +271,7 @@ Localization.init( {
 	"Weather Temp Unit (UI5)":"Unité de température (UI5)",
 	"Watch Formula":"Formule du Suivi de variable",
 	"Generated code":"Code Généré",
-	"Edit Watch Expression":"Editer l'expression du Suivi de Variable",
+	"Edit Watch Expression":"Editer l&quot;expression du Suivi de Variable",
 	"Return Result":"Résultat",
 	"Console Output":"Sortie Console",
 	"Lua execution succeeded":"Exécution Lua réussie",
