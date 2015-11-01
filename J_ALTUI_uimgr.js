@@ -4315,7 +4315,7 @@ var UIManager  = ( function( window, undefined ) {
 							var valueNow = MultiBox.getStatus( device, control.Display.Service, control.Display.Variable )
 							bActif = (valueToMatch==valueNow);
 						}
-						var button = $( "<button type='button' class='btn btn-{1} altui-controlpanel-button'>{0}</button>".format(control.Label.text, bActif ? 'primary' : 'default'))
+						var button = $( "<button type='button' class='btn btn-sm btn-{1} altui-controlpanel-button'>{0}</button>".format(control.Label.text, bActif ? 'primary' : 'default'))
 							.appendTo( $(domparent) );
 						
 						control.Display.Width = Math.max( control.Display.Width || 10 , $(button).outerWidth() );
@@ -4342,7 +4342,7 @@ var UIManager  = ( function( window, undefined ) {
 						}
 						button
 							.width(control.Display.Width)
-							.height(control.Display.Height)
+							// .height(control.Display.Height)
 							.click( function() {
 								//"Command":{"Service":"urn:a-lurker-com:serviceId:InfoViewer1","Action":"SetParameters","Parameters":[{"Name":"newLuaPattern","ID":"thePattern"}]}}	
 								var parameters = {};
