@@ -289,5 +289,7 @@ Localization.init( {
 	"On":"On","Off":"Off","Reset":"Reset",
 	"Create Device succeeded":"Périphérique créé",
 	"Configuration":"Configuration",
-	"Deleted Device {0} successfully":"Périphérique {0} effacé avec succès"
+	"Deleted Device {0} successfully":"Périphérique {0} effacé avec succès",
+	"Reset Theme Override":"Remise a zéro du thème",
+	"Preview":"Prévisualiser"
 });

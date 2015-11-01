@@ -288,5 +288,7 @@ Localization.init( {
 	"On":"On","Off":"Off","Reset":"Reset",
 	"Create Device succeeded":"Create Device succeeded",
 	"Configuration":"Configuration",
-	"Deleted Device {0} successfully":"Deleted Device {0} successfully"
+	"Deleted Device {0} successfully":"Deleted Device {0} successfully",
+	"Reset Theme Override":"Reset Theme Override",
+	"Preview":"Preview"
 	});
