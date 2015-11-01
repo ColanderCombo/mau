@@ -5,7 +5,7 @@ This plugin offers an alternative user interface for your VERA(s) controllers th
 It works as a simple plugin and you just need your browser. it supports UI5 and UI7 veras and can aggregate in the same screen the devices from multiple seperate VERA boxes.
 It is not just a re skin of UI5/7, and will offer a number of additional feature
 
-[b]LATEST VERSION[/b] : [glow=red,2,300]v 0.95.859 Oct 30th 2015[/glow] : 
+[b]LATEST VERSION[/b] : [glow=red,2,300]v 0.95.871 Nov 1st 2015[/glow] : 
 
 [b]Extra features not present in UI5 UI7[/b]:
 [list]
@@ -50,6 +50,8 @@ It is not just a re skin of UI5/7, and will offer a number of additional feature
 [li]Camera: live video feed in local mode, images in remote mode[/li]
 [li]Debug tool screen enabling to get all device information, to get one device / all variable info, to search all devices for a given variable name (pattern matching), or to call a javascript piece of code, including the ALTUI object apis[/li]
 [li]Scene trigger can be a [b]device variable watch[/b] without any line of LUA code. supports conditional expression and with an optional Stable since x Sec choice[/li]
+[li]Blockly editor for watch expressions[/li]
+[li]Easy built in theme switcher for chosing predefined bootswatch themes[/li]
 [/list]
 
 [b]Features equivalent to UI5 UI7[/b]:
@@ -141,7 +143,7 @@ ellipsis glyph , signifying "default drawing"[/li]
 [list]
 [li]official version : by the store or the UI7 "Apps' menu.[/li]
 [li]latest version : accept the autoupdate dialog box proposal , or install by opening this link in your browser  
-[url=http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29432]http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29432[/url]
+[url=http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29466]http://<yourip>:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29466[/url]
 ignore error messages displayed by this page and wait until your unit reloads...[/li]
 [/list]
 
