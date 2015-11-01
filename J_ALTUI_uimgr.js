@@ -9784,7 +9784,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				.on( "click", "#altui-energy", UIManager.pagePower )	
 				.on( "click", "#altui-tbl-device", UIManager.pageTblDevices )
 				.on( "click", "#altui-optimize", UIManager.pageOptions )
-				.on( "click", "#altui-theme", UIManager.pageThemes )
+				.on( "click", "#altui-theme-selector", UIManager.pageThemes )
 				.on( "click", "#altui-localize", UIManager.pageLocalization  )
 				.on( "click", "#altui-debugtools", UIManager.pageDebug  )
 				.on( "click", "#altui-debug-btn", function() {
@@ -10011,7 +10011,7 @@ $(document).ready(function() {
 		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>Admin</li>";
 		body+="			<li><a id='altui-optimize' href='#'>"+_T("Options")+"</a></li>";
-		body+="			<li><a id='altui-theme' href='#'>"+_T("Themes")+"</a></li>";
+		body+="			<li><a id='altui-theme-selector' href='#'>"+_T("Themes")+"</a></li>";
 		body+="			<li><a id='altui-localize' href='#'>"+_T("Localization")+"</a></li>";
 		body+="			<li><a id='altui-debugtools' href='#'>"+_T("Debug")+"</a></li>";
 		body+="			<li class='divider'></li>";
