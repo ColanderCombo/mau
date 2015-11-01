@@ -5400,15 +5400,32 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 	
 	function _initUIEngine(css) {
 		$("title").before("<style type='text/css'>{0}</style>".format(css));
+	};	
+
+	function _setTheme(themecss) {
+		if (themecss==null) {
+			themecss = g_OrgTheme;
+			$("link[href='"+g_CustomTheme+"']").attr('href',themecss);
+			g_CustomTheme = themecss;
+			MyLocalStorage.setSettings("Theme",null);
+		} else {
+			var link = $("link[href='{0}']".format(g_CustomTheme));
+			if (link.length>0) {
+				$(link).attr('href',themecss);					
+			} else {
+				// if (themecss && (themecss.trim()!="") )
+				$("title").after("<link rel='stylesheet' href='"+themecss+"'>");			
+			}
+			g_CustomTheme = themecss;
+			MyLocalStorage.setSettings("Theme",themecss);
+		}
 	};
-	
+
 	function _initEngine(styles, devicetypes, themecss, serveroptions, cbfunc) {
 		_initOptions(serveroptions);
 		_initUIEngine(styles);
 		_initDB(devicetypes,cbfunc);
-
-		if (themecss && (themecss.trim()!="") )
-			$("title").after("<link rel='stylesheet' href='"+themecss+"'>");
+		_setTheme(themecss);
 		_initBlockly();
 	};
 
@@ -6136,6 +6153,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 	loadScript 		: _loadScript,	//(scriptLocationAndName) 
 	loadD3Script	: _loadD3Script,
 	clearScripts	: _clearScripts,
+	setTheme		: _setTheme,	//(themecss)
 	
 	// UI helpers
 	checkAltuiUpdate	: _checkAltuiUpdate,
@@ -9543,18 +9561,13 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		});
 		$(".altui-mainpanel").on('click','.altui-theme-thumbnail',function() {
 			var href = $(this).closest('.altui-theme-thumbnail').data('href');
-			$("link[href='"+g_CustomTheme+"']").attr('href',href);
-			g_CustomTheme = href;
-			MyLocalStorage.setSettings("Theme",href);
+			UIManager.setTheme(href);
 		}).on('click','.altui-theme-preview',function(e) {
 			var href = $(this).closest('.altui-theme-thumbnail').data('preview');
 			window.open(href, '_blank');
 			return false;
 		}).on('click','#altui-theme-reset',function(e) {
-			var href = g_OrgTheme;
-			$("link[href='"+g_CustomTheme+"']").attr('href',href);
-			g_CustomTheme = href;
-			MyLocalStorage.setSettings("Theme",null);			
+			UIManager.setTheme(null);
 		});
 	},
 	
