@@ -54,10 +54,10 @@ var hiddenGlyph = "<span class='glyphicon glyphicon-eye-close' aria-hidden='true
 var invisibleGlyph = "<span class='glyphicon glyphicon-ban-circle' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Invisible'></span>";
 var timeGlyph="<span class='glyphicon glyphicon-time' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='time'></span>";
 var okGlyph="<span class='glyphicon glyphicon-ok' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='OK'></span>";
-var wrenchGlyph="<span class='glyphicon glyphicon-wrench' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Settings'></span>";
 var plusGlyph="<span class='glyphicon glyphicon-plus' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Add'></span>";
 var saveGlyph="<span class='glyphicon glyphicon-save' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Save'></span>";
 var labelGlyph="<span class='glyphicon glyphicon-font' aria-hidden='true' data-toggle='tooltip' data-placement='bottom' title='Label'></span>";
+var wrenchGlyph="";
 var optHorGlyph="";
 var refreshGlyph="";
 var removeGlyph="";
@@ -4042,7 +4042,7 @@ var UIManager  = ( function( window, undefined ) {
 			}
 			return nextrun;
 		};
-		var delButtonHtml = buttonTemplate.format( scene.altuiid, 'btn-xs altui-delscene pull-right', deleteGlyph,'default');
+		var delButtonHtml = buttonTemplate.format( scene.altuiid, 'btn-xs altui-delscene pull-right', deleteGlyph,'default',_T("Delete"));
 		var pauseButtonHtml = glyphTemplate.format( "off", _T("Pause Scene") , 'altui-pausescene ' + ((scene.paused>0) ? 'paused':'activated'));
 		var favoriteHtml = (scene.favorite==true) ? starGlyph : staremtpyGlyph;
 		var label = ((scene.hidden==true) ? hiddenGlyph+' ' : '') + scene.name;
@@ -4073,10 +4073,11 @@ var UIManager  = ( function( window, undefined ) {
 		scenecontainerTemplate	+=  "</div>";
 		scenecontainerTemplate	+=  "</div>";
 
-		var runButtonHtml = buttonTemplate.format( scene.altuiid, 'altui-runscene', _T("Run")+"&nbsp;"+runGlyph,'primary');
-		var editButtonHtml = buttonTemplate.format( scene.altuiid, 'altui-editscene pull-left', wrenchGlyph,'default');
-		var calendarHtml = buttonTemplate.format( scene.altuiid, 'altui-scene-history pull-left', calendarGlyph,'default');
-		return scenecontainerTemplate.format(scene.altuiid, label, 'tooltip', runButtonHtml , editButtonHtml , calendarHtml , lastrun, nextrun);
+		var tooltip = "";
+		var runButtonHtml = buttonTemplate.format( scene.altuiid, 'altui-runscene', _T("Run")+"&nbsp;"+runGlyph,'primary',_T("Run"));
+		var editButtonHtml = buttonTemplate.format( scene.altuiid, 'altui-editscene pull-left', wrenchGlyph,'default',_T("Settings"));
+		var calendarHtml = buttonTemplate.format( scene.altuiid, 'altui-scene-history pull-left', calendarGlyph,'default',_T("History"));
+		return scenecontainerTemplate.format(scene.altuiid, label, tooltip, runButtonHtml , editButtonHtml , calendarHtml , lastrun, nextrun);
 	};
 	
 	function _cameraDraw(device,size,zindex) // size:1,2,3,... 1=220px
@@ -7850,7 +7851,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		
 		UIManager.clearPage(_T('OsCommand'),_T("OS Command"),UIManager.oneColumnLayout);
 		
-		var editButtonHtml = buttonTemplate.format( 'altui-editoscmd-0', 'altui-editoscmd', wrenchGlyph,'default');
+		var editButtonHtml = buttonTemplate.format( 'altui-editoscmd-0', 'altui-editoscmd', editGlyph,'default',"");
 
 		var html = "";
 		html+="<div class='col-xs-12'><form>";
@@ -9929,6 +9930,7 @@ $(document).ready(function() {
 		starGlyph = glyphTemplate.format( "star", _T("Favorite"), "altui-favorite text-warning" );
 		questionGlyph=glyphTemplate.format( "question-sign", _T("Question"), "text-warning" );
 		searchGlyph=glyphTemplate.format( "search", _T("Search"), "" );
+		wrenchGlyph=glyphTemplate.format("wrench", _T("Settings"), "" );
 		optHorGlyph=glyphTemplate.format( "option-horizontal", _T("Option"), "pull-left" );
 		signalGlyph=glyphTemplate.format( "signal", _T("Graph"), "" );
 		calendarGlyph=glyphTemplate.format( "calendar", _T("History"), "" );

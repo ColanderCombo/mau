@@ -290,5 +290,7 @@ Localization.init( {
 	"Configuration":"Configuration",
 	"Deleted Device {0} successfully":"Deleted Device {0} successfully",
 	"Reset Theme Override":"Reset Theme Override",
-	"Preview":"Preview"
+	"Preview":"Preview",
+	"Delete":"Delete",
+	"Settings":"Settings"
 	});
