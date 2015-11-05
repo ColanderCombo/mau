@@ -3358,7 +3358,8 @@ var UIManager  = ( function( window, undefined ) {
 
 		function _clickOnValue() {
 			var id = $(this).prop('id');	// idx in variable state array
-			var tbl = [device.states[id].service , device.states[id].variable]//atob(id).split('.');
+			var state =  MultiBox.getStateByID( device.altuiid, id );
+			var tbl = [state.service , state.variable]//atob(id).split('.');
 			var value = MultiBox.getStatus(device,tbl[0],tbl[1]);
 			$(this).off( "click");
 			$(this).html( _enhanceEditorValue(id,value) );
@@ -3366,7 +3367,8 @@ var UIManager  = ( function( window, undefined ) {
 				.focus()
 				.focusout( function() {
 				var id = $(this).prop('id');	
-				var tbl = [device.states[id].service , device.states[id].variable]//atob(id).split('.');
+				var state =  MultiBox.getStateByID( device.altuiid, id );
+				var tbl = [state.service , state.variable]//atob(id).split('.');
 				var oldval = $(this).attr("value");	// oldval
 				var val = $(this).val();	// but this is in UTC so we need to convert back to locale timezone
 				if (oldval != val) {
