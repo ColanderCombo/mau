@@ -699,6 +699,17 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		return jqxhr;
 	};
 
+	function _renameRoom(id,name) {
+		//http://ip_address:3480/data_request?id=room&action=rename&room=5&name=Garage
+		var jqxhr = _httpGet( "?id=room&action=rename&name="+name+"&room="+id, {}, function(data, textStatus, jqXHR) {
+			if ((data!=null) && (data!="ERROR")) 
+				PageMessage.message(_T("Renamed Room")+" "+id, "success", _isUI5());	// need user_data reload on UI5
+			else 
+				PageMessage.message(_T("Could not rename Room")+" "+id, "warning");
+		});
+		return jqxhr;
+	};
+	
 	function _runScene(id)
 	{
 		if ( (id<=0) || ((this.getSceneByID(id) == null)) )
@@ -1267,6 +1278,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	updateNeighbors	: _updateNeighbors, // id=lu_action&action=UpdateNeighbors&Device=3&DeviceNum=1
 	createRoom		: _createRoom,
 	deleteRoom		: _deleteRoom,
+	renameRoom		: _renameRoom,		// _renameRoom(id,name)
 	runScene		: _runScene,
 	editScene		: _editScene,			//(sceneid,scene);
 	deleteScene		: _deleteScene,

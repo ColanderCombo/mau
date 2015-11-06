@@ -279,6 +279,10 @@ var MultiBox = ( function( window, undefined ) {
 	function _createRoom(controllerid, name, cbfunc ) {
 		return _controllers[controllerid].controller.createRoom(name, cbfunc);
 	};
+	function _renameRoom(controllerid, room, name) {
+		var elems = room.altuiid.split("-");
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.renameRoom(elems[1],name);
+	};
 	function _createDevice( controllerid, param , cbfunc ) {
 		var id = controllerid || 0;
 		return _controllers[id].controller.createDevice( param , function(newid) {
@@ -656,6 +660,7 @@ var MultiBox = ( function( window, undefined ) {
 	getRoomsSync	: _getRoomsSync,	//()
 	deleteRoom		: _deleteRoom,		//(room)
 	createRoom		: _createRoom,		//(controllerid, name, cbfunc )
+	renameRoom		: _renameRoom,		//(controllerid, room, name)  returns a promise
 	getRoomByID		: _getRoomByID,		//( roomid )
 	getRoomByAltuiID:_getRoomByAltuiID,	//(altuiid)	
 	

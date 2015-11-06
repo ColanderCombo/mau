@@ -460,6 +460,9 @@ var styles ="					\
 	.altui-oscommand-configtbl th {		\
 		text-transform: capitalize;		\
 	}									\
+	.altui-room-name  {		\
+		cursor: pointer;	\
+	}						\
 	.table .table {					\
 	background-color:transparent;	\
 	}								\
@@ -6444,7 +6447,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			.append($("<div class='col-xs-12'><table id='table' class='table table-condensed'><thead><tr><th>ID</th><th>Name</th><th>Devices</th><th>Actions</th></tr></thead><tbody></tbody></table></div>"));
 		$("#altui-controller-select").closest(".form-group").append(formHtml);
 		
-		var roomListTemplate = "<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td></tr>";	
+		var roomListTemplate = "<tr><td>{0}</td><td><span class='altui-room-name' id='{0}'>{1}</span></td><td>{2}</td><td>{3}</td></tr>";	
 		MultiBox.getRooms( null,null,function( rooms) {
 			if (rooms) {
 				$.each(rooms.sort(altuiSortByName), function(idx,room) {
@@ -6453,6 +6456,23 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					$(".altui-mainpanel tbody").append( roomListTemplate.format(id,(room!=null) ? room.name : "No Room",_roomSummary(room),delButtonHtml) );
 				});
 				// install click handler for buttons
+				$(".altui-mainpanel")
+					.off("click","span.altui-room-name")
+					.on("click","span.altui-room-name",function(event) {
+						var id = $(this).prop('id');
+						var room = MultiBox.getRoomByAltuiID(id);
+						$(this).replaceWith("<input class='altui-room-name form-control' id='{0}' value='{1}'></input>".format(room.altuiid, room.name.escapeXml()));
+					})
+					.off("focusout","input.altui-room-name")
+					.on("focusout","input.altui-room-name",function(event) {
+						var id = $(this).prop('id');
+						var room = MultiBox.getRoomByAltuiID(id);
+						var value = $(this).val();
+						room.name = value;
+						var controllerid = MultiBox.controllerOf(room.altuiid).controller;
+						MultiBox.renameRoom(controllerid, room, room.name );
+						$(this).replaceWith("<span class='altui-room-name' id='{0}'>{1}</span>".format(room.altuiid,room.name));
+					});
 				$("button.altui-delroom").click( function(event) {
 					var id = $(this).prop('id');
 					var room = MultiBox.getRoomByAltuiID(id);
