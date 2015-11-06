@@ -3354,7 +3354,7 @@ var UIManager  = ( function( window, undefined ) {
 	}
 	
 	function _setPushLineParams(push) {
-		return "{0}#{1}#{2}#{3}#{4}#{5}#{6}#{7}".format( push.service, push.variable, push.deviceid, push.provider, push.channelid, push.readkey, "key={0}&field{1}=%s".format(push.key,push.fieldnum),push.graphicurl);
+		return "{0}#{1}#{2}#{3}#{4}#{5}#{6}#{7}".format( push.service, push.variable, push.deviceid, push.provider, push.channelid, push.readkey, "key={0}&field{1}=%s".format(push.key,push.fieldnum),push.graphicurl || "");
 	}
 
 	function _deviceDrawVariables(device) {
@@ -3540,7 +3540,7 @@ var UIManager  = ( function( window, undefined ) {
 							readkey : form.find("input#readApiKey_"+varid).val(),
 							key : form.find("input#apiKey_"+varid).val(),
 							fieldnum : form.find("input#fieldNum_"+varid).val(),
-							graphicurl : tr.closest("tbody").find("input#altui-graphUrl_"+varid).val()
+							graphicurl : "" || tr.closest("tbody").find("input#altui-graphUrl_"+varid).val()
 						};
 						varPushesToSave.push( _setPushLineParams(push) );
 					}
