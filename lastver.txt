@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("875,fix for variable update;settings tab uses bootstrap buttons;minor theme switch fixes;minor localization fixes;control panel button size fix,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29531")
+UIManager.checkAltuiUpdate("880,thingspeak null url fix;Prevent watch on secondary controller;Click on room to rename it;Blockly upgrade,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29588")
