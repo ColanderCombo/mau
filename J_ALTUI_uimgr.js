@@ -3449,9 +3449,10 @@ var UIManager  = ( function( window, undefined ) {
 							}
 							html += "<div class='col-md-4'>";
 							html += "<div class='checkbox'>"
-								html += "<label><input type='checkbox' id='enablePush_{0}' {1}>Enable Push to Thingspeak</label>".format(
+								html += "<label><input type='checkbox' id='altui-enablePush_{0}' {1} {2}>Enable Push to Thingspeak</label>".format(
 									varid, 
-									(pushData!=null) ? 'checked' : ''
+									(pushData!=null) ? 'checked' : '',
+									MultiBox.controllerOf(device.altuiid).controller !=0 ? 'disabled' : ''
 								);
 							html += "</div>"
 							html += "<form id='form_{0}' class='form-inline'>".format(varid);
@@ -3490,9 +3491,9 @@ var UIManager  = ( function( window, undefined ) {
 						html += "</div></div>";
 					html += "</td></tr>";
 					tr.after(html);
-					var checked = $("#enablePush_"+varid).is(':checked');
+					var checked = $("#altui-enablePush_"+varid).is(':checked');
 					$("#form_"+varid).toggle(checked);
-					$("#enablePush_"+varid).change(function() {
+					$("#altui-enablePush_"+varid).change(function() {
 						var checked = $(this).is(':checked');
 						$("#form_"+varid).toggle(checked);
 					});
@@ -3529,7 +3530,7 @@ var UIManager  = ( function( window, undefined ) {
 						}
 					});
 					var nexttr = tr.next("tr");
-					if (nexttr.find("input#enablePush_"+varid).prop('checked') ==true ) {
+					if (nexttr.find("input#altui-enablePush_"+varid).prop('checked') ==true ) {
 						var push = {
 							service : state.service,
 							variable : state.variable,
