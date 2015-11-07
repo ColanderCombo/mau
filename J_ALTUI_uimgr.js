@@ -6454,7 +6454,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				$.each(rooms.sort(altuiSortByName), function(idx,room) {
 					var id = room.altuiid;
 					var delButtonHtml = smallbuttonTemplate.format( id, 'altui-delroom', deleteGlyph);
-					$(".altui-mainpanel tbody").append( roomListTemplate.format(id,(room!=null) ? room.name : "No Room",_roomSummary(room),delButtonHtml) );
+					var viewButtonHtml = smallbuttonTemplate.format( id, 'altui-viewroom', searchGlyph);
+					$(".altui-mainpanel tbody").append( roomListTemplate.format(id,(room!=null) ? room.name : "No Room",_roomSummary(room),viewButtonHtml+delButtonHtml) );
 				});
 				// install click handler for buttons
 				$(".altui-mainpanel")
@@ -6474,6 +6475,11 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 						MultiBox.renameRoom(controllerid, room, room.name );
 						$(this).replaceWith("<span class='altui-room-name' id='{0}'>{1}</span>".format(room.altuiid,room.name));
 					});
+				$("button.altui-viewroom").click( function(event) {
+					var id = $(this).prop('id');
+					var room = MultiBox.getRoomByAltuiID(id);
+					UIManager.pageDevices({ room:id });
+				});
 				$("button.altui-delroom").click( function(event) {
 					var id = $(this).prop('id');
 					var room = MultiBox.getRoomByAltuiID(id);
@@ -6591,11 +6597,11 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		$("div.altui-device[data-altuiid="+altuiid+"] img").attr('src',defaultIconSrc);
 	},
 	
-	pageDevices : function ()
+	pageDevices : function ( filter )
 	{
 		var _roomID2Name = {};
 		var _deviceID2RoomName = {};
-		var _deviceDisplayFilter = {
+		var _deviceDisplayFilter = $.extend( {
 			filterformvisible 	: false,
 			room			: MyLocalStorage.getSettings("DeviceRoomFilter") || -1,
 			favorites		: (MyLocalStorage.getSettings("ShowFavoriteDevice")==true),
@@ -6605,7 +6611,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			filtername		: MyLocalStorage.getSettings("DeviceFilterName") || "",
 			isRoomFilterValid 		: function() {return this.room!=-1},
 			isCategoryFilterValid 	: function() {return this.category!=0},
-		};
+		}, filter );
 		
 		// filter function
 		function deviceFilter(device) {
