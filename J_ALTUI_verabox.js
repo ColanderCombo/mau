@@ -894,7 +894,32 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			}
 		});
 	};
-
+	function _renameSceneUserData(sceneid,name)
+	{
+		if (_user_data.scenes) {
+			var bFound = false;
+			$.each(_user_data.scenes, function(i,s) {
+				if (s.id == sceneid) {
+					_user_data.scenes[i].name=name;
+					bFound = true;
+					return false;
+				}
+			})			
+		}
+	};
+	function _renameScene(sceneid,newname)
+	{
+		//http://ip_address:3480/data_request?id=scene&action=rename&scene=5&name=Chandalier&room=Garage
+		var jqxhr = _httpGet( "?id=scene&action=rename&name="+newname+"&scene="+sceneid, {}, function(data, textStatus, jqXHR) {
+			if ((data!=null) && (data!="ERROR")) {
+				_renameSceneUserData(sceneid,newname)
+				PageMessage.message(_T("Renamed Scene")+" "+sceneid, "success", _isUI5());	// need user_data reload on UI5
+			}
+			else 
+				PageMessage.message(_T("Could not rename Scene")+" "+sceneid, "warning");
+		});
+		return jqxhr;
+	};
 
 	function _getDeviceStaticUI(device) {
 		var staticroot=null;		
@@ -1281,6 +1306,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	renameRoom		: _renameRoom,		// _renameRoom(id,name)
 	runScene		: _runScene,
 	editScene		: _editScene,			//(sceneid,scene);
+	renameScene		: _renameScene,			//(sceneid,scene);
 	deleteScene		: _deleteScene,
 	reloadEngine	: _reloadEngine,	
 	reboot			: _reboot,

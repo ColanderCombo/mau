@@ -224,6 +224,10 @@ var styles ="					\
 		width: 70%;				\
 		height: 20px;			\
 	}		\
+	.altui-scene-title-input {		\
+		width: 60%;				\
+		height: 20px;			\
+	}		\
 	.altui-mainpanel , .altui-device-toolbar{		\
 		margin-top: 2px;			\
 		margin-bottom: 2px;			\
@@ -4063,7 +4067,7 @@ var UIManager  = ( function( window, undefined ) {
 				
 		var scenecontainerTemplate = "";
 		scenecontainerTemplate	+=  "<div class='panel panel-default altui-scene "+((norefresh==true) ? 'altui-norefresh': '') +"' id='{0}' data-altuiid='{0}'>"
-		scenecontainerTemplate	+=	"<div class='panel-heading altui-scene-heading'>"+delButtonHtml +idDisplay+" <span class='panel-title altui-scene-title' data-toggle='tooltip' data-placement='left' title='{2}'>"+pauseButtonHtml+favoriteHtml+"<small>{1}</small></span></div>";
+		scenecontainerTemplate	+=	"<div class='panel-heading altui-scene-heading'>"+delButtonHtml +idDisplay+" <span class='panel-title altui-scene-title' data-toggle='tooltip' data-placement='left' title='{2}'>"+pauseButtonHtml+favoriteHtml+"<small class='altui-scene-title-name'>{1}</small></span></div>";
 		scenecontainerTemplate	+=  "<div class='panel-body altui-scene-body'>";
 		scenecontainerTemplate	+=  "<small class='altui-scene-date text-muted pull-right'>{6}</small><small class='altui-scene-date text-info pull-right'>{7}</small>";
 			scenecontainerTemplate	+=  "<table>";
@@ -6471,8 +6475,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 						var room = MultiBox.getRoomByAltuiID(id);
 						var value = $(this).val();
 						room.name = value;
-						var controllerid = MultiBox.controllerOf(room.altuiid).controller;
-						MultiBox.renameRoom(controllerid, room, room.name );
+						MultiBox.renameRoom(room, room.name );
 						$(this).replaceWith("<span class='altui-room-name' id='{0}'>{1}</span>".format(room.altuiid,room.name));
 					});
 				$("button.altui-viewroom").click( function(event) {
@@ -7045,6 +7048,25 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 						scene.favorite = !scene.favorite;
 						Favorites.set('scene', altuiid, scene.favorite );
 						$(this).replaceWith( (scene.favorite==true) ? starGlyph : staremtpyGlyph );
+					})
+					.on("click",".altui-scene-title-name",function(event) {
+						if ( $(this).find("input").length>=1 )
+							return;
+						var scenedom = $(this).closest(".altui-scene");
+						var altuiid = scenedom.data('altuiid');
+						var scene = MultiBox.getSceneByAltuiID(altuiid);
+						scenedom.addClass("altui-norefresh");
+						$(this).html("<input id='{0}' class='altui-scene-title-input' value='{1}'></input>".format(altuiid,scene.name.escapeXml()));
+					})
+					.on("focusout",".altui-scene-title-input",function(event) {
+						var newname = $(this).val();
+						var namedom = $(this).parent();
+						var scenedom = $(this).closest(".altui-scene");
+						var altuiid = scenedom.data('altuiid');
+						var scene = MultiBox.getSceneByAltuiID(altuiid);
+						namedom.text(newname);
+						MultiBox.renameScene(scene,newname);
+						scenedom.removeClass("altui-norefresh");
 					});
 				
 				$("#altui-device-room-filter a").click( function() {

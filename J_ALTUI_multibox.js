@@ -279,7 +279,7 @@ var MultiBox = ( function( window, undefined ) {
 	function _createRoom(controllerid, name, cbfunc ) {
 		return _controllers[controllerid].controller.createRoom(name, cbfunc);
 	};
-	function _renameRoom(controllerid, room, name) {
+	function _renameRoom(room, name) {
 		var elems = room.altuiid.split("-");
 		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.renameRoom(elems[1],name);
 	};
@@ -508,6 +508,10 @@ var MultiBox = ( function( window, undefined ) {
 		var elems = altuiid.split("-");
 		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.editScene(elems[1],scenejson,cbfunc);
 	};
+	function _renameScene(scene,newname) {
+		var elems = scene.altuiid.split("-");
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.renameScene(elems[1],newname);
+	};
 	function _runScene(scene) {
 		var elems = scene.altuiid.split("-");
 		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.runScene(elems[1]);
@@ -721,6 +725,7 @@ var MultiBox = ( function( window, undefined ) {
 	getSceneHistory		: _getSceneHistory,	//( id, cbfunc) {
 	getScenesSync		: _getScenesSync,	//()
 	editScene			: _editScene,		//(altuiid,scenejson, function(result)	
+	renameScene			: _renameScene,		// (scene, newname)
 	runScene			: _runScene,		//(id)
 	runSceneByAltuiID	: _runSceneByAltuiID,
 	
