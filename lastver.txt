@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("880,thingspeak null url fix;Prevent watch on secondary controller;Click on room to rename it;Blockly upgrade,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29588")
+UIManager.checkAltuiUpdate("883,scene rename by clicking on title;room rename by clicking on title,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29596")
