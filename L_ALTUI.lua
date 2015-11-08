@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.95"
+local version = "v0.96"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -1383,35 +1383,35 @@ function sendValueToStorage(watch,lul_device, lul_service, lul_variable,old, new
 	return 0
 end
 
-function evaluateExpression(lul_device, lul_service, lul_variable,expr,old, new, lastupdate, scene)
-	debug(string.format("evaluateExpression(%s,%s,%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,expr,old, new, tostring(lastupdate),scene))
+function evaluateExpression(lul_device, lul_service, lul_variable,expr,old, new, lastupdate, exp_index, scene)
+	debug(string.format("evaluateExpression(%s,%s,%s,%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,expr,old, new, tostring(lastupdate),exp_index,scene))
 	local watch = findWatch( lul_device, lul_service, lul_variable )
 	if (watch==nil) then
 		return
 	end
 	
 	local results = _evaluateUserExpression(lul_device, lul_service, lul_variable,old,new,lastupdate,expr)
-	local res,delay = results[1] or nil, results[2] or nil
+	local res,delay = results[1], results[2] or nil
 	
 	-- if it evaluates as FALSE , do not do anything & cancel timer
 	if (res==nil or res==false or tonumber(res)==0) then
-		debug(string.format("ignoring watch trigger, loadstring returned %s",tostring(res or 'nil')))
+		debug(string.format("ignoring watch trigger, loadstring returned %s",tostring(res)))
 		-- cancelling the timer for that expression as the condition is false now before the timer expired
-		watch['Expressions'][expr]["PendingTimer"] = nil
+		watch['Expressions'][expr][exp_index]["PendingTimer"] = nil
 	else
 		-- if it evaluates as TRUE, 
 		if (delay ~=nil ) then
 			-- if it is a defered response, 
-			if (watch['Expressions'][expr]["PendingTimer"]==nil) then
+			if (watch['Expressions'][expr][exp_index]["PendingTimer"]==nil) then
 				-- if new timer
 				local tbl = {lul_device, lul_service, lul_variable,expr}
 				local timer = luup.call_delay("watchTimerCB",delay, table.concat(tbl, "#") ) or 1
 				if (timer==0) then
 					debug("preparing timer watchTimerCB with delay "..delay)
-					watch['Expressions'][expr]["PendingTimer"]=1
+					watch['Expressions'][expr][exp_index]["PendingTimer"]=1
 				else
 					error("luup.call_delay failed !")
-					watch['Expressions'][expr]["PendingTimer"]=nil
+					watch['Expressions'][expr][exp_index]["PendingTimer"]=nil
 				end
 			else
 				-- already a running timer, still true, do nothing wait for the timer
@@ -1420,14 +1420,14 @@ function evaluateExpression(lul_device, lul_service, lul_variable,expr,old, new,
 		else
 			-- if it is a immediate response, then run the scene
 			if (scene ~= -1 ) then
-				res = run_scene(scene)
-				if (res==-1) then
+				local scene_res = run_scene(scene)
+				if (scene_res==-1) then
 					error(string.format("Failed to run the scene %s",scene))
 				end
 			end
 		end
 	end
-	debug(string.format("evaluateExpression() returns %s",tostring(res or 'nil')))
+	debug(string.format("evaluateExpression() returns %s",tostring(res)))
 	return res
 end
 
@@ -1443,9 +1443,12 @@ function variableWatchCallback(lul_device, lul_service, lul_variable, lul_value_
 		watch["LastUpdate"] = os.time()
 		debug(string.format("-----> evaluateExpression()"))
 		for k,v  in pairs(watch['Expressions'] or {}) do
-			-- k is expression
+			-- watch['Expressions'][k] is a table of object 		{ ["LastEval"] = nil, ["SceneID"] = scene }
 			-- v is an object
-			watch['Expressions'][k]["LastEval"] = evaluateExpression(lul_device, lul_service, lul_variable,k,lul_value_old, lul_value_new, watch["LastUpdate"], v["SceneID"])
+			for exp_index,target in ipairs(watch['Expressions'][k]) do
+				watch['Expressions'][k][exp_index]["LastEval"] = evaluateExpression(lul_device, lul_service, lul_variable,k,lul_value_old, lul_value_new, watch["LastUpdate"], exp_index, target["SceneID"])
+				debug(string.format(">>>evaluated %s, index:%s LastEval:%s",k,exp_index,tostring(watch['Expressions'][k][exp_index]["LastEval"])))
+			end
 		end
 		debug(string.format("-----> DataProviders()"))
 		for k,v  in pairs(watch['DataProviders'] or {}) do
@@ -1480,11 +1483,13 @@ function addWatch( devid, service, variable, expression, scene , provider, data,
 		registeredWatches[devidstr][service][variable]['Expressions']={}
 	end
 	if (registeredWatches[devidstr][service][variable]['Expressions'][expression] == nil) then
-		registeredWatches[devidstr][service][variable]['Expressions'][expression] = {
-			["LastEval"] = nil,
-			["SceneID"] = scene
-		}
+		registeredWatches[devidstr][service][variable]['Expressions'][expression] = {}
 	end
+	local n = tablelength(registeredWatches[devidstr][service][variable]['Expressions'][expression])
+	registeredWatches[devidstr][service][variable]['Expressions'][expression][n+1]= {
+		["LastEval"] = nil,
+		["SceneID"] = scene
+	}
 	if (scene==-1) then
 		if (provider=="thingspeak") and ( isempty(data)==false ) then
 			if (registeredWatches[devidstr][service][variable]['DataProviders'] == nil) then

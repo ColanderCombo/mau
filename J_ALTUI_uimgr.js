@@ -2486,7 +2486,7 @@ html+="  </xml>";
 				var idxwatch = $(".altui-blockly-editor ").data('idxwatch');
 				var watch = _getWatchLineParams(scenewatches[idxwatch]);
 				var workspace = $(".altui-blockly-editor ").data('workspace');
-				watch.luaexpr = $("#blocklyDivCode").text();
+				watch.luaexpr = trim($("#blocklyDivCode").text());	// remove \n at the end
 				watch.xml = Blockly.Xml.domToText( Blockly.Xml.workspaceToDom(workspace) );
 				scenewatches[idxwatch] = _setWatchLineParams(watch);
 
