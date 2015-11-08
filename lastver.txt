@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("883,scene rename by clicking on title;room rename by clicking on title,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29596")
+UIManager.checkAltuiUpdate("885,bufix when same watch expression is used in several scenes;scene rename by clicking on title;room rename by clicking on title,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29601")
