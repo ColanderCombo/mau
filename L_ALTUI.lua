@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local service = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.96"
+local version = "v0.96b"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -108,6 +108,15 @@ function url_decode(str)
       function(h) return string.char(tonumber(h,16)) end)
   str = string.gsub (str, "\r\n", "\n")
   return str
+end
+	
+function findALTUIDevice()
+	for k,v in pairs(luup.devices) do
+		if( v.device_type == devicetype ) then
+			return k
+		end
+	end
+	return -1
 end
 
 function proxyGet(lul_device,newUrl,resultName)
@@ -334,6 +343,13 @@ function tablelength(T)
   local count = 0
   for _ in pairs(T) do count = count + 1 end
   return count
+end
+
+function inTable(tbl, item)
+    for key, value in pairs(tbl) do
+        if value == item then return key end
+    end
+    return false
 end
 
 local function getParent(lul_device)
@@ -664,23 +680,70 @@ local htmlLayout = [[
 </html>
 ]]
 
-	
-function findALTUIDevice()
-	for k,v in pairs(luup.devices) do
-		if( v.device_type == devicetype ) then
-			return k
+local remoteWatches={}
+
+function remoteVariableWatchCallback(lul_device, lul_service, lul_variable, lul_value_old, lul_value_new)
+	debug(string.format("remoteVariableWatchCallback(%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable, lul_value_old, lul_value_new))
+	local watch = remoteWatches[lul_device][lul_service][lul_variable]
+	if (watch~=nil) then
+		local data = watch["data"]	
+		if (data~="") then
+			local url = string.format("http://%s/port_3480/data_request?id=lr_ALTUI_Handler&command=setwatchCB&service=%s&variable=%s&device=%s&old=%s&new=%s",
+				data,
+				lul_service,
+				lul_variable,
+				lul_device,
+				lul_value_old,
+				lul_value_new
+			)
+			debug(string.format("calling url:%s",url))
+			local httpcode,data = luup.inet.wget(url,10)
+			if (httpcode~=0) then
+				error(string.format("failed to connect to url:%s, http.request returned %d", url,httpcode))
+				return 0,"";
+			end
+			debug(string.format("success httpcode:%s",httpcode))	
+			debug(string.format("data:%s",data))	
+			return 1,data
+		else
+			warning("ignoring watch CB because of empty data")
 		end
+	else
+		warning("ignoring watch CB because of unknown watch")
 	end
-	return -1
 end
 
-function inTable(tbl, item)
-    for key, value in pairs(tbl) do
-        if value == item then return key end
-    end
-    return false
+function addRemoteWatch(service,variable,devid,data)
+	debug(string.format("addRemoteWatch(%s,%s,%s,%s)",service,variable,devid,json.encode(data)))
+	if (remoteWatches[devid]==nil) then
+		remoteWatches[devid]={}
+	end
+	if (remoteWatches[devid][service]==nil) then
+		remoteWatches[devid][service]={}
+	end
+	if (remoteWatches[devid][service][variable]==nil) then
+		remoteWatches[devid][service][variable]={
+			["data"] = data
+		}
+		return true
+	end
+	return false
 end
 
+-- http://192.168.1.16/port_3480/data_request?id=lr_ALTUI_Handler&command=setwatch&device=112&variable=Status&service=urn:upnp-org:serviceId:SwitchPower1&data=192.168.1.16
+-- http://192.168.1.5/port_3480/data_request?id=lr_ALTUI_Handler&command=setwatch&device=42&variable=Status&service=urn:upnp-org:serviceId:SwitchPower1&data=192.168.1.16
+function setRemoteWatch(service,variable,devid,data)
+	debug(string.format("setRemoteWatch(%s,%s,%s,%s)",service,variable,devid,json.encode(data)))
+	devid = tonumber(devid)
+	-- data = "192.168.1.16"
+	if (addRemoteWatch(service,variable,devid,data)==true) then
+		luup.variable_watch("remoteVariableWatchCallback", service,variable,devid)
+	else
+		debug("Ignoring duplicate remote watch")
+	end
+	return "ok"
+end
+				
 function myALTUI_LuaRunHandler(lul_request, lul_parameters, lul_outputformat)
 
 	-- local oldlog = 	_G.log
@@ -912,6 +975,24 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				local res = string.format("%d,%s",code,result);
 				return res, "text/plain"
 			end,
+		["setwatch"] = 
+			function(params)	-- primary controller calling the secondary one to set a watch
+				local device = lul_parameters["device"]
+				local service = lul_parameters["service"]
+				local variable = lul_parameters["variable"]
+				local data = lul_parameters["data"]
+				local res = setRemoteWatch(service,variable,device,data)
+				return res, "text/plain"
+			end,
+		["setwatchCB"] = 		-- secondary controller calling back the primary controller with a watch result
+			function(params)
+				local lul_device = lul_parameters["device"]
+				local lul_service = lul_parameters["service"]
+				local lul_variable = lul_parameters["variable"] 
+				local lul_value_old = lul_parameters["old"]
+				local lul_value_new = lul_parameters["new"]
+				return "ok", "text/plain"
+			end,
 		["readtmp"] = 
 			function(params)
 				-- local command = lul_parameters["oscommand"]
@@ -970,6 +1051,10 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 			function(params)
 				return json.encode( luup.devices ) , "application/json"
 			end,
+		["scenes"] = 
+			function(params)
+				return json.encode( luup.scenes ), "application/json"
+			end,
 		["image"] = 
 			function(params)
 				local default_img="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAASJSURBVHja7Jp7aI5RHMff123CMOYyMmFY5LZYI5umFmHhD2pyyYzYkju5hCWX0jZKM9rEkCy5tJostxWRIteZe5FLyW2Y68z35Pfq9Os8z573eT3vu9fOr76d5zzn8jyf59x+57yvu6amxlWfrIGrnpkG1sAaWANrYA2sgTWwBnbKGnmT2e12/7MHb8vOaYhgEJQA9YN6Qj2g5lCoSFu4eNF1K3V5sx9o5M+vC0jxvCRoKjQOalmnW9gH0BYI5kKLoE5B06Vttug8KBMKqyX7S+g+9Ab6SGHwAAN2MIICqL9BlifQMegcdAHj9X1QtjBAxcy2BNoENWbJ1VARtAO6BMiaoO7SgG2C4AA0SZF8CFoDyMf/xRgGbCsExVA8S3oEzQJomUG5AQgSoSFQNNSZlqZ4q8uS34Hx0s0MYA+KSQsv/pHlD0eQQctTVFC1MDkQRQrYtQDdoOgFa6F0qGmwdun10Fh2Lx2wOxnseAS7ofZGDhP0DHoAVUJvnQB2e+OWcdcSEKMRnGTZlgN2K+sBWdACRZXfoBPQYeg8ytmC9IrBLjB5T+VQFynLXrz0TDZrC5gJrKrv0HYoG/lf+dpq/vKlMxnsbRqbcsuqYC9B0wH6MGi2h4CJRDCfjT+x9HyR7mUpYIXDkRAoWF9aeBXzovIAcUX6IBMVYzYTedZb+JghCCIo+gFl3gV00sILtcalGHchdPsr1B0v9lJaeiqgjlLRXKRnmED2QpAGjYH6iEdJyeJZp6FCEarcUW8Y7HTpKRKssD0eWLLVDPYqbQtVoGFQAX2gZVBfBuuiuoSDUgpdRv4Yf4/haSxewDyodLZZSMUH+a6AFXDCdUxVQBpZrJj0UHamX4DxoDb0UI/dAsw1KZ5KfrDH9iP9pqKe3mLdhSJtvLNY6vbYhfa2hRNZmRKWPoPFtxhMSkehcJb0ArpRi2THJA91DXR6lo5j8dMSSFeacDx2Ea17T1HHQpbPRSccscj/3KR3tUVwl7V0LjTMyRaOZnG5O49gacUGrbtUUe8KM1iyHKgduzcUdSY62cK9pOvXzPftx/JeUJRPUnRl8dEO03L3t8VRd7X0oUYpJkuPpdAxkSPAHaTrpyytG4uXK8onKO7FsAM74YWJQ4EqyWffZfJO8U526VA27mRrK13/NPCQult4xmyUrZLiG6GuJvmjnOzS8oa+QnG6USZ5XyprVkv9wiM7L3XlOOaz+8zgVWYzXxhp+Raq+GSSJjb/K9kEl2/BKfkRkEM8i3bfJC0NH61SioufYdawPJsVK0V5XQY+S742t32ALWU95jWC4+yIKFpRtszx/bAPVqaY3V+RM2Lm0rYkJ0NlhX4707J5eDCHLTPF1PJmNhJKVtwvQU8YW2d/LiXLJydiOMWTDWBqs0oLM3jAu7QYm78QTHb9+UXCromZOcXOzzYB+csDHRiMoMMBb004NMmoo8RfBwD/Cvo57XTWQZ8tFjsi3E6UPeW3My0njDYOU+hMS/jWEZL7egc6Q4cJqu2mcwfx/4Pp/2lpYA2sgTWwBtbAGlgDO2W/BRgADRV6RjlErQoAAAAASUVORK5CYII="
@@ -1027,10 +1112,6 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				-- luup.attr_set(attr , value, devid)
 				-- return "ok"
 			-- end,
-		["scenes"] = 
-			function(params)
-				return json.encode( luup.scenes ), "application/json"
-			end,
 		["default"] = 
 			function(params)	
 				return "not successful", "text/plain"
