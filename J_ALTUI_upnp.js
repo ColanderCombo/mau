@@ -13,7 +13,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 	//---------------------------------------------------------
 	// private functions
 	//---------------------------------------------------------	
-	var _ipaddr = ip_addr || '';
+	var _ipaddr = trim(ip_addr || '');
 	var _veraidx = veraidx || 0;
 	var _proxyresultarea = "altuictrl"+_veraidx;
 	var _urlhead = (_ipaddr=='') ? window.location.pathname : ("http://{0}/port_3480/data_request".format(ip_addr));
