@@ -7,10 +7,10 @@
 -- // but WITHOUT ANY WARRANTY; without even the implied warranty of
 -- // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE . 
 local MSG_CLASS = "ALTUI"
-local service = "urn:upnp-org:serviceId:altui1"
+local ALTUI_SERVICE = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.96b"
+local version = "v0.97"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -70,7 +70,7 @@ function setDebugMode(lul_device,newDebugMode)
 	lul_device = tonumber(lul_device)
 	newDebugMode = tonumber(newDebugMode) or 0
 	log(string.format("setDebugMode(%d,%d)",lul_device,newDebugMode))
-	luup.variable_set(service, "Debug", newDebugMode, lul_device)
+	luup.variable_set(ALTUI_SERVICE, "Debug", newDebugMode, lul_device)
 	if (newDebugMode==1) then
 		DEBUG_MODE=true
 	else
@@ -224,13 +224,13 @@ end
 -- Check UI7
 ------------------------------------------------
 local function checkVersion(lul_device)
-	local ui7Check = luup.variable_get(service, "UI7Check", lul_device) or ""
+	local ui7Check = luup.variable_get(ALTUI_SERVICE, "UI7Check", lul_device) or ""
 	if ui7Check == "" then
-		luup.variable_set(service, "UI7Check", "false", lul_device)
+		luup.variable_set(ALTUI_SERVICE, "UI7Check", "false", lul_device)
 		ui7Check = "false"
 	end
 	if( luup.version_branch == 1 and luup.version_major == 7 and ui7Check == "false") then
-		luup.variable_set(service, "UI7Check", "true", lul_device)
+		luup.variable_set(ALTUI_SERVICE, "UI7Check", "true", lul_device)
 		luup.attr_set("device_json", UI7_JSON_FILE, lul_device)
 		luup.reload()
 	end
@@ -516,13 +516,13 @@ local function getDataFor( deviceID,name )
 	
 	-- search for all "Data_xxx_nnn" variables and concatenate them
 	-- debug("reading "..name.."_"..num)
-	var = luup.variable_get(service, name.."_"..num, deviceID) or ""
+	var = luup.variable_get(ALTUI_SERVICE, name.."_"..num, deviceID) or ""
 	-- debug("var =("..var..")")
 	while( var ~= "") do
 		num = num+1
 		result = result .. var
 		-- debug("reading "..name.."_"..num)
-		var = luup.variable_get(service, name.."_"..num, deviceID) or ""
+		var = luup.variable_get(ALTUI_SERVICE, name.."_"..num, deviceID) or ""
 		-- debug("var =("..var..")")
 	end
 	
@@ -684,17 +684,19 @@ local remoteWatches={}
 
 function remoteVariableWatchCallback(lul_device, lul_service, lul_variable, lul_value_old, lul_value_new)
 	debug(string.format("remoteVariableWatchCallback(%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable, lul_value_old, lul_value_new))
+	lul_device = tonumber(lul_device)
 	local watch = remoteWatches[lul_device][lul_service][lul_variable]
 	if (watch~=nil) then
 		local data = watch["data"]	
 		if (data~="") then
-			local url = string.format("http://%s/port_3480/data_request?id=lr_ALTUI_Handler&command=setwatchCB&service=%s&variable=%s&device=%s&old=%s&new=%s",
-				data,
+			local url = string.format("http://%s/port_3480/data_request?id=lr_ALTUI_Handler&command=setwatchCB&service=%s&variable=%s&device=%d&old=%s&new=%s&ctrlid=%s",
+				data["ipaddr"],
 				lul_service,
 				lul_variable,
 				lul_device,
 				lul_value_old,
-				lul_value_new
+				lul_value_new,
+				data["ctrlid"]
 			)
 			debug(string.format("calling url:%s",url))
 			local httpcode,data = luup.inet.wget(url,10)
@@ -702,8 +704,7 @@ function remoteVariableWatchCallback(lul_device, lul_service, lul_variable, lul_
 				error(string.format("failed to connect to url:%s, http.request returned %d", url,httpcode))
 				return 0,"";
 			end
-			debug(string.format("success httpcode:%s",httpcode))	
-			debug(string.format("data:%s",data))	
+			debug(string.format("success httpcode:%s data:%s",httpcode,data))
 			return 1,data
 		else
 			warning("ignoring watch CB because of empty data")
@@ -715,6 +716,7 @@ end
 
 function addRemoteWatch(service,variable,devid,data)
 	debug(string.format("addRemoteWatch(%s,%s,%s,%s)",service,variable,devid,json.encode(data)))
+	devid = tonumber(devid)
 	if (remoteWatches[devid]==nil) then
 		remoteWatches[devid]={}
 	end
@@ -723,7 +725,7 @@ function addRemoteWatch(service,variable,devid,data)
 	end
 	if (remoteWatches[devid][service][variable]==nil) then
 		remoteWatches[devid][service][variable]={
-			["data"] = data
+			["data"] = data	
 		}
 		return true
 	end
@@ -734,10 +736,8 @@ end
 -- http://192.168.1.5/port_3480/data_request?id=lr_ALTUI_Handler&command=setwatch&device=42&variable=Status&service=urn:upnp-org:serviceId:SwitchPower1&data=192.168.1.16
 function setRemoteWatch(service,variable,devid,data)
 	debug(string.format("setRemoteWatch(%s,%s,%s,%s)",service,variable,devid,json.encode(data)))
-	devid = tonumber(devid)
-	-- data = "192.168.1.16"
 	if (addRemoteWatch(service,variable,devid,data)==true) then
-		luup.variable_watch("remoteVariableWatchCallback", service,variable,devid)
+		luup.variable_watch("remoteVariableWatchCallback", service,variable,tonumber(devid))
 	else
 		debug("Ignoring duplicate remote watch")
 	end
@@ -803,13 +803,13 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 			-- end,
 		["home"] = 
 			function(params)
-				local result = luup.variable_get(service, "PluginConfig", deviceID)
+				local result = luup.variable_get(ALTUI_SERVICE, "PluginConfig", deviceID)
 				local tbl = json.decode(result)
 				tbl ["info"] = {
-					["ui7Check"] = luup.variable_get(service, "UI7Check", deviceID) or "",
+					["ui7Check"] = luup.variable_get(ALTUI_SERVICE, "UI7Check", deviceID) or "",
 					["debug"] = DEBUG_MODE,
-					["PluginVersion"] = luup.variable_get(service, "Version", deviceID) or "",
-					["RemoteAccess"] = luup.variable_get(service, "RemoteAccess", deviceID) or ""
+					["PluginVersion"] = luup.variable_get(ALTUI_SERVICE, "Version", deviceID) or "",
+					["RemoteAccess"] = luup.variable_get(ALTUI_SERVICE, "RemoteAccess", deviceID) or ""
 				}
 				
 				-- preload necessary scripts : optimization for remote access
@@ -882,12 +882,12 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 					local data = getDataFor( deviceID, v )
 					table.insert(  result_tbl , data )
 				end
-				-- local custompages = luup.variable_get(service, "CustomPages", deviceID) or "[]"
+				-- local custompages = luup.variable_get(ALTUI_SERVICE, "CustomPages", deviceID) or "[]"
 				-- custompages = string.gsub(custompages,"'","\\x27")
 				-- custompages = string.gsub(custompages,"\"","\\x22")
-				local serverOptions= getSetVariable(service, "ServerOptions", deviceID, "")	
-				local localcdn = getSetVariable(service, "LocalCDN", deviceID, "")
-				local localbootstrap = getSetVariable(service, "LocalBootstrap", deviceID, "")
+				local serverOptions= getSetVariable(ALTUI_SERVICE, "ServerOptions", deviceID, "")	
+				local localcdn = getSetVariable(ALTUI_SERVICE, "LocalCDN", deviceID, "")
+				local localbootstrap = getSetVariable(ALTUI_SERVICE, "LocalBootstrap", deviceID, "")
 				if (localbootstrap == "") then	
 					localbootstrap=defaultBootstrapPath
 				end
@@ -897,11 +897,11 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				variables["localbootstrap"] = localbootstrap
 				variables["devicetypes"] = json.encode(tbl)
 				variables["custompages"] = "["..table.concat(result_tbl, ",").."]"
-				variables["ThemeCSS"] = luup.variable_get(service, "ThemeCSS", deviceID) or ""
+				variables["ThemeCSS"] = luup.variable_get(ALTUI_SERVICE, "ThemeCSS", deviceID) or ""
 				variables["ServerOptions"] = serverOptions
 				variables["style"] = htmlStyle
 				variables["mydeviceid"] = deviceID
-				variables["extracontroller"] = getSetVariable(service, "ExtraController", deviceID, "")
+				variables["extracontroller"] = getSetVariable(ALTUI_SERVICE, "ExtraController", deviceID, "")
 				-- variables["firstuserdata"] = "{}"
 				variables["firstuserdata"] = getFirstUserData()	-- ( json.encode( getFirstUserData() )	-- :gsub("'", "\'") )
 				if (localcdn ~= "") then
@@ -924,13 +924,13 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				local variablename = "Data_"..name.."_"..npage
 				if (data=="") then
 					debug(string.format("ALTUI_Handler: save_data( ) - Empty data",name,npage))
-					luup.variable_set(service, variablename, "", deviceID)
+					luup.variable_set(ALTUI_SERVICE, variablename, "", deviceID)
 					return "ok", "text/plain"
 				else
 					debug(string.format("ALTUI_Handler: save_data( ) - Not Empty data",name,npage))
 					data = url_decode( data )
 					debug(string.format("ALTUI_Handler: save_data( ) - url decoded",name,npage))
-					luup.variable_set(service, variablename, data, deviceID)
+					luup.variable_set(ALTUI_SERVICE, variablename, data, deviceID)
 					debug(string.format("ALTUI_Handler: save_data( ) - returns:%s",data))
 					return data, "text/plain"
 				end
@@ -941,12 +941,12 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				local npage = lul_parameters["npage"]
 				local variablename = "Data_"..name.."_"..npage
 				-- cleanup all found data until we find
-				local var = luup.variable_get(service, variablename,  deviceID)
+				local var = luup.variable_get(ALTUI_SERVICE, variablename,  deviceID)
 				while ((var ~= nil) and (var ~="" )) do
-					luup.variable_set(service, variablename, "", deviceID)
+					luup.variable_set(ALTUI_SERVICE, variablename, "", deviceID)
 					npage = npage + 1
 					variablename = "Data_"..name.."_"..npage
-					var = luup.variable_get(service, variablename,  deviceID)
+					var = luup.variable_get(ALTUI_SERVICE, variablename,  deviceID)
 				end
 				return "ok", "text/plain"
 			end,
@@ -980,8 +980,9 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				local device = lul_parameters["device"]
 				local service = lul_parameters["service"]
 				local variable = lul_parameters["variable"]
-				local data = lul_parameters["data"]
-				local res = setRemoteWatch(service,variable,device,data)
+				local ctrlid = lul_parameters["ctrlid"]
+				local ipaddr = lul_parameters["ipaddr"]
+				local res = setRemoteWatch(service,variable,device,{["ctrlid"]=ctrlid, ["ipaddr"]=ipaddr })
 				return res, "text/plain"
 			end,
 		["setwatchCB"] = 		-- secondary controller calling back the primary controller with a watch result
@@ -991,6 +992,8 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				local lul_variable = lul_parameters["variable"] 
 				local lul_value_old = lul_parameters["old"]
 				local lul_value_new = lul_parameters["new"]
+				local ctrlid = lul_parameters["ctrlid"]
+				variableWatchCallbackFromRemote(ctrlid, lul_device, lul_service, lul_variable, lul_value_old, lul_value_new)
 				return "ok", "text/plain"
 			end,
 		["readtmp"] = 
@@ -1094,13 +1097,13 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 			end,
 		["devicetypes"] = 
 			function(params)
-				local result = luup.variable_get(service, "PluginConfig", deviceID)
+				local result = luup.variable_get(ALTUI_SERVICE, "PluginConfig", deviceID)
 				local tbl = json.decode(result)
 				tbl ["info"] = {
 					["debug"] = DEBUG_MODE,
-					["ui7Check"] = luup.variable_get(service, "UI7Check", deviceID) or "",
-					["PluginVersion"] = luup.variable_get(service, "Version", deviceID) or "",
-					["RemoteAccess"] = luup.variable_get(service, "RemoteAccess", deviceID) or ""
+					["ui7Check"] = luup.variable_get(ALTUI_SERVICE, "UI7Check", deviceID) or "",
+					["PluginVersion"] = luup.variable_get(ALTUI_SERVICE, "Version", deviceID) or "",
+					["RemoteAccess"] = luup.variable_get(ALTUI_SERVICE, "RemoteAccess", deviceID) or ""
 				}
 				return json.encode(tbl), "application/json"
 			end,
@@ -1312,7 +1315,7 @@ function resetDevice(lul_device,norepeat)
 	-- reset the config
 	local tbl = getDefaultConfig()
 	local default = json.encode( tbl )
-	setVariableIfChanged(service, "PluginConfig", default, lul_device)
+	setVariableIfChanged(ALTUI_SERVICE, "PluginConfig", default, lul_device)
 	debug(string.format("Reseting ALTUI config to %s",default))
 end
 
@@ -1324,7 +1327,7 @@ function registerPlugin(lul_device,newDeviceType,newScriptFile,newDeviceDrawFunc
 	newControlPanelFunc = newControlPanelFunc or ""
 	log(string.format("registerPlugin(%d,%s,%s,%s,%s,%s,%s)",lul_device,newDeviceType,newScriptFile,newDeviceDrawFunc,newStyleFunc,newDeviceIconFunc,newControlPanelFunc))
 	if (newDeviceType ~= "") then
-		local tbljson = getSetVariable(service, "PluginConfig", lul_device, json.encode( getDefaultConfig() ) )
+		local tbljson = getSetVariable(ALTUI_SERVICE, "PluginConfig", lul_device, json.encode( getDefaultConfig() ) )
 		local tbl = json.decode(tbljson)
 		if (tbl[newDeviceType] == nil) then
 			tbl[newDeviceType]={}
@@ -1334,7 +1337,7 @@ function registerPlugin(lul_device,newDeviceType,newScriptFile,newDeviceDrawFunc
 				tbl[newDeviceType][k]=v
 			end
 		end
-		setVariableIfChanged(service, "PluginConfig", json.encode( tbl ), lul_device)
+		setVariableIfChanged(ALTUI_SERVICE, "PluginConfig", json.encode( tbl ), lul_device)
 	else
 		debug("Ignored, empty device type")
 	end
@@ -1367,14 +1370,14 @@ local registeredWatches = {}
 -- service#variable#deviceid#sceneid#lua_expr#blockly xml;service#variable#deviceid#sceneid#lua_expr#blockly xml
 function getWatchParams(str)
 	local params = str:split("#")
-	return params[1],params[2],tonumber(params[3]),tonumber(params[4]),params[5]	
+	return params[1],params[2],params[3],tonumber(params[4]),params[5]	
 end
 
 -- service#variable#deviceid#provider#data line which is a template sprintf string for params
 -- urn:micasaverde-com:serviceId:SceneController1#LastSceneID#208#thingspeak#61186#key=U1F7T31MHB5O8HZI&field1=0#graphic url
 function getPushParams(str)
 	local params = str:split("#")
-	return params[1],params[2],tonumber(params[3]),params[4],params[5],params[6],params[7],params[8] or ""
+	return params[1],params[2],params[3],params[4],params[5],params[6],params[7],params[8] or ""
 end
 
 function findWatch( devid, service, variable )
@@ -1512,8 +1515,8 @@ function evaluateExpression(lul_device, lul_service, lul_variable,expr,old, new,
 	return res
 end
 
-function variableWatchCallback(lul_device, lul_service, lul_variable, lul_value_old, lul_value_new)
-	debug(string.format("variableWatchCallback(%s,%s,%s,old:'%s',new:'%s')",lul_device, lul_service, lul_variable, lul_value_old, lul_value_new))
+function _internalVariableWatchCallback(lul_device, lul_service, lul_variable, lul_value_old, lul_value_new)
+	debug(string.format("_internalVariableWatchCallback(%s,%s,%s,old:'%s',new:'%s')",lul_device, lul_service, lul_variable, lul_value_old, lul_value_new))
 	local watch = findWatch( lul_device, lul_service, lul_variable )
 	if (watch==nil) or (watch['Expressions']==nil )then
 		warning(string.format("ignoring unexpected watch callback, variableWatchCallback(%s,%s,%s,old:'%s',new:'%s')",lul_device, lul_service, lul_variable, lul_value_old, lul_value_new))
@@ -1540,9 +1543,24 @@ function variableWatchCallback(lul_device, lul_service, lul_variable, lul_value_
 	debug(string.format("registeredWatches: %s",json.encode(registeredWatches)))
 end
 
+function variableWatchCallbackFromRemote(ctrlid, lul_device, lul_service, lul_variable, lul_value_old, lul_value_new)
+	lul_device = tostring(ctrlid).."-"..lul_device
+	_internalVariableWatchCallback(lul_device, lul_service, lul_variable, lul_value_old, lul_value_new)
+end
+
+function variableWatchCallback(lul_device, lul_service, lul_variable, lul_value_old, lul_value_new)
+	lul_device = "0-"..lul_device
+	_internalVariableWatchCallback(lul_device, lul_service, lul_variable, lul_value_old, lul_value_new)
+end
+
 function addWatch( devid, service, variable, expression, scene , provider, data, graphicurl )
 	debug(string.format("addWatch(%s,%s,%s,%s,%s,%s,%s)",devid, service, variable, expression, scene, provider or "", data or "", graphicurl or ""))
 	devidstr = tostring(devid)	 -- to inssure it is not a indexed array , but hash table
+	local parts = devidstr:split("-")
+	if (parts[2]==nil) then
+		devidstr = "0-"..devidstr
+		parts = devidstr:split("-")
+	end
 	local bDuplicateWatch = false
 	if (registeredWatches[devidstr] == nil) then
 		registeredWatches[devidstr]={}
@@ -1587,7 +1605,30 @@ function addWatch( devid, service, variable, expression, scene , provider, data,
 	if (bDuplicateWatch==true) then
 		debug(string.format("Ignoring duplicate watch for %s-%s",service,variable))
 	else
-		luup.variable_watch("variableWatchCallback", service,variable,devid)
+		if (parts[1]=="0") then	 
+			-- Master Controller
+			luup.variable_watch("variableWatchCallback", service,variable,tonumber(parts[2]))
+		else
+			-- Secondary Controller
+			local extraController= getSetVariable(ALTUI_SERVICE, "ExtraController", lul_device, "")
+			local controllers = extraController:split(",")
+			local ipaddr =  controllers [ tonumber(parts[1]) ]:trim()
+			local url = string.format("http://%s/port_3480/data_request?id=lr_ALTUI_Handler&command=setwatch&device=%s&variable=%s&service=%s&ctrlid=%s&ipaddr=%s",
+				ipaddr,		-- remote ctrl ip addr
+				parts[2],	-- pure vera device id on remote controller
+				variable,	 
+				service,	
+				parts[1],	-- controller id for ALTUI
+				getIP()		-- local IP address for callback
+				)
+			debug(string.format("Calling url to set remote watch. url:%s",url))
+			local httpcode,data = luup.inet.wget(url,10)
+			if (httpcode~=0) then
+				error(string.format("failed to connect to url:%s, http.request returned %d", url,httpcode))
+				return 0
+			end
+			debug(string.format("success httpcode:%s data:%s",httpcode,data))	
+		end
 	end
 	debug(string.format("registeredWatches: %s",json.encode(registeredWatches)))
 end
@@ -1596,8 +1637,10 @@ function initVariableWatches( variableWatchString , dataPushString)
 	debug(string.format("initVariableWatches(%s,%s)",variableWatchString,dataPushString))
 	local watches = variableWatchString:split(";")
 	for k,v  in pairs(watches) do
-		local service,variable,device,scene,expression  = getWatchParams(v)
-		addWatch( device, service, variable, expression, scene )
+		if (v~="") then
+			local service,variable,device,scene,expression  = getWatchParams(v)
+			addWatch( device, service, variable, expression, scene )
+		end
 	end
 	-- urn:micasaverde-com:serviceId:SceneController1#LastSceneID#208#thingspeak#key=U1F7T31MHB5O8HZI&field1=0
 	local watches = dataPushString:split(";")
@@ -1720,16 +1763,16 @@ function startupDeferred(lul_device)
 	lul_device = tonumber(lul_device)
 	log("startupDeferred, called on behalf of device:"..lul_device)
 		
-	local debugmode = getSetVariable(service, "Debug", lul_device, "0")
-	local oldversion = getSetVariable(service, "Version", lul_device, version)
-	local present = getSetVariable(service,"Present", lul_device, 0)
-	local remoteurl =getSetVariable(service,"RemoteAccess", lul_device, "https://vera-ui.strongcubedfitness.com/Veralogin.php")
-	local localurl = getSetVariableIfEmpty(service,"LocalHome", lul_device, "/port_3480/data_request?id=lr_ALTUI_Handler&command=home")
-	local css = getSetVariable(service,"ThemeCSS", lul_device, "")
-	local extraController= getSetVariable(service, "ExtraController", lul_device, "")
-	local serverOptions= getSetVariable(service, "ServerOptions", lul_device, "")	
-	local localcdn = getSetVariable(service, "LocalCDN", lul_device, "")
-	local localbootstrap = getSetVariable(service, "LocalBootstrap", lul_device, "")
+	local debugmode = getSetVariable(ALTUI_SERVICE, "Debug", lul_device, "0")
+	local oldversion = getSetVariable(ALTUI_SERVICE, "Version", lul_device, version)
+	local present = getSetVariable(ALTUI_SERVICE,"Present", lul_device, 0)
+	local remoteurl =getSetVariable(ALTUI_SERVICE,"RemoteAccess", lul_device, "https://vera-ui.strongcubedfitness.com/Veralogin.php")
+	local localurl = getSetVariableIfEmpty(ALTUI_SERVICE,"LocalHome", lul_device, "/port_3480/data_request?id=lr_ALTUI_Handler&command=home")
+	local css = getSetVariable(ALTUI_SERVICE,"ThemeCSS", lul_device, "")
+	local extraController= getSetVariable(ALTUI_SERVICE, "ExtraController", lul_device, "")
+	local serverOptions= getSetVariable(ALTUI_SERVICE, "ServerOptions", lul_device, "")	
+	local localcdn = getSetVariable(ALTUI_SERVICE, "LocalCDN", lul_device, "")
+	local localbootstrap = getSetVariable(ALTUI_SERVICE, "LocalBootstrap", lul_device, "")
 	if (localbootstrap == "") then	
 		localbootstrap=defaultBootstrapPath
 	else
@@ -1740,7 +1783,7 @@ function startupDeferred(lul_device)
 			else
 				localbootstrap = "../"..localbootstrap
 			end
-			luup.variable_set(service, "LocalBootstrap", localbootstrap, lul_device)
+			luup.variable_set(ALTUI_SERVICE, "LocalBootstrap", localbootstrap, lul_device)
 		end
 	end
 	
@@ -1765,21 +1808,21 @@ function startupDeferred(lul_device)
 		
 		-- init the configuration table with a valid default if needed
 		local defconfigjson = json.encode( getDefaultConfig() )
-		local config = getSetVariable(service, "PluginConfig", lul_device, defconfigjson )
+		local config = getSetVariable(ALTUI_SERVICE, "PluginConfig", lul_device, defconfigjson )
 		
 		-- force the default in case of upgrade
 		if ( (newmajor>major) or ( (newmajor==major) and (newminor>minor) ) ) then
 			log ("Version upgrade => Reseting Plugin config to default")
-			setVariableIfChanged(service, "PluginConfig", defconfigjson, lul_device)		
+			setVariableIfChanged(ALTUI_SERVICE, "PluginConfig", defconfigjson, lul_device)		
 		end
 		
-		luup.variable_set(service, "Version", version, lul_device)
+		luup.variable_set(ALTUI_SERVICE, "Version", version, lul_device)
 	end	
 	
 	-- init watches
 	-- init data storages
-	local variableWatch = getSetVariable(service, "VariablesToWatch", lul_device, "")	-- service#variable#deviceid#sceneid;service#variable#deviceid#sceneid
-	local dataPushes= getSetVariable(service, "VariablesToSend", lul_device, "")	-- service#variable#deviceid#providername; ...
+	local variableWatch = getSetVariable(ALTUI_SERVICE, "VariablesToWatch", lul_device, "")	-- service#variable#deviceid#sceneid;service#variable#deviceid#sceneid
+	local dataPushes= getSetVariable(ALTUI_SERVICE, "VariablesToSend", lul_device, "")	-- service#variable#deviceid#providername; ...
 	initVariableWatches( variableWatch, dataPushes )
 
 	

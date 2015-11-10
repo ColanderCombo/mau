@@ -8,7 +8,7 @@
 // written devagreement from amg0 / alexis . mermet @ gmail . com
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE . 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
   
 /*The MIT License (MIT)
 BOOTGRID: Copyright (c) 2014-2015 Rafael J. Staib
@@ -1462,7 +1462,7 @@ var SceneEditor = function (scene) {
 	function _editWatch( idx, jqButton) {
 		var watch =  (idx!=-1) ? _getWatchLineParams( scenewatches[idx] ) : "";
 		var dialog = DialogManager.createPropertyDialog(_T('Watch'));
-		var device = (idx!=-1) ? MultiBox.getDeviceByID( scenecontroller , watch.deviceid) : NULL_DEVICE;
+		var device = (idx!=-1) ? MultiBox.getDeviceByAltuiID(watch.deviceid) : NULL_DEVICE;
 		
 		DialogManager.dlgAddDevices( dialog , device ? device.altuiid : NULL_DEVICE, 
 			function() {			// callback
@@ -1480,7 +1480,7 @@ var SceneEditor = function (scene) {
 				});
 			},
 			function( device ) {	// filter
-				return (MultiBox.controllerOf(device.altuiid).controller == scenecontroller);
+				return true;	 //(MultiBox.controllerOf(device.altuiid).controller == scenecontroller);
 			}
 		);
 		
@@ -1492,7 +1492,7 @@ var SceneEditor = function (scene) {
 				//watch.service, watch.variable, watch.deviceid, watch.sceneid, watch.luaexpr
 				service:state.service,
 				variable:state.variable,
-				deviceid:MultiBox.controllerOf(altuiid).id,
+				deviceid:altuiid,
 				sceneid:scene.id,  
 				luaexpr:$("#altui-widget-LuaExpression").val(),
 				xml:$("#altui-xml-LuaExpression").val()
@@ -1531,7 +1531,7 @@ var SceneEditor = function (scene) {
 		var html ="";
 		html +="<tr data-watch-idx='{0}'>".format(idx);
 		html +="<td>";
-		var device = MultiBox.getDeviceByID(scenecontroller,watch.deviceid)
+		var device = MultiBox.getDeviceByAltuiID(watch.deviceid);
 		html += device.name;
 		html +="</td>";
 		html +="<td>";
