@@ -3324,7 +3324,8 @@ var UIManager  = ( function( window, undefined ) {
 			// offset = ((offset<0? '+':'-')+ _format(parseInt(Math.abs(offset/60)))+ ":"+_format(Math.abs(offset%60)));
 			return field.format(id, _toIso(date),extradata);
 		}
-		return "<input {2} id='{0}' class='form-control' type='text' value='{1}'></input>".format(id,value,extradata);
+		var str = value.toString().escapeXml();
+		return "<input {2} id='{0}' class='form-control' type='text' value='{1}'></input>".format(id,str,extradata);
 	};
 		
 	// -- urn:micasaverde-com:serviceId:SceneController1#LastSceneID#208#thingspeak#61666#U1F7T31MH#key=U1F7T31MHB5O8HZI&field1=%s#graphicurl
@@ -3343,7 +3344,7 @@ var UIManager  = ( function( window, undefined ) {
 			key = m[1];
 			fieldnum=parseInt(m[2]);
 		}
-		//service,variable,deviceid,provider,data 
+		//service,variable,deviceid,provider,channelid,readkey,data,graphicurl
 		return {
 			service : params[0] || "",
 			variable : params[1] || "",
@@ -3428,7 +3429,7 @@ var UIManager  = ( function( window, undefined ) {
 					var varPushes = {};
 					$.each( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend" ) || "").split(';'),function(idx,pushLine) {
 						var push = _getPushLineParams(pushLine);
-						if (device.altuiid == ("0-"+push.deviceid)) {	//ctrl 0 only for now !
+						if (device.altuiid == push.deviceid) {	//ctrl 0 only for now !
 							varPushes[push.service+':'+push.variable]=push;
 						}
 					});
@@ -3529,7 +3530,7 @@ var UIManager  = ( function( window, undefined ) {
 					var varPushesToSave = [];
 					$.each( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend" ) || "").split(';'),function(idx,pushLine) {
 						var push = _getPushLineParams(pushLine);
-						if ((device.altuiid != ("0-"+push.deviceid)) || (push.service!=state.service) || (push.variable != state.variable)) {	//ctrl 0 only for now !
+						if ((device.altuiid != push.deviceid) || (push.service!=state.service) || (push.variable != state.variable)) {	
 							varPushesToSave.push(pushLine);
 						}
 					});
@@ -3538,7 +3539,7 @@ var UIManager  = ( function( window, undefined ) {
 						var push = {
 							service : state.service,
 							variable : state.variable,
-							deviceid : MultiBox.controllerOf(device.altuiid).id,
+							deviceid : device.altuiid,
 							provider : "thingspeak",
 							channelid : form.find("input#channelID_"+varid).val(),
 							readkey : form.find("input#readApiKey_"+varid).val(),
