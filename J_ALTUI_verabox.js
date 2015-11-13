@@ -10,6 +10,7 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 
+var ALTUI_NEW_SCENE_ID = 9999999999;
 var VeraBox = ( function( uniq_id, ip_addr ) {
 
   //---------------------------------------------------------
@@ -324,11 +325,17 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 	
 	function _getNewSceneID() {
-		var max = 0;
-		$.each(_user_data.scenes, function( i,scene) {
-			max = Math.max( scene.id, max );
-		});
-		return max+1;
+		// var id=1;
+		// while( _getSceneByID(id) != null )
+			// id++;
+		// return id;
+		
+		// var max = 0;
+		// $.each(_user_data.scenes, function( i,scene) {
+			// max = Math.max( scene.id, max );
+		// });
+		// return max+1;
+		return ALTUI_NEW_SCENE_ID;
 	};
 	
 	function _getStates( deviceid  )

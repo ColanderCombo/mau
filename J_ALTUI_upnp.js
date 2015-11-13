@@ -497,6 +497,8 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 				}
 			});		
 		} else {
+			if (newscene.id==ALTUI_NEW_SCENE_ID)
+				delete newscene.id;
 			var jq = _exec( _buildSceneCreateUrl(JSON.stringify(newscene)), function(data,jqXHR) {
 				if ($.isFunction(cbfunc))
 					(cbfunc)(data,jqXHR);
