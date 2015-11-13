@@ -3853,7 +3853,7 @@ var UIManager  = ( function( window, undefined ) {
 								}
 								AltuiDebug.debug("UI5 style static baseIconName modified :"+baseIconName);
 								var ds = ui_static_data.DisplayStatus;
-								if ((ds.Service != undefined) && (ds.Variable != undefined))
+								if ((ds != undefined) && (ds.Service != undefined) && (ds.Variable != undefined))
 								{
 									var variable = MultiBox.getStatus( device, ds.Service, ds.Variable );
 									if (variable==null) 

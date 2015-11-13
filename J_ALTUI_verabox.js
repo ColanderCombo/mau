@@ -10,7 +10,7 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 
-var ALTUI_NEW_SCENE_ID = 9999999999;
+var ALTUI_NEW_SCENE_ID = -1;
 var VeraBox = ( function( uniq_id, ip_addr ) {
 
   //---------------------------------------------------------
