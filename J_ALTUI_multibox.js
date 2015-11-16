@@ -141,7 +141,7 @@ var MultiBox = ( function( window, undefined ) {
 		// add the extra controllers
 		if (extraController.trim().length>0)
 			$.each(extraController.split(','), function(idx,ipaddr) {
-				_controllers.push({ ip:ipaddr, controller:null });
+				_controllers.push({ ip:ipaddr.trim(), controller:null });
 			});
 		
 		// initialize controllers that are not yet initialized

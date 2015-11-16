@@ -16,7 +16,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 	var _ipaddr = trim(ip_addr || '');
 	var _veraidx = veraidx || 0;
 	var _proxyresultarea = "altuictrl"+_veraidx;
-	var _urlhead = (_ipaddr=='') ? window.location.pathname : ("http://{0}/port_3480/data_request".format(ip_addr));
+	var _urlhead = (_ipaddr=='') ? window.location.pathname : ("http://{0}/port_3480/data_request".format(_ipaddr));
 	// var _proxyhead = "/port_3480/data_request?id=action&output_format=json&DeviceNum={0}&serviceId=urn:upnp-org:serviceId:altui1&resultName={1}&action=ProxyGet&newUrl=".format(g_MyDeviceID,_proxyresultarea);
 	var _proxyhead = "?id=lr_ALTUI_Handler&command=proxyget&resultName=none&newUrl=";
 

@@ -3594,7 +3594,7 @@ var UIManager  = ( function( window, undefined ) {
 							readkey : form.find("input#readApiKey_"+varid).val(),
 							key : form.find("input#apiKey_"+varid).val(),
 							fieldnum : form.find("input#fieldNum_"+varid).val(),
-							graphicurl : "" || tr.closest("tbody").find("input#altui-graphUrl_"+varid).val()
+							graphicurl : (tr.closest("tbody").find("input#altui-graphUrl_"+varid).val()) || ""
 						};
 						differentWatches = previousWatches.filter( function(watch) {
 							return (watch.service != push.service) 

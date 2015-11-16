@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local ALTUI_SERVICE = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.97"
+local version = "v0.98"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -341,7 +341,9 @@ end
 
 function tablelength(T)
   local count = 0
-  for _ in pairs(T) do count = count + 1 end
+  if (T~=nil) then
+	for _ in pairs(T) do count = count + 1 end
+  end
   return count
 end
 
@@ -759,7 +761,13 @@ local function delRemoteWatch(lul_device,service,variable,devid,ctrlid,ipaddr)
 	debug(string.format("delRemoteWatch(%s,%s,%s,%s,%s,%s)",lul_device,service,variable,devid,ctrlid,ipaddr))
 	local watchline = setRemoteWatchParams(service,variable,devid,ctrlid,ipaddr)
 	local variableWatch = getSetVariable(ALTUI_SERVICE, "RemoteVariablesToWatch", lul_device, "")
-	local bFound=false;
+	local toKeep = {}
+	for k,v  in pairs(variableWatch:split(';')) do
+		if (v ~= watchline) then
+			table.insert(toKeep,v)
+		end
+	end
+	luup.variable_set(ALTUI_SERVICE, "RemoteVariablesToWatch", table.concat(toKeep,";"), lul_device)
 	return "ok"
 end
 
@@ -1740,6 +1748,7 @@ end
 function addWatch( lul_device, service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl )
 	debug(string.format("addWatch(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",lul_device, service, variable, deviceid, sceneid, expression, xml or "", provider or "", channelid or "", readkey or "", data or "", graphicurl or ""))
 	-- 1/ Add Watch in database
+	graphicurl = graphicurl or ""
 	local newwatch = _addWatch( service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl ) 
 	
 	-- 2/ Add Watch in persistence list ( device variable )
@@ -1843,7 +1852,8 @@ end
 function delWatch( lul_device, service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl )
 	debug(string.format("delWatch(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",lul_device, service, variable, deviceid, sceneid, expression, xml or "", provider or "", channelid or "", readkey or "", data or "", graphicurl or ""))
 	-- remove from DB and  call the remote controller to remove the watch too
-	_delWatch(service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl )
+	graphicurl = graphicurl or ""
+	_delWatch(service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl  )
 	
 	--  remove from persistent list
 	if (sceneid ~=-1) then
