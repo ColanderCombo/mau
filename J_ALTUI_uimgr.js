@@ -1328,6 +1328,14 @@ var SceneEditor = function (scene) {
 		return (watch.sceneid == scene.id) && (scenecontroller==0);
 	});	
 	
+	function _sameWatch(watcha,watchb) {
+		return 	watcha.service == watchb.service && 
+				watcha.variable == watchb.variable &&
+				watcha.deviceid == watchb.deviceid &&
+				watcha.sceneid == watchb.sceneid &&
+				watcha.luaexpr == watchb.luaexpr &&
+				watcha.xml == watchb.xml ;
+	};
 	function _getWatchLineParams(watchLine) {
 		var params = watchLine.split('#');
 		//service,variable,deviceid,sceneid,lua_expr
@@ -2540,6 +2548,41 @@ var SceneEditor = function (scene) {
 						scene.modeStatus="0";
 				}
 
+				// prepare table of old and new watches
+				var previousWatches = $.map( $.grep( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToWatch" ) || "").split(';'),
+					function(w) {
+						var watch = _getWatchLineParams(w);
+						return (watch.sceneid == scene.id) && (scenecontroller==0);
+					}), 
+					function (watchline) {
+						return _getWatchLineParams(watchline);
+					}
+				);
+				var newWatches = $.map(scenewatches, function(watchline) {
+					return _getWatchLineParams(watchline);
+				});
+				
+				var onlyInPrevious = previousWatches.filter(function(current){
+					return newWatches.filter(function(current_b){
+						return _sameWatch(current,current_b);
+					}).length == 0
+				});
+
+				var onlyInNew = newWatches.filter(function(current){
+					return previousWatches.filter(function(current_a){
+						return _sameWatch(current,current_a);
+					}).length == 0
+				});
+
+				// delete all watches that are in the VERA variable and not any more in the scenewatches
+				$.each(onlyInPrevious , function(i,w) {
+					MultiBox.delWatch( w.service, w.variable, w.deviceid, w.sceneid, w.luaexpr, w.xml )
+				});
+				// add all the watches that are in the scenewatches and not in the VERA variable
+				$.each(onlyInNew , function(i,w) {
+					MultiBox.addWatch( w.service, w.variable, w.deviceid, w.sceneid, w.luaexpr, w.xml )
+				});
+				
 				// save new watches
 				var watchesToKeep = $.grep( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToWatch" ) || "").split(';'),function(w) {
 					var watch = _getWatchLineParams(w);
@@ -3457,7 +3500,7 @@ var UIManager  = ( function( window, undefined ) {
 								html += "<label><input type='checkbox' id='altui-enablePush_{0}' {1} {2}>Enable Push to Thingspeak</label>".format(
 									varid, 
 									(pushData!=null) ? 'checked' : '',
-									MultiBox.controllerOf(device.altuiid).controller !=0 ? 'disabled' : ''
+									'' // MultiBox.controllerOf(device.altuiid).controller !=0 ? 'disabled' : ''
 								);
 							html += "</div>"
 							html += "<form id='form_{0}' class='form-inline'>".format(varid);
@@ -3525,18 +3568,24 @@ var UIManager  = ( function( window, undefined ) {
 				} else {
 					//change color
 					$(this).addClass("btn-default").removeClass("btn-danger");
-
-					// first keep the other ones
-					var varPushesToSave = [];
-					$.each( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend" ) || "").split(';'),function(idx,pushLine) {
-						var push = _getPushLineParams(pushLine);
-						if ((device.altuiid != push.deviceid) || (push.service!=state.service) || (push.variable != state.variable)) {	
-							varPushesToSave.push(pushLine);
-						}
-					});
 					var nexttr = tr.next("tr");
-					if (nexttr.find("input#altui-enablePush_"+varid).prop('checked') ==true ) {
-						var push = {
+					var pushEnabled = nexttr.find("input#altui-enablePush_"+varid).prop('checked');
+					var push = null;
+					var differentWatches=null;
+					// find all watches for this device
+					var previousWatches = $.map( $.grep( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend" ) || "").split(';'),
+						function(w) {
+							var watch = _getPushLineParams(w);
+							return (watch.service == state.service) && (watch.variable == state.variable)  && (watch.deviceid == device.altuiid) 
+						}), 
+						function (watchline) {
+							return _getPushLineParams(watchline);
+						}
+					);
+
+					// add a new one unless it is already there
+					if (pushEnabled ==true ) {
+						push = {
 							service : state.service,
 							variable : state.variable,
 							deviceid : device.altuiid,
@@ -3547,9 +3596,30 @@ var UIManager  = ( function( window, undefined ) {
 							fieldnum : form.find("input#fieldNum_"+varid).val(),
 							graphicurl : "" || tr.closest("tbody").find("input#altui-graphUrl_"+varid).val()
 						};
-						varPushesToSave.push( _setPushLineParams(push) );
+						differentWatches = previousWatches.filter( function(watch) {
+							return (watch.service != push.service) 
+								||  (watch.variable != push.variable)  
+								||  (watch.deviceid != push.deviceid)  
+								||  (watch.provider != push.provider) 
+								||  (watch.channelid != push.channelid)
+								||  (watch.readkey != push.readkey)
+								||  (watch.key != push.key)
+								||  (watch.fieldnum != push.fieldnum)
+								||  (watch.graphicurl != push.graphicurl)
+						});
+						// delete all old ones
+						$.each(differentWatches , function(i,w) {
+							MultiBox.delWatch( w.service, w.variable, w.deviceid, -1, "true", "", w.provider, w.channelid, w.readkey, "key={0}&field{1}=%s".format(w.key,w.fieldnum), w.graphicurl )
+						});
+						// add new one if it was not there before
+						if (differentWatches.length==previousWatches.length)
+							MultiBox.addWatch( push.service, push.variable, push.deviceid, -1, "true", "", push.provider, push.channelid, push.readkey, "key={0}&field{1}=%s".format(push.key,push.fieldnum), push.graphicurl ) ;
+					} else {
+						// delete all watches that are in the VERA variable and not any more in the scenewatches
+						$.each(previousWatches , function(i,w) {
+							MultiBox.delWatch( w.service, w.variable, w.deviceid, -1, "true", "", w.provider, w.channelid, w.readkey, "key={0}&field{1}=%s".format(w.key,w.fieldnum), w.graphicurl )
+						});
 					}
-					MultiBox.setStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend", varPushesToSave.join(';') );
 					form.closest("tr").remove();
 				}
 			});

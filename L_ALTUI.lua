@@ -689,7 +689,7 @@ local registeredWatches = {}
 
 -- service#variable#deviceid#sceneid#lua_expr#blockly xml;service#variable#deviceid#sceneid#lua_expr#blockly xml
 local function setWatchParams(service,variable,deviceid,sceneid,lua,xml)
-	return string.format("%s#%s#%s#%s#%s#%s",service,variable,deviceid,sceneid,lua,xml)
+	return string.format("%s#%s#%s#%s#%s#%s",service,variable,deviceid,sceneid,lua,xml or '')
 end
 
 local function getWatchParams(str)
@@ -755,10 +755,19 @@ end
 
 -- http://192.168.1.16/port_3480/data_request?id=lr_ALTUI_Handler&command=addRemoteWatch&device=112&variable=Status&service=urn:upnp-org:serviceId:SwitchPower1&data=192.168.1.16
 -- http://192.168.1.5/port_3480/data_request?id=lr_ALTUI_Handler&command=addRemoteWatch&device=42&variable=Status&service=urn:upnp-org:serviceId:SwitchPower1&data=192.168.1.16
+local function delRemoteWatch(lul_device,service,variable,devid,ctrlid,ipaddr)
+	debug(string.format("delRemoteWatch(%s,%s,%s,%s,%s,%s)",lul_device,service,variable,devid,ctrlid,ipaddr))
+	local watchline = setRemoteWatchParams(service,variable,devid,ctrlid,ipaddr)
+	local variableWatch = getSetVariable(ALTUI_SERVICE, "RemoteVariablesToWatch", lul_device, "")
+	local bFound=false;
+	return "ok"
+end
+
 local function addRemoteWatch(lul_device,service,variable,devid,ctrlid,ipaddr)
 	debug(string.format("addRemoteWatch(%s,%s,%s,%s,%s,%s)",lul_device,service,variable,devid,ctrlid,ipaddr))
 	if (setRemoteWatch(service,variable,devid,ctrlid,ipaddr)==true) then
-		luup.variable_watch("remoteVariableWatchCallback", service,variable,tonumber(devid))
+		local parts = devid:split("-");
+		luup.variable_watch("remoteVariableWatchCallback", service,variable,tonumber(parts[2]))
 		saveRemoteWatch(lul_device,service,variable,devid,ctrlid,ipaddr)
 	else
 		debug("Ignoring duplicate remote watch")
@@ -780,8 +789,9 @@ end
 
 function remoteVariableWatchCallback(lul_device, lul_service, lul_variable, lul_value_old, lul_value_new)
 	debug(string.format("remoteVariableWatchCallback(%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable, lul_value_old, lul_value_new))
-	lul_device = "0-"..lul_device
-	local watch = remoteWatches[lul_device][lul_service][lul_variable]
+	debug(string.format("remoteWatches:%s",json.encode(remoteWatches)))
+	local altuiid = "0-"..lul_device
+	local watch = remoteWatches[altuiid][lul_service][lul_variable]
 	if (watch~=nil) then
 		local url = string.format("http://%s/port_3480/data_request?id=lr_ALTUI_Handler&command=remoteWatchCB&service=%s&variable=%s&device=%d&old=%s&new=%s&ctrlid=%s",
 			watch["ipaddr"],
@@ -1066,7 +1076,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				local res = delWatch( 
 					deviceID,
 					lul_parameters["service"], lul_parameters["variable"], lul_parameters["device"], 
-					lul_parameters["scene"], lul_parameters["expression"], lul_parameters["xml"], 
+					tonumber(lul_parameters["scene"]), lul_parameters["expression"], lul_parameters["xml"], 
 					lul_parameters["provider"], lul_parameters["channelid"], lul_parameters["readkey"], lul_parameters["data"], lul_parameters["graphicurl"] )
 				return res, "text/plain"
 			end,
@@ -1075,7 +1085,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				local res = addWatch( 
 					deviceID,
 					lul_parameters["service"], lul_parameters["variable"], lul_parameters["device"], 
-					lul_parameters["scene"], lul_parameters["expression"], lul_parameters["xml"], 
+					tonumber(lul_parameters["scene"]), lul_parameters["expression"], lul_parameters["xml"], 
 					lul_parameters["provider"], lul_parameters["channelid"], lul_parameters["readkey"], lul_parameters["data"], lul_parameters["graphicurl"] )
 				return res, "text/plain"
 			end,
@@ -1087,6 +1097,16 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				local ctrlid = lul_parameters["ctrlid"]
 				local ipaddr = lul_parameters["ipaddr"]
 				local res = addRemoteWatch(deviceID,service,variable,device,ctrlid,ipaddr)
+				return res, "text/plain"
+			end,
+		["delRemoteWatch"] = 
+			function(params)	-- primary controller calling the secondary one to set a watch
+				local device = "0-"..lul_parameters["device"]	-- we receive a VERA device ID, we make a ALTUI ID
+				local service = lul_parameters["service"]
+				local variable = lul_parameters["variable"]
+				local ctrlid = lul_parameters["ctrlid"]
+				local ipaddr = lul_parameters["ipaddr"]
+				local res = delRemoteWatch(deviceID,service,variable,device,ctrlid,ipaddr)
 				return res, "text/plain"
 			end,
 		["remoteWatchCB"] = 		-- secondary controller calling back the primary controller with a watch result
@@ -1497,24 +1517,27 @@ end
 function sendValueToStorage(watch,lul_device, lul_service, lul_variable,old, new, lastupdate)
 	debug(string.format("sendValueToStorage(%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,old, new, lastupdate))
 	for provider,v  in pairs(watch['DataProviders']) do
-		local template = v['Data']
-		if (isempty(template==nil)==false) then
-			local data = string.format(template,new)
-			local response_body = {}
-			debug(string.format("Provider:%s Url:%s",provider,data))
-			local response, status, headers = https.request{
-				method="POST",
-				url="https://api.thingspeak.com/update",
-				headers = {
-					["Content-Type"] = "application/x-www-form-urlencoded",
-					["Content-Length"] = string.len(data),
-					-- ["X-THINGSPEAKAPIKEY"] = api_write_key
-				},
-				source = ltn12.source.string(data),
-				sink = ltn12.sink.table(response_body)
-			}
-			debug("https Response=" .. json.encode({res=response,sta=status,hea=headers}) )	
-			return response or 0
+		local n = tablelength(watch['DataProviders'][provider])
+		for i=1,n do
+			local template = v[i]['Data']
+			if (isempty(template==nil)==false) then
+				local data = string.format(template,new)
+				local response_body = {}
+				debug(string.format("Provider:%s Url:%s",provider,data))
+				local response, status, headers = https.request{
+					method="POST",
+					url="https://api.thingspeak.com/update",
+					headers = {
+						["Content-Type"] = "application/x-www-form-urlencoded",
+						["Content-Length"] = string.len(data),
+						-- ["X-THINGSPEAKAPIKEY"] = api_write_key
+					},
+					source = ltn12.source.string(data),
+					sink = ltn12.sink.table(response_body)
+				}
+				debug("https Response=" .. json.encode({res=response,sta=status,hea=headers}) )	
+				return response or 0
+			end
 		end
 	end
 	return 0
@@ -1578,7 +1601,7 @@ function _internalVariableWatchCallback(lul_device, lul_service, lul_variable, l
 		watch["LastOld"] = lul_value_old
 		watch["LastNew"] = lul_value_new
 		watch["LastUpdate"] = os.time()
-		debug(string.format("-----> evaluateExpression()"))
+		debug(string.format("-----> evaluateExpression() %s",json.encode(watch['Expressions'] )))
 		for k,v  in pairs(watch['Expressions'] or {}) do
 			-- watch['Expressions'][k] is a table of object 		{ ["LastEval"] = nil, ["SceneID"] = scene }
 			-- v is an object
@@ -1587,7 +1610,7 @@ function _internalVariableWatchCallback(lul_device, lul_service, lul_variable, l
 				debug(string.format(">>>evaluated %s, index:%s LastEval:%s",k,exp_index,tostring(watch['Expressions'][k][exp_index]["LastEval"])))
 			end
 		end
-		debug(string.format("-----> DataProviders()"))
+		debug(string.format("-----> DataProviders() %s",json.encode(watch['DataProviders'])))
 		for k,v  in pairs(watch['DataProviders'] or {}) do
 			debug(string.format("Data Provider watch k:%s v:%s",k,json.encode(v)))
 			sendValueToStorage(watch,lul_device, lul_service, lul_variable,lul_value_old, lul_value_new, watch["LastUpdate"])
@@ -1607,7 +1630,8 @@ function variableWatchCallback(lul_device, lul_service, lul_variable, lul_value_
 end
 
 function _addWatch( service, variable, devid, scene, expression, xml, provider, channelid, readkey, data, graphicurl )
-	debug(string.format("addWatch(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",service, variable, devid, scene, expression, provider or "", channelid or "", readkey or "", data or "", graphicurl or ""))
+	debug(string.format("_addWatch(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",service, variable, devid, scene, expression, xml or "", provider or "", channelid or "", readkey or "", data or "", graphicurl or ""))
+	local result = 1
 	devidstr = tostring(devid)	 -- to inssure it is not a indexed array , but hash table
 	local parts = devidstr:split("-")
 	if (parts[2]==nil) then
@@ -1638,11 +1662,11 @@ function _addWatch( service, variable, devid, scene, expression, xml, provider, 
 		registeredWatches[devidstr][service][variable]['Expressions'][expression] = {}
 	end
 	local n = tablelength(registeredWatches[devidstr][service][variable]['Expressions'][expression])
-	registeredWatches[devidstr][service][variable]['Expressions'][expression][n+1]= {
-		["LastEval"] = nil,
-		["SceneID"] = scene
-	}
 	if (scene==-1) then
+		registeredWatches[devidstr][service][variable]['Expressions'][expression][1]= {
+			["LastEval"] = nil,
+			["SceneID"] = scene
+		}
 		if (provider=="thingspeak") and ( isempty(data)==false ) then
 			if (registeredWatches[devidstr][service][variable]['DataProviders'] == nil) then
 				registeredWatches[devidstr][service][variable]['DataProviders']={}
@@ -1650,15 +1674,39 @@ function _addWatch( service, variable, devid, scene, expression, xml, provider, 
 			if (registeredWatches[devidstr][service][variable]['DataProviders'][provider] == nil) then
 				registeredWatches[devidstr][service][variable]['DataProviders'][provider]={}
 			end
-			registeredWatches[devidstr][service][variable]['DataProviders'][provider]['Data']=data
+			local n2 = tablelength(registeredWatches[devidstr][service][variable]['DataProviders'][provider])
+			local bFound = false
+			for i=1,n2 do
+				if (registeredWatches[devidstr][service][variable]['DataProviders'][provider][i]['Data']==data) then
+					bFound = true
+				end			
+			end
+			if (bFound==false) then
+				registeredWatches[devidstr][service][variable]['DataProviders'][provider][n2+1] = {
+					['Data']=data
+				}
+			end
 		else
 			warning(string.format("Unknown data push provider:%s data:%s",provider or"", data or ""))
 			return 0
 		end
+	else
+		local bFound = false
+		for i=1,n do
+			if (registeredWatches[devidstr][service][variable]['Expressions'][expression][i]["SceneID"] == scene ) then
+				bFound = true
+			end
+		end
+		if (bFound==false) then
+			registeredWatches[devidstr][service][variable]['Expressions'][expression][n+1]= {
+				["LastEval"] = nil,
+				["SceneID"] = scene
+			}
+		end
 	end
 	if (bDuplicateWatch==true) then
-		debug(string.format("Ignoring duplicate watch for %s-%s",service,variable))
-		return 0
+		debug(string.format("Ignoring luup.variable_watch for duplicate watch for %s-%s",service,variable))
+		result = 0
 	else
 		if (parts[1]=="0") then	 
 			-- Master Controller
@@ -1686,10 +1734,11 @@ function _addWatch( service, variable, devid, scene, expression, xml, provider, 
 		end
 	end
 	debug(string.format("registeredWatches: %s",json.encode(registeredWatches)))
-	return 1
+	return result
 end
 
 function addWatch( lul_device, service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl )
+	debug(string.format("addWatch(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",lul_device, service, variable, deviceid, sceneid, expression, xml or "", provider or "", channelid or "", readkey or "", data or "", graphicurl or ""))
 	-- 1/ Add Watch in database
 	local newwatch = _addWatch( service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl ) 
 	
@@ -1726,9 +1775,77 @@ function addWatch( lul_device, service, variable, deviceid, sceneid, expression,
 	return newwatch
 end
 
+function _delWatch(service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl )
+	debug(string.format("_delWatch(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",service, variable, deviceid, sceneid, expression, xml or "", provider or "", channelid or "", readkey or "", data or "", graphicurl or ""))
+	devidstr = tostring(deviceid)	 -- to inssure it is not a indexed array , but hash table
+	local parts = devidstr:split("-")
+	if (parts[2]==nil) then
+		devidstr = "0-"..devidstr
+		parts = devidstr:split("-")
+	end
+	-- registeredWatches[devidstr][service][variable]['Expressions'][expression][n+1]
+	-- local n = tablelength(registeredWatches[devidstr][service][variable]['Expressions'][expression])
+	if (registeredWatches[devidstr] ~= nil) and (registeredWatches[devidstr][service] ~= nil) and (registeredWatches[devidstr][service][variable] ~= nil) and (registeredWatches[devidstr][service][variable]['Expressions'][expression] ~= nil) then
+		local removed=0
+		if (sceneid==-1) then
+			-- watch for push
+			-- if (registeredWatches[devidstr][service][variable]['DataProviders']DataProviders[i]['Data']==data) then
+			local n = tablelength(registeredWatches[devidstr][service][variable]['DataProviders'][provider])
+			for i=n,1,-1 do
+				if (registeredWatches[devidstr][service][variable]['DataProviders'][provider][i]['Data']==data) then
+					table.remove(registeredWatches[devidstr][service][variable]['DataProviders'][provider],i)
+					removed = removed +1
+				end
+			end
+			if (removed == n) then
+				registeredWatches[devidstr][service][variable]['DataProviders'][provider]=nil
+			end
+		else
+			-- watch for scene
+			local n = tablelength(registeredWatches[devidstr][service][variable]['Expressions'][expression])
+			for i=n,1,-1 do
+				if (registeredWatches[devidstr][service][variable]['Expressions'][expression][i]["SceneID"] == sceneid) then
+					table.remove(registeredWatches[devidstr][service][variable]['Expressions'][expression], i)
+					removed = removed +1
+				end
+			end
+			if (removed == n) then
+				registeredWatches[devidstr][service][variable]['Expressions'][expression]=nil
+			end
+		end
+		if (removed==0) then
+			warning("did not removed anything")
+		end
+	end
+	if (parts[1] ~= "0") then
+		-- Remote Watch
+		local extraController= getSetVariable(ALTUI_SERVICE, "ExtraController", lul_device, "")
+		local controllers = extraController:split(",")
+		local ipaddr =  controllers [ tonumber(parts[1]) ]:trim()
+		local url = string.format("http://%s/port_3480/data_request?id=lr_ALTUI_Handler&command=delRemoteWatch&device=%s&variable=%s&service=%s&ctrlid=%s&ipaddr=%s",
+			ipaddr,		-- remote ctrl ip addr
+			parts[2],	-- pure vera device id on remote controller
+			variable,	 
+			service,	
+			parts[1],	-- controller id for ALTUI
+			getIP()		-- local IP address for callback
+			)
+		debug(string.format("Calling url to delete remote watch. url:%s",url))
+		local httpcode,data = luup.inet.wget(url,10)
+		if (httpcode~=0) then
+			error(string.format("failed to connect to url:%s, http.request returned %d", url,httpcode))
+			return 0
+		end
+		debug(string.format("success httpcode:%s data:%s",httpcode,data))	
+	end
+end
+
 function delWatch( lul_device, service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl )
-	-- would remove from persistent list
-	-- would call the remote controller to remove the watch too
+	debug(string.format("delWatch(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",lul_device, service, variable, deviceid, sceneid, expression, xml or "", provider or "", channelid or "", readkey or "", data or "", graphicurl or ""))
+	-- remove from DB and  call the remote controller to remove the watch too
+	_delWatch(service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl )
+	
+	--  remove from persistent list
 	if (sceneid ~=-1) then
 		-- classic watch
 		local watchline = setWatchParams(service,variable,deviceid,sceneid,expression,xml)
@@ -1752,10 +1869,12 @@ function delWatch( lul_device, service, variable, deviceid, sceneid, expression,
 		end
 		luup.variable_set(ALTUI_SERVICE, "VariablesToSend", table.concat(toKeep,";"), lul_device)
 	end
+	debug(string.format("registeredWatches: %s",json.encode(registeredWatches)))
 	return 1
 end
 
 function fixVariableWatches( lul_device )
+	debug(string.format("fixVariableWatches(%s)",lul_device ))
 	debug(string.format("fixVariableWatches(%s)",lul_device ))
 	local strings = {
 		["VariablesToWatch"]=getSetVariable(ALTUI_SERVICE, "VariablesToWatch", lul_device, ""),
