@@ -39,6 +39,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-cyan { color:cyan;}";
 		style += ".altui-dimmable-slider { margin-left: 60px; }";	
 		style += ".altui-infoviewer-log-btn,.altui-infoviewer-btn,.altui-window-btn,.altui-datamine-open { margin-top: 10px; }";	
+		style += ".altui-infoviewer-pattern { font-size: 14px; }";	
 		style += "div.altui-windowcover button.btn-sm { width: 4em; }";
 		style += ".altui-sonos-text, .altui-combsw-text, .altui-sysmon-text, .altui-veraalerts-text {font-size: 11px;}";
 		style += ".altui-multistring-text-div { margin-top: 2px; height: 48px; overflow: hidden; }"
@@ -849,12 +850,14 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var html ="";
 		var pattern = MultiBox.getStatus( device, 'urn:a-lurker-com:serviceId:InfoViewer1', 'LuaPattern');
 		var urlhead = MultiBox.getUrlHead(device.altuiid);
-		if (pattern!="")
-			html+= "<span class=''>Pattern: {0}</span>".format( pattern.htmlEncode() );
 		html += "<div class='btn-group pull-right'>";
-		html+= ("<button id='altui-infoviewer-{0}' type='button' class='altui-infoviewer-btn btn btn-default btn-sm '>{1}</button>" .format( device.altuiid,_T("Open") )) ;
-		html+= ("<button id='altui-infoviewer-log-{0}' type='button' class='altui-infoviewer-log-btn btn btn-default btn-sm '>{1}</button>" .format( device.altuiid,_T("Logs") )) ;
+		html+= ("<button id='altui-infoviewer-{0}' type='button' class='altui-infoviewer-btn btn btn-default btn-sm pull-right'>{1}</button>" .format( device.altuiid,_T("Open") )) ;
+		html+= ("<button id='altui-infoviewer-log-{0}' type='button' class='altui-infoviewer-log-btn btn btn-default btn-sm pull-right'>{1}</button>" .format( device.altuiid,_T("Logs") )) ;
 		html += "</div>";
+		if (pattern!="") {
+			html+= "<div class='altui-infoviewer-pattern'>Pattern:</div>";
+			html+= "<div class='altui-infoviewer-pattern'>{0}</div>".format( pattern.htmlEncode() );
+		}
 		html += "<script type='text/javascript'>";
 		html += " $('button.altui-infoviewer-btn').on('click', function() { window.open('{1}?id=lr_al_info','_blank'); } );".format(device.altuiid,urlhead);
 		html += " $('button.altui-infoviewer-log-btn').on('click', function() { window.open('{1}?id=lr_al_info&fnc=getLog&app=localapp','_blank'); } );".format(device.altuiid,urlhead);
