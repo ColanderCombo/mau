@@ -1985,7 +1985,7 @@ function registerHandlers()
 		local x = select(i, ...)
 			arg[i] = tostring(x)
 		end
-		table.insert (printResult, table.concat (arg, "\t"))
+		table.insert (printResult, table.concat (arg, " \t"))
 	end
 	-- pretty (), pretty-print for Lua, 2014.06.26  @akbooer
 	local function pretty (Lua)
