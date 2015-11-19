@@ -2652,7 +2652,7 @@ var SceneEditor = function (scene) {
 				var ids = $(this).prop('id').split('.');
 				var group = scene.groups[ ids[0] ];
 				group.actions.splice( ids[1], 1 );
-				$(this).parents("tr [data-group-idx=0]").parent().parent().replaceWith( _displayGroup(group,ids[0] ) );
+				$(this).parents("tr [data-group-idx={0}]".format(ids[0])).parent().parent().replaceWith( _displayGroup(group,ids[0] ) );
 				// $(this).parents("tr").first().remove();
 				_showSaveNeeded();
 				PageMessage.message( "Action deleted, remember to save your changes", "info");
