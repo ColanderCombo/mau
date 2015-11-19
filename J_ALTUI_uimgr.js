@@ -4690,19 +4690,36 @@ var UIManager  = ( function( window, undefined ) {
 			var tmp = sel.append(opt);
 		});
 		var html ="";
+		var re = /(\d*)-(.*)/; 
+		var str = varnum.toString();
+		var m;
+		 
+		if ((m = re.exec(str)) !== null) {
+			if (m.index === re.lastIndex) {
+				re.lastIndex++;
+			}
+			// View your result using the m-variable.
+			// eg m[0] etc.
+		}
+		else {
+			m = ["",varnum];
+		}
 		html += "<tr>";
 		html += "<td>";
-		html += "<div class='col-xs-4'><input required type='number' min='1' class='form-control input-sm' value='{0}'></input></div>".format(varnum);
+		html += "<div class=''><small>{0}</small></span></div>".format( m[2] || "" )
+		html += "</td>";
+		html += "<td>";
+		html += "<div class='col-xs-4'><input required type='number' min='1' class='form-control input-sm' value='{0}'></input></div>".format( m[1] || "" );
 		html += smallbuttonTemplate.format( 'altui-deletevar-'+varnum, 'altui-delete-variable', deleteGlyph ,'Delete');
 		html += "</td>";
 		html += "<td>";
 		html += sel.wrap("div").parent().html();
 		html += "</td>";
 		html += "<td>";
-		html += "<div class='col-xs-4'><input type='number' class='form-control input-sm' value='{0}'></input></div>".format(value);
+		html += "<div class='col-xs-4'><input type='number' class='form-control input-sm' value='{0}'></input></div>".format(value || "");
 		html += "</td>";
 		html += "<td>";
-		html += "<div class='col-xs-4'>{0}</div>".format(current);
+		html += "<div class='col-xs-4'>{0}</div>".format(current || "");
 		html += "</td>";
 		html += "</tr>";		
 		return html;
@@ -4739,13 +4756,12 @@ var UIManager  = ( function( window, undefined ) {
 			/*
 http://192.168.1.16/port_3480/data_request?id=lu_variableset&DeviceNum=208&serviceId=urn%3Amicasaverde-com%3AserviceId%3AZWaveDevice1&Variable=VariablesSet&Value=3%2C1d%2C0&rand=0.9005297843832523
 http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&source=devset3
-			
 			*/
-			var curvariables = MultiBox.getStatus(device, "urn:micasaverde-com:serviceId:ZWaveDevice1", "ConfiguredVariable");
+			var html ="";
+			var curvariables = MultiBox.getStatus(device, "urn:micasaverde-com:serviceId:ZWaveDevice1", "ConfiguredVariable") || "";
 			var variables = MultiBox.getStatus(device, "urn:micasaverde-com:serviceId:ZWaveDevice1", "VariablesSet");
 			if (isNullOrEmpty(variables))
 				variables = curvariables;
-			var html ="";
 			html +="<div class='row'>";
 			html += "<div id='altui-device-config-"+device.altuiid+"' class='col-xs-12 altui-device-config'>"
 			html += _drawDeviceLastUpdateStats( device );
@@ -4755,6 +4771,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				html +=("<caption>{0} <button id='"+device.altuiid+"' type='submit' class='btn btn-sm btn-primary altui-device-config-save'>{1}</button></caption>").format(_T("Device zWave Parameters"),_T('Save Changes'));
 				html += "<thead>";
 				html += "<tr>";
+				html += "<th>";
+				html += "</th>";
 				html += "<th>";
 				html += "Var</th>";
 				html += "<th>";
@@ -4911,15 +4929,17 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			html += "<div id='altui-device-attributes-"+devid+"' class='col-xs-12 altui-device-attributes'>"
 			html += "<form class='form'>";
 			$.each( device, function(key,val) {
-				var typ = Object.prototype.toString.call(val);
-				if ((typ!="[object Object]") && (typ!="[object Array]")){
-					html += "<div class='col-sm-6 col-md-4 col-lg-3'>";
-					html += "<div class='form-group'>";
-					html += "<label for='"+key+"'>"+key+"</label>";
-					html += _enhanceEditorValue(key,val,devid)
-					// html += "<input id='"+key+"' data-altuiid='"+devid+"' class='form-control' value='"+val+"'></input>";
-					html += "</div>"
-					html += "</div>"
+				if (val!=undefined) {
+					var typ = Object.prototype.toString.call(val);
+					if ((typ!="[object Object]") && (typ!="[object Array]")){
+						html += "<div class='col-sm-6 col-md-4 col-lg-3'>";
+						html += "<div class='form-group'>";
+						html += "<label for='"+key+"'>"+key+"</label>";
+						html += _enhanceEditorValue(key,val,devid)
+						// html += "<input id='"+key+"' data-altuiid='"+devid+"' class='form-control' value='"+val+"'></input>";
+						html += "</div>"
+						html += "</div>"
+					}
 				}
 			});
 			html += "</form>";
