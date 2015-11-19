@@ -418,6 +418,10 @@ var MultiBox = ( function( window, undefined ) {
 		var elems = device.altuiid.split("-");
 		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.updateNeighbors(elems[1]);
 	};
+	function _setColor(device,hex) {
+		var elems = device.altuiid.split("-");
+		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.setColor(elems[1],hex);
+	}
 	function _getCategories( cbfunc, filterfunc, endfunc ) {
 		var dfd = $.Deferred();
 		var arr=[];
@@ -719,6 +723,7 @@ var MultiBox = ( function( window, undefined ) {
 	setDoorLock				: function ( altuiid, armed) {
 								this.runActionByAltuiID( altuiid, 'urn:micasaverde-com:serviceId:DoorLock1', 'SetTarget', {'newTargetValue':armed} );
 							},
+	setColor		: _setColor,
 		
 	// Categories
 	getCategoryTitle : _getCategoryTitle,		// ( catnum )

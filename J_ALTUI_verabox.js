@@ -144,6 +144,34 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		return jqxhr;
 	};
 	
+	function _setColor(deviceid, hex) {
+		var rgb = hexToRgb(hex) 
+		_upnpHelper.UPnPAction(deviceid,'urn:micasaverde-com:serviceId:Color1','SetColorRGB', {
+			newColorRGBTarget: "{0},{1},{2}".format(rgb.r,rgb.g,rgb.b)
+		})
+		// http://192.168.1.16/port_3480/data_request?id=lu_action&output_format=json&DeviceNum=231&serviceId=urn:micasaverde-com:serviceId:Color1&action=SetColorRGB&newColorRGBTarget=15,1,249&rand=0.740677387919277
+				
+		// var data = '51 5 10 0 0 1 0 2 {0} 3 {1} 4 {2}'.format(rgb.r,rgb.g,rgb.b);
+		// _upnpHelper.UPnPAction( 1, 'urn:micasaverde-com:serviceId:ZWaveNetwork1', 'SendData', {
+			// Node:device.altid,
+			// Data:data
+		// });
+		
+		// 51 = Color Control Command Class (0x33)
+		// 5 = Color Set Command
+		// 10 = Size of following data
+		// 0 = Warm White colour channel
+		// 0 = OFF @ 0
+		// 1 = Cool White colour channel
+		// 0 = OFF @ 0
+		// 2 = Red colour channel
+		// 50 = ON @ 50
+		// 3 = Green colour channel
+		// 75 = ON @ 75
+		// 4 = Blue colour channel
+		// 125 = ON @ 125
+	};
+	
 	function _getWeatherSettings()
 	{
 		var target = {tempFormat: "", weatherCountry: "", weatherCity: ""};
@@ -1356,6 +1384,9 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 
 	// energy
 	getPower		: _getPower,
+	
+	// color
+	setColor		: _setColor,
 	
 	// stats
 	resetPollCounters : _resetPollCounters,

@@ -5387,7 +5387,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		
 		// $(".altui-device") which do not have a btngroup in open state
 		// to avoid a refresh to erase an opened popup menu
-		$(".altui-device:not(:has(div.btn-group.open))").each( function( index, element) {
+		$(".altui-device:not(:has(div.btn-group.open))").not(".altui-norefresh").each( function( index, element) {
 			var devid = $(element).data("altuiid");
 			var device = MultiBox.getDeviceByAltuiID( devid );
 			if ( (device!=null) && (bFull==true || device.dirty==true) ) {

@@ -1324,6 +1324,10 @@ local function getDefaultConfig()
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawDimmable",
 	}
+	tbl["urn:schemas-upnp-org:device:DimmableRGBLight:1"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawDimmableRGB",
+	}
 	tbl["urn:schemas-micasaverde-com:device:MotionSensor:1"]= {
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawMotion",

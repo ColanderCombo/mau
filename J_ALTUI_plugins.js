@@ -38,6 +38,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-heater-container select.input-sm { height:22px; padding:0;}"; 
 		style += ".altui-cyan { color:cyan;}";
 		style += ".altui-dimmable-slider { margin-left: 60px; }";	
+		style += ".altui-colorpicker { margin-top: 15px; width:30px; }";	
 		style += ".altui-infoviewer-log-btn,.altui-infoviewer-btn,.altui-window-btn,.altui-datamine-open { margin-top: 10px; }";	
 		style += ".altui-infoviewer-pattern { font-size: 14px; }";	
 		style += "div.altui-windowcover button.btn-sm { width: 4em; }";
@@ -421,11 +422,11 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	};
 
 	// return the html string inside the .panel-body of the .altui-device#id panel
-	function _drawDimmable( device) {
+	function _drawDimmable( device, colorpicker ) {
 
 		var html = "";
 		var onebody = $(".altui-device-body");
-		var sliderwidth = (onebody.length>=1) ? onebody.first().width()-65-70  : 95;
+		var sliderwidth = (onebody.length>=1) ? onebody.first().width()-65-70-(colorpicker?45:0)  : 95;
 		var bodywidth=$(".altui-device-body").first().width();
 		
 		// load level
@@ -444,6 +445,22 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			status = -1;
 		}
 		html += _createOnOffButton( status,"altui-onoffbtn-"+device.altuiid , _T("OFF,ON") , "pull-right");
+
+		if (colorpicker)// color picker 
+		{
+			// try Target then Current
+			var current = MultiBox.getStatus(device,'urn:micasaverde-com:serviceId:Color1','TargetColor') || MultiBox.getStatus(device,'urn:micasaverde-com:serviceId:Color1','CurrentColor');
+			if (current!=null) {
+				var parts = current.split(",");	// 0=0,1=0,2=0,3=0,4=255
+				current = rgbToHex(
+					parseInt(parts[2].substring(2)), 
+					parseInt(parts[3].substring(2)), 
+					parseInt(parts[4].substring(2))
+					);		
+			} else
+				current="#ffffff";
+			html+=("<input id='altui-colorpicker-{0}' class='altui-colorpicker pull-right' type='color' value='{1}'></input>".format(device.altuiid,current));
+		}
 		
 		// dimming
 		html+=("<div id='slider-{0}' class='altui-dimmable-slider' style='width: "+sliderwidth+"px;' ></div>").format(device.altuiid);
@@ -452,6 +469,18 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		html += "<script type='text/javascript'>";
 		html += "$('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleOnOffButton('{0}','div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
 		html += "$('div#slider-{0}.altui-dimmable-slider').slider({ max:100,min:0,value:{1},change:ALTUI_PluginDisplays.onSliderChange });".format(device.altuiid,level);
+		if (colorpicker) { // color picker 
+			html += "$('input#altui-colorpicker-{0}.altui-colorpicker').on('change',function() { \
+					var device = MultiBox.getDeviceByAltuiID('{0}'); 					\
+					var val = $(this).val(); 											\
+					MultiBox.setColor(device,val);		\
+					var rgb = hexToRgb(val);											\
+					var currentColor = '0=0,1=0,2={0},3={1},4={2}'.format(rgb.r,rgb.g,rgb.b);	\
+					MultiBox.setStatus(device,'urn:micasaverde-com:serviceId:Color1','CurrentColor',currentColor); 	\
+					$(this).closest('.altui-device').toggleClass('altui-norefresh'); 	\
+				}).on('click' ,function() { 		\
+					$(this).closest('.altui-device').toggleClass('altui-norefresh'); } );".format(device.altuiid);
+		}
 		html += "</script>";
 		
 		$(".altui-mainpanel").off("slide","#slider-"+device.altuiid);
@@ -461,7 +490,11 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		
 		return html;
 	};
-
+	function _drawDimmableRGB(device) {
+		var html = "";
+		html += _drawDimmable(device,true);
+		return html;
+	};
 	// return the html string inside the .panel-body of the .altui-device#id panel
 	function _drawDoorLock( device) { 
 		var status = MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:DoorLock1', 'Status' );
@@ -897,6 +930,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawDoorLock   : _drawDoorLock,
 	drawPLEG 	   : _drawPLEG,
 	drawDimmable   : _drawDimmable,
+	drawDimmableRGB   : _drawDimmableRGB,
 	drawMotion 	   : _drawMotion,
 	drawGCal       : _drawGCal,
 	drawCombinationSwitch	: _drawCombinationSwitch,
