@@ -776,11 +776,28 @@ var DialogManager = ( function() {
 		$.each(_timerDOW, function(idx,element) {
 			// propertyline += "<div class='checkbox'>";
 			propertyline +="<label class='checkbox-inline'>";
-			propertyline +=( "<input type='checkbox' id='altui-widget-"+name+element.value+"' " + ( ($.inArray(element.value.toString(),selected_days)!=-1) ? 'checked' : '') +" value='"+element.value+"' />"+element.text);
+			propertyline +=( "<input type='checkbox' class='altui-widget-TimerDayOfWeek' id='altui-widget-"+name+element.value+"' " + ( ($.inArray(element.value.toString(),selected_days)!=-1) ? 'checked' : '') +" value='"+element.value+"' />"+element.text);
 			propertyline +="</label>";
 		});
+		propertyline += " ";
+		propertyline += xsbuttonTemplate.format('altui-TimerDayOfWeek-setAll','',okGlyph,_T("All"));
+		propertyline += xsbuttonTemplate.format('altui-TimerDayOfWeek-clearAll','',removeGlyph,_T("None"));
 		propertyline += "</div>";
 		$(dialog).find(".row-fluid").append(propertyline);
+		$("#altui-TimerDayOfWeek-setAll").click(function(){
+			$(".altui-widget-TimerDayOfWeek").each( function(i,e) {
+				var id = parseInt($(e).prop('id').substring( ("altui-widget-"+name).length ));
+				if (id<8)
+					$(e).prop('checked', true);
+			});
+		});
+		$("#altui-TimerDayOfWeek-clearAll").click(function(){
+			$(".altui-widget-TimerDayOfWeek").each( function(i,e) {
+				var id = parseInt($(e).prop('id').substring( ("altui-widget-"+name).length ));
+				if (id<8)
+					$(e).prop('checked', false);
+			});
+		});
 	};
 	
 	function _dlgAddColorPicker(dialog, name, label, help, value, options)
