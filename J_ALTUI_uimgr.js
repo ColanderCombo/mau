@@ -4314,6 +4314,37 @@ var UIManager  = ( function( window, undefined ) {
 				case "spacer": 
 					// no action to do for control panel, only for UI7 dashboard
 					break;
+				case 'color_picker': {
+					var current = MultiBox.getStatus(device,'urn:micasaverde-com:serviceId:Color1','TargetColor') || MultiBox.getStatus(device,'urn:micasaverde-com:serviceId:Color1','CurrentColor');
+					if (current!=null) {
+						var parts = current.split(",");	// 0=0,1=0,2=0,3=0,4=255
+						current = rgbToHex(
+							parseInt(parts[2].substring(2)), 
+							parseInt(parts[3].substring(2)), 
+							parseInt(parts[4].substring(2))
+							);		
+					} else
+						current="#ffffff";
+					var top = paddingtop + (control.Display.Top || 0);
+					var left = paddingleft  + (control.Display.Left || 0);
+					$("<input title='{4}' id='altui-colorpicker-{0}' style='top:{2}px; left:{3}px;' class='altui-colorpicker pull-right' type='color' value='{1}'></input>".format(
+						device.altuiid,current,top,left,control.Label.text))
+						.appendTo( $(domparent) )
+						.css({
+							top: top, 
+							left: left, 
+							position:'absolute'})
+						// .width(control.Display.Width)
+						// .height(control.Display.Height);
+					$("input#altui-colorpicker-{0}".format(device.altuiid)).on('change',function() {
+						var val = $(this).val();
+						MultiBox.setColor(device,val);
+						var rgb = hexToRgb(val);
+						var currentColor = '0=0,1=0,2={0},3={1},4={2}'.format(rgb.r,rgb.g,rgb.b);	
+						MultiBox.setStatus(device,'urn:micasaverde-com:serviceId:Color1','CurrentColor',currentColor); 
+					});
+					break;
+				};
 				case "label": {
 					$( "<p>"+control.Label.text+"</p>" )
 						.appendTo( $(domparent) )
