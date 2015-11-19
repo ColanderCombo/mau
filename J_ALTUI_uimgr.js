@@ -6358,6 +6358,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			{ id:24, title:_T('OsCommand'), onclick:'UIManager.pageOsCommand()', parent:0 },
 			{ id:25, title:_T('Triggers'), onclick:'UIManager.pageTriggers()', 	parent:6 },
 			{ id:26, title:_T('Themes'), onclick:'UIManager.pageThemes()', parent:0 },
+			{ id:27, title:_T('TblScenes'), onclick:'UIManager.pageTblScenes()', parent:0 },
 		];
 
 		function _parentsOf(child) {
@@ -9634,6 +9635,81 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			$("."+action.id).click( action.onclick );
 		});
 	},
+	pageTblScenes: function() {
+		UIManager.clearPage(_T('TblScenes'),_T("Table Scenes"),UIManager.oneColumnLayout);
+		MultiBox.getScenes(null, null, function (scenes) {
+			var viscols = MyLocalStorage.getSettings("ScenesVisibleCols") || [];
+			if (viscols.length==0)
+				viscols = [ 'id','name','last_run'];
+			var cols = [ 
+				{ name:'id', visible: $.inArray('id',viscols)!=-1, type:'numeric', identifier:true, width:50 },
+				{ name:'altuiid', visible: $.inArray('altuiid',viscols)!=-1, type:'string', identifier:true, width:80 },
+				{ name:'name', visible: $.inArray('name',viscols)!=-1, type:'string', identifier:true, width:150 }
+			];		
+			var obj = scenes[0];
+			$.each( Object.keys(obj), function (idx,key) {
+				if ( !$.isArray(obj[key]) && !$.isPlainObject(obj[key]) && (key!='dirty') ) {
+					if ($.inArray(key, $.map(cols,function(o) { return o.name } ))==-1)
+						cols.push( { name:key, visible: ($.inArray(key,viscols)!=-1) } );
+				}
+			});			
+			var html = "";
+			html+="<div class='col-xs-12'>";
+			html+="<table id='altui-grid' class='table table-condensed table-hover table-striped'>";
+			html+="    <thead>";
+			html+="    <tr>";
+			$.each(cols, function(idx,col) {
+				html += "<th data-column-id='{0}' data-type='{1}' {2} {3} {4}>{0}</th>".format(
+					col.name, 
+					col.type,
+					col.identifier ? "data-identifier='true'" : "",
+					col.width ? "data-width='{0}'".format(col.width) : "",
+					"data-visible='{0}'".format(col.visible)
+					);
+			});
+			html+="    </tr>";
+			html+="    </thead>";
+			html+="    <tbody>";
+			$.each(scenes, function(idx, scene) {
+				html+="    <tr>";
+				$.each(cols, function(i,col) {
+					html += "<td>{0}</td>".format( _enhanceValue(scene[col.name] || '') );
+				});
+				html+="    </tr>";
+			});
+			html+="    </tbody>";
+			html+="</table>";
+			html+="</div>";
+			$(".altui-mainpanel").append( html );
+			$("#altui-grid").bootgrid({
+				caseSensitive: false,
+				statusMapping: {}
+			}).on("loaded.rs.jquery.bootgrid", function (e)
+			{
+				var settings = $("#altui-grid").bootgrid("getColumnSettings");
+				viscols = $.map($.grep(settings, function (obj) { return obj.visible == true }),function(obj){ return obj.id;});
+				MyLocalStorage.setSettings("ScenesVisibleCols",viscols);
+				/* your code goes here */
+			});	
+			
+			// Add CSV export button
+			var glyph = glyphTemplate.format('save',_T("Copy to clipboard"), '');
+			var csvButtonHtml = buttonTemplate.format( 'altui-grid-btn', 'altui-tbl2csv', glyph,'default');
+			$(".actions.btn-group").append(csvButtonHtml);
+			$("#altui-grid-btn").click( function() {
+				$('#altui-grid').table2CSV({
+					delivery : function(data) {
+						UIManager.pageEditorForm("CSV text",data,null,_T("Copy to clipboard"),function(text,that) {
+							$(that).prev(".form-group").find("#altui-editor-text").select();
+							document.execCommand('copy');
+							$(that).parents("form").remove();
+							PageMessage.message( _T("Data copied in clipboard"), "info");
+						});
+					}
+				});
+			});
+		});			
+	},
 	pageTblDevices : function() {
 		UIManager.clearPage(_T('TblDevices'),_T("Table Devices"),UIManager.oneColumnLayout);
 
@@ -9976,6 +10052,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				.on( "click", "#altui-quality", UIManager.pageQuality )		
 				.on( "click", "#altui-energy", UIManager.pagePower )	
 				.on( "click", "#altui-tbl-device", UIManager.pageTblDevices )
+				.on( "click", "#altui-tbl-scene", UIManager.pageTblScenes )
 				.on( "click", "#altui-optimize", UIManager.pageOptions )
 				.on( "click", "#altui-theme-selector", UIManager.pageThemes )
 				.on( "click", "#altui-localize", UIManager.pageLocalization  )
@@ -10174,6 +10251,7 @@ $(document).ready(function() {
 		body+="				<li class='dropdown-header'>Tables</li>";
 		body+="				<li><a id='altui-tbl-device' href='#' >"+_T("Devices")+"</a></li>";
 		body+="				<li><a id='altui-scene-triggers' href='#' >"+_T("Triggers")+"</a></li>";
+		body+="				<li><a id='altui-tbl-scene' href='#' >"+_T("Scenes")+"</a></li>";
 		body+="			<li class='divider'></li>";
 		body+="				<li class='dropdown-header'>Graphic</li>";
 		body+="				<li><a id='altui-energy' href='#' >"+_T("Power Chart")+"</a></li>";
