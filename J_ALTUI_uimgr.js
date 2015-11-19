@@ -1756,8 +1756,7 @@ var SceneEditor = function (scene) {
 			id: _getNewTimerID(),
 			enabled: 1,
 			name: 'new timer',
-			type: 1,
-			interval: '1h'
+			type: 1
 		};
 		var dialog = DialogManager.createPropertyDialog(_T('Timer'));
 		DialogManager.dlgAddLine( dialog , "TimerName", _T("TimerName"), timer.name, "", {required:''} ); 
@@ -4338,8 +4337,11 @@ var UIManager  = ( function( window, undefined ) {
 						// .height(control.Display.Height);
 					$("input#altui-colorpicker-{0}".format(device.altuiid)).on('change',function() {
 						var val = $(this).val();
-						MultiBox.setColor(device,val);
+						var params={};
 						var rgb = hexToRgb(val);
+						params[control.Command.ActionArgumentName]="{0},{1},{2}".format(rgb.r,rgb.g,rgb.b)
+						MultiBox.runAction( device, control.Command.Service, control.Command.Action, params, null );
+						// MultiBox.setColor(device,val);
 						var currentColor = '0=0,1=0,2={0},3={1},4={2}'.format(rgb.r,rgb.g,rgb.b);	
 						MultiBox.setStatus(device,'urn:micasaverde-com:serviceId:Color1','CurrentColor',currentColor); 
 					});
