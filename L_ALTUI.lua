@@ -555,6 +555,7 @@ local htmlLocalScripts = [[
     <script src="@localcdn@/jquery-ui.min.js"></script> 
     <script src="@localcdn@/jquery.bootgrid.min.js"></script> 	
     <script src="@localcdn@/jsapi.js"></script> 	
+	<script src="@localcdn@/spectrum.min.js"></script>
 	<script src="J_ALTUI_utils.js" ></script>
 	<script src="J_ALTUI_verabox.js" ></script> 
 	<script src="J_ALTUI_multibox.js" ></script> 
@@ -567,6 +568,7 @@ local htmlScripts = [[
 	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" ></script>
     <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js" ></script> 
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-bootgrid/1.2.0/jquery.bootgrid.min.js" defer></script> 	
+	<script src="//cdnjs.cloudflare.com/ajax/libs/spectrum/1.7.1/spectrum.min.js"></script>
 	<script type="text/javascript"  
 	  src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["gauge","table"]}]}' >
 	</script>
@@ -591,12 +593,14 @@ local htmlLocalCSSlinks = [[
 	<link rel="stylesheet" href="@localcdn@/jquery-ui.css">
 	<link rel="stylesheet" href="@localcdn@/bootstrap.min.css">
 	<link rel="stylesheet" href="@localcdn@/jquery.bootgrid.min.css">
+    <link rel="stylesheet" type="text/css" href="@localcdn@/spectrum.min.css">
 ]]
 
 local htmlCSSlinks = [[
-	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
-	<link rel="stylesheet" href="@localbootstrap@">
-	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jquery-bootgrid/1.2.0/jquery.bootgrid.min.css">
+	<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+	<link rel="stylesheet" type="text/css" href="@localbootstrap@">
+	<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jquery-bootgrid/1.2.0/jquery.bootgrid.min.css">
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/spectrum/1.7.1/spectrum.min.css">
 ]]
 
 local htmlLayout = [[

@@ -38,7 +38,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-heater-container select.input-sm { height:22px; padding:0;}"; 
 		style += ".altui-cyan { color:cyan;}";
 		style += ".altui-dimmable-slider { margin-left: 60px; }";	
-		style += ".altui-colorpicker { margin-top: 15px; width:30px; }";	
+		style += ".altui-colorpicker { margin-top: 3px; width:28px; }";	
 		style += ".altui-infoviewer-log-btn,.altui-infoviewer-btn,.altui-window-btn,.altui-datamine-open { margin-top: 10px; }";	
 		style += ".altui-infoviewer-pattern { font-size: 14px; }";	
 		style += "div.altui-windowcover button.btn-sm { width: 4em; }";
@@ -422,6 +422,13 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	};
 
 	// return the html string inside the .panel-body of the .altui-device#id panel
+	function _onColorPicker(e,altuiid,color) {
+		var device = MultiBox.getDeviceByAltuiID(altuiid);
+		MultiBox.setColor(device,color.toHexString());		
+		var currentColor = '0=0,1=0,2={0},3={1},4={2}'.format(parseInt(color._r),parseInt(color._g),parseInt(color._b));	
+		MultiBox.setStatus(device,'urn:micasaverde-com:serviceId:Color1','CurrentColor',currentColor); 		
+	};
+	
 	function _drawDimmable( device, colorpicker ) {
 
 		var html = "";
@@ -445,11 +452,11 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			status = -1;
 		}
 		html += _createOnOffButton( status,"altui-onoffbtn-"+device.altuiid , _T("OFF,ON") , "pull-right");
-
+		var current = "#ffffff";
 		if (colorpicker)// color picker 
 		{
 			// try Target then Current
-			var current = MultiBox.getStatus(device,'urn:micasaverde-com:serviceId:Color1','TargetColor') || MultiBox.getStatus(device,'urn:micasaverde-com:serviceId:Color1','CurrentColor');
+			current = MultiBox.getStatus(device,'urn:micasaverde-com:serviceId:Color1','TargetColor') || MultiBox.getStatus(device,'urn:micasaverde-com:serviceId:Color1','CurrentColor');
 			if (current!=null) {
 				var parts = current.split(",");	// 0=0,1=0,2=0,3=0,4=255
 				current = rgbToHex(
@@ -459,7 +466,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 					);		
 			} else
 				current="#ffffff";
-			html+=("<input id='altui-colorpicker-{0}' class='altui-colorpicker pull-right' type='color' value='{1}'></input>".format(device.altuiid,current));
+			// html+=("<input id='altui-colorpicker-{0}' class='altui-colorpicker pull-right' type='color' value='{1}'></input>".format(device.altuiid,current));
+			html+=("<div class='altui-colorpicker pull-right'><input id='altui-colorpicker-{0}' value='{1}'></input></div>".format(device.altuiid,current));
 		}
 		
 		// dimming
@@ -467,19 +475,20 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		
 		// on off 
 		html += "<script type='text/javascript'>";
+		html +="$('#altui-colorpicker-{0}').spectrum({		\
+			color: '{1}',							\
+			preferredFormat: 'hex',				 \
+			show: function(color) {	\
+				$(this).closest('.altui-device').toggleClass('altui-norefresh'); 	\
+			},	\
+			hide: function(color) {	\
+				$(this).closest('.altui-device').toggleClass('altui-norefresh'); 	\
+			}	\
+		});".format(device.altuiid,current);
 		html += "$('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleOnOffButton('{0}','div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
 		html += "$('div#slider-{0}.altui-dimmable-slider').slider({ max:100,min:0,value:{1},change:ALTUI_PluginDisplays.onSliderChange });".format(device.altuiid,level);
 		if (colorpicker) { // color picker 
-			html += "$('input#altui-colorpicker-{0}.altui-colorpicker').on('change',function() { \
-					var device = MultiBox.getDeviceByAltuiID('{0}'); 					\
-					var val = $(this).val(); 											\
-					MultiBox.setColor(device,val);		\
-					var rgb = hexToRgb(val);											\
-					var currentColor = '0=0,1=0,2={0},3={1},4={2}'.format(rgb.r,rgb.g,rgb.b);	\
-					MultiBox.setStatus(device,'urn:micasaverde-com:serviceId:Color1','CurrentColor',currentColor); 	\
-					$(this).closest('.altui-device').toggleClass('altui-norefresh'); 	\
-				}).on('click' ,function() { 		\
-					$(this).closest('.altui-device').toggleClass('altui-norefresh'); } );".format(device.altuiid);
+			html += "$('input#altui-colorpicker-{0}').on('change', function(e,color) {  ALTUI_PluginDisplays.onColorPicker(e,'{0}',color); })".format(device.altuiid);
 		}
 		html += "</script>";
 		
@@ -930,6 +939,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawDoorLock   : _drawDoorLock,
 	drawPLEG 	   : _drawPLEG,
 	drawDimmable   : _drawDimmable,
+	onColorPicker  : _onColorPicker,
 	drawDimmableRGB   : _drawDimmableRGB,
 	drawMotion 	   : _drawMotion,
 	drawGCal       : _drawGCal,

@@ -4343,23 +4343,25 @@ var UIManager  = ( function( window, undefined ) {
 						current="#ffffff";
 					var top = paddingtop + (control.Display.Top || 0);
 					var left = paddingleft  + (control.Display.Left || 0);
-					$("<input title='{4}' id='altui-colorpicker-{0}' style='top:{2}px; left:{3}px;' class='altui-colorpicker pull-right' type='color' value='{1}'></input>".format(
-						device.altuiid,current,top,left,control.Label.text))
-						.appendTo( $(domparent) )
-						.css({
+					var domobj = $("<div class='' style='top:{2}px; left:{3}px;' ><input title='{4}' id='altui-colorpicker-{0}'  value='{1}'></input></div>"
+						.format(device.altuiid,current,top,left,control.Label.text))
+						.appendTo( $(domparent) );
+						
+					$(domobj).find("input").spectrum({
+						preferredFormat: 'hex',							
+					});
+					$(domobj).css({
 							top: top, 
 							left: left, 
 							position:'absolute'})
 						// .width(control.Display.Width)
 						// .height(control.Display.Height);
-					$("input#altui-colorpicker-{0}".format(device.altuiid)).on('change',function() {
-						var val = $(this).val();
+					$(domobj).on('change',"input", function(e,color) {
 						var params={};
-						var rgb = hexToRgb(val);
-						params[control.Command.ActionArgumentName]="{0},{1},{2}".format(rgb.r,rgb.g,rgb.b)
+						params[control.Command.ActionArgumentName]="{0},{1},{2}".format(parseInt(color._r),parseInt(color._g),parseInt(color._b))
 						MultiBox.runAction( device, control.Command.Service, control.Command.Action, params, null );
 						// MultiBox.setColor(device,val);
-						var currentColor = '0=0,1=0,2={0},3={1},4={2}'.format(rgb.r,rgb.g,rgb.b);	
+						var currentColor = '0=0,1=0,2={0},3={1},4={2}'.format(parseInt(color._r),parseInt(color._g),parseInt(color._b));	
 						MultiBox.setStatus(device,'urn:micasaverde-com:serviceId:Color1','CurrentColor',currentColor); 
 					});
 					break;
@@ -7845,6 +7847,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			["Blockly","https://developers.google.com/blockly/","Blockly Library"],
 			["Bootswatch","https://bootswatch.com/","Bootstrap Themes"],
 			["ThingSpeak","https://thingspeak.com/","ThingSpeak Data platform for IoT"],
+			["jQuery Colorpicker","http://bgrins.github.io/spectrum/","Spectrum Color Picker"],		
 			["amg0","http://forum.micasaverde.com/","reachable as amg0 on this forum "]
 		];
 		
