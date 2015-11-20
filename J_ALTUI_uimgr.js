@@ -9643,9 +9643,9 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			if (viscols.length==0)
 				viscols = [ 'id','name','last_run'];
 			var cols = [ 
-				{ name:'id', visible: $.inArray('id',viscols)!=-1, type:'numeric', identifier:true, width:50 },
+				{ name:'id', visible: $.inArray('id',viscols)!=-1, type:'numeric', identifier:false, width:50 },
 				{ name:'altuiid', visible: $.inArray('altuiid',viscols)!=-1, type:'string', identifier:true, width:80 },
-				{ name:'name', visible: $.inArray('name',viscols)!=-1, type:'string', identifier:true, width:150 }
+				{ name:'name', visible: $.inArray('name',viscols)!=-1, type:'string', identifier:false, width:150 }
 			];		
 			var obj = scenes[0];
 			$.each( Object.keys(obj), function (idx,key) {
@@ -9668,6 +9668,22 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					"data-visible='{0}'".format(col.visible)
 					);
 			});
+			// add other  count
+			html += "<th data-column-id='{0}' data-type='{1}' {2} {3} {4}>{0}</th>".format(
+				"triggers", 
+				"numeric",
+				"",
+				50,
+				"data-visible='{0}'".format($.inArray('triggers',viscols)!=-1)
+				);
+			html += "<th data-column-id='{0}' data-type='{1}' {2} {3} {4}>{0}</th>".format(
+				"timers", 
+				"numeric",
+				"",
+				50,
+				"data-visible='{0}'".format($.inArray('timers',viscols)!=-1)
+				);
+			html += "<th data-column-id='commands' data-formatter='commands' data-sortable='false'>Commands</th>";
 			html+="    </tr>";
 			html+="    </thead>";
 			html+="    <tbody>";
@@ -9676,21 +9692,45 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				$.each(cols, function(i,col) {
 					html += "<td>{0}</td>".format( _enhanceValue(scene[col.name] || '') );
 				});
+				html += "<td>{0}</td>".format( scene.triggers.length );
+				html += "<td>{0}</td>".format( scene.timers.length );
+				html += "<td></td>";	// commands
 				html+="    </tr>";
 			});
 			html+="    </tbody>";
 			html+="</table>";
 			html+="</div>";
 			$(".altui-mainpanel").append( html );
-			$("#altui-grid").bootgrid({
+			var grid = $("#altui-grid").bootgrid({
 				caseSensitive: false,
-				statusMapping: {}
+				statusMapping: {},
+				formatters: {
+					"commands": function(column, row)
+					{
+						return "<button type=\"button\" class=\"btn btn-xs btn-default altui-command-edit\" data-row-id=\"" + row.altuiid + "\">"+editGlyph+"</button>" + 
+							"<button type=\"button\" class=\"btn btn-xs btn-default altui-command-delete\" data-row-id=\"" + row.altuiid + "\">"+deleteGlyph+"</button>";
+					}
+				}
 			}).on("loaded.rs.jquery.bootgrid", function (e)
 			{
 				var settings = $("#altui-grid").bootgrid("getColumnSettings");
 				viscols = $.map($.grep(settings, function (obj) { return obj.visible == true }),function(obj){ return obj.id;});
 				MyLocalStorage.setSettings("ScenesVisibleCols",viscols);
 				/* your code goes here */
+				grid.find(".altui-command-edit").on('click',function(){
+					var id = $(this).data("row-id");
+					UIManager.pageSceneEdit(id);
+				});
+				grid.find(".altui-command-delete").on('click',function(){
+					var altuiid = $(this).data("row-id");
+					var scene = MultiBox.getSceneByAltuiID(altuiid);
+					DialogManager.confirmDialog(_T("Are you sure you want to delete scene ({0})").format(altuiid),function(result) {
+						if (result==true) {
+							MultiBox.deleteScene( scene );
+							grid.bootgrid("remove", [scene.altuiid]);
+						}
+					});
+				});
 			});	
 			
 			// Add CSV export button
