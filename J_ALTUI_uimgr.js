@@ -7483,7 +7483,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 						trigger: triggerinfo.name,
 						device: triggerinfo.device,
 						condition: "{0} {1}".format(triggerinfo.descr,triggerinfo.condition),
-						id: scene.altuiid+"-"+idx
+						id: scene.altuiid+"-"+idx,
+						lua : trigger.lua || ""
 					})
 				})
 			});
@@ -7491,7 +7492,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		
 		var viscols = MyLocalStorage.getSettings("TriggersVisibleCols") || [];
 		if (viscols.length==0)
-			viscols = [ 'lastrun','scene','trigger','device','condition','id'];
+			viscols = [ 'lastrun','scene','trigger','device','condition','id','lua'];
 
 		$(".altui-mainpanel").append( _array2Table(arr,'id',viscols) );
 		$("#altui-grid").bootgrid({
