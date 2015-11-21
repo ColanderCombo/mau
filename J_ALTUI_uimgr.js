@@ -9695,8 +9695,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				$.each(cols, function(i,col) {
 					html += "<td>{0}</td>".format( _enhanceValue(scene[col.name] || '') );
 				});
-				html += "<td>{0}</td>".format( scene.triggers.length );
-				html += "<td>{0}</td>".format( scene.timers.length );
+				html += "<td>{0}</td>".format( scene.triggers ? scene.triggers.length : 0 );
+				html += "<td>{0}</td>".format( scene.timers ? scene.timers.length : 0 );
 				html += "<td></td>";	// commands
 				html+="    </tr>";
 			});
