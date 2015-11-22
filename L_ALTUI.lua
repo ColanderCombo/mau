@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local ALTUI_SERVICE = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.99"
+local version = "v0.100"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -1329,6 +1329,10 @@ local function getDefaultConfig()
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawDimmable",
 	}
 	tbl["urn:schemas-upnp-org:device:DimmableRGBLight:1"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawDimmableRGB",
+	}
+	tbl["urn:schemas-upnp-org:device:DimmableRGBLight:2"]= {
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawDimmableRGB",
 	}
