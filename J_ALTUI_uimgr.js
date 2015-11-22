@@ -9651,6 +9651,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				{ name:'name', visible: $.inArray('name',viscols)!=-1, type:'string', identifier:false, width:150 }
 			];		
 			var obj = scenes[0];
+			if (obj == undefined)
+				return;
 			$.each( Object.keys(obj), function (idx,key) {
 				if ( !$.isArray(obj[key]) && !$.isPlainObject(obj[key]) && (key!='dirty') ) {
 					if ($.inArray(key, $.map(cols,function(o) { return o.name } ))==-1)
