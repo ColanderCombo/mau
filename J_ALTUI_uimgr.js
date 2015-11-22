@@ -128,6 +128,10 @@ var styles ="					\
 	.altui-widget-frame-div , .solid-border {	\
 		border:1px solid;\
 	}					\
+	.altui-colorpicker-replacer { \
+	}	\
+	.sp-dd { \
+	}	\
 	.fill {	\
 		min-height:100%;\
 		max-height:100%;\
@@ -809,10 +813,14 @@ var DialogManager = ( function() {
 		propertyline += "	<label for='altui-widget-"+name+"' title='"+(help || '')+"'>"+label+"</label>";
 		if (help)
 			propertyline += "	<span title='"+(help || '')+"'>"+helpGlyph+"</span>";
-		propertyline += "<input id='altui-widget-"+name+"' type='color' name='{0}' value='{1}' {2}></input>"
+		propertyline += "<input id='altui-widget-"+name+"' name='{0}' value='{1}' {2}></input>"
 			.format(name,value,optstr);
 		propertyline += "</div>";
 		$(dialog).find(".row-fluid").append(propertyline);
+		$("#altui-widget-{0}".format(name)).spectrum({
+			preferredFormat: 'hex',			
+			replacerClassName: 'altui-colorpicker-replacer',	
+		});
 	};
 
 	function _dlgAddBlockly(dialog, name, label, value, xml, help, options)
@@ -4348,7 +4356,8 @@ var UIManager  = ( function( window, undefined ) {
 						.appendTo( $(domparent) );
 						
 					$(domobj).find("input").spectrum({
-						preferredFormat: 'hex',							
+						preferredFormat: 'hex',			
+						replacerClassName: 'altui-colorpicker-replacer',						
 					});
 					$(domobj).css({
 							top: top, 
@@ -6361,6 +6370,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			{ id:25, title:_T('Triggers'), onclick:'UIManager.pageTriggers()', 	parent:6 },
 			{ id:26, title:_T('Themes'), onclick:'UIManager.pageThemes()', parent:0 },
 			{ id:27, title:_T('TblScenes'), onclick:'UIManager.pageTblScenes()', parent:0 },
+			{ id:28, title:_T('TblControllers'), onclick:'UIManager.pageTblControllers()', parent:0 },
 		];
 
 		function _parentsOf(child) {
@@ -9639,6 +9649,26 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			$("."+action.id).click( action.onclick );
 		});
 	},
+	pageTblControllers:function() {
+		UIManager.clearPage(_T('TblControllers'),_T("Table Controllers"),UIManager.oneColumnLayout);
+		var html="";
+		html+="<div>";
+		html+="  <ul class='nav nav-tabs' role='tablist'>";
+		var controllers = MultiBox.getControllers();
+		$.each(controllers, function( idx, controller) {
+			var name  = (controller.ip == "" ) ? "Main" : controller.ip ;
+			html+="    <li role='presentation' class='active'><a href='#altui_ctrl_{0}' aria-controls='home' role='tab' data-toggle='tab'>{1}</a></li>".format(idx,name);
+		});
+		html+="  </ul>";
+		html+="  <div class='tab-content'>";
+		$.each(controllers, function( idx, controller) {
+			var name  = (controller.ip == "" ) ? "Main" : controller.ip ;
+			html+="    <div role='tabpanel' class='tab-pane active' id='altui_ctrl_{0}'>...{1}...</div>".format(idx,name);
+		});
+		html+="  </div>";
+		html+="</div>";
+		$(".altui-mainpanel").append( html );
+	},
 	pageTblScenes: function() {
 		UIManager.clearPage(_T('TblScenes'),_T("Table Scenes"),UIManager.oneColumnLayout);
 		MultiBox.getScenes(null, null, function (scenes) {
@@ -10099,6 +10129,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				.on( "click", "#altui-energy", UIManager.pagePower )	
 				.on( "click", "#altui-tbl-device", UIManager.pageTblDevices )
 				.on( "click", "#altui-tbl-scene", UIManager.pageTblScenes )
+				.on( "click", "#altui-tbl-controllers", UIManager.pageTblControllers )				
 				.on( "click", "#altui-optimize", UIManager.pageOptions )
 				.on( "click", "#altui-theme-selector", UIManager.pageThemes )
 				.on( "click", "#altui-localize", UIManager.pageLocalization  )
@@ -10298,6 +10329,7 @@ $(document).ready(function() {
 		body+="				<li><a id='altui-tbl-device' href='#' >"+_T("Devices")+"</a></li>";
 		body+="				<li><a id='altui-scene-triggers' href='#' >"+_T("Triggers")+"</a></li>";
 		body+="				<li><a id='altui-tbl-scene' href='#' >"+_T("Scenes")+"</a></li>";
+		body+="				<li><a id='altui-tbl-controllers' href='#' >"+_T("Controllers")+"</a></li>";
 		body+="			<li class='divider'></li>";
 		body+="				<li class='dropdown-header'>Graphic</li>";
 		body+="				<li><a id='altui-energy' href='#' >"+_T("Power Chart")+"</a></li>";

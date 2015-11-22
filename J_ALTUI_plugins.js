@@ -39,7 +39,6 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-cyan { color:cyan;}";
 		style += ".altui-dimmable-slider { margin-left: 60px; }";	
 		style += ".altui-colorpicker { margin-top: 3px; width:30px; }";	
-		style += ".altui-colorpicker-replacer { }";
 		style += ".altui-infoviewer-log-btn,.altui-infoviewer-btn,.altui-window-btn,.altui-datamine-open { margin-top: 10px; }";	
 		style += ".altui-infoviewer-pattern { font-size: 14px; }";	
 		style += "div.altui-windowcover button.btn-sm { width: 4em; }";
