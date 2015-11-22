@@ -38,7 +38,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-heater-container select.input-sm { height:22px; padding:0;}"; 
 		style += ".altui-cyan { color:cyan;}";
 		style += ".altui-dimmable-slider { margin-left: 60px; }";	
-		style += ".altui-colorpicker { margin-top: 3px; width:28px; }";	
+		style += ".altui-colorpicker { margin-top: 3px; width:30px; }";	
+		style += ".altui-colorpicker-replacer { }";
 		style += ".altui-infoviewer-log-btn,.altui-infoviewer-btn,.altui-window-btn,.altui-datamine-open { margin-top: 10px; }";	
 		style += ".altui-infoviewer-pattern { font-size: 14px; }";	
 		style += "div.altui-windowcover button.btn-sm { width: 4em; }";
@@ -478,6 +479,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		html +="$('#altui-colorpicker-{0}').spectrum({		\
 			color: '{1}',							\
 			preferredFormat: 'hex',				 \
+			replacerClassName: 'altui-colorpicker-replacer',		 \
 			show: function(color) {	\
 				$(this).closest('.altui-device').toggleClass('altui-norefresh'); 	\
 			},	\
@@ -488,15 +490,15 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		html += "$('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleOnOffButton('{0}','div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
 		html += "$('div#slider-{0}.altui-dimmable-slider').slider({ max:100,min:0,value:{1},change:ALTUI_PluginDisplays.onSliderChange });".format(device.altuiid,level);
 		if (colorpicker) { // color picker 
-			html += "$('input#altui-colorpicker-{0}').on('change', function(e,color) {  ALTUI_PluginDisplays.onColorPicker(e,'{0}',color); })".format(device.altuiid);
+			// html += "$('input#altui-colorpicker-{0}').on('change', function(e,color) {  ALTUI_PluginDisplays.onColorPicker(e,'{0}',color); }).siblings('.altui-colorpicker-replacer').first().css('background-color','rgba(0,0,0,0)');".format(device.altuiid);
+			html += "$('input#altui-colorpicker-{0}').on('change', function(e,color) {  ALTUI_PluginDisplays.onColorPicker(e,'{0}',color); });".format(device.altuiid);
 		}
 		html += "</script>";
-		
+		//"+getCSS('color','bg-info')+"
 		$(".altui-mainpanel").off("slide","#slider-"+device.altuiid);
 		$(".altui-mainpanel").on("slide","#slider-"+device.altuiid,function( event, ui ){ 
 			$("#slider-val-"+device.altuiid).text( ui.value+'%');
 		});
-		
 		return html;
 	};
 	function _drawDimmableRGB(device) {
