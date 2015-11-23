@@ -91,9 +91,8 @@ var defaultIconSrc="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAA
 var styles ="					\
 	.big-glyph  {				\
 		font-size: 22px;		\
-		margin-left: 17px;		\
-		padding-top: 5px;		\
-		padding-bottom: 5px;	\
+		margin-left: 14px;		\
+		margin-top: 5px;		\
 	}							\
 	.glyphicon-spin {									\
 		-webkit-animation: spin 1000ms infinite linear; \
@@ -102,70 +101,70 @@ var styles ="					\
 	@-webkit-keyframes spin {							\
 		0% {											\
 			-webkit-transform: rotate(0deg);			\
-			transform: rotate(0deg);					\
+			transform: rotate(0deg); 	\
 		}												\
 		100% {											\
 			-webkit-transform: rotate(359deg);			\
-			transform: rotate(359deg);					\
+			transform: rotate(359deg); 				\
 		}												\
 	}													\
 	@keyframes spin {									\
 		0% {											\
 			-webkit-transform: rotate(0deg);			\
-			transform: rotate(0deg);					\
+			transform: rotate(0deg); 					\
 		}												\
 		100% {											\
 			-webkit-transform: rotate(359deg);			\
 			transform: rotate(359deg);					\
 		}												\
 	}													\
-.onoffswitch { \
-    position: relative; width: 55px; 		\
-    -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none; \
-} \
-.onoffswitch-checkbox { \
-    display: none; \
-} \
-.onoffswitch-label { \
-    display: block; overflow: hidden; cursor: pointer; \
-    border: 2px solid #ADAAAA; border-radius: 20px; \
-	margin-top: 3px;	\
-} \
-.onoffswitch-inner { \
-    display: block; width: 200%; margin-left: -100%; \
-	height: 20px; \
-    transition: margin 0.3s ease-in 0s; \
-} \
-.onoffswitch-inner:before, .onoffswitch-inner:after { \
-    display: block; float: left; width: 50%; padding: 0; line-height: 20px; \
-    font-size: 14px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold; \
-    box-sizing: border-box; \
-} \
-.onoffswitch-inner:before { \
-    content: '\\00a0'; \
-    padding-left: 9px; \
-    background-color: #34A7C1; color: #FFFFFF; \
-} \
-.onoffswitch-inner:after { \
-    content: '\\00a0'; \
-    padding-right: 9px; \
-    background-color: #D4D4D4; color: #999999; \
-    text-align: right; \
-} \
-.onoffswitch-switch { \
-    display: block; width: 28px; margin: 0px; margin-top: -1px; margin-bottom: -1px;\
-    background: #FFFFFF; \
-    position: absolute; top: 0; bottom: 0; \
-    right: 30px; \
-    border: 2px solid #ADAAAA; border-radius: 20px; \
-    transition: all 0.3s ease-in 0s;  \
-} \
-.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner { \
-    margin-left: 0; \
-} \
-.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch { \
-    right: 0px;  \
-} \
+	.onoffswitch { \
+		position: relative; width: 55px; 		\
+		-webkit-user-select:none; -moz-user-select:none; -ms-user-select: none; \
+	} \
+	.onoffswitch-checkbox { \
+		display: none; \
+	} \
+	.onoffswitch-label { \
+		display: block; overflow: hidden; cursor: pointer; \
+		border: 2px solid #ADAAAA; border-radius: 20px; \
+		margin-top: 3px;	\
+	} \
+	.onoffswitch-inner { \
+		display: block; width: 200%; margin-left: -100%; \
+		height: 20px; \
+		transition: margin 0.3s ease-in 0s; \
+	} \
+	.onoffswitch-inner:before, .onoffswitch-inner:after { \
+		display: block; float: left; width: 50%; padding: 0; line-height: 20px; \
+		font-size: 14px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold; \
+		box-sizing: border-box; \
+	} \
+	.onoffswitch-inner:before { \
+		content: '\\00a0'; \
+		padding-left: 9px; \
+		background-color: #34A7C1; color: #FFFFFF; \
+	} \
+	.onoffswitch-inner:after { \
+		content: '\\00a0'; \
+		padding-right: 9px; \
+		background-color: #D4D4D4; color: #999999; \
+		text-align: right; \
+	} \
+	.onoffswitch-switch { \
+		display: block; width: 28px; margin: 0px; margin-top: -1px; margin-bottom: -1px;\
+		background: #FFFFFF; \
+		position: absolute; top: 0; bottom: 0; \
+		right: 30px; \
+		border: 2px solid #ADAAAA; border-radius: 20px; \
+		transition: all 0.3s ease-in 0s;  \
+	} \
+	.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner { \
+		margin-left: 0; \
+	} \
+	.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch { \
+		right: 0px;  \
+	} \
 	.on-off-device .glyphicon-spin {		\
 		top: 9px;							\
 		left: 24px;							\
