@@ -31,7 +31,7 @@ var MultiBox = ( function( window, undefined ) {
 		return "{0}-{1}".format(ctrlid,devid);
 	};
 	function _getControllers() {
-		return $.map(_controllers,function(c) { return {	ip:c.ip	} });
+		return $.map(_controllers,function(c) { return {	ip:c.ip , box_info:c.controller.getBoxFullInfo() } });
 	};	
 	function _initDB(devicetypes) {
 		$.extend(true,_devicetypesDB[0],devicetypes); 	// data received initially comes from ctrl 0
@@ -166,13 +166,6 @@ var MultiBox = ( function( window, undefined ) {
 			box.controller.clearEngine();
 		});
 		return;
-	};
-	function _getBoxInfo() {
-		var arr=[];
-		$.each(_controllers, function(i,c) {
-			arr.push( c.controller.getBoxInfo() );
-		});
-		return arr;
 	};
 	function _getUrlHead(altuiid) {
 		var elems = altuiid.split("-");
@@ -665,6 +658,7 @@ var MultiBox = ( function( window, undefined ) {
 	// Access & Modes
 	isRemoteAccess	: function() 	{ 	return window.location.href.indexOf("mios.com")!=-1; /*return true;*/ },
 	getBoxInfo		: function() 	{	return _controllers[0].controller.getBoxInfo(); },
+	getBoxFullInfo	: function() 	{	return _controllers[0].controller.getBoxFullInfo(); },
 	getHouseMode	: function(cb) 	{	return _controllers[0].controller.getHouseMode(cb); },		// (cbfunc)
 	setHouseMode	: _setHouseMode,		// (newmode,cbfunc)
 	getHouseModeSwitchDelay : _getHouseModeSwitchDelay,
@@ -749,7 +743,6 @@ var MultiBox = ( function( window, undefined ) {
 	updatePluginVersion	: _updatePluginVersion,	//(id,ver,function(result)
 
 	// Misc
-	getBoxInfo			: _getBoxInfo,			// ()
 	getUrlHead			: _getUrlHead,			// ()
 	getIpAddr			: _getIpAddr,			// ()
 	isUI5				: _isUI5,				// (controller)

@@ -681,6 +681,14 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		return jqxhr;
 	};
 	
+	function _getBoxFullInfo() {
+		var info = {}
+		$.each(_user_data, function(key,val) {
+			if (!$.isArray(val) && !$.isPlainObject(val))
+				info[key]=val;
+		});
+		return info;
+	};
 	function _getBoxInfo() {
 		return {
 			PK_AccessPoint: _user_data.PK_AccessPoint,
@@ -1324,6 +1332,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	getWeatherSettings : _getWeatherSettings,
 	isUI5			: _isUI5,				
 	getBoxInfo		: _getBoxInfo,		//()
+	getBoxFullInfo	: _getBoxFullInfo,		//()
 	getLuaStartup 	: _getLuaStartup,
     getRooms		: _getRooms,		// in the future getRooms could cache the information and only call _getRooms when needed
     getRoomsSync	: function() 		{ return _rooms; },

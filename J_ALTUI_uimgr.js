@@ -9655,15 +9655,23 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		html+="<div>";
 		html+="  <ul class='nav nav-tabs' role='tablist'>";
 		var controllers = MultiBox.getControllers();
+		var bFirst=true;
 		$.each(controllers, function( idx, controller) {
 			var name  = (controller.ip == "" ) ? "Main" : controller.ip ;
-			html+="    <li role='presentation' class='active'><a href='#altui_ctrl_{0}' aria-controls='home' role='tab' data-toggle='tab'>{1}</a></li>".format(idx,name);
+			html+="    <li role='presentation' class='{2}'><a href='#altui_ctrl_{0}' aria-controls='home' role='tab' data-toggle='tab'>{1}</a></li>".format(
+				idx,name,
+				(bFirst==true ? 'active' : ''));
+			bFirst=false;
 		});
 		html+="  </ul>";
 		html+="  <div class='tab-content'>";
+		bFirst=true;
 		$.each(controllers, function( idx, controller) {
 			var name  = (controller.ip == "" ) ? "Main" : controller.ip ;
-			html+="    <div role='tabpanel' class='tab-pane active' id='altui_ctrl_{0}'>...{1}...</div>".format(idx,name);
+			html+="    <div role='tabpanel' class='tab-pane {2}' id='altui_ctrl_{0}'><pre class='pre-scrollable'>{1}</pre></div>".format(
+				idx,JSON.stringify(controller.box_info),
+				(bFirst==true ? 'active' : ''));
+			bFirst=false;
 		});
 		html+="  </div>";
 		html+="</div>";
