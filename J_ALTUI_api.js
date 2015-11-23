@@ -101,8 +101,8 @@ function get_new_timer_id(timersArray){
 }
 
 var _spinDialog = null;
-function show_loading() {
-	_spinDialog = DialogManager.createSpinningDialog();
+function show_loading(message) {
+	_spinDialog = DialogManager.createSpinningDialog(message);
 	_spinDialog.modal('show');
 };
 

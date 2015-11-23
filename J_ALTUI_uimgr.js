@@ -696,7 +696,10 @@ var DialogManager = ( function() {
 		defaultSpinDialogModalTemplate += "    </div><!-- /.modal-content -->";
 		defaultSpinDialogModalTemplate += "  </div><!-- /.modal-dialog -->";
 		defaultSpinDialogModalTemplate += "</div><!-- /.modal -->";
-		return DialogManager.registerDialog('dialogModal',defaultSpinDialogModalTemplate.format( "<div class='big-spinner' style='height:70px;'></div>",message || ""));
+		return DialogManager.registerDialog('dialogModal',defaultSpinDialogModalTemplate.format( 
+			glyphTemplate.format( "refresh", _T("Refresh"), "text-warning glyphicon-spin big-glyph" ),
+			message || "")
+		);
 	};
 	
 	function _confirmDialog(message,cbfunc) {
