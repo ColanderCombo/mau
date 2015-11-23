@@ -114,7 +114,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			status = parseInt( status );
 			if (status>0)		// special case of dimmer
 				status=1;
-			$(htmlselector).removeClass("on").addClass("spinner");
+			// $(htmlselector).removeClass("on").addClass("spinner");
+			$(htmlselector).removeClass("on").removeClass("off").addClass("center-block").html(glyphTemplate.format( "refresh", _T("Refresh"), "text-warning glyphicon-spin big-glyph" ));
 			cbfunc(device, 1-status);
 		}
 	}
