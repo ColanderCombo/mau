@@ -682,12 +682,13 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 	
 	function _getBoxFullInfo() {
-		var info = {}
-		$.each(_user_data, function(key,val) {
+		var ordered = {};
+		$.each( Object.keys(_user_data).sort(), function(i,key) {
+			var val = _user_data[key];
 			if (!$.isArray(val) && !$.isPlainObject(val))
-				info[key]=val;
+				ordered[key]=val;			
 		});
-		return info;
+		return ordered;
 	};
 	function _getBoxInfo() {
 		return {
