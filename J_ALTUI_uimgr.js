@@ -4947,14 +4947,14 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					var altuiid = $('#myform .altui-device-config-save').prop('id');
 					var controllerid = MultiBox.controllerOf(altuiid).controller;
 					var device = MultiBox.getDeviceByAltuiID(altuiid);
-					var rows = $(this).closest("table").find("tbody tr").not(":last-child");
+					var rows = $(this).find("table").find("tbody tr").not(":last-child")
 					var variables = [];
 					$(rows).each(function(idx,row) {
 						var tds = $(row).find("td");
 						variables.push("{0},{1},{2}".format( 
-							$(tds[0]).find("input").val(),
-							$(tds[1]).find("select :selected").val(),
-							$(tds[2]).find("input").val() )
+							$(tds[1]).find("input").val(),
+							$(tds[2]).find("select :selected").val(),
+							$(tds[3]).find("input").val() )
 						);
 					});
 					MultiBox.setStatus( device, "urn:micasaverde-com:serviceId:ZWaveDevice1", "VariablesSet", variables.join(",") );
