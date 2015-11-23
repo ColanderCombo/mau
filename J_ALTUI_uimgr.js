@@ -9669,7 +9669,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		$.each(controllers, function( idx, controller) {
 			var name  = (controller.ip == "" ) ? "Main" : controller.ip ;
 			html+="    <div role='tabpanel' class='tab-pane {2}' id='altui_ctrl_{0}'><pre class='pre-scrollable'>{1}</pre></div>".format(
-				idx,JSON.stringify(controller.box_info),
+				idx,JSON.stringify(controller.box_info,null,2),
 				(bFirst==true ? 'active' : ''));
 			bFirst=false;
 		});
