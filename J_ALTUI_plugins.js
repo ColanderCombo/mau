@@ -66,9 +66,20 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		{
 			var onoffbuttonTemplate = "";
 			onoffbuttonTemplate += "<div class='altui-button-onoff "+(extracls || '')+"'>";
-			onoffbuttonTemplate += "<div id='{2}' class='" + (extracls || '') +" on-off-device {0}' ></div>";
-			onoffbuttonTemplate += "<div class='altui-button-stateLabel'>{1}</div>";
+				onoffbuttonTemplate += "<div id='{2}' class='onoffswitch'>";
+				onoffbuttonTemplate += "    <input type='checkbox' name='onoffswitch' class='onoffswitch-checkbox'  {0}>";
+				onoffbuttonTemplate += "    <label class='onoffswitch-label' for='myonoffswitch'>";
+				onoffbuttonTemplate += "        <span class='onoffswitch-inner'></span>";
+				onoffbuttonTemplate += "        <span class='onoffswitch-switch'></span>";
+				onoffbuttonTemplate += "    </label>";
+				onoffbuttonTemplate += "</div>";
+				onoffbuttonTemplate += "<div class='altui-button-stateLabel'>{1}</div>";
 			onoffbuttonTemplate += "</div>";
+			
+			// onoffbuttonTemplate += "<div class='altui-button-onoff "+(extracls || '')+"'>";
+			// onoffbuttonTemplate += "<div id='{2}' class='" + (extracls || '') +" on-off-device {0}' ></div>";
+			// onoffbuttonTemplate += "<div class='altui-button-stateLabel'>{1}</div>";
+			// onoffbuttonTemplate += "</div>";
 			var css="";
 			onoff = onoff || 0;
 			if (onoff>0)
@@ -79,13 +90,13 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 				case "0":
 				case 0:
 					str=str[0];
-					css="off";
+					css="";
 					break;
 				case true:
 				case "1":
 				case 1:
 					str=str[1];
-					css="on";
+					css="checked";
 					break;
 				default:
 					str="";
