@@ -249,7 +249,7 @@ function _array2Table(arr,idcolumn,viscols) {
 	var idcolumn = idcolumn || 'id';
 	var viscols = viscols || [idcolumn];
 	html+="<div class='col-xs-12'>";
-	if (arr && arr.length>0) {
+	if ( (arr) && ($.isArray(arr) && (arr.length>0)) ) {
 		var bFirst=true;
 		html+="<table id='altui-grid' class='table table-condensed table-hover table-striped'>";
 		$.each(arr, function(idx,obj) {

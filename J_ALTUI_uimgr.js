@@ -9716,11 +9716,24 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		});
 	},
 	pageTblControllers:function() {
+		function _displayControllerInfo(box_info) {
+			return _array2Table(box_info,"PK_AccessPoint",[]);
+		};
 		UIManager.clearPage(_T('TblControllers'),_T("Table Controllers"),UIManager.oneColumnLayout);
 		var html="";
 		html+="<div>";
 		html+="  <ul class='nav nav-tabs' role='tablist'>";
 		var controllers = MultiBox.getControllers();
+		// var arr = [];
+		// $.each(controllers, function( idx, controller) {
+			// var ip = (controller.ip == "" ) ? "Main" : controller.ip ;
+			// $.each(controller.box_info,function(key,val) {
+				// if (arr[key]==undefined)
+					// arr[key]={};
+				// arr[key][ip]=val;
+			// });
+		// });
+
 		var bFirst=true;
 		$.each(controllers, function( idx, controller) {
 			var name  = (controller.ip == "" ) ? "Main" : controller.ip ;
@@ -9735,7 +9748,9 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		$.each(controllers, function( idx, controller) {
 			var name  = (controller.ip == "" ) ? "Main" : controller.ip ;
 			html+="    <div role='tabpanel' class='tab-pane {2}' id='altui_ctrl_{0}'><pre class='pre-scrollable'>{1}</pre></div>".format(
-				idx,JSON.stringify(controller.box_info,null,2),
+				idx,
+				// _displayControllerInfo(controller.box_info),
+				JSON.stringify(controller.box_info,null,2),
 				(bFirst==true ? 'active' : ''));
 			bFirst=false;
 		});
