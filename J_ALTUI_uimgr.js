@@ -5486,6 +5486,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		// $(".altui-favorites").toggle(false);
 		MultiBox.getDevices(null , function(device) { return device.favorite; }, function(devices) {
 			html += "<div class='altui-favorites row'>";
+			html += "<div class='col-xs-12'>";
 			$.each(devices, function(idx,device) {
 				html +=favoriteTemplate.format(device.name,_drawFavoriteDevice(device));
 			})
@@ -5494,6 +5495,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				$.each(scenes, function(idx,scene) {
 					html +=favoriteTemplate.format(scene.name,_drawFavoriteScene(scene));
 				})
+			html += "</div>";		
 			html += "</div>";		
 
 				// html += "<div class='col-xs-12'>";
