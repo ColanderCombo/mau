@@ -38,7 +38,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-heater-container select.input-sm { height:22px; padding:0;}"; 
 		style += ".altui-cyan { color:cyan;}";
 		style += ".altui-dimmable-slider { margin-left: 60px; }";	
-		style += ".altui-colorpicker { margin-top: 3px; width:30px; margin-right: 13px; }";	
+		style += ".altui-colorpicker { margin-top: 2px; width:30px; margin-right: 15px; }";	
 		style += ".altui-infoviewer-log-btn,.altui-infoviewer-btn,.altui-window-btn,.altui-datamine-open { margin-top: 10px; }";	
 		style += ".altui-infoviewer-pattern { font-size: 14px; }";	
 		style += "div.altui-windowcover button.btn-sm { width: 4em; }";
@@ -126,7 +126,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			if (status>0)		// special case of dimmer
 				status=1;
 			// $(htmlselector).removeClass("on").addClass("spinner");
-			$(htmlselector).removeClass("on").removeClass("off").addClass("center-block").html(glyphTemplate.format( "refresh", _T("Refresh"), "text-warning glyphicon-spin big-glyph" ));
+			// $(htmlselector).removeClass("on").removeClass("off").addClass("center-block").html(glyphTemplate.format( "refresh", _T("Refresh"), "text-warning glyphicon-spin big-glyph" ));
+			$(htmlselector).find("input").prop('checked', (status==0)); // invert
 			cbfunc(device, 1-status);
 		}
 	}
