@@ -157,7 +157,7 @@ var styles ="					\
 		display: block; width: 28px; margin: 0px; margin-top: -1px; margin-bottom: -1px;\
 		background: #FFFFFF; \
 		position: absolute; top: 0; bottom: 0; \
-		right: 30px; \
+		right: 27px; \
 		border: 2px solid #ADAAAA; border-radius: 20px; \
 		transition: all 0.3s ease-in 0s;  \
 	} \
