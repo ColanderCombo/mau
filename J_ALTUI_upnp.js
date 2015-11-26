@@ -97,11 +97,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 	
 	function _buildHAGSoapUrl()
 	{
-		var url = '';
-		if (_ipaddr=='')
-			url = window.location.protocol+'//'+window.location.hostname+"/port_49451/upnp/control/hag";
-		else
-			url = window.location.protocol+'//'+_ipaddr+"/port_49451/upnp/control/hag";
+		var url = _getUrlHead().replace('/port_3480/data_request','/port_49451/upnp/control/hag');
 		return url;
 	}
 	
