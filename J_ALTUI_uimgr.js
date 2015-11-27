@@ -4611,6 +4611,7 @@ var UIManager  = ( function( window, undefined ) {
 				};
 				case "slider_vertical": {
 					function _onClickSlider(event) {
+						$(this).closest(".altui-device-controlpanel").addClass("altui-norefresh");
 						var uniqid = event.data.uniqid;
 						var control = event.data.control;
 						var htmlid = "altui-slider-vertical-value-"+uniqid;
@@ -4648,6 +4649,7 @@ var UIManager  = ( function( window, undefined ) {
 								$("div#"+htmlid).text(val).show();
 								$("div#altui-slider-vertical-"+uniqid).slider("value", val*10 );
 								$("input#"+htmlid).hide();	// toggle both DIV and INPUT
+								$(this).closest(".altui-device-controlpanel").removeClass("altui-norefresh");
 							});
 					};
 					
@@ -7927,7 +7929,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			["Bootswatch","https://bootswatch.com/","Bootstrap Themes"],
 			["ThingSpeak","https://thingspeak.com/","ThingSpeak Data platform for IoT"],
 			["jQuery Colorpicker","http://bgrins.github.io/spectrum/","Spectrum Color Picker"],		
-			["proto.io","https://proto.io/freebies/onoff/","switch button"],		
+			["proto io","https://proto.io/freebies/onoff/","switch button"],		
 			["amg0","http://forum.micasaverde.com/","reachable as amg0 on this forum "]
 		];
 		

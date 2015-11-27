@@ -296,22 +296,23 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 					}
 				html += "</div>";
 				html += "<div class='col-xs-3'>";
-					if ((isUI5==true ) || (allsetpoints==null)) {
-						//UI5
-						html += _button(device.altuiid, "altui-blue", upGlyph, 
-									"urn:upnp-org:serviceId:TemperatureSetpoint1_Cool",
-									"SetCurrentSetpoint",
-									"NewCurrentSetpoint",
-									coldsetpoint+HVAC_INCREMENT
-								);
-						html += _button(device.altuiid, "altui-blue", downGlyph, 
-									"urn:upnp-org:serviceId:TemperatureSetpoint1_Cool",
-									"SetCurrentSetpoint",
-									"NewCurrentSetpoint",
-									coldsetpoint-HVAC_INCREMENT
-								);	
+					if (isUI5==true) {
+						if (coldsetpoint!=null) {
+							//UI5
+							html += _button(device.altuiid, "altui-blue", upGlyph, 
+										"urn:upnp-org:serviceId:TemperatureSetpoint1_Cool",
+										"SetCurrentSetpoint",
+										"NewCurrentSetpoint",
+										coldsetpoint+HVAC_INCREMENT
+									);
+							html += _button(device.altuiid, "altui-blue", downGlyph, 
+										"urn:upnp-org:serviceId:TemperatureSetpoint1_Cool",
+										"SetCurrentSetpoint",
+										"NewCurrentSetpoint",
+										coldsetpoint-HVAC_INCREMENT
+									);	
+						}
 					} else {
-						//UI7
 						html += _button(device.altuiid, "", downGlyph, 
 									"urn:upnp-org:serviceId:TemperatureSetpoint1",
 									"SetCurrentSetpoint",
