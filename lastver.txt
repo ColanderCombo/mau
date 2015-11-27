@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("930,new onoff button removing the looking issue;new glyph spinner for transparency;bugfix for zwave configuration parameters,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29681")
+UIManager.checkAltuiUpdate("936,fix for HAG remote url;adjust button size and animation;adjust columns on home page,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29702")
