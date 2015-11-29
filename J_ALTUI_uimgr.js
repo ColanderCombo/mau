@@ -210,6 +210,16 @@ var styles ="					\
 	.altui-widget-frame-div , .solid-border {	\
 		border:1px solid;\
 	}					\
+	.altui-widget-iframe {	\
+		width:100%;		\
+		height:100%;	\
+		margin: 0;	\
+		padding-top: 10px; \
+		padding-left: 0px; \
+		padding-right: 10px; \
+		padding-bottom: 10px; \
+		border: 0; \
+	}					\
 	.altui-colorpicker-replacer { \
 	}	\
 	.sp-dd { \
@@ -921,7 +931,7 @@ var DialogManager = ( function() {
 	{
 		var optstr = _optionsToString($.extend( {type:'text'},options));
 		value = (value==undefined) ? '' : value ;
-		var placeholder = ((options !=undefined) && (options.placeholder==undefined)) ? "placeholder:'enter "+name+"'" : "";
+		var placeholder = ((options !=undefined) && (options.placeholder==undefined)) ? "placeholder='enter "+name+"'" : "";
 		var propertyline = "";
 		propertyline += "<div class='form-group'>";
 		propertyline += "	<label for='altui-widget-"+name+"' title='"+(help || '')+"'>"+label+"</label>";
@@ -931,7 +941,19 @@ var DialogManager = ( function() {
 		propertyline += "</div>";
 		$(dialog).find(".row-fluid").append(propertyline);
 	};
-	
+	function _dlgAddUrl(dialog, name, label, value,help, options) {
+		var optstr = _optionsToString($.extend( {type:'text'},options));
+		value = (value==undefined) ? '' : value ;
+		var placeholder = ((options !=undefined) && (options.placeholder==undefined)) ? "placeholder='enter "+name+"'" : "";
+		var propertyline = "";
+		propertyline += "<div class='form-group'>";
+		propertyline += "	<label for='altui-widget-"+name+"' title='"+(help || '')+"'>"+label+"</label>";
+		if (help)
+			propertyline += "	<span title='"+(help || '')+"'>"+helpGlyph+"</span>";
+		propertyline += "	<input type='url' id='altui-widget-"+name+"' class='form-control' "+optstr+" value='"+value+"' "+placeholder+" ></input>";
+		propertyline += "</div>";
+		$(dialog).find(".row-fluid").append(propertyline);
+	};
 	function _dlgAddSelect(dialog, name, label, value, lines, htmloptions)
 	{
 		var optstr = _optionsToString(htmloptions);
@@ -1290,6 +1312,7 @@ var DialogManager = ( function() {
 		dlgAddCheck:_dlgAddCheck,
 		dlgAddColorPicker : _dlgAddColorPicker,	//(dialog, name, label, help, value, options)
 		dlgAddLine:_dlgAddLine,
+		dlgAddUrl:_dlgAddUrl,
 		dlgAddBlockly: _dlgAddBlockly,	//(dialog, name, label, value )
 		dlgAddSelect: _dlgAddSelect,
 		dlgAddVariables:_dlgAddVariables,
@@ -3104,14 +3127,15 @@ var UIManager  = ( function( window, undefined ) {
 				property: _onPropertyFrame, 
 				onWidgetResize: _onResizeStub,
 				widgetdisplay: function(widget,bEdit)	{ 
-					return "<div class='altui-widget-frame-div' src='{0}' style='max-height:100%; max-width:100%; height:100%; width:100%; background:{1}; '>{0}</div>".format( widget.properties.label,widget.properties.css );
+					var content = (widget.properties.url=='') ? widget.properties.label : "<iframe class='altui-widget-iframe' src='{0}'></iframe>".format(widget.properties.url);
+					return "<div class='altui-widget-frame-div' style='max-height:100%; max-width:100%; height:100%; width:100%; background:{1}; '>{0}</div>".format( content,widget.properties.css );
 				},
 				defaultSize: { width:50, height:50 },
 				zindex: -1,
 				properties: {
 					label:'',
 					css:'',
-					iframesrc:'',
+					url:'',
 				} 
 			},
 			{ 	id:40, 
@@ -5992,6 +6016,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		var dialog = DialogManager.createPropertyDialog(_T('Frame Properties'));
 		DialogManager.dlgAddLine(dialog, "Label", _T("Frame Label"), widget.properties.label, "");
 		DialogManager.dlgAddLine(dialog, "CSS", _T("background CSS"), widget.properties.css, "");
+		DialogManager.dlgAddUrl(dialog, "Url", _T("IFrame Url"), widget.properties.url, _T("Optional, if specified frame will be filled in with this url"), {});
 		$('div#dialogModal').modal();
 		// buttons
 		$('div#dialogs')		
@@ -5999,6 +6024,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			.on( 'submit',"div#dialogModal form", function() {
 				real_widget.properties.label = $("#altui-widget-Label").val();
 				real_widget.properties.css = $("#altui-widget-CSS").val();
+				real_widget.properties.url = $("#altui-widget-Url").val();
 				$('div#dialogModal').modal('hide');
 				_showSavePageNeeded(true);
 				_replaceWidget(real_widget);
