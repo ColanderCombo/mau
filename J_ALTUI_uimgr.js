@@ -3110,7 +3110,8 @@ var UIManager  = ( function( window, undefined ) {
 				zindex: -1,
 				properties: {
 					label:'',
-					css:''
+					css:'',
+					iframesrc:'',
 				} 
 			},
 			{ 	id:40, 
@@ -4801,6 +4802,14 @@ var UIManager  = ( function( window, undefined ) {
 		}
 	};
 
+	function _findCurrentValue(getelemstbl,varnum) {
+		var i;
+		for (i=0;i<getelemstbl.length;i+=2) {
+			if (getelemstbl[i]==varnum)
+				return getelemstbl[i+1];
+		};
+		return null;
+	};
 	function _displayConfigVariable( device,varnum,lengthtype,value, current ) {
 		var options = [
 			{val : 'm', text: 'monitor only'},
@@ -4846,10 +4855,10 @@ var UIManager  = ( function( window, undefined ) {
 		html += sel.wrap("div").parent().html();
 		html += "</td>";
 		html += "<td>";
-		html += "<div class='col-xs-4'><input type='number' class='form-control input-sm' value='{0}'></input></div>".format(value || "");
+		html += "<div class='col-xs-6'><input type='number' class='form-control input-sm' value='{0}'></input></div>".format(value || "");
 		html += "</td>";
 		html += "<td>";
-		html += "<div class='col-xs-4'>{0}</div>".format(current || "");
+		html += "<div class='col-xs-6'>{0}</div>".format(current || "");
 		html += "</td>";
 		html += "</tr>";		
 		return html;
@@ -4889,13 +4898,14 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			*/
 			var html ="";
 			var curvariables = MultiBox.getStatus(device, "urn:micasaverde-com:serviceId:ZWaveDevice1", "ConfiguredVariable") || "";
-			var variables = MultiBox.getStatus(device, "urn:micasaverde-com:serviceId:ZWaveDevice1", "VariablesSet");
-			if (isNullOrEmpty(variables))
-				variables = curvariables;
+			var setvariables = MultiBox.getStatus(device, "urn:micasaverde-com:serviceId:ZWaveDevice1", "VariablesSet");
+			if (isNullOrEmpty(setvariables))
+				setvariables = curvariables;
+			var getvariables = MultiBox.getStatus(device, "urn:micasaverde-com:serviceId:ZWaveDevice1", "VariablesGet");
 			html +="<div class='row'>";
 			html += "<div id='altui-device-config-"+device.altuiid+"' class='col-xs-12 altui-device-config'>"
 			html += _drawDeviceLastUpdateStats( device );
-			if (isNullOrEmpty(variables) == false) {
+			if (isNullOrEmpty(setvariables) == false) {
 				html += "<form id='myform' data-toggle='validator' role='form' action='javascript:void(0);' >";
 				html += "<table class='table table-condensed altui-config-variables'>";
 				html +=("<caption>{0} <button id='"+device.altuiid+"' type='submit' class='btn btn-sm btn-primary altui-device-config-save'>{1}</button></caption>").format(_T("Device zWave Parameters"),_T('Save Changes'));
@@ -4914,19 +4924,20 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				html += "</tr>";
 				html += "</thead>";
 				html += "<tbody>";
-				html += "</form>";
 				var curelems = curvariables.split(',');
-				var elems = variables.split(',');
+				var elems = setvariables.split(',');
+				var getelems = getvariables.split(',');
 				for (i=0;i<elems.length;i+=3) {
-					html += _displayConfigVariable( device,elems[i],elems[i+1],elems[i+2],curelems[i+2] );
+					html += _displayConfigVariable( device,elems[i],elems[i+1],elems[i+2],_findCurrentValue(getelems,elems[i]) );
 				}
 				html += "<tr>";
-				html += "<td colspan='4'>";
+				html += "<td colspan='5'>";
 				html += smallbuttonTemplate.format( 'altui-addvar', 'altui-add-variable', plusGlyph ,'Add');
 				html += "</td>";
 				html += "</tr>";
 				html += "</tbody>";
 				html += "</table>";
+				html += "</form>";
 			}	
 			html += "</div>";	// device-config
 			html += "</div>";	// row
