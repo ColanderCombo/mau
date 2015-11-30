@@ -190,7 +190,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		return html;
 	}
 		
-	function _internaldrawZoneThermostat( device , userOperatingMode1Items,  userHVACFanOperatingMode1Items ) {
+	function _internaldrawZoneThermostat( device , userOperatingMode1Items,  userHVACFanOperatingMode1Items, isHeater) {
 		function _button(altuiid, colorclass, glyph, service, action, name, value) {
 			return ("<button id='altui-setpointcontrol-{0}' type='button' style='width:50%;' class='altui-heater-btn {6} btn btn-default btn-xs' data-service='{2}' data-action='{3}' data-name='{4}' data-value='{5}'>{1}</button>".format( 
 			altuiid,		// id
@@ -202,7 +202,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			colorclass
 			));
 		};
-		var HVAC_INCREMENT = 1;	
+		var HVAC_INCREMENT = 0.5;	
 		var controller = MultiBox.controllerOf(device.altuiid).controller;
 		var isUI5 = MultiBox.isUI5(controller);
 		var ws = MultiBox.getWeatherSettings();
@@ -247,7 +247,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 					}
 				html += "</div>";
 				html += "<div class='col-xs-3'>";
-					if (coldsetpoint!=null) {
+					if ((isHeater==false) && (coldsetpoint!=null)) {
 						html += ("<span class='altui-temperature altui-blue' >"+parseFloat(coldsetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
 					}
 				html += "</div>";
@@ -297,7 +297,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 				html += "</div>";
 				html += "<div class='col-xs-3'>";
 					if (isUI5==true) {
-						if (coldsetpoint!=null) {
+						if ((isHeater==false) && (coldsetpoint!=null)) {
 							//UI5
 							html += _button(device.altuiid, "altui-blue", upGlyph, 
 										"urn:upnp-org:serviceId:TemperatureSetpoint1_Cool",
@@ -371,7 +371,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			{label:"On", value:"ContinuousOn", service:"urn:upnp-org:serviceId:HVAC_FanOperatingMode1", action:"SetMode", name:"NewMode"},
 			{label:"Cycle", value:"PeriodicOn", service:"urn:upnp-org:serviceId:HVAC_FanOperatingMode1", action:"SetMode", name:"NewMode"}
 		];
-		return  _internaldrawZoneThermostat( device , userOperatingMode1Items,  userHVACFanOperatingMode1Items );
+		return  _internaldrawZoneThermostat( device , userOperatingMode1Items,  userHVACFanOperatingMode1Items, false );
 	};
 	
 	function _drawHeater( device) {
@@ -380,7 +380,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			{label:"Heat", value:"HeatOn", service:"urn:upnp-org:serviceId:HVAC_UserOperatingMode1", action:"SetModeTarget", name:"NewMode"}
 		];
 		var userHVACFanOperatingMode1Items = [];
-		return  _internaldrawZoneThermostat( device , userOperatingMode1Items,  userHVACFanOperatingMode1Items );
+		return  _internaldrawZoneThermostat( device , userOperatingMode1Items,  userHVACFanOperatingMode1Items, true );
 	};
 		
 	// return the html string inside the .panel-body of the .altui-device#id panel
