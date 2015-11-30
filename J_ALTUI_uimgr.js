@@ -1443,7 +1443,7 @@ var WatchManager = (function() {
 	};
 	function _countWatchForScene(scene) {
 		var sceneWatches = _getSceneWatches(scene);
-		return scenewatches ? scenewatches.length : 0;
+		return sceneWatches ? sceneWatches.length : 0;
 	};
 	return {
 		sameWatch: _sameWatch,
@@ -7649,7 +7649,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 							device: device.name,
 							condition: 'watch '+w.variable,
 							id: scene.altuiid+"-"+idx,
-							lua : ""
+							lua : w.luaexpr
 						})
 					});
 				}
