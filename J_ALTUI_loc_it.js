@@ -292,5 +292,16 @@ Localization.init( {
 	"Reset Theme Override":"Reset Theme Override",
 	"Preview":"Preview",
 	"Delete":"Delete",
-	"Settings":"Settings"
+	"Settings":"Settings",
+	"Controllers":"Controllers",
+	"Support":"Support",
+	"TblScenes":"TblScenes",
+	"TblControllers":"TblControllers",
+	"Save":"Save",
+	"Frame Properties":"Frame Properties",
+	"Frame Label":"Frame Label",
+	"background CSS":"background CSS",
+	"IFrame Url":"IFrame Url",
+	"Optional, if specified frame will be filled in with this url":"Optional, if specified frame will be filled in with this url",
+	"Same Room for Devices/Scenes":"Same Room for Devices/Scenes"	
 	});

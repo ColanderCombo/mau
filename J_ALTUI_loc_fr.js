@@ -293,5 +293,16 @@ Localization.init( {
 	"Reset Theme Override":"Remise a zéro du thème",
 	"Preview":"Prévisualiser",
 	"Delete":"Effacer",
-	"Settings":"Paramètres"
+	"Settings":"Paramètres",
+	"Controllers":"Controleurs",
+	"Support":"Support",
+	"TblScenes":"Table Scènes",
+	"TblControllers":"Table Controleurs",
+	"Save":"Sauver",
+	"Frame Properties":"Propriétés du Cadre",
+	"Frame Label":"Label du Cadre",
+	"background CSS":"Background CSS",
+	"IFrame Url":"Url IFrame",
+	"Optional, if specified frame will be filled in with this url":"Optionel, affiche une page web si specifiée",
+	"Same Room for Devices/Scenes":"Meme Piece pour la page Périphériques/Scènes"	
 });
