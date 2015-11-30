@@ -10499,7 +10499,8 @@ $(document).ready(function() {
 		body+="			<li class='divider'></li>";
 		body+="			<li class='dropdown-header'>About</li>";
 		body+="			<li><a id='altui-credits' href='#'>"+_T("Credits")+"</a></li>";
-		body+="			<li><a href='http://forum.micasaverde.com/index.php?board=78.0'>"+_T("Evolutions")+"</a></li>";
+		body+="			<li><a href='http://forum.micasaverde.com/index.php/topic,33308.msg244110.html#msg244110'>"+_T("Evolutions")+"</a></li>";
+		body+="			<li><a href='http://forum.micasaverde.com/index.php?board=78.0'>"+_T("Support")+"</a></li>";
 		body+="		  </ul>";
 		body+="		</li>";
 		body+="	  </ul>";
