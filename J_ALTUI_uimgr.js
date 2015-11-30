@@ -3059,8 +3059,9 @@ var UIManager  = ( function( window, undefined ) {
 		{ id:'FixedLeftButtonBar', type:'checkbox', label:"Left Buttons are fixed on the page", _default:1 },
 		{ id:'ShowWeather', type:'checkbox', label:"Show Weather on home page", _default:1 },
 		{ id:'UseVeraFavorites', type:'checkbox', label:"Use Vera Favorites", _default:0 },
+		{ id:'SyncLastRoom', type:'checkbox', label:"Same Room for Devices/Scenes", _default:1},
 		{ id:'Menu2ColumnLimit', type:'number', label:"2-columns Menu's limit", _default:15, min:2, max:30  },
-		{ id:'TempUnitOverride', type:'select', label:"Weather Temp Unit (UI5)", _default:'c', choices:'c|f'  },
+		{ id:'TempUnitOverride', type:'select', label:"Weather Temp Unit (UI5)", _default:'c', choices:'c|f'  }
 	];
 	var edittools = [];
 	var tools = [];
@@ -7132,6 +7133,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			_deviceDisplayFilter.room = (altuiid !="") ? altuiid : htmlid;	
 			UIManager.setLeftnavRoomsActive(_deviceDisplayFilter.room);
 			MyLocalStorage.setSettings("DeviceRoomFilter",_deviceDisplayFilter.room);
+			if ( MyLocalStorage.getSettings('SyncLastRoom')==1 )
+				MyLocalStorage.setSettings("SceneRoomFilter",_deviceDisplayFilter.room);
 			_drawDevices(deviceFilter);
 		};
 		
@@ -7217,6 +7220,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			_sceneFilter.room = (altuiid !="") ? altuiid : htmlid;
 			UIManager.setLeftnavRoomsActive( _sceneFilter.room );
 			MyLocalStorage.setSettings("SceneRoomFilter",_sceneFilter.room);
+			if ( MyLocalStorage.getSettings('SyncLastRoom')==1 )
+				MyLocalStorage.setSettings("DeviceRoomFilter",_sceneFilter.room);
 			_drawScenes( _sceneInThisRoom );
 		};
 		
