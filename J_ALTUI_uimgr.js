@@ -1430,20 +1430,27 @@ var WatchManager = (function() {
 	function _setWatchLineParams(watch) {
 		return "{0}#{1}#{2}#{3}#{4}#{5}".format( watch.service, watch.variable, watch.deviceid, watch.sceneid, watch.luaexpr, watch.xml || "");
 	};
-	function _countWatchForScene(scene) {
-		var scenecontroller = MultiBox.controllerOf(scene.altuiid).controller;
+	function _getSceneWatches(scene) {
 		var altuidevice = MultiBox.getDeviceByID( 0, g_MyDeviceID );
-		var scenewatches = $.grep( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToWatch" ) || "").split(';'),function(w) {
+		var scenecontroller = MultiBox.controllerOf(scene.altuiid).controller;
+		var sceneWatches = $.grep( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToWatch" ) || "").split(';'),function(w) {
 			var watch = WatchManager.getWatchLineParams(w);
-				return (watch.sceneid == scene.id) && (scenecontroller==0);
-			});	
+			return (watch.sceneid == scene.id) && (scenecontroller==0);
+		});	
+		return $.map(sceneWatches,function(line){
+			return WatchManager.getWatchLineParams(line);
+		});
+	};
+	function _countWatchForScene(scene) {
+		var sceneWatches = _getSceneWatches(scene);
 		return scenewatches ? scenewatches.length : 0;
 	};
 	return {
 		sameWatch: _sameWatch,
 		getWatchLineParams: _getWatchLineParams,
 		setWatchLineParams: _setWatchLineParams,
-		countWatchForScene: _countWatchForScene
+		countWatchForScene: _countWatchForScene,
+		getSceneWatches : _getSceneWatches
 	};
 })();
 
@@ -7630,7 +7637,22 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 						id: scene.altuiid+"-"+idx,
 						lua : trigger.lua || ""
 					})
-				})
+				});
+				var sceneWatches = WatchManager.getSceneWatches(scene);
+				if (sceneWatches) {
+					$.each(sceneWatches,function(idx,w){
+						var device = MultiBox.getDeviceByAltuiID(w.deviceid);
+						arr.push( {
+							lastrun: scene.last_run ? _toIso(new Date(scene.last_run*1000)," ") : "",
+							scene: scene.name,
+							trigger: w.service,
+							device: device.name,
+							condition: 'watch '+w.variable,
+							id: scene.altuiid+"-"+idx,
+							lua : ""
+						})
+					});
+				}
 			});
 		})
 		
