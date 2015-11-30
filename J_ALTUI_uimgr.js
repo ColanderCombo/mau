@@ -3930,11 +3930,11 @@ var UIManager  = ( function( window, undefined ) {
 	
 	function _defaultDeviceDrawWatts( device ) {
 		var html ="";
-		var watts = parseInt(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'Watts' )); 
+		var watts = parseFloat(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'Watts' )); 
 		if (isNaN(watts)==false) 
 			html += wattTemplate.format(watts);
 		else {
-			watts = parseInt(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'UserSuppliedWattage' )); 
+			watts = parseFloat(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'UserSuppliedWattage' )); 
 			if (isNaN(watts)==false) 
 				html += wattTemplate.format(watts);
 		}
