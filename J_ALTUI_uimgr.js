@@ -1430,10 +1430,20 @@ var WatchManager = (function() {
 	function _setWatchLineParams(watch) {
 		return "{0}#{1}#{2}#{3}#{4}#{5}".format( watch.service, watch.variable, watch.deviceid, watch.sceneid, watch.luaexpr, watch.xml || "");
 	};
+	function _countWatchForScene(scene) {
+		var scenecontroller = MultiBox.controllerOf(scene.altuiid).controller;
+		var altuidevice = MultiBox.getDeviceByID( 0, g_MyDeviceID );
+		var scenewatches = $.grep( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToWatch" ) || "").split(';'),function(w) {
+			var watch = WatchManager.getWatchLineParams(w);
+				return (watch.sceneid == scene.id) && (scenecontroller==0);
+			});	
+		return scenewatches ? scenewatches.length : 0;
+	};
 	return {
 		sameWatch: _sameWatch,
 		getWatchLineParams: _getWatchLineParams,
-		setWatchLineParams: _setWatchLineParams
+		setWatchLineParams: _setWatchLineParams,
+		countWatchForScene: _countWatchForScene
 	};
 })();
 
@@ -9816,9 +9826,6 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		$(".altui-mainpanel").append( html );
 	},
 	pageTblScenes: function() {
-		function _countSceneWatch(scene) {
-			return 0;
-		};
 		UIManager.clearPage(_T('TblScenes'),_T("Table Scenes"),UIManager.oneColumnLayout);
 		MultiBox.getScenes(null, null, function (scenes) {
 			var viscols = MyLocalStorage.getSettings("ScenesVisibleCols") || [];
@@ -9884,7 +9891,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					html += "<td>{0}</td>".format( _enhanceValue(scene[col.name] || '') );
 				});
 				html += "<td>{0}</td>".format( scene.triggers ? scene.triggers.length : 0 );
-				html += "<td>{0}</td>".format( _countSceneWatch(scene) );
+				html += "<td>{0}</td>".format( WatchManager.countWatchForScene(scene) );
 				html += "<td>{0}</td>".format( scene.timers ? scene.timers.length : 0 );
 				html += "<td></td>";	// commands
 				html+="    </tr>";
