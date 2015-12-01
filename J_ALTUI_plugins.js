@@ -352,7 +352,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		html += "   var value = parseFloat($('#'+$(selected).data('value')).text()) ;					";
 		html += "   var incr = $(selected).data('incr');					";
 		html += "   var params = {}; params[name]=value+incr;				";
-		html += "   $('#'+$(selected).data('value')).html(value+incr+'&deg;');				";
+		html += "   $('#'+$(selected).data('value')).html( (value+incr).toFixed(1)+'&deg;');				";
 		html += "	MultiBox.runActionByAltuiID('{0}', service, action, params);".format(device.altuiid);
 		html += "});"
 		html += " $('select#altui-heater-select-{0}').on('change', function() { 	".format(device.altuiid);
