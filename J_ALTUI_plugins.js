@@ -209,14 +209,15 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		if (ws.tempFormat==undefined)
 			ws.tempFormat="";
 		
+		var modeStatus = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:HVAC_UserOperatingMode1', 'ModeStatus' ); 
+		var modeFan = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:HVAC_FanOperatingMode1', 'Mode' ); 
 		var curTemp = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSensor1', 'CurrentTemperature' ); 
-		var allsetpoints = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1', 'AllSetpoints' ); 
+		var allsetpoints = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1', 'AllSetpoints' );
+		var heatsetpoint = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Heat', 'CurrentSetpoint' ); 
+		var coldsetpoint = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Cool', 'CurrentSetpoint' ); 
 		var heatsetpoint=null, coldsetpoint=null, autosetpoint=null, currentmodesetpoint=null;
-		if ((isUI5==true ) || (  isNullOrEmpty(allsetpoints)==true )) {
-			heatsetpoint = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Heat', 'CurrentSetpoint' ); 
-			coldsetpoint = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Cool', 'CurrentSetpoint' ); 
-		}
-		else {
+		var bNewControl = (isUI5==false ) && (  isNullOrEmpty(allsetpoints)==false );
+		if (bNewControl ==true) {
 			AltuiDebug.debug("Using new form of heater as AllSetpoints is not empty: {0} )".format( allsetpoints));
 			var splits = allsetpoints.split(",");
 			heatsetpoint = splits[0] || "";
@@ -224,8 +225,6 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			autosetpoint = splits[2] || "";
 			currentmodesetpoint = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1', 'CurrentSetpoint' ); 
 		}
-		var modeStatus = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:HVAC_UserOperatingMode1', 'ModeStatus' ); 
-		var modeFan = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:HVAC_FanOperatingMode1', 'Mode' ); 
 		//debug
 		// curTemp = 20;
 		// heatsetpoint = 22.3;
@@ -271,19 +270,19 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 					}
 				html += "</div>";
 				html += "<div class='col-xs-3'>"; 
-					if ((isUI5==true ) || (isNullOrEmpty(allsetpoints)==true)) {
+					if (bNewControl == false) {
 						//UI5
 						html += _button(device.altuiid, "altui-red", upGlyph, 
 									"urn:upnp-org:serviceId:TemperatureSetpoint1_Heat",
 									"SetCurrentSetpoint",
 									"NewCurrentSetpoint",
-									parseFloat(heatsetpoint)+HVAC_INCREMENT	
+									parseFloat(heatsetpoint||0)+HVAC_INCREMENT	
 								);
 						html += _button(device.altuiid, "altui-red", downGlyph, 
 									"urn:upnp-org:serviceId:TemperatureSetpoint1_Heat",
 									"SetCurrentSetpoint",
 									"NewCurrentSetpoint",
-									parseFloat(heatsetpoint)-HVAC_INCREMENT
+									parseFloat(heatsetpoint||0)-HVAC_INCREMENT
 								);	
 					} else {
 						//currentmodesetpoint
@@ -292,25 +291,25 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 									"urn:upnp-org:serviceId:TemperatureSetpoint1",
 									"SetCurrentSetpoint",
 									"NewCurrentSetpoint",
-									parseFloat(currentmodesetpoint)+HVAC_INCREMENT	
+									parseFloat(currentmodesetpoint||0)+HVAC_INCREMENT	
 								);						
 					}
 				html += "</div>";
 				html += "<div class='col-xs-3'>";
-					if ((isUI5==true ) || (isNullOrEmpty(allsetpoints)==true)) {
+					if (bNewControl == false) {
 						//UI5
 						if (isHeater==false) {
 							html += _button(device.altuiid, "altui-blue", upGlyph, 
 										"urn:upnp-org:serviceId:TemperatureSetpoint1_Cool",
 										"SetCurrentSetpoint",
 										"NewCurrentSetpoint",
-										parseFloat(coldsetpoint)+HVAC_INCREMENT
+										parseFloat(coldsetpoint||0)+HVAC_INCREMENT
 									);
 							html += _button(device.altuiid, "altui-blue", downGlyph, 
 										"urn:upnp-org:serviceId:TemperatureSetpoint1_Cool",
 										"SetCurrentSetpoint",
 										"NewCurrentSetpoint",
-										parseFloat(coldsetpoint)-HVAC_INCREMENT
+										parseFloat(coldsetpoint||0)-HVAC_INCREMENT
 									);	
 						}
 					}
@@ -319,7 +318,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 									"urn:upnp-org:serviceId:TemperatureSetpoint1",
 									"SetCurrentSetpoint",
 									"NewCurrentSetpoint",
-									parseFloat(currentmodesetpoint)-HVAC_INCREMENT	
+									parseFloat(currentmodesetpoint||0)-HVAC_INCREMENT	
 								);						
 					}				
 				html += "</div>";
