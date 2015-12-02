@@ -227,8 +227,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			currentmodesetpoint = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1', 'CurrentSetpoint' ); 
 		}
 		//debug
-		curTemp = 20;
-		heatsetpoint = 22.3;
+		// curTemp = 20;
+		// heatsetpoint = 22.3;
 		// coldsetpoint = 18;
 		// autosetpoint = 21;		
 		// currentmodesetpoint=12;
