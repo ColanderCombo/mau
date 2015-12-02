@@ -304,5 +304,11 @@ Localization.init( {
 	"background CSS":"Background CSS",
 	"IFrame Url":"Url IFrame",
 	"Optional, if specified frame will be filled in with this url":"Optionel, affiche une page web si specifiée",
-	"Same Room for Devices/Scenes":"Meme Piece pour la page Périphériques/Scènes"	
+	"Same Room for Devices/Scenes":"Meme Piece pour la page Périphériques/Scènes",
+	"Rules":"Régles",
+	"Timeline":"Timeline",
+	"Table Scenes":"Table Scènes",
+	"Use new UI7 behavior for Heater devices":"Utilise le comportement UI7 pour les thermostats",
+	"Show all rows in grid tables":"Voir toutes les lignes dans les tables",
+	"Table Controllers":"Table Controleurs"	
 });

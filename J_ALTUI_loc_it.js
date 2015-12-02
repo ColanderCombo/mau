@@ -303,5 +303,11 @@ Localization.init( {
 	"background CSS":"background CSS",
 	"IFrame Url":"IFrame Url",
 	"Optional, if specified frame will be filled in with this url":"Optional, if specified frame will be filled in with this url",
-	"Same Room for Devices/Scenes":"Same Room for Devices/Scenes"	
+	"Same Room for Devices/Scenes":"Same Room for Devices/Scenes",
+	"Rules":"Rules",
+	"Timeline":"Timeline",
+	"Table Scenes":"Table Scenes",
+	"Use new UI7 behavior for Heater devices":"Use new UI7 behavior for Heater devices",
+	"Show all rows in grid tables":"Show all rows in grid tables",
+	"Table Controllers":"Table Controllers"
 	});
