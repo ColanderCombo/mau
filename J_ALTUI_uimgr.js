@@ -5362,11 +5362,18 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		}
 	};
 	
-	function _checkAltuiUpdate(data,strUsers) {
+	function _checkAltuiUpdate(data,tblUsers) {
 		var user = MultiBox.getMainUser();
-		if (user && strUsers) {
-			var usr = JSON.parse(strUsers);
-			if ($.inArray(user.Name,usr) == -1) {
+		if (user && tblUsers) {
+			var bFound = false;
+			if (tblUsers[user.Name]!=undefined) {
+				var d1 = tblUsers[user.Name].getTime() / 86400000;
+				var d2 = (new Date()).getTime() / 86400000;
+				var diff = new Number(d2 - d1).toFixed(0);
+				if (diff <= 365)
+					bFound = true;
+			}
+			if (bFound==false) {
 				$("footer form").append("<blockquote class='blockquote'><p class='text-danger'>Please support ALTUI with a yearly contribution</p></blockquote>");
 				// $("footer form").css('background','red');
 			}
