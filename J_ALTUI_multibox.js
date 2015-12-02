@@ -264,6 +264,12 @@ var MultiBox = ( function( window, undefined ) {
 	function _getUserByID(controllerid, userid) {
 		return _controllers[controllerid].controller.getUserByID( userid );
 	};
+	function _getMainUser() {
+		var usrs = _controllers[0].controller.getUsersSync();
+		if ( (usrs!=null) && (usrs.length>=1) )
+			return usrs[0];
+		return null;
+	};
 	
 	function _deleteRoom(room) {
 		var elems = room.altuiid.split("-");
@@ -676,7 +682,8 @@ var MultiBox = ( function( window, undefined ) {
 	getUsers		: _getUsers,
 	getUsersSync	: _getUsersSync,
 	getUserByID		: _getUserByID,
-
+	getMainUser		: _getMainUser,
+	
 	// Devices
 	createDevice			: _createDevice,			// ( param , cbfunc )
 	deleteDevice			: _deleteDevice,			// id
