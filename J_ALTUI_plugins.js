@@ -216,8 +216,11 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var allsetpoints = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1', 'AllSetpoints' );
 		var heatsetpoint = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Heat', 'CurrentSetpoint' ); 
 		var coldsetpoint = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Cool', 'CurrentSetpoint' ); 
-		var heatsetpoint=null, coldsetpoint=null, autosetpoint=null, currentmodesetpoint=null;
+		var autosetpoint=null, currentmodesetpoint=null;
 		var bNewControl = (isUI5==false ) && (  isNullOrEmpty(allsetpoints)==false );
+		if (bNewControl==true)
+			bNewControl = (MyLocalStorage.getSettings('UseUI7Heater')==1);
+		
 		if (bNewControl ==true) {
 			AltuiDebug.debug("Using new form of heater as AllSetpoints is not empty: {0} )".format( allsetpoints));
 			var splits = allsetpoints.split(",");

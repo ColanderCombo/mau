@@ -3086,6 +3086,7 @@ var UIManager  = ( function( window, undefined ) {
 		{ id:'ShowWeather', type:'checkbox', label:"Show Weather on home page", _default:1 },
 		{ id:'UseVeraFavorites', type:'checkbox', label:"Use Vera Favorites", _default:0 },
 		{ id:'SyncLastRoom', type:'checkbox', label:"Same Room for Devices/Scenes", _default:1},
+		{ id:'UseUI7Heater', type:'checkbox', label:"Use new UI7 behavior for Heater devices", _default:0},
 		{ id:'Menu2ColumnLimit', type:'number', label:"2-columns Menu's limit", _default:15, min:2, max:30  },
 		{ id:'TempUnitOverride', type:'select', label:"Weather Temp Unit (UI5)", _default:'c', choices:'c|f'  }
 	];
