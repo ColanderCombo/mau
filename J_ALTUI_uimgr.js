@@ -3087,6 +3087,7 @@ var UIManager  = ( function( window, undefined ) {
 		{ id:'UseVeraFavorites', type:'checkbox', label:"Use Vera Favorites", _default:0 },
 		{ id:'SyncLastRoom', type:'checkbox', label:"Same Room for Devices/Scenes", _default:1},
 		{ id:'UseUI7Heater', type:'checkbox', label:"Use new UI7 behavior for Heater devices", _default:0},
+		{ id:'ShowAllRows', type:'checkbox', label:"Show all rows in grid tables", _default:0},
 		{ id:'Menu2ColumnLimit', type:'number', label:"2-columns Menu's limit", _default:15, min:2, max:30  },
 		{ id:'TempUnitOverride', type:'select', label:"Weather Temp Unit (UI5)", _default:'c', choices:'c|f'  }
 	];
@@ -5669,7 +5670,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		var defaults={};
 		$.each(tbl, function(idx,elem) {
 			var key_vals=elem.split('=');
-			defaults[ key_vals[0] ] =  key_vals[1];
+			defaults[ key_vals[0] ] =  decodeURIComponent(key_vals[1]);
 		});
 		$.each(_checkOptions, function(idx,opt) {
 			if (MyLocalStorage.getSettings(opt.id) == null)
@@ -7660,13 +7661,15 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		var viscols = MyLocalStorage.getSettings("TriggersVisibleCols") || [];
 		if (viscols.length==0)
 			viscols = [ 'lastrun','scene','trigger','device','condition','id','lua'];
-
+		var options = (MyLocalStorage.getSettings('ShowAllRows')==1) ? {rowCount:-1	} : {};
+		
 		$(".altui-mainpanel").append( _array2Table(arr,'id',viscols) );
-		$("#altui-grid").bootgrid({
-			caseSensitive: false,
-			statusMapping: {}
-		})
-		.bootgrid("sort",{
+		$("#altui-grid").bootgrid( 
+			$.extend({
+				caseSensitive: false,
+				statusMapping: {}
+			},options)
+		).bootgrid("sort",{
 			lastrun:"desc"
 		})
 		.on("loaded.rs.jquery.bootgrid", function (e) {
@@ -9923,18 +9926,21 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			html+="</table>";
 			html+="</div>";
 			$(".altui-mainpanel").append( html );
-			var grid = $("#altui-grid").bootgrid({
-				caseSensitive: false,
-				statusMapping: {},
-				formatters: {
-					"commands": function(column, row)
-					{
-						return "<button type=\"button\" class=\"btn btn-xs btn-default altui-command-edit\" data-row-id=\"" + row.altuiid + "\">"+editGlyph+"</button>" + 
-							"<button type=\"button\" class=\"btn btn-xs btn-default altui-command-delete\" data-row-id=\"" + row.altuiid + "\">"+deleteGlyph+"</button>";
+
+			var options = (MyLocalStorage.getSettings('ShowAllRows')==1) ? {rowCount:-1	} : {};
+			var grid = $("#altui-grid").bootgrid( 
+				$.extend({
+					caseSensitive: false,
+					statusMapping: {},
+					formatters: {
+						"commands": function(column, row)
+						{
+							return "<button type=\"button\" class=\"btn btn-xs btn-default altui-command-edit\" data-row-id=\"" + row.altuiid + "\">"+editGlyph+"</button>" + 
+								"<button type=\"button\" class=\"btn btn-xs btn-default altui-command-delete\" data-row-id=\"" + row.altuiid + "\">"+deleteGlyph+"</button>";
+						}
 					}
-				}
-			}).on("loaded.rs.jquery.bootgrid", function (e)
-			{
+				},options)
+			).on("loaded.rs.jquery.bootgrid", function (e) {
 				var settings = $("#altui-grid").bootgrid("getColumnSettings");
 				viscols = $.map($.grep(settings, function (obj) { return obj.visible == true }),function(obj){ return obj.id;});
 				MyLocalStorage.setSettings("ScenesVisibleCols",viscols);
@@ -10032,11 +10038,13 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				html+="</table>";
 				html+="</div>";
 				$(".altui-mainpanel").append( html );
-				$("#altui-grid").bootgrid({
-					caseSensitive: false,
-					statusMapping: {}
-				}).on("loaded.rs.jquery.bootgrid", function (e)
-				{
+				var options = (MyLocalStorage.getSettings('ShowAllRows')==1) ? {rowCount:-1	} : {};
+				$("#altui-grid").bootgrid(
+					$.extend({
+						caseSensitive: false,
+						statusMapping: {}
+					},options)
+				).on("loaded.rs.jquery.bootgrid", function (e){
 					var settings = $("#altui-grid").bootgrid("getColumnSettings");
 					viscols = $.map($.grep(settings, function (obj) { return obj.visible == true }),function(obj){ return obj.id;});
 					MyLocalStorage.setSettings("DevicesVisibleCols",viscols);
@@ -10117,7 +10125,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 						val=0;
 					if (val==true)
 						val=1;
-					tbl.push("{0}={1}".format(key,val));
+					tbl.push("{0}={1}".format(key,encodeURIComponent(val)));
 				}
 			});
 			MultiBox.setStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "ServerOptions", tbl.join(','));
