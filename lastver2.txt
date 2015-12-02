@@ -1,5 +1,5 @@
 UIManager.checkAltuiUpdate("949,Show Watch in trigger table;Show Watch count in scene table;bugfix Watch in scene editor;Option to keep last selected room common in device and scene page;Hide cold buttons in heater dashboard;Add menu entries in Misc;Watts displayed with decimal;Lua Pretty function from akbooer;IFrame option in Frame widget for custom pages;Display zWave variables in monitoring mode;Prevent refreshes of control panel while entering slider values,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29726",
 {
 	'amg0':new Date(2015,10,28),
-	'amg1':new Date(2014,11,3)
+	'amg1':new Date(2014,11,2)
 } );
