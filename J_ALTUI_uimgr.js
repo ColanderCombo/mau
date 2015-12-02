@@ -5401,11 +5401,15 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				var info = MultiBox.getBoxInfo()[0];
 				var infotbl=[];
 				for( var key in info) { infotbl.push( info[key] || "") };
-				$("small#altui-footer").html( "<p>AltUI {0}.{1}, amg0,{2}</p>".format(_version,jsrevision,infotbl.join(", ")));
+				var curuser = MultiBox.getMainUser();
+				$("small#altui-footer").html( "<p>AltUI {0}.{1}, &copy; 2015 amg0,{2} User: {3}</p>".format(
+					_version,jsrevision,
+					infotbl.join(", "),
+					curuser ? curuser.Name : ''));
 				$("small#altui-footer").append( "<span>"+UIManager.getPayPalButtonHtml( false ) + "</span>");
 				
 				// JSONP call that will trigger a response with a call to _checkAltuiUpdate(data)
-				var url = "//code.mios.com/svn_public/mios_alternate_ui/lastver2.txt";
+				var url = "//code.mios.com/svn_public/mios_alternate_ui/lastver.txt";
 				$.ajax({
 				  url: url,
 				  dataType: "jsonp",
