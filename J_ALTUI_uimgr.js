@@ -92,6 +92,40 @@ var defaultIconSrc="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAA
 		// margin-top: 5px;		\
 
 var styles ="					\
+	@-webkit-keyframes horiz_rotate {	\
+		0% {											\
+			-webkit-transform: translateX(10px) rotateX(0deg); 			\
+			transform: translateX(10px) rotateX(0deg); 					\
+		}												\
+		50% {											\
+			-webkit-transform: translateX(10px) rotateX(180deg); 		\
+			transform: translateX(10px) rotateX(180deg); 				\
+		}												\
+		100% {											\
+			-webkit-transform: translateX(10px) rotateX(0deg); 			\
+			transform: translateX(10px) rotateX(0deg); 					\
+		}												\
+	}										\
+	@keyframes horiz_rotate	{	\
+		0% {											\
+			-webkit-transform: translateX(10px) rotateX(0deg); 			\
+			transform: translateX(10px) rotateX(0deg); 					\
+		}												\
+		50% {											\
+			-webkit-transform: translateX(10px) rotateX(180deg); 		\
+			transform: translateX(10px) rotateX(180deg); 				\
+		}												\
+		100% {											\
+			-webkit-transform: translateX(10px) rotateX(0deg); 			\
+			transform: translateX(10px) rotateX(0deg); 					\
+		}												\
+	}										\
+	#altui-license {						\
+	}										\
+	#altui-license.license-rotated {		\
+		-webkit-animation: horiz_rotate 3s ease-in-out 0s 5 normal;		\
+		animation: horiz_rotate 3s ease-in-out 0s 5 normal;				\
+	}										\
 	.big-glyph  {				\
 		font-size: 22px;		\
 		margin: 5px;			\
@@ -5374,8 +5408,16 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					bFound = true;
 			}
 			if (bFound==false) {
-				$("footer form").append("<blockquote class='blockquote'><p class='text-danger'>Please support ALTUI with a yearly contribution</p></blockquote>");
-				// $("footer form").css('background','red');
+				// $("footer form").append("<blockquote class='blockquote'><p class='text-danger'>Hello {0}, please support ALTUI with a yearly contribution. Last:{1}</p></blockquote>".format(
+				$("body nav").after("<blockquote id='altui-license' class='blockquote'><p class='text-info'>Hello {0}, please support ALTUI with a yearly contribution. Last:{1}</p></blockquote>".format(
+					user.Name,
+					tblUsers[user.Name].toUTCString()
+				));
+				$("#altui-license").toggleClass("license-rotated").one("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
+					$("#altui-license").remove();
+				});
+			} else {
+				$("#altui-footer form").remove();
 			}
 		}
 		var re = /\$Revision:\s*(\d*).*\$/; 
@@ -5416,7 +5458,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				$("small#altui-footer").append( "<span>"+UIManager.getPayPalButtonHtml( false ) + "</span>");
 				
 				// JSONP call that will trigger a response with a call to _checkAltuiUpdate(data)
-				var url = "//code.mios.com/svn_public/mios_alternate_ui/lastver.txt";
+				var url = "//code.mios.com/svn_public/mios_alternate_ui/lastver2.txt";
 				$.ajax({
 				  url: url,
 				  dataType: "jsonp",
@@ -8060,7 +8102,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 
 		html +="<p>For those who really like this plugin and feel like it, you can donate what you want here on Paypal. It will not buy you more support not any garantee that this can be maintained or evolve in the future but if you want to show you are happy and would like my kids to transform some of the time I steal from them into some <i>concrete</i> returns, please feel very free ( and absolutely not forced to ) to donate whatever you want.  thank you !</p>";
 		// html += UIManager.getPayPalButtonHtml( true );
-
+		html +="<hr>";
+		html += UIManager.getPayPalButtonHtml(false);
 		$(".altui-mainpanel").append(html);
 		
 		$(".altui-leftnav a").on('click', function(e) {
