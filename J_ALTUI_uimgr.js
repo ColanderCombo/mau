@@ -5409,9 +5409,9 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			}
 			if (bFound==false) {
 				// $("footer form").append("<blockquote class='blockquote'><p class='text-danger'>Hello {0}, please support ALTUI with a yearly contribution. Last:{1}</p></blockquote>".format(
-				$("body nav").after("<blockquote id='altui-license' class='blockquote'><p class='text-info'>Hello {0}, please support ALTUI with a yearly contribution. Last:{1}</p></blockquote>".format(
-					user.Name,
-					tblUsers[user.Name].toUTCString()
+				$("body nav").after("<blockquote id='altui-license' class='blockquote'><p class='text-info'>{0}.({1})</p></blockquote>".format(
+					_T("Hello {0}, please consider a small contribution to support ALTUI developpement").format(user.Name),
+					tblUsers[user.Name].toUTCString()					
 				));
 				$("#altui-license").toggleClass("license-rotated").one("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
 					$("#altui-license").remove();
