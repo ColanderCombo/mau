@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("972,heater dashboard;new Option for heater UI5 behavior overide;bugfix:ServerOptions;new Option for bootgrid show all line option,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29762")
+UIManager.checkAltuiUpdate("981,Test Lua print fix (akbooer);VeraAlert plugin display compatibility;Blockly release to fix a IOS display bug,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29776")
