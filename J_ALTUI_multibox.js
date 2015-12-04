@@ -183,6 +183,9 @@ var MultiBox = ( function( window, undefined ) {
 	function _initializeJsonp(controller) {
 		return _controllers[controller].controller.initializeJsonp();
 	};
+	function _initializeSysinfo(controller) {
+		return _controllers[controller].controller.initializeSysinfo();	
+	}
 	function _setHouseMode(newmode,cbfunc) {
 		return _controllers[0].controller.setHouseMode(newmode,cbfunc);
 	};
@@ -754,6 +757,7 @@ var MultiBox = ( function( window, undefined ) {
 	getIpAddr			: _getIpAddr,			// ()
 	isUI5				: _isUI5,				// (controller)
 	initializeJsonp		: _initializeJsonp,		// (controller)
+	initializeSysinfo   : _initializeSysinfo,	// (controller)
 	getWeatherSettings 	: _getWeatherSettings,	// ()
 	runLua				: _runLua,				//(code, cbfunc) 
 	getLuaStartup		: _getLuaStartup,		//()

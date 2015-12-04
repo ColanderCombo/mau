@@ -20,6 +20,7 @@ jsonp.ud.scenes=[];
 jsonp.ud.rooms=[];
 jsonp.ud.static_data=[];
 
+var sysinfoJson={};
 var user_changes=0;		// for PLEG
 
 
@@ -38,6 +39,45 @@ function set_JSAPI_context(ctx) {
 
 	// UI5 compatibility
 	jsonp = MultiBox.initializeJsonp(_JSAPI_ctx.controllerid);
+	sysinfoJson= MultiBox.initializeSysinfo(_JSAPI_ctx.controllerid);
+};
+
+
+function xml_encode(str)
+{
+    if(str == undefined)
+    {
+        alert("error in xml_encode: input undefined");
+        return;
+    }
+    str	=	trim(str.toString());
+
+    str = str.replace(new RegExp("[" + "&" + "]", "g"), "&amp;");
+    str = str.replace(new RegExp("[" + "<" + "]", "g"), "&lt;");
+    str = str.replace(new RegExp("[" + ">" + "]", "g"), "&gt;");
+    str = str.replace(new RegExp("[" + "\"" + "]", "g"), "&quot;");
+    str = str.replace(new RegExp("[" + "'" + "]", "g"), "&apos;");
+    str = str.replace(/%/gi,'&#37;');
+
+    return str;
+};
+
+function xml_decode(str)
+{
+    if(str == undefined)
+    {
+        alert("error in xml_decode: input undefined");
+        return;
+    }
+    str	=	trim(str.toString());
+
+    str = str.replace(new RegExp("&amp;", "g"), "&");
+    str = str.replace(new RegExp("&lt;", "g"), "<");
+    str = str.replace(new RegExp("&gt;", "g"), ">");
+    str = str.replace(new RegExp("&quot;", "g"), "\"");
+    str = str.replace(new RegExp("&apos;", "g"), "'");
+
+    return str;
 };
 
 // function set_set_panel_html_callback(cb) {
@@ -144,6 +184,13 @@ function get_device_obj(deviceID){
     }
 };
 
+function get_trigger_info(sceneID,triggerIndex){
+	var scene = MultiBox.getSceneByID(_JSAPI_ctx.controllerid,sceneID);
+	if (scene==null)
+		return null;
+	return scene.triggers[ triggerIndex ] != undefined ? scene.triggers[ triggerIndex ] : null;
+}
+
 function cloneObject(obj) {
     if (Object.prototype.toString.call(obj) === '[object Array]') {
         var out = [], i = 0, len = obj.length;
@@ -192,6 +239,22 @@ function set_device_state (deviceId, serviceId, variable, value, dynamic) {
 	return true;
 };
 
+// veraalert uses req object
+function commandSent(response){}
+
+var req={
+	sendCommand: function(query,callback,param){
+		jQuery.ajax({
+			url: data_request_url+query,
+			success: function(response,status,obj){
+				if(typeof(callback)!="undefined"){
+					callback(obj.responseText,param);
+				}
+			}
+		});
+	},	
+};
+
 var Ajax = (function(window,undefined) {
 	function Response(data,jqXHR) {
 		return {
@@ -202,7 +265,7 @@ var Ajax = (function(window,undefined) {
 	};
 	return {
 		Request: function (url,opts) {
-			
+			var ajaxopts={};
 			var options = $.extend({
 				method:"GET",
 				parameters: {},
@@ -213,35 +276,47 @@ var Ajax = (function(window,undefined) {
 			
 			var urlHead = url;
 			var params = [];
-			$.each(options.parameters, function(index,value) {
-				params.push( index+"="+value );	// we assume nothing requires uri encoding here
-			});
-			if (params.length>0) {
-				urlHead = urlHead + "?" + params.join('&');
+			if ($.isArray(options.parameters)) {
+				$.each(options.parameters, function(index,value) {
+					params.push( index+"="+value );	// we assume nothing requires uri encoding here
+				});
+				if (params.length>0) {
+					urlHead = urlHead + "?" + params.join('&');
+				}
+				ajaxopts={
+					url: urlHead,
+					type: options.method,
+					// data: options.parameters,
+					// processData : false,			
+					// dataType: "text"
+				};
+			} 
+			else {
+				ajaxopts={
+					url: urlHead,
+					type: options.method,
+					data: options.parameters,
+					// processData : false,			
+					// dataType: "text"
+				};
 			}
-			var jqxhr = $.ajax( {
-				url: urlHead,
-				type: options.method,
-				// data: options.parameters,
-				// processData : false,			
-				// dataType: "text"
-			})
-			.done(function(data, textStatus, jqXHR) {
-				if ($.isFunction( options.onSuccess )) {
-					var response = new Response(data,jqXHR);
-					(options.onSuccess)(response);
-				}
-			})
-			.fail(function(jqXHR, textStatus, errorThrown) {
-				if ($.isFunction( options.onFailure )) {
-					(options.onFailure)(textStatus);
-				}
-			})
-			.always(function(data_jqXHR, textStatus, jqXHR_errorThrown) {
-				if ($.isFunction( options.onComplete )) {
-					(options.onComplete)("");
-				}
-			});
+			var jqxhr = $.ajax(ajaxopts )
+				.done(function(data, textStatus, jqXHR) {
+					if ($.isFunction( options.onSuccess )) {
+						var response = new Response(data,jqXHR);
+						(options.onSuccess)(response);
+					}
+				})
+				.fail(function(jqXHR, textStatus, errorThrown) {
+					if ($.isFunction( options.onFailure )) {
+						(options.onFailure)(textStatus);
+					}
+				})
+				.always(function(data_jqXHR, textStatus, jqXHR_errorThrown) {
+					if ($.isFunction( options.onComplete )) {
+						(options.onComplete)("");
+					}
+				});
 		}
 	};
 })();

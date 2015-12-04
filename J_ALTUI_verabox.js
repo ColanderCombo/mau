@@ -53,6 +53,24 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		PageMessage.message("You need to save your changes","info", true );
 		user_changes=1; //UI5 compat
 	};
+
+	function _initializeSysinfo() {
+		var sysinfo = null;
+		var url = _upnpHelper.proxify( _upnpHelper.getUrlHead().replace('/port_3480/data_request','/cgi-bin/cmh/sysinfo.sh') );
+		var jqxhr = $.ajax( {
+			url: url,
+			type: "GET",
+			async:false,
+			//dataType: "text",
+		})
+		.done(function(data) {
+			sysinfo = JSON.parse(data);
+		})
+		.fail(function(jqXHR, textStatus) {
+			sysinfo={};
+		});
+		return sysinfo;
+	};
 	
 	function _initializeJsonp() {
 		jsonp={};
@@ -1409,6 +1427,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	updateChangeCache : _updateChangeCache,
 	saveChangeCaches  : _saveChangeCaches,
 	initializeJsonp	  : _initializeJsonp,
+	initializeSysinfo : _initializeSysinfo,
 
 	// save page data into altui plugin device
 	saveData		: _saveData,		//  name, data , cbfunc
