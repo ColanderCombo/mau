@@ -8182,8 +8182,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			MyLocalStorage.setSettings("LastOne_LuaTest",lua);
 			MultiBox.runLua(0,lua, function(res) {
 				res = $.extend({success:false, result:"",output:""},res);
-				$("#altui-editor-result").html(res.result);
-				$("#altui-editor-output").html(res.output);
+				$("#altui-editor-result").text(res.result);
+				$("#altui-editor-output").text(res.output);
 				if ( res.success ==true )
 					PageMessage.message( _T("Code execution succeeded"), "success");
 				else
