@@ -236,7 +236,7 @@ var styles ="					\
 		padding-top: 	1px;	\
 		padding-bottom: 1px;	\
 	}					\
-	.altui-warningicon {	\
+	.altui-warningicon, .altui-infoicon {	\
 		font-size: 25px;\
 		padding-left: 5px;		\
 		padding-right: 5px;		\
@@ -728,8 +728,10 @@ var DialogManager = ( function() {
 		});
 	};
 		
-	function _createSpinningDialog(message) {
+	function _createSpinningDialog(message,glyph) {
 				// 0: title, 1: body
+		var glyph2 = glyph || glyphTemplate.format( "refresh", _T("Refresh"), "text-warning glyphicon-spin big-glyph" );
+		
 		var defaultSpinDialogModalTemplate="";
 		defaultSpinDialogModalTemplate = "<div id='dialogModal' class='modal' data-backdrop='static' data-keyboard='false'>";
 		defaultSpinDialogModalTemplate += "  <div class='modal-dialog modal-sm'>";
@@ -743,20 +745,21 @@ var DialogManager = ( function() {
 		defaultSpinDialogModalTemplate += "  </div><!-- /.modal-dialog -->";
 		defaultSpinDialogModalTemplate += "</div><!-- /.modal -->";
 		return DialogManager.registerDialog('dialogModal',defaultSpinDialogModalTemplate.format( 
-			glyphTemplate.format( "refresh", _T("Refresh"), "text-warning glyphicon-spin big-glyph" ),
+			glyph2,
 			message || "")
 		);
 	};
-	
-	function _confirmDialog(message,cbfunc) {
+	function _genericDialog(message,title,buttons,cbfunc) {
 		var result = false;
-		var warningpic = "<div class='altui-warningicon pull-left'>{0}</div>".format(questionGlyph);
 		var dialog = DialogManager.registerDialog('dialogModal',
 						defaultDialogModalTemplate.format( 
-								warningpic+_T("Are you Sure ?"), 	// title
+								title, 	// title
 								message,							// body
 								""));								// size
-		DialogManager.dlgAddDialogButton(dialog, true, _T("Yes"));
+		$.each(buttons,function(i,button) {
+			// [{isdefault:true, label:_T("Yes")}]
+			DialogManager.dlgAddDialogButton(dialog, button.isdefault, button.label);
+		});
 		// buttons
 		$('div#dialogs')		
 			.off('submit',"div#dialogModal form")
@@ -776,8 +779,15 @@ var DialogManager = ( function() {
 		  "show"      : true                     // ensure the modal is shown immediately
 		});
 		return result;
+	}
+	function _confirmDialog(message,cbfunc) {
+		var warningpic = "<div class='altui-warningicon pull-left'>{0}</div>".format(questionGlyph);
+		return _genericDialog(message,warningpic+_T("Are you Sure ?"),[{isdefault:true, label:_T("Yes")}],cbfunc)
 	};
-	
+	function _infoDialog(title,message,cbfunc) {
+		var header= "<div class='altui-infoicon pull-left'>{0}</div> {1}".format(infoGlyph,title);
+		return _genericDialog(message,header,[],cbfunc);
+	};
 	function _triggerDialog( trigger, controller, cbfunc ) {
 		var dialog = DialogManager.createPropertyDialog(_T('Trigger'));
 		var device = MultiBox.getDeviceByID( controller ,trigger.device);
@@ -1338,6 +1348,7 @@ var DialogManager = ( function() {
 	return {
 		registerDialog : _registerDialog,		// name, html
 		createSpinningDialog: _createSpinningDialog,
+		infoDialog: _infoDialog,
 		confirmDialog: _confirmDialog,
 		triggerDialog: _triggerDialog,
 		triggerUsersDialog: _triggerUsersDialog,
@@ -3115,15 +3126,15 @@ var PageMessage = (function(window, undefined ) {
 var UIManager  = ( function( window, undefined ) {  
 	// in English, we will apply the _T() later, at display time
 	var _checkOptions = [
-		{ id:'ShowVideoThumbnail', type:'checkbox', label:"Show Video Thumbnail in Local mode", _default:1 },
-		{ id:'FixedLeftButtonBar', type:'checkbox', label:"Left Buttons are fixed on the page", _default:1 },
-		{ id:'ShowWeather', type:'checkbox', label:"Show Weather on home page", _default:1 },
-		{ id:'UseVeraFavorites', type:'checkbox', label:"Use Vera Favorites", _default:0 },
-		{ id:'SyncLastRoom', type:'checkbox', label:"Same Room for Devices/Scenes", _default:1},
-		{ id:'UseUI7Heater', type:'checkbox', label:"Use new UI7 behavior for Heater devices", _default:0},
-		{ id:'ShowAllRows', type:'checkbox', label:"Show all rows in grid tables", _default:0},
-		{ id:'Menu2ColumnLimit', type:'number', label:"2-columns Menu's limit", _default:15, min:2, max:30  },
-		{ id:'TempUnitOverride', type:'select', label:"Weather Temp Unit (UI5)", _default:'c', choices:'c|f'  }
+		{ id:'ShowVideoThumbnail', type:'checkbox', label:"Show Video Thumbnail in Local mode", _default:1, help:'In Local access mode, show camera in video stream mode' },
+		{ id:'FixedLeftButtonBar', type:'checkbox', label:"Left Buttons are fixed on the page", _default:1, help:'choose whether or not the selection Buttons on the left are scrolling with the page' },
+		{ id:'ShowWeather', type:'checkbox', label:"Show Weather on home page", _default:1, help:'display or not the weather widget on home page' },
+		{ id:'UseVeraFavorites', type:'checkbox', label:"Use Vera Favorites", _default:0, help:'use the same favorites as set on your VERA box but prevent to have different favorites per client device' },
+		{ id:'SyncLastRoom', type:'checkbox', label:"Same Room for Devices/Scenes", _default:1, help:'keep the same last selected room between the device and the scene pages'},
+		{ id:'UseUI7Heater', type:'checkbox', label:"Use new UI7 behavior for Heater devices", _default:0, help:'technical option to trigger the UI7 behavior for heater'},
+		{ id:'ShowAllRows', type:'checkbox', label:"Show all rows in grid tables", _default:0, help:'allways show all the lines in the grid tables, or have a row count selector instead'},
+		{ id:'Menu2ColumnLimit', type:'number', label:"2-columns Menu's limit", _default:15, min:2, max:30, help:'if a menu has more entries than this number then show the menu entries in 2 columns'  },
+		{ id:'TempUnitOverride', type:'select', label:"Weather Temp Unit (UI5)", _default:'c', choices:'c|f', help:'Unit for temperature'  }
 	];
 	var edittools = [];
 	var tools = [];
@@ -10216,9 +10227,10 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			$.each(_checkOptions, function(id,check) {
 				var init =  (MyLocalStorage.getSettings(check.id)!=null) ? MyLocalStorage.getSettings(check.id) : check._default;
 				html += "<div class='col-sm-6'>";
+					var helpbutton = xsbuttonTemplate.format( id, 'altui-help-button',  glyphTemplate.format("question-sign","",""), _T(check.help));
 					switch( check.type ) {
 						case 'select':
-							html +="<label title='"+check.id+"' class='' for='altui-"+check.id+"'>"+_T(check.label)+"</label> : ";
+							html +="<label title='"+_T(check.help)+"' class='' for='altui-"+check.id+"'>"+_T(check.label)+"</label> : ";
 							html +="<select id='altui-"+check.id+"' title='"+check.id+"'>";
 							$.each(check.choices.split("|"),function(id,unit){
 								html += "<option value='{0}' {1}>{0}</option>".format( unit , (unit==init) ? 'selected' : '' );	
@@ -10229,7 +10241,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 							});
 							break;
 						case 'checkbox':
-							html +="<label title='"+check.id+"' class='checkbox-inline'>";
+							html +="<label title='"+_T(check.help)+"' class='checkbox-inline'>";
 							html +=("  <input type='checkbox' id='altui-"+check.id+"' " + ( (init==true) ? 'checked' : '') +" value='"+init+"' title='"+check.id+"'>"+_T(check.label));
 							html +="</label>";
 							$(".altui-mainpanel").on("click","#altui-"+check.id,function(){ 
@@ -10237,7 +10249,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 							});
 							break;
 						case 'number':
-							html +="<label title='"+check.id+"' class='' for='altui-"+check.id+"'>"+_T(check.label)+"</label>:";
+							html +="<label title='"+_T(check.help)+"' class='' for='altui-"+check.id+"'>"+_T(check.label)+"</label>:";
 							html +=("<input type='number' min='"+(check.min||0) +"' max='"+(check.max||999) +"' id='altui-"+check.id+"' " + ( (init==true) ? 'checked' : '') +" value='"+init+"' title='"+check.id+"'>");
 							$(".altui-mainpanel").on("focusout","#altui-"+check.id,function(){ 
 							$("#altui-"+check.id).is(':checked')
@@ -10245,6 +10257,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 							});
 							break;
 					}
+				html+=helpbutton;
 				html += "</div>";
 			});		
 		html +="  </div>";
@@ -10286,6 +10299,11 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		html +="</div>";
 
 		$(".altui-mainpanel").append(html);
+		$(".altui-help-button").click( function() {
+			var id = $(this).prop('id');
+			var check =  _checkOptions[parseInt(id)];
+			DialogManager.infoDialog(check.id,_T(check.help));
+		});
 		
 		$(".altui-save-IconDB").click( function() {
 			IconDB.saveDB();
@@ -10540,7 +10558,7 @@ $(document).ready(function() {
 		refreshGlyph=glyphTemplate.format( "refresh", _T("Refresh"), "text-warning" );
 		removeGlyph=glyphTemplate.format( "remove", _T("Remove"), "" );
 		loadGlyph = glyphTemplate.format( "open", _T("Load") , "");
-		infoGlyph = glyphTemplate.format( "info-sign", _T("Info") , "");
+		infoGlyph = glyphTemplate.format( "info-sign", _T("Info") , "text-info");
 		picGlyph = glyphTemplate.format( "picture", _T("Image") , "");
 		upGlyph = glyphTemplate.format( "arrow-up", _T("More") , "");
 		downGlyph = glyphTemplate.format( "arrow-down", _T("Less") , "");
