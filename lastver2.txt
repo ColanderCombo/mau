@@ -6,6 +6,8 @@ UIManager.checkAltuiUpdate("981,Show Watch in trigger table;Show Watch count in 
 	'vanbredat':new Date(2015,06,15),
 	'ohb_vera':new Date(2015,07,28),
 	'Camiel':new Date(2015,09,10),
+	'actran70':new Date(2015,07,22),
+	'chamberlainzo6':new Date(2015,8,15),
 	'aiw15lgd6171':new Date(2015,10,4),	
 	'dsroberts1945':new Date(2015,10,18),
 	'amg0':new Date(2015,10,28),
