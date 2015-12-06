@@ -224,7 +224,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		curTemp = 19;
 		heatsetpoint_current = 22;
 		heatsetpoint_target = 24;
-		// coldsetpoint = 18;
+		coldsetpoint_current = 17;
+		coldsetpoint_target = 15;
 		// autosetpoint = 21;		
 		// currentmodesetpoint=12;
 		// modeFan = "PeriodicOn";
@@ -263,6 +264,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 				html += "<div class='col-xs-3'>";
 					var coldsetpoint = coldsetpoint_target || parseFloat($("#altui-coldsetpoint-"+device.altuiid).text()) || coldsetpoint_current
 					if ((isHeater==false) && (coldsetpoint!=null)) {
+						html += ("<span class='altui-temperature-minor altui-blue pull-left' id='altui-coldsetpoint-current-"+device.altuiid+"'>"+parseFloat(coldsetpoint_current).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
+						html += ("<span class='altui-temperature-minor altui-blue pull-right' id='altui-coldsetpoint-target-"+device.altuiid+"'>"+parseFloat(coldsetpoint_target).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
 						html += ("<span class='altui-temperature-heater altui-blue' id='altui-coldsetpoint-"+device.altuiid+"'>"+parseFloat(coldsetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
 					}
 				html += "</div>";
@@ -367,35 +370,31 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 				var name = $(selected).data('name');
 				var value = parseFloat($('#'+$(selected).data('value')).text());
 				var incr = $(selected).data('incr');
-				var params = {}; params[name]=value+incr;
 				$('#'+$(selected).data('value')).html( (value+incr).toFixed(1)+'&deg;');
 				function doItNow(obj) {
-					// console.log("timer doItNow() :" + JSON.stringify(params));
-					MultiBox.runActionByAltuiID(event.data, service, action, params);			
-					$(obj).data("timer",null);
+					var params = {}; params[obj.name]=obj.value;
+					MultiBox.runActionByAltuiID(obj.altuiid, obj.service, obj.action, params);			
+					// console.log("timer doItNow() :" + JSON.stringify(obj));
+					$(obj.button).data("timer",null);
 				};
 				var timer = $(this).data("timer");
 				if (timer!=undefined) {
 					clearTimeout(timer);
 					// console.log("clear Timeout({0})".format(timer));
 				}
-				timer = setTimeout(doItNow,1500,$(this));
-				// console.log("set Timeout({0})  params:".format(timer,JSON.stringify(params)));
+				timer = setTimeout(doItNow,1500,{
+						button: $(this),
+						altuiid: event.data,
+						name: name,
+						service: service,
+						action: action,
+						value : value+incr
+				});
+				// console.log("set Timeout({0})  params:{1}".format(timer,value+incr));
 				$(this).data("timer",timer);
 			}	
 		);
 		html += "<script type='text/javascript'>";
-		// html += " $('button.altui-setpointcontrol-{0}').on('click', function() { 	".format(device.altuiid);
-		// html += " 	var selected = $(this);					";
-		// html += "   var service = $(selected).data('service');					";
-		// html += "   var action = $(selected).data('action');					";
-		// html += "   var name = $(selected).data('name');					";
-		// html += "   var value = parseFloat($('#'+$(selected).data('value')).text()) ;					";
-		// html += "   var incr = $(selected).data('incr');					";
-		// html += "   var params = {}; params[name]=value+incr;				";
-		// html += "   $('#'+$(selected).data('value')).html( (value+incr).toFixed(1)+'&deg;');				";
-		// html += "	MultiBox.runActionByAltuiID('{0}', service, action, params);".format(device.altuiid);
-		// html += "});"
 		html += " $('select#altui-heater-select-{0}').on('change', function() { 	".format(device.altuiid);
 		html += " 	var selected = $(this).find(':selected');					";
 		html += "   var service = $(selected).data('service');					";
