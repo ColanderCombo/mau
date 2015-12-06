@@ -221,11 +221,11 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var coldsetpoint_current = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Cool', 'CurrentSetpoint' ); 
 		var coldsetpoint_target = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Cool', 'SetpointTarget' ); 
 		//debug
-		curTemp = 19;
-		heatsetpoint_current = 22;
-		heatsetpoint_target = 24;
-		coldsetpoint_current = 17;
-		coldsetpoint_target = 15;
+		// curTemp = 19;
+		// heatsetpoint_current = 22;
+		// heatsetpoint_target = 24;
+		// coldsetpoint_current = 17;
+		// coldsetpoint_target = 15;
 		// autosetpoint = 21;		
 		// currentmodesetpoint=12;
 		// modeFan = "PeriodicOn";
