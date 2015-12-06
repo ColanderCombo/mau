@@ -7268,6 +7268,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					return;
 				var text = $(this).text();
 				var altuiid = $(this).parents(".altui-device").data('altuiid');
+				$(this).closest(".altui-device").addClass("altui-norefresh");
 				$(this).html("<input id='"+altuiid+"' class='altui-device-title-input' value='"+text+"'></input>");
 
 				$("input#"+altuiid+".altui-device-title-input").focusout({altuiid:altuiid},function(event){ 
@@ -7277,6 +7278,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 						if (result==true)
 							MultiBox.renameDevice(device, newname );
 					});
+					$(this).closest(".altui-device").removeClass("altui-norefresh");
 					$(this).parent().text(device.name);
 				});
 			})
