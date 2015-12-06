@@ -5427,8 +5427,10 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				));
 				$("#altui-license").toggleClass("license-rotated").one("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
 					$("#altui-license").remove();
+					$("#altui-footer > p").append("<span class='text-danger'>, {0}</span>".format(_T("Unregistered Version")));
 				});
 			} else {
+				$("#altui-footer > p").append("<span class='text-success'>, {0}</span>".format(_T("Registered Version")));
 				$("#altui-footer form").remove();
 			}
 		}
@@ -5470,7 +5472,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				$("small#altui-footer").append( "<span>"+UIManager.getPayPalButtonHtml( false ) + "</span>");
 				
 				// JSONP call that will trigger a response with a call to _checkAltuiUpdate(data)
-				var url = "//code.mios.com/svn_public/mios_alternate_ui/lastver.txt";
+				var url = "//code.mios.com/svn_public/mios_alternate_ui/lastver2.txt";
 				$.ajax({
 				  url: url,
 				  dataType: "jsonp",
