@@ -26,6 +26,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var style="";
 		style += ".altui-watts, .altui-volts, .altui-dimmable, .altui-countdown  {font-size: 16px;}";
 		style += ".altui-temperature  {font-size: 16px;}";
+		style += ".altui-temperature-heater  {font-size: 12px;}";
+		style += ".altui-temperature-minor  {font-size: 8px;}";
 		style += ".altui-humidity, .altui-light  {font-size: 18px;}";
 		style += ".altui-motion {font-size: 22px;}";
 		style += ".altui-weather-text, .altui-lasttrip-text, .altui-vswitch-text {font-size: 11px;}";
@@ -219,9 +221,9 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var coldsetpoint_current = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Cool', 'CurrentSetpoint' ); 
 		var coldsetpoint_target = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSetpoint1_Cool', 'SetpointTarget' ); 
 		//debug
-		// curTemp = 19;
-		// heatsetpoint_current = 22;
-		// heatsetpoint_target = null;
+		curTemp = 19;
+		heatsetpoint_current = 22;
+		heatsetpoint_target = 24;
 		// coldsetpoint = 18;
 		// autosetpoint = 21;		
 		// currentmodesetpoint=12;
@@ -253,18 +255,20 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 				html += "<div class='col-xs-3'>";
 					var heatsetpoint = heatsetpoint_target || parseFloat($("#altui-heatsetpoint-"+device.altuiid).text()) || heatsetpoint_current;
 					if (heatsetpoint!=null) {
-						html += ("<span class='altui-temperature altui-red' id='altui-heatsetpoint-"+device.altuiid+"'>"+parseFloat(heatsetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
+						html += ("<span class='altui-temperature-minor altui-red pull-left' id='altui-heatsetpoint-current-"+device.altuiid+"'>"+parseFloat(heatsetpoint_current).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
+						html += ("<span class='altui-temperature-minor altui-red pull-right' id='altui-heatsetpoint-target-"+device.altuiid+"'>"+parseFloat(heatsetpoint_target).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
+						html += ("<span class='altui-temperature-heater altui-red' id='altui-heatsetpoint-"+device.altuiid+"'>"+parseFloat(heatsetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
 					}
 				html += "</div>";
 				html += "<div class='col-xs-3'>";
 					var coldsetpoint = coldsetpoint_target || parseFloat($("#altui-coldsetpoint-"+device.altuiid).text()) || coldsetpoint_current
 					if ((isHeater==false) && (coldsetpoint!=null)) {
-						html += ("<span class='altui-temperature altui-blue' id='altui-coldsetpoint-"+device.altuiid+"'>"+parseFloat(coldsetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
+						html += ("<span class='altui-temperature-heater altui-blue' id='altui-coldsetpoint-"+device.altuiid+"'>"+parseFloat(coldsetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
 					}
 				html += "</div>";
 				html += "<div class='col-xs-3'>";
 					if (autosetpoint!=null) {
-						html += ("<span class='altui-temperature' id='altui-autosetpoint-"+device.altuiid+"'>"+parseFloat(autosetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
+						html += ("<span class='altui-temperature-heater' id='altui-autosetpoint-"+device.altuiid+"'>"+parseFloat(autosetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
 					}
 				html += "</div>";
 			html += "</div>";
@@ -353,18 +357,45 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 			html += "</div>";
 		html += "</div>";
 
+		var cls = 'button.altui-setpointcontrol-{0}'.format(device.altuiid);
+
+		$(".altui-mainpanel").off('click',cls)
+			.on('click',cls,device.altuiid,function(event) {
+				var selected = $(this);
+				var service = $(selected).data('service');
+				var action = $(selected).data('action');
+				var name = $(selected).data('name');
+				var value = parseFloat($('#'+$(selected).data('value')).text());
+				var incr = $(selected).data('incr');
+				var params = {}; params[name]=value+incr;
+				$('#'+$(selected).data('value')).html( (value+incr).toFixed(1)+'&deg;');
+				function doItNow(obj) {
+					// console.log("timer doItNow() :" + JSON.stringify(params));
+					MultiBox.runActionByAltuiID(event.data, service, action, params);			
+					$(obj).data("timer",null);
+				};
+				var timer = $(this).data("timer");
+				if (timer!=undefined) {
+					clearTimeout(timer);
+					// console.log("clear Timeout({0})".format(timer));
+				}
+				timer = setTimeout(doItNow,1500,$(this));
+				// console.log("set Timeout({0})  params:".format(timer,JSON.stringify(params)));
+				$(this).data("timer",timer);
+			}	
+		);
 		html += "<script type='text/javascript'>";
-		html += " $('button.altui-setpointcontrol-{0}').on('click', function() { 	".format(device.altuiid);
-		html += " 	var selected = $(this);					";
-		html += "   var service = $(selected).data('service');					";
-		html += "   var action = $(selected).data('action');					";
-		html += "   var name = $(selected).data('name');					";
-		html += "   var value = parseFloat($('#'+$(selected).data('value')).text()) ;					";
-		html += "   var incr = $(selected).data('incr');					";
-		html += "   var params = {}; params[name]=value+incr;				";
-		html += "   $('#'+$(selected).data('value')).html( (value+incr).toFixed(1)+'&deg;');				";
-		html += "	MultiBox.runActionByAltuiID('{0}', service, action, params);".format(device.altuiid);
-		html += "});"
+		// html += " $('button.altui-setpointcontrol-{0}').on('click', function() { 	".format(device.altuiid);
+		// html += " 	var selected = $(this);					";
+		// html += "   var service = $(selected).data('service');					";
+		// html += "   var action = $(selected).data('action');					";
+		// html += "   var name = $(selected).data('name');					";
+		// html += "   var value = parseFloat($('#'+$(selected).data('value')).text()) ;					";
+		// html += "   var incr = $(selected).data('incr');					";
+		// html += "   var params = {}; params[name]=value+incr;				";
+		// html += "   $('#'+$(selected).data('value')).html( (value+incr).toFixed(1)+'&deg;');				";
+		// html += "	MultiBox.runActionByAltuiID('{0}', service, action, params);".format(device.altuiid);
+		// html += "});"
 		html += " $('select#altui-heater-select-{0}').on('change', function() { 	".format(device.altuiid);
 		html += " 	var selected = $(this).find(':selected');					";
 		html += "   var service = $(selected).data('service');					";
