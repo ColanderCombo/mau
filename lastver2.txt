@@ -8,6 +8,7 @@ UIManager.checkAltuiUpdate("981,Show Watch in trigger table;Show Watch count in 
 	'Camiel':new Date(2015,09,10),
 	'actran70':new Date(2015,07,22),
 	'chamberlainzo6':new Date(2015,8,15),
+	'ilikelife':new Date(2015,9,12),
 	'aiw15lgd6171':new Date(2015,10,4),	
 	'dsroberts1945':new Date(2015,10,18),
 	'amg0':new Date(2015,10,28),
@@ -15,6 +16,7 @@ UIManager.checkAltuiUpdate("981,Show Watch in trigger table;Show Watch count in 
 	'bhouttuin':new Date(2015,11,3),
 	'mylesm':new Date(2015,11,5),
 	'bengoechea':new Date(2015,11,5),
+	'barakfamily':new Date(2015,11,6),
 	'XAPPO':new Date(2016,7,6),
 	'vosmont':new Date(2020,0,1),
 	'akbooer':new Date(2020,0,1)
