@@ -5418,7 +5418,10 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				if (diff <= 365)
 					bFound = true;
 			}
-			if (bFound==false) {
+			if (bFound==true) {
+				$("#altui-footer > p").append("<span class='text-success'>, {0}</span>".format(_T("Registered Version")));
+				$("#altui-footer form").remove();
+			} else {
 				// $("footer form").append("<blockquote class='blockquote'><p class='text-danger'>Hello {0}, please support ALTUI with a yearly contribution. Last:{1}</p></blockquote>".format(
 				$("body nav").after("<blockquote id='altui-license' class='blockquote'><p class='text-info'>{0}.({1})</p></blockquote>".format(
 				// $("footer").prepend("<blockquote id='altui-license' class='blockquote'><p class='text-info'>{0}.({1})</p></blockquote>".format(
@@ -5429,9 +5432,6 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					$("#altui-license").remove();
 					$("#altui-footer > p").append("<span class='text-danger'>, {0}</span>".format(_T("Unregistered Version")));
 				});
-			} else {
-				$("#altui-footer > p").append("<span class='text-success'>, {0}</span>".format(_T("Registered Version")));
-				$("#altui-footer form").remove();
 			}
 		}
 		var re = /\$Revision:\s*(\d*).*\$/; 
