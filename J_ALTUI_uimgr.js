@@ -1104,7 +1104,7 @@ var DialogManager = ( function() {
 		var propertyline = "";
 		propertyline += "<div class='form-group'>";
 		propertyline += "	<label for='altui-widget-"+name+"' title='Date Time'>"+(label ? label : name)+"</label>";
-		propertyline += "	<input id='altui-widget-"+name+"' class='form-control' type='time' step='1' value='"+value+"' placeholder='absolute time' "+optstr+"></input>";
+		propertyline += "	<input required id='altui-widget-"+name+"' class='form-control' type='text' pattern='^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$' step='1' value='"+value+"' placeholder='hh:mm:ss' "+optstr+"></input>";
 		propertyline += "</div>";
 		$(dialog).find(".row-fluid").append(propertyline);
 	};
@@ -2148,8 +2148,8 @@ var SceneEditor = function (scene) {
 						// save for real this time
 						var duration = $("#altui-widget-Delay").val().fromHHMMSS();
 						var bOK = true;
-						$.each(scene.groups, function(ifx,grp) {
-							if (grp.delay == duration)	// cannot have twice the same duration
+						$.each(scene.groups, function(idxgrp,grp) {
+							if ((idx!=idxgrp) && (grp.delay == duration))	// cannot have twice the same duration
 							{
 								bOK = false; 
 								return false;
