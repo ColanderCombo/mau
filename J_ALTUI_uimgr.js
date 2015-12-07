@@ -1104,7 +1104,7 @@ var DialogManager = ( function() {
 		var propertyline = "";
 		propertyline += "<div class='form-group'>";
 		propertyline += "	<label for='altui-widget-"+name+"' title='Date Time'>"+(label ? label : name)+"</label>";
-		propertyline += "	<input id='altui-widget-"+name+"' class='form-control' type='time' value='"+value+"' placeholder='absolute time' "+optstr+"></input>";
+		propertyline += "	<input id='altui-widget-"+name+"' class='form-control' type='time' step='1' value='"+value+"' placeholder='absolute time' "+optstr+"></input>";
 		propertyline += "</div>";
 		$(dialog).find(".row-fluid").append(propertyline);
 	};
