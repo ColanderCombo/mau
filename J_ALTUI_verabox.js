@@ -74,7 +74,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	
 	function _initializeJsonp() {
 		jsonp={};
-		jsonp.ud=_user_data;
+		jsonp.ud =_user_data;
 		// jsonp.ud.devices=[];
 		// jsonp.ud.scenes=[];
 		// jsonp.ud.rooms=[];

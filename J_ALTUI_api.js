@@ -19,6 +19,7 @@ jsonp.ud.devices=[];
 jsonp.ud.scenes=[];
 jsonp.ud.rooms=[];
 jsonp.ud.static_data=[];
+jsonp.ud.users=[];
 
 var sysinfoJson={};
 var user_changes=0;		// for PLEG
@@ -40,6 +41,7 @@ function set_JSAPI_context(ctx) {
 	// UI5 compatibility
 	jsonp = MultiBox.initializeJsonp(_JSAPI_ctx.controllerid);
 	sysinfoJson= MultiBox.initializeSysinfo(_JSAPI_ctx.controllerid);
+	application.userData = jsonp.ud;
 };
 
 
@@ -336,7 +338,8 @@ var Utils = ( function (undefined) {
 			var reg = new RegExp('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(:\\d{1,5})?$', 'i');
 			return(reg.test(ip));
 		},
-		getLangString: function(s1,s2)	{ return _T(s2);}	// returned localized version of the string
+		getLangString: function(s1,s2)	{ return _T(s2);},	// returned localized version of the string
+		xmlEncode : function(str)		{ return xml_encode(str); }
 	}
 })();
 
@@ -359,7 +362,17 @@ var DOMPurify = (function(undefined) {
 
 var application = (function(undefined) {
 	return {
-		sendCommandSaveUserData: function(bSilent)	{ }
+		userData:null,
+		sendCommandSaveUserData: function(bSilent)	{ },
+		sendCommand : function(params, va_RegisterResult, va_SendError, deviceID) {},
+		userDataRemove : function (type,id) { },
+		luReload : function() { 
+			MultiBox.reloadEngine(_JSAPI_ctx.controllerid); 
+		},
+		getSceneObject : function(SceneID) {
+			var scene = MultiBox.getSceneByID(_JSAPI_ctx.controllerid,SceneID);
+			return scene;
+		}
 	}
 })();
 
