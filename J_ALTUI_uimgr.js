@@ -5472,7 +5472,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				$("small#altui-footer").append( "<span>"+UIManager.getPayPalButtonHtml( false ) + "</span>");
 				
 				// JSONP call that will trigger a response with a call to _checkAltuiUpdate(data)
-				var url = "//code.mios.com/svn_public/mios_alternate_ui/lastver2.txt";
+				var url = "//code.mios.com/svn_public/mios_alternate_ui/lastver.txt";
 				$.ajax({
 				  url: url,
 				  dataType: "jsonp",
