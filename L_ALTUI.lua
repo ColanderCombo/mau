@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local ALTUI_SERVICE = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v0.101"
+local version = "v0.102"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -1767,38 +1767,47 @@ function addWatch( lul_device, service, variable, deviceid, sceneid, expression,
 	if (sceneid ~=-1) then
 		-- classic watch
 		local watchline = setWatchParams(service,variable,deviceid,sceneid,expression,xml)
+		debug(string.format("searching if watchline already exists: %s",watchline))
 		local variableWatch = getSetVariable(ALTUI_SERVICE, "VariablesToWatch", lul_device, "")
 		local bFound = false;
 		for k,v  in pairs(variableWatch:split(';')) do
-			if (watchline==v) then
+			local wservice,wvariable,wdevice,wscene,wexpression,wxml  = getWatchParams(v)
+			if (service==wservice) and (variable==wvariable) and (deviceid==wdevice) and (sceneid==wscene) and (expression==wexpression) and (xml==wxml) then
 				bFound = true;
 			end
 		end
 		if (bFound==false) then
+			debug(string.format("no, adding watchline %s",watchline))
 			variableWatch = variableWatch .. ";" .. watchline
 			luup.variable_set(ALTUI_SERVICE, "VariablesToWatch", variableWatch, lul_device)
+		else
+			debug(string.format("yes, found an existing watchline"))
 		end
 	else
 		-- data push watch
 		local watchline = setPushParams(service,variable,deviceid,provider,channelid,readkey,data,graphicurl)
+		debug(string.format("searching if watchline already exists: %s",watchline))
 		local variableWatch= getSetVariable(ALTUI_SERVICE, "VariablesToSend", lul_device, "")
 		local bFound = false;
 		for k,v  in pairs(variableWatch:split(';')) do
-			if (watchline==v) then
+			local wservice,wvariable,wdevice,wprovider,wchannelid,wreadkey,wdata,wgraphicurl  = getPushParams(v)
+			if (service==wservice) and (variable==wvariable) and (deviceid==wdevice) and (provider==wprovider) and (channelid==wchannelid) and (readkey==wreadkey) and (data==wdata) and (graphicurl==wgraphicurl) then
 				bFound = true;
 			end
 		end
 		if (bFound==false) then
+			debug(string.format("no, adding watchline %s",watchline))
 			variableWatch = variableWatch .. ";" .. watchline
 			luup.variable_set(ALTUI_SERVICE, "VariablesToSend", variableWatch, lul_device)
 		end
 	end
-	return newwatch
+	return tostring(newwatch)
 end
 
 function _delWatch(service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl )
 	debug(string.format("_delWatch(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",service, variable, deviceid, sceneid, expression, xml or "", provider or "", channelid or "", readkey or "", data or "", graphicurl or ""))
 	devidstr = tostring(deviceid)	 -- to inssure it is not a indexed array , but hash table
+	local removed=0
 	local parts = devidstr:split("-")
 	if (parts[2]==nil) then
 		devidstr = "0-"..devidstr
@@ -1807,7 +1816,6 @@ function _delWatch(service, variable, deviceid, sceneid, expression, xml, provid
 	-- registeredWatches[devidstr][service][variable]['Expressions'][expression][n+1]
 	-- local n = tablelength(registeredWatches[devidstr][service][variable]['Expressions'][expression])
 	if (registeredWatches[devidstr] ~= nil) and (registeredWatches[devidstr][service] ~= nil) and (registeredWatches[devidstr][service][variable] ~= nil) and (registeredWatches[devidstr][service][variable]['Expressions'][expression] ~= nil) then
-		local removed=0
 		if (sceneid==-1) then
 			-- watch for push
 			-- if (registeredWatches[devidstr][service][variable]['DataProviders']DataProviders[i]['Data']==data) then
@@ -1859,22 +1867,26 @@ function _delWatch(service, variable, deviceid, sceneid, expression, xml, provid
 		end
 		debug(string.format("success httpcode:%s data:%s",httpcode,data))	
 	end
+	return removed
 end
 
 function delWatch( lul_device, service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl )
 	debug(string.format("delWatch(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",lul_device, service, variable, deviceid, sceneid, expression, xml or "", provider or "", channelid or "", readkey or "", data or "", graphicurl or ""))
 	-- remove from DB and  call the remote controller to remove the watch too
 	graphicurl = graphicurl or ""
-	_delWatch(service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl  )
+	local removed = _delWatch(service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl  )
 	
 	--  remove from persistent list
 	if (sceneid ~=-1) then
 		-- classic watch
 		local watchline = setWatchParams(service,variable,deviceid,sceneid,expression,xml)
+		debug(string.format("Watch to delete: %s",watchline))
 		local variableWatch = getSetVariable(ALTUI_SERVICE, "VariablesToWatch", lul_device, "")
 		local toKeep = {}
 		for k,v  in pairs(variableWatch:split(';')) do
-			if (watchline~=v) then
+			local wservice,wvariable,wdevice,wscene,wexpression,wxml  = getWatchParams(v)
+			if (service~=wservice) or (variable~=wvariable) or (deviceid~=wdevice) or (sceneid~=wscene) or (expression~=wexpression) or (xml~=wxml) then
+				debug(string.format("Keeping this watch: %s",v))
 				table.insert(toKeep, v)
 			end
 		end
@@ -1882,17 +1894,21 @@ function delWatch( lul_device, service, variable, deviceid, sceneid, expression,
 	else
 		-- data push watch
 		local watchline = setPushParams(service,variable,deviceid,provider,channelid,readkey,data,graphicurl)
+		debug(string.format("Watch to delete: %s",watchline))
 		local variableWatch= getSetVariable(ALTUI_SERVICE, "VariablesToSend", lul_device, "")
 		local toKeep = {}
 		for k,v  in pairs(variableWatch:split(';')) do
-			if (watchline~=v) then
+			local wservice,wvariable,wdevice,wprovider,wchannelid,wreadkey,wdata,wgraphicurl  = getPushParams(v)
+			if not((service==wservice) and (variable==wvariable) and (deviceid==wdevice) and (provider==wprovider) and (channelid==wchannelid) and (readkey==wreadkey) and (data==wdata) and (graphicurl==wgraphicurl)) then
+				debug(string.format("Keeping this watch: %s",v))
 				table.insert(toKeep, v)
 			end
 		end
 		luup.variable_set(ALTUI_SERVICE, "VariablesToSend", table.concat(toKeep,";"), lul_device)
 	end
 	debug(string.format("registeredWatches: %s",json.encode(registeredWatches)))
-	return 1
+	debug(string.format("delWatch() returns: %d",removed))
+	return tostring(removed)
 end
 
 function fixVariableWatches( lul_device )
