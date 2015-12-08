@@ -14,6 +14,7 @@ UIManager.checkAltuiUpdate("981,Show Watch in trigger table;Show Watch count in 
 	'amg0':new Date(2015,10,28),
 	'Leoni':new Date(2015,11,2),
 	'bhouttuin':new Date(2015,11,3),
+	'cuda':new Date(2015,11,4),
 	'mylesm':new Date(2015,11,5),
 	'bengoechea':new Date(2015,11,5),
 	'barakfamily':new Date(2015,11,6),

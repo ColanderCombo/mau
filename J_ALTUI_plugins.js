@@ -256,16 +256,20 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 				html += "<div class='col-xs-3'>";
 					var heatsetpoint = heatsetpoint_target || parseFloat($("#altui-heatsetpoint-"+device.altuiid).text()) || heatsetpoint_current;
 					if (heatsetpoint!=null) {
-						html += ("<span class='altui-temperature-minor altui-red pull-left' id='altui-heatsetpoint-current-"+device.altuiid+"'>"+parseFloat(heatsetpoint_current).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
-						html += ("<span class='altui-temperature-minor altui-red pull-right' id='altui-heatsetpoint-target-"+device.altuiid+"'>"+parseFloat(heatsetpoint_target).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
+						var v = heatsetpoint_current ? parseFloat(heatsetpoint_current).toFixed(1)+"&deg;"+ws.tempFormat : "";
+						html += ("<span class='altui-temperature-minor altui-red pull-left' id='altui-heatsetpoint-current-"+device.altuiid+"'>"+v+"</span>");
+						v = heatsetpoint_target ? parseFloat(heatsetpoint_target).toFixed(1)+"&deg;"+ws.tempFormat : "";
+						html += ("<span class='altui-temperature-minor altui-red pull-right' id='altui-heatsetpoint-target-"+device.altuiid+"'>"+v+"</span>");
 						html += ("<span class='altui-temperature-heater altui-red' id='altui-heatsetpoint-"+device.altuiid+"'>"+parseFloat(heatsetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
 					}
 				html += "</div>";
 				html += "<div class='col-xs-3'>";
 					var coldsetpoint = coldsetpoint_target || parseFloat($("#altui-coldsetpoint-"+device.altuiid).text()) || coldsetpoint_current
 					if ((isHeater==false) && (coldsetpoint!=null)) {
-						html += ("<span class='altui-temperature-minor altui-blue pull-left' id='altui-coldsetpoint-current-"+device.altuiid+"'>"+parseFloat(coldsetpoint_current).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
-						html += ("<span class='altui-temperature-minor altui-blue pull-right' id='altui-coldsetpoint-target-"+device.altuiid+"'>"+parseFloat(coldsetpoint_target).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
+						v = coldsetpoint_current ? parseFloat(coldsetpoint_current).toFixed(1)+"&deg;"+ws.tempFormat : "";
+						html += ("<span class='altui-temperature-minor altui-blue pull-left' id='altui-coldsetpoint-current-"+device.altuiid+"'>"+v+"</span>");
+						v = coldsetpoint_target ? parseFloat(coldsetpoint_target).toFixed(1)+"&deg;"+ws.tempFormat : "";
+						html += ("<span class='altui-temperature-minor altui-blue pull-right' id='altui-coldsetpoint-target-"+device.altuiid+"'>"+v+"</span>");
 						html += ("<span class='altui-temperature-heater altui-blue' id='altui-coldsetpoint-"+device.altuiid+"'>"+parseFloat(coldsetpoint).toFixed(1)+"&deg;"+ws.tempFormat+"</span>");
 					}
 				html += "</div>";
