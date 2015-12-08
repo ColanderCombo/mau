@@ -1,1 +1,1 @@
-UIManager.checkAltuiUpdate("994,Help for options;Heater dashboard fix;bugfix zwave variable;bugfix refresh while renaming device,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29791")
+UIManager.checkAltuiUpdate("1001,bugfix watch add/delete;bugfix NaN on heater;hhmmss input entry on IOS safari;Veraalert display on UI7,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29792")
