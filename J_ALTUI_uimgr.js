@@ -5776,7 +5776,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 	};	
 
 	function _setTheme(themecss) {
-		if (themecss==null) {
+		if (isNullOrEmpty(themecss)) {
 			themecss = g_OrgTheme;
 			$("link[href='"+g_CustomTheme+"']").attr('href',themecss);
 			g_CustomTheme = themecss;
