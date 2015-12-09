@@ -3166,6 +3166,8 @@ var UIManager  = ( function( window, undefined ) {
 				property: _onPropertyVariable, 
 				widgetdisplay: function(widget,bEdit)	{ 
 					var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
+					if (device==null)
+						return "";
 					return "<p style='color:{1};'>{0}</p>".format( 
 						(widget.properties.deviceid!=NULL_DEVICE) 
 							? (MultiBox.getStatus( device, widget.properties.service, widget.properties.variable ) || '')
@@ -3218,6 +3220,8 @@ var UIManager  = ( function( window, undefined ) {
 				property: _onPropertyIcon, 
 				widgetdisplay: function(widget,bEdit)	{ 
 					var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
+					if (device==null)
+						return "";
 					return (widget.properties.deviceid==NULL_DEVICE) ? ("<p>"+picGlyph+"</p>") : _deviceIconHtml( device );
 				},
 				properties: {
@@ -3254,6 +3258,8 @@ var UIManager  = ( function( window, undefined ) {
 				onWidgetResize: _onResizeStub,
 				widgetdisplay: function(widget,bEdit)	{ 
 					var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
+					if (device==null)
+						return "";
 					return "<button type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='{3}' style='{5}' >{4}{2}</button>".format(
 						device ? device.altuiid : NULL_DEVICE,
 						'altui-widget-upnpaction-button',
@@ -3283,6 +3289,8 @@ var UIManager  = ( function( window, undefined ) {
 				widgetdisplay: function(widget,bEdit)	{
 					var status=0;
 					var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
+					if (device==null)
+						return "";
 					if (widget.properties.deviceid!= NULL_DEVICE)
 					{
 						status = MultiBox.getStatus(device, widget.properties.service, widget.properties.variable);
@@ -3338,6 +3346,8 @@ var UIManager  = ( function( window, undefined ) {
 				property: _onPropertyCamera, 
 				widgetdisplay: function(widget,bEdit)	{ 
 					var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
+					if (device==null)
+						return "";
 					return ((device!=null) && (device.altuiid!=NULL_DEVICE)) ? _cameraDraw(device,widget.size) : "<img src='{0}' style='max-height:100%; max-width:100%;'></img>".format(cameraURI);	//"<div class='altui-camera-div'>xxx</div>";
 				},
 				properties: {	//( deviceID, service, action, params, cbfunc )
@@ -6266,6 +6276,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 	{
 		var widget=PageManager.getWidgetByID( page, widgetid );
 		var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
+		if (device==null)
+			return "";
 		var value = parseFloat( MultiBox.getStatus(device, widget.properties.service, widget.properties.variable) || 0 );
 		var data = google.visualization.arrayToDataTable([
 		  ['Label', 'Value'],
