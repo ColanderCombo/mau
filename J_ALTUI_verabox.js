@@ -20,6 +20,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	var _hagdevice = { id: 0, altuiid:"{0}-0".format(_uniqID) };							// special device for HAG, service=S_HomeAutomationGateway1.xml
 	var _upnpHelper = new UPnPHelper(ip_addr,uniq_id);	// for common UPNP ajax
 	var _dataEngine = null;
+	var _sysinfo = null;
 	var _rooms = null;
 	var _scenes = null;
 	var _devices = null;
@@ -55,7 +56,8 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 
 	function _initializeSysinfo() {
-		var sysinfo = null;
+		if (_sysinfo!=null)
+			return _sysinfo;
 		var url = _upnpHelper.proxify( _upnpHelper.getUrlHead().replace('/port_3480/data_request','/cgi-bin/cmh/sysinfo.sh') );
 		var jqxhr = $.ajax( {
 			url: url,
@@ -63,13 +65,16 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			async:false,
 			//dataType: "text",
 		})
-		.done(function(data) {
-			sysinfo = JSON.parse(data);
+		.done(function(data, textStatus, jqXHR) {
+			_upnpHelper.unproxifyResult(data, textStatus, jqXHR, function(data,textStatus,jqXHR) {
+				_sysinfo = JSON.parse(data);
+			});
 		})
-		.fail(function(jqXHR, textStatus) {
-			sysinfo={};
+		.fail(function(jqXHR, textStatus, errorThrown) {
+			PageMessage.message( _T("Controller {0} did not respond").format(_upnpHelper.getIpAddr()) , "warning");
+			_sysinfo = null;
 		});
-		return sysinfo;
+		return _sysinfo;
 	};
 	
 	function _initializeJsonp() {
