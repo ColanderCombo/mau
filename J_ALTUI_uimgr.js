@@ -5421,7 +5421,9 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		var user = MultiBox.getMainUser();
 		if (user && tblUsers) {
 			var bFound = false;
+			var dDate = null;
 			if (tblUsers[user.Name]!=undefined) {
+				dDate = tblUsers[user.Name].toDateString();
 				var d1 = tblUsers[user.Name].getTime() / 86400000;
 				var d2 = (new Date()).getTime() / 86400000;
 				var diff = new Number(d2 - d1).toFixed(0);
@@ -5429,7 +5431,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					bFound = true;
 			}
 			if (bFound==true) {
-				$("#altui-footer > p").append("<span class='text-success'>, {0}</span>".format(_T("Registered Version")));
+				$("#altui-footer > p").append("<span class='text-success'>, {0} / {1}</span>".format(_T("Registered Version"),(dDate!=null) ? dDate : ''));
 				$("#altui-footer form").remove();
 			} else {
 				// $("footer form").append("<blockquote class='blockquote'><p class='text-danger'>Hello {0}, please support ALTUI with a yearly contribution. Last:{1}</p></blockquote>".format(
@@ -5440,7 +5442,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				));
 				$("#altui-license").toggleClass("license-rotated").one("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
 					$("#altui-license").remove();
-					$("#altui-footer > p").append("<span class='text-danger'>, {0}</span>".format(_T("Unregistered Version")));
+					$("#altui-footer > p").append(", <span class='text-danger'>{0} / {1}</span>".format(_T("Unregistered Version"),(dDate!=null) ? dDate : ''));
 				});
 			}
 		}
