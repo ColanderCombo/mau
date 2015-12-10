@@ -310,5 +310,5 @@ Localization.init( {
 	"Use new UI7 behavior for Heater devices":"Use new UI7 behavior for Heater devices",
 	"Show all rows in grid tables":"Show all rows in grid tables",
 	"Table Controllers":"Table Controllers"	,
-	"Hello {0}, please consider a small contribution to support ALTUI developpement":"Hello {0}, please consider a small contribution to support ALTUI developpement"
+	"Unregistered version for {0}":"Unregistered version for {0}"
 	});

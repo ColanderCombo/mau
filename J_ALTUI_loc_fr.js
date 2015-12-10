@@ -311,5 +311,5 @@ Localization.init( {
 	"Use new UI7 behavior for Heater devices":"Utilise le comportement UI7 pour les thermostats",
 	"Show all rows in grid tables":"Voir toutes les lignes dans les tables",
 	"Table Controllers":"Table Controleurs"	,
-	"Hello {0}, please consider a small contribution to support ALTUI developpement":"Bonjour {0}, merci d'envisager une petite contribution au project ALTUI"
+	"Unregistered version for {0}":"Version non enregistrée pour {0}"
 });
