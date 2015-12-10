@@ -1,1 +1,25 @@
-UIManager.checkAltuiUpdate("1012,V1.0 registration check;device variable dialog text overflow replaced by ellipsis;color button in heater;sysinfo gathering bug;unknown widget in custom pages;themecss null string bugfix;bugfix watch add/delete;bugfix NaN on heater;hhmmss input entry on IOS safari;Veraalert display on UI7,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29821")
+UIManager.checkAltuiUpdate("1012,V1.0 registration check;device variable dialog text overflow replaced by ellipsis;color button in heater;sysinfo gathering bug;unknown widget in custom pages;themecss null string bugfix;bugfix watch add/delete;bugfix NaN on heater;hhmmss input entry on IOS safari;Veraalert display on UI7,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29821",
+{
+	'amg1':new Date(2014,11,2),
+	'amg0':new Date(2015,10,28),
+	'laurentvalentin':new Date(2015,05,12),
+	'@c0rc0ran@':new Date(2015,06,4),
+	'vanbredat':new Date(2015,06,15),
+	'mfroebel':new Date(2015,6,25),
+	'XAPPO':new Date(2016,7,6),	
+	'actran70':new Date(2015,07,22),
+	'ohb_vera':new Date(2015,07,28),
+	'chamberlainzo6':new Date(2015,8,15),
+	'ilikelife':new Date(2015,9,12),
+	'Camiel':new Date(2015,09,20),
+	'aiw15lgd6171':new Date(2015,10,4),	
+	'dsroberts1945':new Date(2015,10,18),
+	'Leoni':new Date(2015,11,3),
+	'bhouttuin':new Date(2015,11,3),
+	'cuda':new Date(2015,11,4),
+	'mylesm':new Date(2015,11,5),
+	'bengoechea':new Date(2015,11,5),
+	'barakfamily':new Date(2015,11,6),
+	'vosmont':new Date(2020,0,1),
+	'akbooer':new Date(2020,0,1)
+})
