@@ -72,7 +72,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		})
 		.fail(function(jqXHR, textStatus, errorThrown) {
 			PageMessage.message( _T("Controller {0} did not respond").format(_upnpHelper.getIpAddr()) , "warning");
-			_sysinfo = null;
+			_sysinfo = {};
 		});
 		return _sysinfo;
 	};
