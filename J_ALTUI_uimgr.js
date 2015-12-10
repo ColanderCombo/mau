@@ -229,6 +229,16 @@ var styles ="					\
 		z-index: -1;			\
 	}							\
 	.ui-resizable-helper { border: 2px dotted #00F; }	\
+	.altui-variable-title {	\
+	}					\
+	.altui-variable-buttons {	\
+	}					\
+	.altui-variable-value {	\
+		max-width: 200px;			\
+		overflow: hidden;		\
+		text-overflow: ellipsis;	\
+		white-space: nowrap;		\
+	}					\
 	.altui-variable-value-history td:first-child {	\
 		width:170px;	\
 	}					\
@@ -3638,8 +3648,8 @@ var UIManager  = ( function( window, undefined ) {
 		// 0: variable , 1: value , 2: service
 		var deviceVariableLineTemplate = "  <tr>";
 		// deviceVariableLineTemplate += "         <th scope='row'>1</th>";
-		deviceVariableLineTemplate += "         <td><span title='{2}'>{0}</span></td>";
-		deviceVariableLineTemplate += 	("<td>"+smallbuttonTemplate.format( '{3}', 'altui-variable-history', calendarGlyph,'History')+smallbuttonTemplate.format( '{3}', 'altui-variable-push', signalGlyph,'Graph')+"</td>");
+		deviceVariableLineTemplate += "         <td class='altui-variable-title'><span title='{2}'>{0}</span></td>";
+		deviceVariableLineTemplate += 	("<td class='altui-variable-buttons'>"+smallbuttonTemplate.format( '{3}', 'altui-variable-history', calendarGlyph,'History')+smallbuttonTemplate.format( '{3}', 'altui-variable-push', signalGlyph,'Graph')+"</td>");
 		deviceVariableLineTemplate += "         <td id='{3}' class='altui-variable-value' >{1}</td>";
 		deviceVariableLineTemplate += "     </tr>";
 			
