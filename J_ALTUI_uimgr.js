@@ -5448,7 +5448,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				$("body nav").after("<blockquote id='altui-license' class='blockquote'><p class='text-info'>{0}.({1})</p></blockquote>".format(
 				// $("footer").prepend("<blockquote id='altui-license' class='blockquote'><p class='text-info'>{0}.({1})</p></blockquote>".format(
 					_T("Unregistered version for {0}").format(user.Name),
-					tblUsers[user.Name].toUTCString()					
+					tblUsers[user.Name].toDateString()					
 				));
 				$("#altui-license").toggleClass("license-rotated").one("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
 					$("#altui-license").remove();
