@@ -5603,11 +5603,13 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					html += "<span>{0}%</span>".format(level);				
 					break;
 				case "urn:schemas-micasaverde-com:device:TemperatureSensor:1":
+				case "urn:schemas-upnp-org:device:HVAC_ZoneThermostat:1":
+				case "urn:schemas-upnp-org:device:Heater:1":
 					var temp = MultiBox.getStatus( device, 'urn:upnp-org:serviceId:TemperatureSensor1', 'CurrentTemperature' ); 
 					// var ws = MultiBox.getWeatherSettings();
 					// if (ws.tempFormat==undefined)
 						// ws.tempFormat="";
-					html += "<span>{0}</span>".format(temp+"&deg;"/*+ws.tempFormat*/);
+					html += "<span>{0}</span>".format((temp || "") +"&deg;"/*+ws.tempFormat*/);
 					break;			
 				case "urn:schemas-micasaverde-com:device:MotionSensor:1":
 					var tripped = parseInt(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:SecuritySensor1', 'Tripped' )); 
