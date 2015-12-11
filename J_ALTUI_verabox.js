@@ -67,7 +67,12 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		})
 		.done(function(data, textStatus, jqXHR) {
 			_upnpHelper.unproxifyResult(data, textStatus, jqXHR, function(data,textStatus,jqXHR) {
-				_sysinfo = JSON.parse(data);
+				if (isNullOrEmpty(data))
+					_sysinfo=={};
+				else if ($.isPlainObject( data ))
+					_sysinfo = data;
+				else 
+					_sysinfo = JSON.parse(data);
 			});
 		})
 		.fail(function(jqXHR, textStatus, errorThrown) {
