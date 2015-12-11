@@ -542,6 +542,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		html+=("<div id='slider-{0}' class='altui-dimmable-slider' style='width: "+sliderwidth+"px;' ></div>").format(device.altuiid);
 		
 		// on off 
+		$('#altui-colorpicker-{0}'.format(device.altuiid,current)).spectrum('destroy');
 		html += "<script type='text/javascript'>";
 		html +="$('#altui-colorpicker-{0}').spectrum({		\
 			color: '{1}',							\
