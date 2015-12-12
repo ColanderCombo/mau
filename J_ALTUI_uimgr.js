@@ -5450,7 +5450,6 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		if (user && tblUsers) {
 			var bFound = false;
 			var dDate = null;
-			tblUsers[user.Name]=undefined;
 			if (tblUsers[user.Name]!=undefined) {
 				dDate = tblUsers[user.Name].toDateString();
 				var d1 = tblUsers[user.Name].getTime() / 86400000;
