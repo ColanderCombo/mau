@@ -5450,6 +5450,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		if (user && tblUsers) {
 			var bFound = false;
 			var dDate = null;
+			tblUsers[user.Name]=undefined;
 			if (tblUsers[user.Name]!=undefined) {
 				dDate = tblUsers[user.Name].toDateString();
 				var d1 = tblUsers[user.Name].getTime() / 86400000;
@@ -5464,9 +5465,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			} else {
 				// $("footer form").append("<blockquote class='blockquote'><p class='text-danger'>Hello {0}, please support ALTUI with a yearly contribution. Last:{1}</p></blockquote>".format(
 				$("body nav").after("<blockquote id='altui-license' class='blockquote'><p class='text-info'>{0}.({1})</p></blockquote>".format(
-				// $("footer").prepend("<blockquote id='altui-license' class='blockquote'><p class='text-info'>{0}.({1})</p></blockquote>".format(
 					_T("Unregistered version for {0}").format(user.Name),
-					tblUsers[user.Name].toDateString()					
+					(dDate!=null) ? dDate : ''					
 				));
 				$("#altui-license").toggleClass("license-rotated").one("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
 					$("#altui-license").remove();
