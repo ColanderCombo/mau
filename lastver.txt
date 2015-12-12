@@ -11,6 +11,8 @@ UIManager.checkAltuiUpdate("1012,V1.0 registration check;device variable dialog 
 	'ohb_vera':new Date(2015,07,28),
 	'chamberlainzo6':new Date(2015,8,15),
 	'ilikelife':new Date(2015,9,12),
+	'jcsv75':new Date(2015,9,20),
+	'djek123':new Date(2015,9,20),
 	'Camiel':new Date(2015,09,20),
 	'aiw15lgd6171':new Date(2015,10,4),	
 	'dsroberts1945':new Date(2015,10,18),
