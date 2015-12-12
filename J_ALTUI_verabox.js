@@ -58,7 +58,8 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	function _initializeSysinfo() {
 		if (_sysinfo!=null)
 			return _sysinfo;
-		var url = _upnpHelper.proxify( _upnpHelper.getUrlHead().replace('/port_3480/data_request','/cgi-bin/cmh/sysinfo.sh') );
+		var url = _upnpHelper.getUrlHead().replace('/port_3480','').replace('/data_request','/cgi-bin/cmh/sysinfo.sh');
+		url = _upnpHelper.proxify( url );
 		var jqxhr = $.ajax( {
 			url: url,
 			type: "GET",

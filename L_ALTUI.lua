@@ -680,8 +680,10 @@ local htmlLayout = [[
 		var g_FirstUserData = @firstuserdata@;
 		// -->
 	</script>
-	<hr>
-	<footer><p class="text-center"><small id="altui-footer">AltUI, amg0, <span class="bg-danger">Waiting Initial Data</span></small></p><span id="debug"></span></footer>
+	<div id="wrap">
+		<div id="push"></div>
+	</div>
+	<footer id="footer"><hr><p class="text-center"><small id="altui-footer">AltUI, amg0, <span class="bg-danger">Waiting Initial Data</span></small></p><span id="debug"></span></footer>
 </body>
 </html>
 ]]

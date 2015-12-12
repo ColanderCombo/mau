@@ -91,8 +91,26 @@ var defaultIconSrc="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAA
 		// margin-left: 14px;		\
 		// margin-top: 5px;		\
 
-var styles ="					\
-	@-webkit-keyframes horiz_rotate {	\
+var styles ="						\
+	html {							\
+	position: relative;				\
+	  min-height: 100%;				\
+	}				\
+	body {				\
+	  /* Margin bottom by footer height */				\
+	  margin-bottom: 140px;				\
+	}				\
+	#push {				\
+	  height: 140px;				\
+	}							\
+	footer {				\
+	  position: absolute;				\
+	  bottom: 0;				\
+	  width: 100%;				\
+	  /* Set the fixed height of the footer here */				\
+	  height: 140px;				\
+	}							\
+    @-webkit-keyframes horiz_rotate {	\
 		0% {											\
 			-webkit-transform: translateX(10px) rotateX(0deg); 			\
 			transform: translateX(10px) rotateX(0deg); 					\
@@ -10684,7 +10702,7 @@ $(document).ready(function() {
 		body+="<div class='container-fluid theme-showcase' role='main'>";
 		body+="</div> <!-- /container -->";
 		body+="<div id='altui-background'></div>";
-		$("body").prepend(body);
+		$("#wrap").prepend(body);
 
 		// client side override of theme if defined
 		var clientsideThemecss= MyLocalStorage.getSettings("Theme");
