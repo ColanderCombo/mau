@@ -186,15 +186,24 @@ if (typeof String.prototype.escapeXml != 'function') {
 if (typeof String.prototype.format == 'undefined') {
 	String.prototype.format = function()
 	{
-	   var content = this;
-	   for (var i=0; i < arguments.length; i++)
-	   {
-			var replacement = new RegExp('\\{' + i + '\\}', 'g');	// regex requires \ and assignment into string requires \\,
-			// if ($.type(arguments[i]) === "string")
-				// arguments[i] = arguments[i].replace(/\$/g,'$');
-			content = content.replace(replacement, arguments[i]);  
-	   }
-	   return content;
+		var args = new Array(arguments.length);
+
+		for (var i = 0; i < args.length; ++i) {
+		// `i` is always valid index in the arguments object
+		// so we merely retrieve the value
+		args[i] = arguments[i];
+		}
+
+		return this.replace(/{(\d+)}/g, function(match, number) { 
+			return typeof args[number] != 'undefined' ? args[number] : match;
+		});
+	   // var content = this;
+	   // for (var i=0; i < arguments.length; i++)
+	   // {
+			// var replacement = new RegExp('\\{' + i + '\\}', 'g');	// regex requires \ and assignment into string requires \\,
+			// content = content.replace(replacement, arguments[i]);  
+	   // }
+	   // return content;
 	};
 };
 

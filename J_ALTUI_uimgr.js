@@ -93,15 +93,20 @@ var defaultIconSrc="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAA
 
 var styles ="						\
 	html {							\
-	position: relative;				\
-	  min-height: 100%;				\
+		position: relative;			\
+		min-height: 100%;			\
 	}				\
 	body {				\
-	  /* Margin bottom by footer height */				\
-	  margin-bottom: 140px;				\
+	  /* Margin bottom by footer height */		\
+	  margin-bottom: 140px;						\
 	}				\
+	#wrap {				\
+	  /*max-height: will be set programmatically; */		\
+	  overflow-y : auto;		\
+	  overflow-x : hidden;		\
+	}							\
 	#push {				\
-	  height: 140px;				\
+	  height: 140px;			\
 	}							\
 	footer {				\
 	  position: absolute;				\
@@ -2987,22 +2992,26 @@ var PageMessage = (function(window, undefined ) {
 	};	
 
 	function _updateMessageButtonColor() {
+		var button =$("#altui-toggle-messages");
 		function _setColor(cls) {
-			$("#altui-toggle-messages").attr("class","dropdown-toggle btn "+"btn-"+cls);
+			button.attr("class","dropdown-toggle btn "+"btn-"+cls);
 		};
-		if ($("div#altui-pagemessage  tr.danger").length>0)
+		var divs = $("div#altui-pagemessage");
+		if (divs.has("tr.danger").length>0)
 			_setColor('danger');
-		else if ($("div#altui-pagemessage  tr.warning").length>0)
+		else if (divs.has("tr.warning").length>0)
 			_setColor('warning');
-		else if ($("div#altui-pagemessage  tr.info").length>0)
+		else if (divs.has("tr.info").length>0)
+		// else if ($("div#altui-pagemessage  tr.info").length>0)
 			_setColor('info');
-		else if ($("div#altui-pagemessage  tr.success").length>0)
+		else if (divs.has("tr.success").length>0)
+		// else if ($("div#altui-pagemessage  tr.success").length>0)
 			_setColor('success');
 		else {
 			_setColor('default');
 			// $("#altui-toggle-messages").dropdown("toggle");
-			$("#altui-toggle-messages").next(".collapse").removeClass("in");
-			$("#altui-toggle-messages span").removeClass( "caret-reversed" );
+			button.next(".collapse").removeClass("in");
+			button.filter("span").removeClass( "caret-reversed" );
 		}
 	};
 	
@@ -3126,10 +3135,12 @@ var PageMessage = (function(window, undefined ) {
 		$("#altui-pagetitle").before( Html );
 		// close button for pageMessages
 		$( document )
+			.off( "click", ".altui-pagemessage-close")
 			.on( "click", ".altui-pagemessage-close", function() {
 				// $(this).closest("tr").remove();
 				PageMessage.clearMessage( $(this).closest("tr").data('idx') );
 			})
+			.off( "click", "#altui-toggle-messages")
 			.on( "click", "#altui-toggle-messages", function() {
 				$(this).find("span").toggleClass( "caret-reversed" );
 			})
@@ -4247,6 +4258,18 @@ var UIManager  = ( function( window, undefined ) {
 		return "<img class='altui-device-icon pull-left img-rounded' data-org-src='"+iconPath+"' src='"+iconDataSrc+"' alt='_todo_' onerror='UIManager.onDeviceIconError(\""+device.altuiid+"\")' ></img>";
 	}
 	
+	var dropdownTemplate =  "";		
+	dropdownTemplate +=  "<div class='btn-group pull-right'>";
+	dropdownTemplate += "<button class='btn btn-default btn-xs dropdown-toggle altui-device-command' type='button' data-toggle='dropdown' aria-expanded='false'>"; 
+	dropdownTemplate += "<span class='caret'></span>";
+	dropdownTemplate += "</button>";
+	dropdownTemplate += "<ul class='dropdown-menu' role='menu'>";
+	dropdownTemplate += "<li><a id='{0}' class='altui-device-variables' href='#' role='menuitem'>Variables</a></li>";
+	dropdownTemplate += "<li><a id='{0}' class='altui-device-actions' href='#' role='menuitem'>Actions</a></li>";
+	dropdownTemplate += "<li><a id='{0}' class='altui-device-controlpanelitem' href='#' role='menuitem'>Control Panel</a></li>";
+	dropdownTemplate += "</ul></div>";
+	dropdownTemplate += "<div class='pull-right text-muted'><small>#{0} </small></div>";
+	
 	function _deviceDraw(device) {
 		var id = device.altuiid;
 		var iconHtml = _deviceIconHtml( device );
@@ -4271,22 +4294,9 @@ var UIManager  = ( function( window, undefined ) {
 			batteryHtmlTemplate+="</div>";
 			batteryHtml = batteryHtmlTemplate.format(batteryLevel,color);
 		}
-		
-		var dropdownTemplate =  "";
-		
-		dropdownTemplate +=  "<div class='btn-group pull-right'>";
-		dropdownTemplate += "<button class='btn btn-default btn-xs dropdown-toggle altui-device-command' type='button' data-toggle='dropdown' aria-expanded='false'>"; 
-		dropdownTemplate += "<span class='caret'></span>";
-		dropdownTemplate += "</button>";
-		dropdownTemplate += "<ul class='dropdown-menu' role='menu'>";
-		dropdownTemplate += "<li><a id='"+device.altuiid+"' class='altui-device-variables' href='#' role='menuitem'>Variables</a></li>";
-		dropdownTemplate += "<li><a id='"+device.altuiid+"' class='altui-device-actions' href='#' role='menuitem'>Actions</a></li>";
-		dropdownTemplate += "<li><a id='"+device.altuiid+"' class='altui-device-controlpanelitem' href='#' role='menuitem'>Control Panel</a></li>";
-		dropdownTemplate += "</ul></div>";
-		dropdownTemplate += "<div class='pull-right text-muted'><small>#"+device.altuiid+" </small></div>";
 
 		var devicecontainerTemplate	= "<div class='panel panel-{4} altui-device' data-altuiid='{5}' id='{0}'>"
-		devicecontainerTemplate	+=		"<div class='panel-heading altui-device-heading'>"+dropdownTemplate+batteryHtml+"<div class='panel-title altui-device-title' data-toggle='tooltip' data-placement='left' title='{2}'>{1}</div></div>";
+		devicecontainerTemplate	+=		"<div class='panel-heading altui-device-heading'>"+dropdownTemplate.format(device.altuiid)+batteryHtml+"<div class='panel-title altui-device-title' data-toggle='tooltip' data-placement='left' title='{2}'>{1}</div></div>";
 		devicecontainerTemplate	+=  	"<div class='panel-body altui-device-body'>";
 		devicecontainerTemplate	+= 	  	iconHtml;
 		devicecontainerTemplate	+= 	  	"{3}";
@@ -5522,6 +5532,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				});
 			}
 		}
+		// $("#wrap").css("max-height",window.innerHeight-$("footer").height() - $(".navbar-fixed-top").height());
 	};
 	
 	function _drawRoomFilterButtonAsync( selectedroom ) {
@@ -5699,14 +5710,15 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		
 		// $(".altui-device") which do not have a btngroup in open state
 		// to avoid a refresh to erase an opened popup menu
-		$(".altui-device:not(:has(div.btn-group.open))").not(".altui-norefresh").each( function( index, element) {
-			var devid = $(element).data("altuiid");
+		$(".altui-device:not(.altui-norefresh)").not(":has(div.btn-group.open)").each( function( index, element) {
+		// $(".altui-device:not(:has(div.btn-group.open))").not(".altui-norefresh").each( function( index, element) {
+			var devid = $(this).data("altuiid");
 			var device = MultiBox.getDeviceByAltuiID( devid );
 			if ( (device!=null) && (bFull==true || device.dirty==true) ) {
 				
 				// get HTML for device and draw it
 				var Html = _deviceDraw(device);
-				$(element).replaceWith(  Html );
+				$(this).replaceWith(  Html );
 				
 				// draw job information.
 				if (device.Jobs != undefined) {
@@ -6803,7 +6815,6 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			
 		// install a click handler on button
 		if ($.isFunction( clickFunction ))  {
-			$("body").off("click",".altui-leftbutton");
 			$("body").on("click",".altui-leftbutton",function() {
 				$(this).parent().children().removeClass("active")
 				$(this).addClass("active");
@@ -7011,6 +7022,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 	
 	pageDevices : function ( filter )
 	{
+		var _domMainPanel = null;
 		var _roomID2Name = {};
 		var _deviceID2RoomName = {};
 		var _deviceDisplayFilter = $.extend( {
@@ -7092,8 +7104,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			devicecontainerTemplate	+= 		"<div class='panel panel-default altui-device' data-altuiid='{1}' id='{0}'>"
 			devicecontainerTemplate	+= 	  	"</div>";
 			devicecontainerTemplate	+= 	"</div>";		
-			var domPanel = $(".altui-mainpanel");
-			domPanel.append(devicecontainerTemplate.format(device.id,device.altuiid));	
+			_domMainPanel.append(devicecontainerTemplate.format(device.id,device.altuiid));	
 		};
 
 		function _drawDeviceToolbar() {
@@ -7268,7 +7279,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		
 		function _drawDevices(filterfunc)
 		{
-			$(".altui-mainpanel").empty();
+			_domMainPanel = $(".altui-mainpanel").empty();
 			// Category & Form filter
 			MultiBox.getDevices( drawDeviceContainer , filterfunc, endDrawDevice);
 		};
@@ -10702,7 +10713,6 @@ $(document).ready(function() {
 		body+="</div> <!-- /container -->";
 		body+="<div id='altui-background'></div>";
 		$("#wrap").prepend(body);
-
 		// client side override of theme if defined
 		var clientsideThemecss= MyLocalStorage.getSettings("Theme");
 		if (clientsideThemecss != null)

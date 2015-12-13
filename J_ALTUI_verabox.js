@@ -327,14 +327,19 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 	function _findDeviceIdxByID(devid)
 	{
-		var idx=-1;
-		$.each(_user_data.devices, function(i,device) {
-			if (device.id==devid) {
-				idx = i;
-				return false;
-			}
-		});
-		return idx;
+		for (i=0; i<_user_data.devices.length; i++ ) {
+			if (_user_data.devices[i].id==devid)
+				return i;
+		}
+		return -1;
+		// var idx=-1;
+		// $.each(_user_data.devices, function(i,device) {
+			// if (device.id==devid) {
+				// idx = i;
+				// return false;
+			// }
+		// });
+		// return idx;
 	};
 
 	function _getDeviceByType( device_type ) {

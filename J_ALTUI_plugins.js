@@ -500,9 +500,9 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	function _drawDimmable( device, colorpicker ) {
 
 		var html = "";
-		var onebody = $(".altui-device-body");
+		var onebody = $(".altui-device-body:first");
 		var sliderwidth = (onebody.length>=1) ? onebody.first().width()-65-70-(colorpicker?45:0)  : 95;
-		var bodywidth=$(".altui-device-body").first().width();
+		var bodywidth=onebody.width();
 		
 		// load level
 		var level = parseInt(MultiBox.getStatus( device, 'urn:upnp-org:serviceId:Dimming1', 'LoadLevelTarget' )); 
