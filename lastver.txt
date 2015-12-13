@@ -23,5 +23,7 @@ UIManager.checkAltuiUpdate("1023,bugfix registration check;sticky footer;Current
 	'bengoechea':new Date(2015,11,5),
 	'barakfamily':new Date(2015,11,6),
 	'vosmont':new Date(2020,0,1),
-	'akbooer':new Date(2020,0,1)
+	'dklinkman':new Date(2020,0,1),
+	'akbooer':new Date(2020,0,1),
+	'Akbooer':new Date(2020,0,1)
 })
