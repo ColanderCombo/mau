@@ -332,36 +332,23 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 				return i;
 		}
 		return -1;
-		// var idx=-1;
-		// $.each(_user_data.devices, function(i,device) {
-			// if (device.id==devid) {
-				// idx = i;
-				// return false;
-			// }
-		// });
-		// return idx;
 	};
 
 	function _getDeviceByType( device_type ) {
-		var idx=-1;
-		$.each(_user_data.devices, function(i,device) {
-			if (device.device_type==device_type)  {
-				idx = i;
-				return false;
-			}
-		});
-		return (idx == -1) ? null : _user_data.devices[idx];
+		for (i=0; i<_user_data.devices.length; i++ ) {
+			if (_user_data.devices[i].device_type==device_type)
+				return _user_data.devices[i]
+		}
+		return null;
 	};
 
 	function _getDeviceByAltID( parentdevid , altid ) {
-		var idx=-1;
-		$.each(_user_data.devices, function(i,device) {
-			if ( (device.id_parent==parentdevid) && (device.altid==altid) ) {
-				idx = i;
-				return false;
-			}
-		});
-		return (idx == -1) ? null : _user_data.devices[idx];
+		for (i=0; i<_user_data.devices.length; i++) {
+			var device = _user_data.devices[i];
+			if ( (device.id_parent==parentdevid) && (device.altid==altid) )
+				return _user_data.devices[i];
+		}
+		return null;
 	};
 	
 	function _getDeviceByID( devid ) {
@@ -376,14 +363,11 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 
 	function _getSceneByID(sceneid) {
-		var found=null;
-		$.each(_user_data.scenes, function( i,scene) {
-			if (scene.id == sceneid) {
-				found = scene;
-				return false;
-			}
-		});
-		return found;
+		for (i=0;i<_user_data.scenes.length;i++) {
+			if (_user_data.scenes[i].id == sceneid)
+				return _user_data.scenes[i];
+		}
+		return null;
 	};
 	
 	function _getNewSceneID() {
@@ -402,39 +386,37 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	
 	function _getStates( deviceid  )
 	{
-		var arr = $.grep(_user_data.devices, function( device,idx) {
-			return (device.id == deviceid);
-		});
-		if (arr.length==0)
-			return null;
-		
-		return arr[0].states;
+		for (i=0; i<_user_data.devices.length; i++) {
+			var device = _user_data.devices[i];
+			if (device.id == deviceid)
+				return _user_data.devices[i].states;
+		}
+		return null;
 	};	
 		
 	function _getStatusObject( deviceid, service, variable, bCreate ) {
-		
+		var foundState = null;
 		var device = _getDeviceByID( deviceid );
-		var states = device.states;
-		if (states==null)
+		if (device==null)
 			return null;
 		
-		var found = $.grep( states , function( state,idx) {
-			return ( state.service == service ) && (state.variable == variable);
-		});
-		
-		if (found.length==0) {
-			if (bCreate != true)
-				return null;
+		for (i=0; i<device.states.length ; i++ ) {
+			var state = device.states[i];
+			if (( state.service == service ) && (state.variable == variable)) {
+				foundState = state;
+				break;
+			}
+		}
+		if ((foundState==null) && (bCreate==true)) {
 			var newstate = {
 				service: service,
 				variable: variable,
 				value: null
 			};
-			states.push( newstate );
+			device.states.push(newstate);
 			return newstate;
 		}
-		
-		return found[0];
+		return foundState;
 	};
 
 	function _getStatus( deviceid, service, variable )

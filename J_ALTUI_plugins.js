@@ -513,9 +513,6 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 
 		// on off button
 		var status = parseInt(MultiBox.getStatus( device, 'urn:upnp-org:serviceId:SwitchPower1', 'Status' )); 
-		// if ( (device.status==1) || (device.status==5) )  {  
-		// if ( level != status )  {  
-		// if ( ( ( device.Jobs != null ) && ( device.Jobs.length>0) ) || (device.status==1) || (device.status==5) ) {  
 		if (_isBusyStatus(device))  {  
 			status = -1;
 		}
@@ -539,7 +536,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		}
 		
 		// dimming
-		html+=("<div id='slider-{0}' class='altui-dimmable-slider' style='width: "+sliderwidth+"px;' ></div>").format(device.altuiid);
+		html+=("<div id='slider-{0}' class='altui-dimmable-slider' style='width: {1}px;' ></div>").format(device.altuiid,sliderwidth);
 		
 		// on off 
 		$('#altui-colorpicker-{0}'.format(device.altuiid,current)).spectrum('destroy');
@@ -563,8 +560,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		}
 		html += "</script>";
 		//"+getCSS('color','bg-info')+"
-		$(".altui-mainpanel").off("slide","#slider-"+device.altuiid);
-		$(".altui-mainpanel").on("slide","#slider-"+device.altuiid,function( event, ui ){ 
+		$(".altui-mainpanel").off("slide","#slider-"+device.altuiid).on("slide","#slider-"+device.altuiid,function( event, ui ){ 
 			$("#slider-val-"+device.altuiid).text( ui.value+'%');
 		});
 		return html;
