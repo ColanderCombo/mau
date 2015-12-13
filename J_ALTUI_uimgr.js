@@ -98,22 +98,16 @@ var styles ="						\
 	}				\
 	body {				\
 	  /* Margin bottom by footer height */		\
-	  margin-bottom: 140px;						\
+	  /* margin-bottom: 140px;	*/				\
 	}				\
 	#wrap {				\
-	  /*max-height: will be set programmatically; */		\
 	  overflow-y : auto;		\
 	  overflow-x : hidden;		\
-	}							\
-	#push {				\
-	  height: 140px;			\
-	}							\
+	}							\						\
 	footer {				\
 	  position: absolute;				\
 	  bottom: 0;				\
 	  width: 100%;				\
-	  /* Set the fixed height of the footer here */				\
-	  height: 140px;				\
 	}							\
     @-webkit-keyframes horiz_rotate {	\
 		0% {											\
@@ -5483,6 +5477,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					$("#altui-footer > p").append(", <span class='text-danger'>{0} / {1}</span>".format(_T("Unregistered Version"),(dDate!=null) ? dDate : ''));
 				});
 			}
+			_refreshFooterSize();
 		}
 		var re = /\$Revision:\s*(\d*).*\$/; 
 		var m;
@@ -5503,7 +5498,13 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			}
 		}
 	};
-	
+	function _refreshFooterSize() {
+		if ( MyLocalStorage.getSettings('StickyFooter')==1 ) {
+			$("#wrap").css("max-height",window.innerHeight-$("footer").height() - $(".navbar-fixed-top").outerHeight(true));
+		} else {
+			$("body").css("margin-bottom",$("footer").outerHeight(true));
+		}		
+	};
 	function _refreshFooter() {
 		// refresh footer if needed
 		if ($("small#altui-footer span.bg-danger").length == 1) {
@@ -5533,8 +5534,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				});
 			}
 		}
-		if ( MyLocalStorage.getSettings('StickyFooter')==1 )
-			$("#wrap").css("max-height",window.innerHeight-$("footer").height() - $(".navbar-fixed-top").outerHeight(true));
+		_refreshFooterSize();
 	};
 	
 	function _drawRoomFilterButtonAsync( selectedroom ) {
