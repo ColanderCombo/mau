@@ -4265,7 +4265,21 @@ var UIManager  = ( function( window, undefined ) {
 	dropdownTemplate += "</ul></div>";
 	dropdownTemplate += "<div class='pull-right text-muted'><small>#{0} </small></div>";
 	
-	function _deviceDraw(device) {
+	var batteryHtmlTemplate="";
+	batteryHtmlTemplate+="<div class='altui-battery progress pull-right' style='width: 35px; height: 15px;'>";
+	batteryHtmlTemplate+="  <div class='progress-bar {1}' role='progressbar' aria-valuenow='60' aria-valuemin='0' aria-valuemax='100' style='min-width: 1em; width: {0}%;'>";
+	batteryHtmlTemplate+="    {0}%";
+	batteryHtmlTemplate+="  </div>";
+	batteryHtmlTemplate+="</div>";
+	
+	var devicecontainerTemplate	= "<div class='panel panel-{4} altui-device' data-altuiid='{5}' id='{0}'>"
+	devicecontainerTemplate	+=		"<div class='panel-heading altui-device-heading'>{6} {7}<div class='panel-title altui-device-title' data-toggle='tooltip' data-placement='left' title='{2}'>{1}</div></div>";
+	devicecontainerTemplate	+=  	"<div class='panel-body altui-device-body'>";
+	devicecontainerTemplate	+= 	  	"{8}{3}";
+	devicecontainerTemplate	+= 	  "</div>";
+	devicecontainerTemplate	+= 	  "</div>";
+
+		function _deviceDraw(device) {
 		var id = device.altuiid;
 		var iconHtml = _deviceIconHtml( device );
 		var batteryHtml ="";
@@ -4280,23 +4294,8 @@ var UIManager  = ( function( window, undefined ) {
 			else if (batteryLevel>=10)
 				color = "warning";
 			color = "progress-bar-"+color;
-			
-			var batteryHtmlTemplate="";
-			batteryHtmlTemplate+="<div class='altui-battery progress pull-right' style='width: 35px; height: 15px;'>";
-			batteryHtmlTemplate+="  <div class='progress-bar {1}' role='progressbar' aria-valuenow='60' aria-valuemin='0' aria-valuemax='100' style='min-width: 1em; width: {0}%;'>";
-			batteryHtmlTemplate+="    {0}%";
-			batteryHtmlTemplate+="  </div>";
-			batteryHtmlTemplate+="</div>";
 			batteryHtml = batteryHtmlTemplate.format(batteryLevel,color);
 		}
-
-		var devicecontainerTemplate	= "<div class='panel panel-{4} altui-device' data-altuiid='{5}' id='{0}'>"
-		devicecontainerTemplate	+=		"<div class='panel-heading altui-device-heading'>"+dropdownTemplate.format(device.altuiid)+batteryHtml+"<div class='panel-title altui-device-title' data-toggle='tooltip' data-placement='left' title='{2}'>{1}</div></div>";
-		devicecontainerTemplate	+=  	"<div class='panel-body altui-device-body'>";
-		devicecontainerTemplate	+= 	  	iconHtml;
-		devicecontainerTemplate	+= 	  	"{3}";
-		devicecontainerTemplate	+= 	  "</div>";
-		devicecontainerTemplate	+= 	  "</div>";
 		
 		var deviceHtml ="";
 		if ( id /*&& ( (device.invisible == undefined) || (device.invisible ==false) )*/ ) 
@@ -4312,9 +4311,7 @@ var UIManager  = ( function( window, undefined ) {
 		
 			// check which plugin function to call by deviceType
 			// if not, defaults to _defaultDeviceDraw()
-			
-			var devicebodyHtml = "";
-			var controller = MultiBox.controllerOf(device.altuiid).controller;
+			// var controller = MultiBox.controllerOf(device.altuiid).controller;
 
 			//
 			// get ALTUI plugins definition, this is allways on master controller, so controller 0 !
@@ -4327,6 +4324,8 @@ var UIManager  = ( function( window, undefined ) {
 				elems[3] = "MSwitch";
 				devicetype = elems.join(':');
 			} 
+			
+			var devicebodyHtml = "";
 			if (_devicetypesDB[ devicetype ]!=null && _devicetypesDB[ devicetype ].DeviceDrawFunc!=null) {
 				devicebodyHtml+= Altui_ExecuteFunctionByName(_devicetypesDB[ devicetype ].DeviceDrawFunc, window, device);
 			}
@@ -4340,7 +4339,11 @@ var UIManager  = ( function( window, undefined ) {
 				tooltip,
 				devicebodyHtml,
 				UIManager.jobStatusToColor(device.status),
-				device.altuiid);
+				device.altuiid,
+				dropdownTemplate.format(device.altuiid),
+				batteryHtml,
+				iconHtml
+				);
 			device.dirty=false;
 		}
 		return deviceHtml;
