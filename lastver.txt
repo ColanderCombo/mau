@@ -1,4 +1,4 @@
-UIManager.checkAltuiUpdate("1023,bugfix registration check;sticky footer;Current temp on heater/therm favorite tiles; sysinfo fix (openluup);bugfix DOM injection color picker ,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29822",
+UIManager.checkAltuiUpdate("1030,bugfix for serveroptions variable containing quotes;Sticky footer optimization & option;performance optimization;bugfix message button double callback,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29828",
 {
 	'amg1':new Date(2014,11,2),
 	'amg0':new Date(2015,10,28),
