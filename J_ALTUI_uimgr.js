@@ -611,6 +611,47 @@ var styles ="						\
 	}								\
 ";		
 
+var ALTUI_Templates = (function() {
+	var _dropdownTemplate =  "";		
+	_dropdownTemplate +=  "<div class='btn-group pull-right'>";
+	_dropdownTemplate += "<button class='btn btn-default btn-xs dropdown-toggle altui-device-command' type='button' data-toggle='dropdown' aria-expanded='false'>"; 
+	_dropdownTemplate += "<span class='caret'></span>";
+	_dropdownTemplate += "</button>";
+	_dropdownTemplate += "<ul class='dropdown-menu' role='menu'>";
+	_dropdownTemplate += "<li><a id='{0}' class='altui-device-variables' href='#' role='menuitem'>Variables</a></li>";
+	_dropdownTemplate += "<li><a id='{0}' class='altui-device-actions' href='#' role='menuitem'>Actions</a></li>";
+	_dropdownTemplate += "<li><a id='{0}' class='altui-device-controlpanelitem' href='#' role='menuitem'>Control Panel</a></li>";
+	_dropdownTemplate += "</ul></div>";
+	_dropdownTemplate += "<div class='pull-right text-muted'><small>#{0} </small></div>";
+	
+	var _batteryHtmlTemplate="";
+	_batteryHtmlTemplate+="<div class='altui-battery progress pull-right' style='width: 35px; height: 15px;'>";
+	_batteryHtmlTemplate+="  <div class='progress-bar {1}' role='progressbar' aria-valuenow='60' aria-valuemin='0' aria-valuemax='100' style='min-width: 1em; width: {0}%;'>";
+	_batteryHtmlTemplate+="    {0}%";
+	_batteryHtmlTemplate+="  </div>";
+	_batteryHtmlTemplate+="</div>";
+	
+	var _devicecontainerTemplate	= "<div class='panel panel-{4} altui-device' data-altuiid='{5}' id='{0}'>"
+	_devicecontainerTemplate	+=		"<div class='panel-heading altui-device-heading'>{6} {7}<div class='panel-title altui-device-title' data-toggle='tooltip' data-placement='left' title='{2}'>{1}</div></div>";
+	_devicecontainerTemplate	+=  	"<div class='panel-body altui-device-body'>";
+	_devicecontainerTemplate	+= 	  	"{8}{3}";
+	_devicecontainerTemplate	+= 	  "</div>";
+	_devicecontainerTemplate	+= 	  "</div>";
+	
+	var _deviceEmptyContainerTemplate="<div class=' col-sm-6 col-md-4 col-lg-3 '>";
+		_deviceEmptyContainerTemplate	+= 		"<div class='panel panel-default altui-device' data-altuiid='{1}' id='{0}'>"
+		_deviceEmptyContainerTemplate	+= 	  	"</div>";
+		_deviceEmptyContainerTemplate	+= 	"</div>";		
+
+	return {
+		dropdownTemplate : _dropdownTemplate,
+		batteryHtmlTemplate : _batteryHtmlTemplate,
+		devicecontainerTemplate : _devicecontainerTemplate,
+		deviceEmptyContainerTemplate : _deviceEmptyContainerTemplate
+	};
+})();
+
+
 
 var LuaEditor = (function () {
 	// 0: Lua code to edit
@@ -4253,33 +4294,7 @@ var UIManager  = ( function( window, undefined ) {
 		return "<img class='altui-device-icon pull-left img-rounded' data-org-src='"+iconPath+"' src='"+iconDataSrc+"' alt='_todo_' onerror='UIManager.onDeviceIconError(\""+device.altuiid+"\")' ></img>";
 	}
 	
-	var dropdownTemplate =  "";		
-	dropdownTemplate +=  "<div class='btn-group pull-right'>";
-	dropdownTemplate += "<button class='btn btn-default btn-xs dropdown-toggle altui-device-command' type='button' data-toggle='dropdown' aria-expanded='false'>"; 
-	dropdownTemplate += "<span class='caret'></span>";
-	dropdownTemplate += "</button>";
-	dropdownTemplate += "<ul class='dropdown-menu' role='menu'>";
-	dropdownTemplate += "<li><a id='{0}' class='altui-device-variables' href='#' role='menuitem'>Variables</a></li>";
-	dropdownTemplate += "<li><a id='{0}' class='altui-device-actions' href='#' role='menuitem'>Actions</a></li>";
-	dropdownTemplate += "<li><a id='{0}' class='altui-device-controlpanelitem' href='#' role='menuitem'>Control Panel</a></li>";
-	dropdownTemplate += "</ul></div>";
-	dropdownTemplate += "<div class='pull-right text-muted'><small>#{0} </small></div>";
-	
-	var batteryHtmlTemplate="";
-	batteryHtmlTemplate+="<div class='altui-battery progress pull-right' style='width: 35px; height: 15px;'>";
-	batteryHtmlTemplate+="  <div class='progress-bar {1}' role='progressbar' aria-valuenow='60' aria-valuemin='0' aria-valuemax='100' style='min-width: 1em; width: {0}%;'>";
-	batteryHtmlTemplate+="    {0}%";
-	batteryHtmlTemplate+="  </div>";
-	batteryHtmlTemplate+="</div>";
-	
-	var devicecontainerTemplate	= "<div class='panel panel-{4} altui-device' data-altuiid='{5}' id='{0}'>"
-	devicecontainerTemplate	+=		"<div class='panel-heading altui-device-heading'>{6} {7}<div class='panel-title altui-device-title' data-toggle='tooltip' data-placement='left' title='{2}'>{1}</div></div>";
-	devicecontainerTemplate	+=  	"<div class='panel-body altui-device-body'>";
-	devicecontainerTemplate	+= 	  	"{8}{3}";
-	devicecontainerTemplate	+= 	  "</div>";
-	devicecontainerTemplate	+= 	  "</div>";
-
-		function _deviceDraw(device) {
+	function _deviceDraw(device) {
 		var id = device.altuiid;
 		var iconHtml = _deviceIconHtml( device );
 		var batteryHtml ="";
@@ -4294,7 +4309,7 @@ var UIManager  = ( function( window, undefined ) {
 			else if (batteryLevel>=10)
 				color = "warning";
 			color = "progress-bar-"+color;
-			batteryHtml = batteryHtmlTemplate.format(batteryLevel,color);
+			batteryHtml = ALTUI_Templates.batteryHtmlTemplate.format(batteryLevel,color);
 		}
 		
 		var deviceHtml ="";
@@ -4308,13 +4323,9 @@ var UIManager  = ( function( window, undefined ) {
 				}
 			});
 			tooltip = tooltip.join('\n');
-		
-			// check which plugin function to call by deviceType
-			// if not, defaults to _defaultDeviceDraw()
-			// var controller = MultiBox.controllerOf(device.altuiid).controller;
 
 			//
-			// get ALTUI plugins definition, this is allways on master controller, so controller 0 !
+			// get ALTUI plugins definition, 
 			//
 			var _devicetypesDB = MultiBox.getALTUITypesDB();	// master controller / Plugin information
 			var devicetype = device.device_type;
@@ -4333,14 +4344,14 @@ var UIManager  = ( function( window, undefined ) {
 				devicebodyHtml+= _defaultDeviceDraw(device);
 			}
 			// $("div.altui-device#"+id+" div.panel-body" ).append(deviceHtml);
-			deviceHtml = devicecontainerTemplate.format(
+			deviceHtml = ALTUI_Templates.devicecontainerTemplate.format(
 				id,
 				_enhancedDeviceTitle(device),
 				tooltip,
 				devicebodyHtml,
 				UIManager.jobStatusToColor(device.status),
 				device.altuiid,
-				dropdownTemplate.format(device.altuiid),
+				ALTUI_Templates.dropdownTemplate.format(device.altuiid),
 				batteryHtml,
 				iconHtml
 				);
@@ -7111,12 +7122,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			UIManager.refreshUI(true,false);
 		};
 		
-		function drawDeviceContainer(idx, device) {
-			var devicecontainerTemplate="<div class=' col-sm-6 col-md-4 col-lg-3 '>";
-			devicecontainerTemplate	+= 		"<div class='panel panel-default altui-device' data-altuiid='{1}' id='{0}'>"
-			devicecontainerTemplate	+= 	  	"</div>";
-			devicecontainerTemplate	+= 	"</div>";		
-			_domMainPanel.append(devicecontainerTemplate.format(device.id,device.altuiid));	
+		function drawDeviceEmptyContainer(idx, device) {
+			_domMainPanel.append(ALTUI_Templates.deviceEmptyContainerTemplate.format(device.id,device.altuiid));	
 		};
 
 		function _drawDeviceToolbar() {
@@ -7293,7 +7300,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		{
 			_domMainPanel = $(".altui-mainpanel").empty();
 			// Category & Form filter
-			MultiBox.getDevices( drawDeviceContainer , filterfunc, endDrawDevice);
+			MultiBox.getDevices( drawDeviceEmptyContainer , filterfunc, endDrawDevice);
 		};
 		
 		function _onClickRoomButton(htmlid,altuiid)
