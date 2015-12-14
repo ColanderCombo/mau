@@ -5795,16 +5795,23 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 	};
 	
 	function _initOptions(serveroptions) {
+		if (isNullOrEmpty(serveroptions))
+			serveroptions="{}";
+		var defaults = JSON.parse(serveroptions);
 		// option1=val1,option2=val2,...
-		var tbl = serveroptions.split(',');
-		var defaults={};
-		$.each(tbl, function(idx,elem) {
-			var key_vals=elem.split('=');
-			defaults[ key_vals[0] ] =  decodeURIComponent(key_vals[1]);
-		});
+		// serveroptions = atob(serveroptions);
+		// var tbl = serveroptions.split(',');
+		// var defaults={};
+		// $.each(tbl, function(idx,elem) {
+			// var key_vals=elem.split('=');
+			// defaults[ key_vals[0] ] =  key_vals[1];
+		// });
 		$.each(_checkOptions, function(idx,opt) {
 			if (MyLocalStorage.getSettings(opt.id) == null)
-				MyLocalStorage.setSettings(opt.id, defaults[opt.id] || opt._default);
+				if (defaults[opt.id] != undefined )
+					MyLocalStorage.setSettings(opt.id, atob(defaults[opt.id]) );
+				else
+					MyLocalStorage.setSettings(opt.id, opt._default);
 		});
 	};
 	
@@ -10252,17 +10259,18 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			// save a copy of the simple options to Vera
 			var altuidevice = MultiBox.getDeviceByID( 0, g_MyDeviceID );
 			var altui_settings = MyLocalStorage.get("ALTUI_Settings");
-			var tbl=[]
+			var tbl={}
 			$.each(altui_settings,function(key,val) {
-				if (isObject(val)==false) {
-					if (val==false)
-						val=0;
-					if (val==true)
-						val=1;
-					tbl.push("{0}={1}".format(key,encodeURIComponent(val)));
+				if ( (val!=null) && (isObject(val)==false)) {
+					tbl[key]=btoa(val.toString())
+					// if (val==false)
+						// val=0;
+					// if (val==true)
+						// val=1;
+					// tbl.push("{0}={1}".format(key,val));
 				}
 			});
-			MultiBox.setStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "ServerOptions", tbl.join(','));
+			MultiBox.setStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "ServerOptions", JSON.stringify(tbl) );
 		};
 		UIManager.clearPage(_T('Options'),_T("Options"),UIManager.oneColumnLayout);
 

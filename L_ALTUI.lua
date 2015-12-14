@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local ALTUI_SERVICE = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v1.0"
+local version = "v1.01"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -2144,6 +2144,9 @@ function startupDeferred(lul_device)
 		if ( (newmajor>major) or ( (newmajor==major) and (newminor>minor) ) ) then
 			log ("Version upgrade => Reseting Plugin config to default")
 			setVariableIfChanged(ALTUI_SERVICE, "PluginConfig", defconfigjson, lul_device)		
+			if (newmajor==1) and (newminor==1) then
+				setVariableIfChanged(ALTUI_SERVICE, "ServerOptions", "[]", lul_device)
+			end
 		end
 		
 		luup.variable_set(ALTUI_SERVICE, "Version", version, lul_device)

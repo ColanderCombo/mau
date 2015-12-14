@@ -164,6 +164,10 @@ if (typeof String.prototype.escapeQuotes != 'function') {
 	var content = this;
     return content.replace(/'/g, "\\'");
   };
+  String.prototype.escapeDoubleQuotes = function (){
+	var content = this;
+    return content.replace(/"/g, "\\\"");
+  };
 };
 
 if (typeof String.prototype.escapeXml != 'function') {
