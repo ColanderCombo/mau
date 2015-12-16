@@ -25,6 +25,7 @@ UIManager.checkAltuiUpdate("1030,bugfix for serveroptions variable containing qu
 	'barakfamily':new Date(2015,11,6),
 	'bside':new Date(2015,11,12),
 	'Kullematz':new Date(2015,11,14),
+	'lmet':new Date(2015,11,15),
 	'vosmont':new Date(2020,0,1),
 	'dklinkman':new Date(2020,0,1),
 	'akbooer':new Date(2020,0,1),
