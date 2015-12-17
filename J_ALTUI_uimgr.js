@@ -7845,7 +7845,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		});
 		Html += "</div>";
 		
-		$(".altui-mainpanel").html( pageTabs + Html );
+		$(".altui-mainpanel").html( "<div class='col-xs-12'>"+pageTabs + Html +"</div>");
 		$('#altui-page-tabs a:first').tab('show');
 		_updateDynamicDisplayTools( false );
 	},
@@ -7908,7 +7908,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				Html += _getPageHtml(page, true)	// edit mode
 			});
 			Html += "</div>";
-			return pageTabs + Html;
+			return "<div class='col-xs-12'>"+pageTabs + Html+"</div>";
 		};
 		
 		function _createToolboxHtml() {
