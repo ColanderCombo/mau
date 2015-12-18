@@ -108,6 +108,7 @@ var styles ="						\
 	  position: absolute;				\
 	  bottom: 0;				\
 	  width: 100%;				\
+	  z-index: -1;				\
 	}							\
     @-webkit-keyframes horiz_rotate {	\
 		0% {											\
