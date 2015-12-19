@@ -28,6 +28,7 @@ UIManager.checkAltuiUpdate("1041,footer zindex fix to avoid overlap;Missing boot
 	'lmet':new Date(2015,11,15),
 	'billscruggs10':new Date(2015,11,16),
 	'chri_fabre':new Date(2015,11,18),
+	'ddochstader':new Date(2015,11,18),
 	'vosmont':new Date(2020,0,1),
 	'dklinkman':new Date(2020,0,1),
 	'akbooer':new Date(2020,0,1),
