@@ -101,8 +101,6 @@ var styles ="						\
 	  /* margin-bottom: 140px;	*/				\
 	}				\
 	#wrap {				\
-	  overflow-y : auto;		\
-	  overflow-x : hidden;		\
 	}							\						\
 	footer {				\
 	  position: absolute;				\
