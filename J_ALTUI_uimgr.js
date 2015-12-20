@@ -5311,23 +5311,25 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				if (bExtraTab) {
 					lines.push( "<li id='altui-devtab-0' role='presentation' ><a href='#altui-devtab-content-0' aria-controls='{0}' role='tab' data-toggle='tab'>{0}</a></li>".format("AltUI") );
 				}
-				$.each( tabs, function( idx,tab) {
-					if ((tab.TabType!="javascript") || (tab.ScriptName!="shared.js")) {
-						lines.push( "<li id='altui-devtab-{1}' role='presentation' ><a href='#altui-devtab-content-{1}' aria-controls='{0}' role='tab' data-toggle='tab'>{0}</a></li>".format(tab.Label.text,idx+1) );
-					}
-				});
+				if (tabs!=undefined)
+					$.each( tabs, function( idx,tab) {
+						if ((tab.TabType!="javascript") || (tab.ScriptName!="shared.js")) {
+							lines.push( "<li id='altui-devtab-{1}' role='presentation' ><a href='#altui-devtab-content-{1}' aria-controls='{0}' role='tab' data-toggle='tab'>{0}</a></li>".format(tab.Label.text,idx+1) );
+						}
+					});
 				lines.push("</ul>");
 				var html = "<div class='tab-content {0}'>".format( (UIManager.UI7Check()==true) ? '' : 'altui-tabcontent-fix');
 				if (bExtraTab) {
 					html += "<div id='altui-devtab-content-0' class='tab-pane bg-info altui-devtab-content'>";
 					html += "</div>";
 				}
-				$.each( tabs, function( idx,tab) {
-					if ((tab.TabType!="javascript") || (tab.ScriptName!="shared.js")) {
-						html += "<div id='altui-devtab-content-{0}' class='tab-pane bg-info altui-devtab-content'>".format(idx+1);
-						html += "</div>";
-					}
-				});
+				if (tabs!=undefined)
+					$.each( tabs, function( idx,tab) {
+						if ((tab.TabType!="javascript") || (tab.ScriptName!="shared.js")) {
+							html += "<div id='altui-devtab-content-{0}' class='tab-pane bg-info altui-devtab-content'>".format(idx+1);
+							html += "</div>";
+						}
+					});
 				html += "</div>";
 				return lines.join('')+html;
 			};
@@ -5417,16 +5419,17 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		if (ui_static_data!=null) {
 			// load scripts
 			var scripts = {};
-			$.each( ui_static_data.Tabs, function( idx,tab) {
-				if (tab.TabType=="javascript" && tab.ScriptName!="shared.js")
-				{
-					var script = tab.ScriptName;
-					var func = tab.Function;
-					if (scripts[script] == undefined)
-						scripts[script]=[];
-					scripts[script].push( func );
-				}
-			});
+			if (ui_static_data.Tabs != undefined) 
+				$.each( ui_static_data.Tabs, function( idx,tab) {
+					if (tab.TabType=="javascript" && tab.ScriptName!="shared.js")
+					{
+						var script = tab.ScriptName;
+						var func = tab.Function;
+						if (scripts[script] == undefined)
+							scripts[script]=[];
+						scripts[script].push( func );
+					}
+				});
 		
 			if (Object.keys(scripts).length==0)
 				_defereddisplay(true);
