@@ -5668,6 +5668,10 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 						status==1 ? "text-success" : "text-danger"
 					);
 					break;
+				case "urn:schemas-micasaverde-com:device:PowerMeter:1":
+					var watts = MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'Watts' );  
+					html += "<span>{0}W</span>".format(watts || "-");				
+					break;
 				default:
 					html += "-";
 					break;
@@ -5705,8 +5709,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				$.each(scenes, function(idx,scene) {
 					html +=favoriteTemplate.format(scene.name,_drawFavoriteScene(scene));
 				})
-			html += "</div>";		
-			html += "</div>";		
+				// html += "</div>";		
+				// html += "</div>";		
 
 				// html += "<div class='col-xs-12'>";
 				// html +="	<br><p>"+_T("This plugin is a work in progress, it will continuously evolve over time.");
