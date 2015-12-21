@@ -2709,14 +2709,16 @@ var SceneEditor = function (scene) {
 		$("#altui-hint-Triggers").html( '<span class="badge">{0}</span>'.format( scene.triggers.length + scenewatches.length));
 		$("#altui-hint-Timers").html( '<span class="badge">{0}</span>'.format( scene.timers.length));
 		$("#altui-hint-Actions").html( '<span class="badge">{0}</span>'.format( _countActions(scene)) );
+		var header = "{0} in {1}".format(scene.name,_roomIDToName["{0}-{1}".format(scenecontroller,scene.room)]);
 		if (UIManager.UI7Check())
 		{
 			var html = $.map( $("div.housemode.preset_selected") , function(elem,idx) {	
 				var id = parseInt( $(elem).prop('id').substring("altui-mode".length) ) - 1;
 				return _HouseModes[ id ].text;
 			}).join(",");
-			$("#altui-hint-Header").html( '<span class="text-muted"><small>{0} in {1} ({2})</small></span>'.format( scene.name,_roomIDToName["{0}-{1}".format(scenecontroller,scene.room)],html ));
+			header += (" ({0})".format(html));
 		}
+		$("#altui-hint-Header").html( '<span class="text-muted"><small>{0}</small></span>'.format( header ) );
 	};
 	
 	function _runActions(  ) {
