@@ -2,11 +2,11 @@ UIManager.checkAltuiUpdate("1050,scene name-room in header of editor;bugfix: if 
 {
 	'amg1':new Date(2014,11,2),
 	'amg0':new Date(2015,10,28),
+	'gledholt':new Date(2016,5,8),	
 	'laurentvalentin':new Date(2015,05,12),
 	'@c0rc0ran@':new Date(2015,06,4),
 	'vanbredat':new Date(2015,06,15),
 	'mfroebel':new Date(2015,6,25),
-	'XAPPO':new Date(2016,7,6),	
 	'actran70':new Date(2015,07,22),
 	'ohb_vera':new Date(2015,07,28),
 	'chamberlainzo6':new Date(2015,8,15),
