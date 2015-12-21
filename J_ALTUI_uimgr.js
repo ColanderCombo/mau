@@ -1597,6 +1597,9 @@ var SceneEditor = function (scene) {
 	];
 
 	// var scenealtuiid = scene.altuiid;
+	var _roomIDToName={
+		"0-0":_T("No Room")
+	};
 	var scenecontroller = MultiBox.controllerOf(scene.altuiid).controller;
 	var altuidevice = MultiBox.getDeviceByID( 0, g_MyDeviceID );
 	var scenewatches = $.grep( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToWatch" ) || "").split(';'),function(w) {
@@ -2255,6 +2258,7 @@ var SceneEditor = function (scene) {
 	function _sceneEditDraw() {
 		// var htmlSceneAddButtonTmpl = "  <button type='submit' class='btn btn-default {0}'>"+plusGlyph+"</button>";
 		var rooms = $.grep( MultiBox.getRoomsSync(), function(room,idx) {
+			_roomIDToName[room.altuiid]=room.name;
 			return ( MultiBox.controllerOf(room.altuiid).controller == scenecontroller );
 		});	
 
@@ -2552,7 +2556,7 @@ var SceneEditor = function (scene) {
 			var htmlRoomSelect = "<select id='altui-room-list' class='form-control'>";
 			var htmlRoomName = "<input id='altui-scene-name-input' type='text' class='form-control' value='"+scene.name+"'></input>";
 			if (rooms) {
-					htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format("No Room",0,'');
+					htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format(_T("No Room"),0,'');
 					$.each(rooms, function(idx,room) {
 						var selected = (room.id.toString() == scene.room);
 						htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format(room.name,room.id,selected ? 'selected' : '');
@@ -2711,7 +2715,7 @@ var SceneEditor = function (scene) {
 				var id = parseInt( $(elem).prop('id').substring("altui-mode".length) ) - 1;
 				return _HouseModes[ id ].text;
 			}).join(",");
-			$("#altui-hint-Header").html( '<span class="text-muted"><small>({0})</small></span>'.format( html ));
+			$("#altui-hint-Header").html( '<span class="text-muted"><small>{0} in {1} ({2})</small></span>'.format( scene.name,_roomIDToName["{0}-{1}".format(scenecontroller,scene.room)],html ));
 		}
 	};
 	
@@ -2780,7 +2784,9 @@ var SceneEditor = function (scene) {
 			})
 			.on("change","#altui-scene-name-input",function() { 
 				if ( $("#altui-scene-name-input").val() != scene.name ) {
+					scene.name = $("#altui-scene-name-input").val();
 					_showSaveNeeded();
+					_updateAccordeonHeaders();
 				}
 			})
 			.on("click",".altui-scene-editbutton",function(){ 
@@ -5276,7 +5282,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			},function(rooms) {
 				var htmlRoomSelect = "<select id='altui-room-list' class='form-control input-sm'>";
 				if (rooms)
-						htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format("No Room",0,'');
+						htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format(_T("No Room"),0,'');
 						$.each(rooms, function(idx,room) {
 							var selected = (room.id.toString() == device.room);
 							htmlRoomSelect 	  += "<option value='{1}' {2}>{0}</option>".format(room.name,room.id,selected ? 'selected' : '');
@@ -6859,7 +6865,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			});
 
 			$.each(filteredrooms, function(i,room) {
-				leftnav.append( leftNavButtonTemplate.format( room.id, room.altuiid, (room!=null) ? room.name : "No Room") );	
+				leftnav.append( leftNavButtonTemplate.format( room.id, room.altuiid, (room!=null) ? room.name : _T("No Room")) );	
 			})
 			if ($.isFunction(roomLoadedFunction))
 				(roomLoadedFunction)(rooms);
@@ -6908,7 +6914,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					var id = room.altuiid;
 					var delButtonHtml = smallbuttonTemplate.format( id, 'altui-delroom', deleteGlyph);
 					var viewButtonHtml = smallbuttonTemplate.format( id, 'altui-viewroom', searchGlyph);
-					$(".altui-mainpanel tbody").append( roomListTemplate.format(id,(room!=null) ? room.name : "No Room",_roomSummary(room),viewButtonHtml+delButtonHtml) );
+					$(".altui-mainpanel tbody").append( roomListTemplate.format(id,(room!=null) ? room.name : _T("No Room"),_roomSummary(room),viewButtonHtml+delButtonHtml) );
 				});
 				// install click handler for buttons
 				$(".altui-mainpanel")
