@@ -29,6 +29,7 @@ UIManager.checkAltuiUpdate("1050,scene name-room in header of editor;bugfix: if 
 	'billscruggs10':new Date(2015,11,16),
 	'chri_fabre':new Date(2015,11,18),
 	'ddochstader':new Date(2015,11,18),
+	'Maromaro1970':new Date(2015,11,21),
 	'vosmont':new Date(2020,0,1),
 	'dklinkman':new Date(2020,0,1),
 	'akbooer':new Date(2020,0,1),
