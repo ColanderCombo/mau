@@ -101,9 +101,12 @@ var styles ="						\
 	  /* margin-bottom: 140px;	*/				\
 	}				\
 	#wrap {				\
-	}							\						\
-	footer {				\
-	  position: absolute;				\
+	}					\
+	#filler {			\
+		height: 140px;	\
+	}					\
+	footer {					\
+	  position: absolute;		\
 	  bottom: 0;				\
 	  width: 100%;				\
 	  z-index: -1;				\
@@ -5014,7 +5017,7 @@ var UIManager  = ( function( window, undefined ) {
 		html += smallbuttonTemplate.format( 'altui-deletevar-'+varnum, 'altui-delete-variable', deleteGlyph ,'Delete');
 		html += "</td>";
 		html += "<td>";
-		html += sel.wrap("div").parent().html();
+		html += $("<div></div>").append(sel).html();
 		html += "</td>";
 		html += "<td>";
 		html += "<div class='col-xs-6'><input type='number' class='form-control input-sm' value='{0}'></input></div>".format(value || "");
@@ -5491,7 +5494,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				$("#altui-footer > p").append("<span class='text-success'>, {0} / {1}</span>".format(_T("Registered Version"),(dDate!=null) ? dDate : ''));
 				$("#altui-footer form").remove();
 			} else {
-				// $("footer form").append("<blockquote class='blockquote'><p class='text-danger'>Hello {0}, please support ALTUI with a yearly contribution. Last:{1}</p></blockquote>".format(
+				//// $("footer form").append("<blockquote class='blockquote'><p class='text-danger'>Hello {0}, please support ALTUI with a yearly contribution. Last:{1}</p></blockquote>".format(
 				$("body nav").after("<blockquote id='altui-license' class='blockquote'><p class='text-info'>{0}.({1})</p></blockquote>".format(
 					_T("Unregistered version for {0}").format(user.Name),
 					(dDate!=null) ? dDate : ''					
@@ -5524,7 +5527,15 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 	};
 	function _refreshFooterSize() {
 		if ( MyLocalStorage.getSettings('StickyFooter')==1 ) {
-			$("#wrap").css("max-height",window.innerHeight-$("footer").height() - $(".navbar-fixed-top").outerHeight(true));
+			$("#wrap")
+					.css("width","100%")
+					.css("overflow-y","auto")
+					.css("overflow-x","hidden")
+					.css("position","absolute")
+					.css("top",$(".navbar-fixed-top").outerHeight(true))
+					// .css("padding-top",$(".navbar-fixed-top").outerHeight(true)) //$(".navbar-fixed-top").outerHeight(true))
+					.css("bottom",$("footer").outerHeight(true))
+					// .css("max-height",window.innerHeight-$("footer").height() - $(".navbar-fixed-top").outerHeight(true));
 		} else {
 			$("body").css("margin-bottom",$("footer").outerHeight(true));
 		}		
@@ -6644,6 +6655,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 	sceneDraw			: _sceneDraw,
 	refreshUI 			: _refreshUI,					// 
 	refreshUIPerDevice	: _refreshUIPerDevice,
+	refreshFooter		: _refreshFooter,
 	
 	// breadcumb
 	breadCrumb: function( title , param ) {
@@ -10458,6 +10470,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			  /*if (window.innerWidth > tabletSize) */
 			  $(".navbar-collapse").collapse('hide');
 			  UIManager.refreshUI( true ,false  );	// full but not first time
+			  UIManager.refreshFooter();
 			});			
 			$( window ).unload(function() {
 				// save state to accelerate the launch next time
