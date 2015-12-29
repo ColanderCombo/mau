@@ -1,0 +1,73 @@
+Hello there,  thank you for the feedback.
+
+It is great you are thinking about this as I need some users to try using the theming, have issues so I can fix them. 
+I can tell you the theory but we will most likely encounter issues and we can improve it together. also if you do 
+improve this on/off bitmap , I am more than interested to try to see if we can put it back in standard distribution for the benefit of others.
+
+DEVICE TYPE customizations
+--------------------------
+Before I go into theming, let me talk about device specific customization. for these, really the javascript module is the way to go. 
+It is not hard to do, just a few lines, and then, for a given device type, you decide the dashboard appearance with the html, button, css classes & images. 
+so if you really want some device specific custom buttons, let's please take the JS module route. I can provide information & sample on how to do this
+JS module offer an api to draw device dashboard, but also to load device-type specific CSS ( but only your drawing code knows about these classes so you end up needing both 
+the small drawing code function() and the style function() )
+
+the api of plugins also support an icon api so you can customize the icon, I do this for the weather plugin for instance to have an icon depending on the weather.
+see exemples in J_ALTUI_plugins.js.
+
+For the global theming, ALTUI uses bootstrap CSS and ALTUI own CSS. 
+you would only change bootstrap CSS by incrementally adding rules into the css file ( not changing the original ). CSS allow you to override a previous declaration
+it depends on the order, it depends also how precise the selector is ( there are the weighting algorythm to determine the weight of a selector and the heaviest one wins )
+or there are people ( like MCV ) literally abusing of the 'important!' keyword which I absolutely do not recommend. but sometimes you are forced
+
+let me talk about bootstrap.css first , then I ll talk about altui CSS
+
+bootstrap.css
+-------------
+
+you start with a base which is either nothing ( meaning then your base is the default bootstrap.css => https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.css) 
+or some of the bootstrap.css themes you can find out there, I did this for the darky one for instance.
+
+a) if you start with nothing, the ThemeCSS can point to your own CSS file which is loaded , on top of bootstrap.css
+b) if want to start with a bootstrap theme like the darky one, the ThemeCSS can point to your own version of that darky bootstrap file which should be the darky bootstrap theme file, in which you add the lines you want to add for your overrides
+
+for a) and b) you have to put the .css file in some place accessible via http/s and enter that url in the ThemeCSS variable.
+Personally I use my google drive space to hold and serve these .css files , but you can also use your own vera by putting the file somewhere under /www if you really
+want to work in "internet-down" situations. ( although CSS file issus should not prevent operating ALTUI )
+
+ALTUI.css
+---------
+
+altui CSS classes and id names  are 'normally' all labelled like altui-xxxxx to be recognized. you will find them in J_ALTUI_uimgr.js as they are dynamically loaded by the JS code
+(easier for debug as upding a JS file on vera does not require a luup reload, otherwise I could have put them inside the HTML template given by the LUA code)
+
+for instance ON OFF button images are not bootstrap, they are determined by these 2 ALTUI css classes. you should be able to redefine these CSS classes in your own CSS, 
+pointed to by the ThemeCSS variable and it "should" work
+
+Button's class is on-off-device and second class is on or off 
+
+	.on-off-device.off {		\
+		background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEYAAAAoCAYAAABD0IyuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuNWWFMmUAAAKOSURBVGhD7ZhZb+MwDITz//9c8tJs49x3srmb800lvXGgdYcSbctoC2iADyIGrWtNJVp2wxgTAUAzEoMRgWYkBiMCzUgMRgSaoXg8HjRAwZ//SUCzCpfLhYZCgtf5bqBZhs1mQ0Mlwet+F9Asyu12oyGIGr1u1/R7PTMaDs1kPDbTycTMplMzn83MYj5PWS4WXvgfdTqd0muWAZpams2mCRhKKu5L3SQxg37fjEejNBiGg8nCQUG42G23fGk4BwloalmtVjSE136/N7xyhoNBpVVjs1ou+dJwHghoFkDUer1OcdUucRD2qqkaTAYJzeML0NTw3L+ipDDs2qXb9fql11TZThnalQNNJU5JYdi1TxyGtJ3QpLVoeg40fczpxnySwrBrnw6Hw2s7cTihthNDgnPLgKYPzSFOCsOufeInVB19hjlS6CQ4PwaaCrySwrBrjbI+EzqYv//uAc0tBZoKvJLCsGuN6gqGIaG5pUBTgVdSGHatEW+jLBgmBvOUvWJiMJZ+1VY6n880uCWFYdc+8VOprmB8Bz1o+pjRzfkkhWHXPh3onamuxzW/j5Hg/BhoKnFKCsOufeJD3a864DHH45EGWVIYdu3Sld6VXG/YaLJaNO9L0CyAKCkMu3aJg8j6SxYMhxIimOfJHc3nBTS1uN6ZpDDsWtJ+tzNJp1NLf9F+tIJmEUp8/Hbqfr+bzvt78A9VzPO7NJxHHmgWhftBCHEoSZK8Pm3mD3ZVtlGRUBholqHqZ84t3fifdjvdQvneUmW1cKM9f3zwn4D3LQHNMrRaLRp0h7+cGn1aHe23t/+2UNZb8qtFGwyvEE2TlYBmCLbU5HhrCIK/85OAZiQGIwLNSAxGBJqRGIyAaXwCmHJBNse7DisAAAAASUVORK5CYII=') no-repeat;		\
+	}		\
+	.on-off-device.on {		\	
+		background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEYAAAAoCAYAAABD0IyuAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwgAADsIBFShKgAAAABh0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC41ZYUyZQAAAy5JREFUaEPtmbtuE0EUhkcgQYNEOiQangABQjjcYyDU0IRLYm4mYCdcGkQoCRWCyqKlRYIXCDUvgJSGhgYoLblz4as0nLF3opPZfy5rL5IXzZE+7egUO55PZ87sroWUMgKAyUgUYwUmI1GMFZiMFEPMfuIEcZjYm+Q0e4hDxFFiX5LLBZicEQ4QVeJtt9uV/X6fhukYDAbq8pk4SaD7TARMzgjLxB8iOHq9nrqge2UGJkO59+m9PLJZkeL51d08WxzzlHhyZcz6ZSnql6SolaV4RKwuSFG9KMWDC3Sj81LcPSdF5awUK2fo1qP7TxOp35oVmPSx8OFFWoZGS+Fi1ok1ElMjMTtSSMj9RMidsZC51UW5/fsnTTF9JFsM/v4QYNIFlMFB1aKkqGp5zCpFS0mqRNw+nZsUHcPhUF3gOnzApA0owiRVLXwLkZSHyfbhUm7Ny8bXLzRF/qEaNwVcjwuYREAJJiHVontKsn1UpZTfrNEU7mg2myNcY0fANbmASRNnT+H4qoVvoUSKuDkvv/34TtO4wyaDj20xSb+BSRMoAWGKcVXL8ngLHd+o0BT+sMngY0/AtdmASRMowcSUosWMTiKjt+xUS0k2ttSzmT9sMvjYFVmfcWCSA59TEKYYdUTXlRhjG+neQtUibpTk9q+wk8gmg49dkfWEgkkOlIBIiXFtI6oWJWapRFOEhU0GHwcEXCMCJjlQAiJUjDqik6Yrlk7RFGFhk8HHAQHXiIBJDpSACBGjn12S/hLF/I9iDr66jkWYhIjRW0n1mKJvpWsfX2MRJqFijOZb2FNJAUWYpMQQAcd1YZ9jFEHbyRSj8D7g0ZPvyxWawh82GXzsCbg2GzCJgDJMTDkBrwSqagr7rqQ49q6GZXBMMbrPeF4iy5t1msIdNhl87Ai4JhcwacO7pUwxvqphchpb/+Z7TKfTURe4Hhcw6cJbOb6q4b3GkJP3F7xpPm/CZAhQiiKkaviWYnLmqgX+5muSqiAtZlfVJHLUCeWSoxoyCcrhMyf8rVmAyVmh3W7TJTwm/b6LgMlZo9Vq6Saaijz/ZOPAZCSKsQKTkSjGCkxGohgLUvwFOBYW/Ol9cekAAAAASUVORK5CYII=') no-repeat;		\
+	}		\
+	
+All sort of CSS3 background should work, image, gradient, even video...
+
+Now, another point to note. if the image is on internet, you can put the url to it. But you get into trouble if :
+- the image ( like the on off button ) is on VERA as it will not display with remote accessible
+- if it does not exist with the same name/location on UI5 UI7 boxes
+
+To address these kind of situations,  ALTUI tends to use the data 64 format for images. that is the url('data:image/png;base64,ixxxxx') syntax you see above. 
+That way, the image is given directly to your browser, which caches it and it works in all situations. you have converters on the web like http://www.askapache.com/online-tools/base64-image-converter/
+
+SLIDERS
+--------
+Slides are jqueryui sliders, but normally I have put a class altui-dimmable-slider on them so you can customize just that class.
+*OR* you can look at jqueryUI theming as well for the sliders and create these specific css classes ( ui-xxxx ) for the slider background/color that you want. 
+jqueryUI sliders use the background property so that should do the trick
+.altui-dimmable-slider {		
+		background: url('something')
+	}		
+	
