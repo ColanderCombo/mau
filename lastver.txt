@@ -33,6 +33,7 @@ UIManager.checkAltuiUpdate("1054,bugfix:zWave configuration screen;bugfix:sticky
 	'cschlote':new Date(2015,11,24),
 	'mikeblackwell':new Date(2015,11,26),
 	'kulfsson':new Date(2015,11,29),
+	'artoodetoo':new Date(2015,11,29),
 	'xxx':new Date(2015,11,29),
 	'vosmont':new Date(2020,0,1),
 	'dklinkman':new Date(2020,0,1),
