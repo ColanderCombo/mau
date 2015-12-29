@@ -1729,7 +1729,9 @@ var SceneEditor = function (scene) {
 	function _editWatch( idx, jqButton) {
 		var watch =  (idx!=-1) ? WatchManager.getWatchLineParams( scenewatches[idx] ) : "";
 		var dialog = DialogManager.createPropertyDialog(_T('Watch'));
-		var device = (idx!=-1) ? MultiBox.getDeviceByAltuiID(watch.deviceid) : NULL_DEVICE;
+		var device = NULL_DEVICE;
+		if (idx!=-1)
+			device = MultiBox.getDeviceByAltuiID(watch.deviceid) || NULL_DEVICE;
 		
 		DialogManager.dlgAddDevices( dialog , device ? device.altuiid : NULL_DEVICE, 
 			function() {			// callback
@@ -1795,10 +1797,13 @@ var SceneEditor = function (scene) {
 	}
 	
 	function _displayWatch(idx,watch) {
+		var device = MultiBox.getDeviceByAltuiID(watch.deviceid);
+		if (device==null)
+			device = {name:"<span class='text-danger'>Invalid</span>"};
+
 		var html ="";
 		html +="<tr data-watch-idx='{0}'>".format(idx);
 		html +="<td>";
-		var device = MultiBox.getDeviceByAltuiID(watch.deviceid);
 		html += device.name;
 		html +="</td>";
 		html +="<td>";
