@@ -400,11 +400,13 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		if (device==null)
 			return null;
 		
-		for (i=0; i<device.states.length ; i++ ) {
-			var state = device.states[i];
-			if (( state.service == service ) && (state.variable == variable)) {
-				foundState = state;
-				break;
+		if (device.states) {
+			for (i=0; i<device.states.length ; i++ ) {
+				var state = device.states[i];
+				if (( state.service == service ) && (state.variable == variable)) {
+					foundState = state;
+					break;
+				}
 			}
 		}
 		if ((foundState==null) && (bCreate==true)) {
