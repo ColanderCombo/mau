@@ -1,4 +1,4 @@
-UIManager.checkAltuiUpdate("1054,bugfix:zWave configuration screen;bugfix:sticky footer;scene name-room in header of editor;bugfix: if no settings tabs in device;bugfix: menu cutting off by footer;power meter favorite;footer zindex fix to avoid overlap;Missing bootstrap column for custom pages;Performance optimization,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29881",
+UIManager.checkAltuiUpdate("1063,bugfix:scene editor bad watches;bugfix:google gauge bad device,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29894",
 {
 	'amg1':new Date(2014,11,2),
 	'amg0':new Date(2015,10,28),
