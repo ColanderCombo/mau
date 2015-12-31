@@ -327,7 +327,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 	function _findDeviceIdxByID(devid)
 	{
-		for (i=0; i<_user_data.devices.length; i++ ) {
+		for (var i=0; i<_user_data.devices.length; i++ ) {
 			if (_user_data.devices[i].id==devid)
 				return i;
 		}
@@ -335,7 +335,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 
 	function _getDeviceByType( device_type ) {
-		for (i=0; i<_user_data.devices.length; i++ ) {
+		for (var i=0; i<_user_data.devices.length; i++ ) {
 			if (_user_data.devices[i].device_type==device_type)
 				return _user_data.devices[i]
 		}
@@ -343,7 +343,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 
 	function _getDeviceByAltID( parentdevid , altid ) {
-		for (i=0; i<_user_data.devices.length; i++) {
+		for (var i=0; i<_user_data.devices.length; i++) {
 			var device = _user_data.devices[i];
 			if ( (device.id_parent==parentdevid) && (device.altid==altid) )
 				return _user_data.devices[i];
@@ -363,7 +363,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	};
 
 	function _getSceneByID(sceneid) {
-		for (i=0;i<_user_data.scenes.length;i++) {
+		for (var i=0;i<_user_data.scenes.length;i++) {
 			if (_user_data.scenes[i].id == sceneid)
 				return _user_data.scenes[i];
 		}
@@ -386,7 +386,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	
 	function _getStates( deviceid  )
 	{
-		for (i=0; i<_user_data.devices.length; i++) {
+		for (var i=0; i<_user_data.devices.length; i++) {
 			var device = _user_data.devices[i];
 			if (device.id == deviceid)
 				return _user_data.devices[i].states;
@@ -401,7 +401,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 			return null;
 		
 		if (device.states) {
-			for (i=0; i<device.states.length ; i++ ) {
+			for (var i=0; i<device.states.length ; i++ ) {
 				var state = device.states[i];
 				if (( state.service == service ) && (state.variable == variable)) {
 					foundState = state;

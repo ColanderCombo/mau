@@ -4973,8 +4973,7 @@ var UIManager  = ( function( window, undefined ) {
 	};
 
 	function _findCurrentValue(getelemstbl,varnum) {
-		var i;
-		for (i=0;i<getelemstbl.length;i+=2) {
+		for (var i=0;i<getelemstbl.length;i+=2) {
 			if (getelemstbl[i]==varnum)
 				return getelemstbl[i+1];
 		};
@@ -5097,7 +5096,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				var curelems = curvariables.split(',');
 				var elems = setvariables.split(',');
 				var getelems = getvariables.split(',');
-				for (i=0;i<elems.length;i+=3) {
+				for (var i=0;i<elems.length;i+=3) {
 					html += _displayConfigVariable( device,elems[i],elems[i+1],elems[i+2],_findCurrentValue(getelems,elems[i]) );
 				}
 				html += "<tr>";
