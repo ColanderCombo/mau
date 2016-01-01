@@ -31,7 +31,7 @@ var MultiBox = ( function( window, undefined ) {
 		return "{0}-{1}".format(ctrlid,devid);
 	};
 	function _getControllers() {
-		return $.map(_controllers,function(c) { return {	ip:c.ip , box_info:c.controller.getBoxFullInfo() } });
+		return $.map(_controllers,function(c) { return {	ip:c.ip , box_info:c.controller.getBoxFullInfo(), controller: c.controller } });
 	};	
 	function _initDB(devicetypes) {
 		$.extend(true,_devicetypesDB[0],devicetypes); 	// data received initially comes from ctrl 0

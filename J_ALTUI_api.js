@@ -302,12 +302,24 @@ var Ajax = (function(window,undefined) {
 					// dataType: "text"
 				};
 			}
+			// if this is for a remove controller, we need to proxify the url ( and the result )
+			// so that controller 0 acts as a proxy for the web request
+			// the hack is that vera only supports parameters with a "GET" & on the url
+			var controller = MultiBox.getControllers()[_JSAPI_ctx.controllerid];
+			var upnphelper = controller.controller.getUPnPHelper();
+			if (_JSAPI_ctx.controllerid>0) {
+				var querystring = $.param(ajaxopts.data);
+				ajaxopts.data=null;
+				ajaxopts.url = upnphelper.proxify("http://{0}{1}?{2}".format(controller.ip,ajaxopts.url,querystring));
+			}
 			var jqxhr = $.ajax(ajaxopts )
 				.done(function(data, textStatus, jqXHR) {
-					if ($.isFunction( options.onSuccess )) {
-						var response = new Response(data,jqXHR);
-						(options.onSuccess)(response);
-					}
+					upnphelper.unproxifyResult(data, textStatus, jqXHR, function(data,textStatus,jqXHR) {
+						if ($.isFunction( options.onSuccess )) {
+							var response = new Response(data,jqXHR);
+							(options.onSuccess)(response);
+						}
+					});
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
 					if ($.isFunction( options.onFailure )) {
