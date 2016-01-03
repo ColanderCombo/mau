@@ -565,7 +565,7 @@ local htmlLocalScripts = [[
 
 local htmlScripts = [[
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js" ></script>
-	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" ></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" ></script>
     <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js" ></script> 
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-bootgrid/1.2.0/jquery.bootgrid.min.js" defer></script> 	
 	<script src="//cdnjs.cloudflare.com/ajax/libs/spectrum/1.7.1/spectrum.min.js"></script>
@@ -587,7 +587,7 @@ local htmlStyle = [[
 	</style>
 ]]
 
-local defaultBootstrapPath = "//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"
+local defaultBootstrapPath = "//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
 
 local htmlLocalCSSlinks = [[
 	<link rel="stylesheet" href="@localcdn@/jquery-ui.css">
