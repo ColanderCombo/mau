@@ -182,9 +182,8 @@ ALTUI scene editor will take care of editing this [b]VariablesToWatch[/b] variab
 
 [b]Overall DOC in English[/b] : 
 [list]
-[li][url=http://code.mios.com/trac/mios_alternate_ui/export/245/doc.docx]http://code.mios.com/trac/mios_alternate_ui/export/245/doc.docx[/url]
-[/li]
-[li][url=http://code.mios.com/trac/mios_alternate_ui/export/245/doc.pdf]http://code.mios.com/trac/mios_alternate_ui/export/245/doc.pdf[/url][/li]
+[li][url]http://code.mios.com/trac/mios_alternate_ui/export/1071/Docs/doc.docx[/url][/li]
+[li][url]http://code.mios.com/trac/mios_alternate_ui/export/1071/Docs/doc.pdf[/url][/li]
 [/list]
 
 [b]BLOG & Web Magazine[/b]
