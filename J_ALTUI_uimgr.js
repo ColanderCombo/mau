@@ -476,6 +476,7 @@ var styles ="						\
 		margin: 2px;			\
 		padding-left: 2px;		\
 		padding-right: 2px;		\
+		position: relative;		\
 	}		\
 	div.altui-favorites-device:hover, div.altui-favorites-scene:hover {				\
 		cursor: pointer;		\
@@ -490,10 +491,18 @@ var styles ="						\
 		white-space: nowrap; overflow: hidden; text-overflow: ellipsis;		\
 		width: 100%; max-width: 100% 	\
 	}		\
-	.btn.altui-housemode{				\
+	.altui-favorites-watts { 	\
+		float: right;			\
+		text-align: right;		\
+		font-size: 12px;		\
+		bottom: 0px;			\
+		position: absolute;		\
+		right: 0px;				\
+	}						 	\
+	.btn.altui-housemode{		\
 		padding-left: 0px;		\
 		padding-right: 0px;		\
-	}								\
+	}							\
 	.housemode {				\
 		text-align: center;		\
 		cursor: pointer;		\
@@ -5641,6 +5650,9 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		function _drawFavoriteDevice(device) {
 			var html="";
 			html += "<div class='altui-favorites-device-content' data-altuiid='{0}'>".format(device.altuiid);
+			var watts = parseFloat(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'Watts' )); 
+			if (isNaN(watts)==false) 
+				html += "<div class='bg-danger altui-favorites-watts'>{0} Watts</div>".format(watts);
 			switch(device.device_type) {
 				case "urn:schemas-micasaverde-com:device:LightSensor:1":
 					var level = MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:LightSensor1', 'CurrentLevel' ); 
