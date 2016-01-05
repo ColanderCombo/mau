@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local ALTUI_SERVICE = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v1.01"
+local version = "v1.02"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -511,7 +511,7 @@ end
 local function getDataFor( deviceID,name )
 	debug("getDataFor("..name..")")
 	local name = "Data_"..name
-	
+	name = name:gsub(" ", "+")	-- spaces are replaced by '+'
 	local num = 0
 	local var = nil
 	local result = ""

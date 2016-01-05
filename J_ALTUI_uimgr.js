@@ -5810,7 +5810,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			var pagename = _getActivePageName();
 			var page = PageManager.getPageFromName( pagename );
 			// for all widget present which need refresh
-			var selector = "#altui-page-content-{0} .altui-widget".format(pagename);
+			var selector = "#altui-page-content-{0} .altui-widget".format(pagename.replace(' ','_'));
 			$(selector).each( function (idx,elem) {
 				var widgetid = $(elem).prop('id');
 				var widget = PageManager.getWidgetByID( page, widgetid );
@@ -6524,15 +6524,15 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 	};
 
 	function _getActivePageName() {
-		var pagename = $("#altui-page-tabs li.active").prop('id');
-		return pagename != undefined ? pagename.substring( "altui-page-".length) : '';
+		return $("#altui-page-tabs li.active").text();		
+		// return pagename != undefined ? pagename.substring( "altui-page-".length) : '';
 	};
 	
 	// one page if specified, all pages otherwise
 	function _getPageSelector( page ) {
 		if (page == undefined)
 				return ".altui-page-content-one";
-		return "#altui-page-content-{0}".format(page.name);
+		return "#altui-page-content-{0}".format(page.name.replace(' ','_'));
 	};
 	function _getWidgetSelector(page,widget) {
 		if ((page==undefined) || (widget==undefined))
@@ -6544,7 +6544,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		var actions = "";
 		var lines = new Array();
 		PageManager.forEachPage( function( idx, page) {
-			lines.push( "<li id='altui-page-{0}' role='presentation' ><a href='#altui-page-content-{0}' aria-controls='{0}' role='tab' data-toggle='tab'>{0}</a></li>".format(page.name) );
+			lines.push( "<li id='altui-page-{1}' role='presentation' ><a href='#altui-page-content-{1}' aria-controls='{1}' role='tab' data-toggle='tab'>{0}</a></li>".format(page.name,page.name.replace(' ','_')) ); // no white space in ID
 		});
 		
 		if (bEditMode==true) {
@@ -6596,7 +6596,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				pageHtml += _getWidgetHtml( child, bEditMode );
 			});
 		pageHtml += "</div>";
-		var str = "<div role='tabpanel' class='tab-pane altui-page-content-one' id='altui-page-content-{0}' >{1}</div>".format(page.name,pageHtml);
+		var str = "<div role='tabpanel' class='tab-pane altui-page-content-one' id='altui-page-content-{0}' >{1}</div>".format(page.name.replace(' ','_'),pageHtml); // no white space in IDs
 		var elem = $(str).css('background',page.background);
 		return elem.wrap( "<div></div>" ).parent().html();
 	};
@@ -7288,7 +7288,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					});
 					$("#altui-device-name-filter input").val(_deviceDisplayFilter.filtername);
 					var v=$("#altui-device-name-filter input").val();
-					if (v.length>0)
+					if (v && v.length>0)
 						$("#altui-device-name-filter input").focus();
 					
 					$("#altui-device-filter-form").toggle(_deviceDisplayFilter.filterformvisible);
