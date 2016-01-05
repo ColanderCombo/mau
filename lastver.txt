@@ -39,6 +39,7 @@ UIManager.checkAltuiUpdate("1065,bugfix: plugin compatibility (sonos);bugfix:sce
 	'betabob':new Date(2016,0,3),
 	'liko':new Date(2016,0,3),
 	'Lorenza':new Date(2016,0,3),
+	'connoleg':new Date(2016,0,4),
 	'vosmont':new Date(2020,0,1),
 	'dklinkman':new Date(2020,0,1),
 	'akbooer':new Date(2020,0,1),
