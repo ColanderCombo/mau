@@ -1,4 +1,4 @@
-UIManager.checkAltuiUpdate("1065,bugfix: plugin compatibility (sonos);bugfix:scene editor bad watches;bugfix:google gauge bad device,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29901",
+UIManager.checkAltuiUpdate("1076,bugfix:plugin compatibility (sonos & Upnp url);bootstrap 3.3.6;display Watts in favorite,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29924",
 {
 	'amg0':new Date(2014,11,2),
 	'amg1':new Date(2015,10,28),
