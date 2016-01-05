@@ -3636,7 +3636,7 @@ var UIManager  = ( function( window, undefined ) {
 			return "";
 		var valuetype = $.type(value);
 		if ($.isNumeric(value)) {
-			if ( value>=1035615941 && value <= 4035615941) {
+			if ( value>=900000000 && value <= 4035615941) {
 				var date = new Date(value*1000);
 				return date.toLocaleString();
 			}
@@ -3650,7 +3650,7 @@ var UIManager  = ( function( window, undefined ) {
 	function _enhanceEditorValue(id,value,altuiid)
 	{
 		var extradata = altuiid ? ("data-altuiid='"+altuiid+"'") : "";
-		if ($.isNumeric(value) && value>=1035615941 && value <= 4035615941) {
+		if ($.isNumeric(value) && value>=900000000 && value <= 4035615941) {
 			var field = "<input {2} type='datetime-local' class='form-control' id='{0}' name='{0}' value='{1}'>";
 			var date = new Date(value*1000);
 			// var offset = date.getTimezoneOffset();
