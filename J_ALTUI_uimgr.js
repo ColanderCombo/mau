@@ -5652,7 +5652,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			html += "<div class='altui-favorites-device-content' data-altuiid='{0}'>".format(device.altuiid);
 			var watts = parseFloat(MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:EnergyMetering1', 'Watts' )); 
 			if (isNaN(watts)==false) 
-				html += "<div class='bg-danger altui-favorites-watts'>{0} Watts</div>".format(watts);
+				html += "<div class='bg-danger altui-favorites-watts'>{0} W</div>".format(watts);
 			switch(device.device_type) {
 				case "urn:schemas-micasaverde-com:device:LightSensor:1":
 					var level = MultiBox.getStatus( device, 'urn:micasaverde-com:serviceId:LightSensor1', 'CurrentLevel' ); 
