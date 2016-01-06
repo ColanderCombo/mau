@@ -3393,9 +3393,9 @@ var UIManager  = ( function( window, undefined ) {
 					if (widget.properties.deviceid!= NULL_DEVICE)
 					{
 						status = MultiBox.getStatus(device, widget.properties.service, widget.properties.variable);
-						if  ((status==undefined) || (status==null) ||(status==false) || (status=='0') )
+						if  ( ( (widget.properties.offvalue=='') && ((status==undefined) || (status==null) ||(status==false) || (status=='0')) ) ||  (status==widget.properties.offvalue) )
 							status = 0;
-						else if ((status=='true') || (status=='1') || (status>=1))
+						else if ( ((widget.properties.onvalue=='') && ((status=='true') || (status=='1') || (status>=1))) || (status==widget.properties.onvalue) )
 							status = 1;
 						if (widget.properties.inverted==true)
 							status = 1-status;
@@ -3422,6 +3422,8 @@ var UIManager  = ( function( window, undefined ) {
 					deviceid:NULL_DEVICE,
 					service:'',		// display state service
 					variable:'',	// display state variable
+					onvalue:'',
+					offvalue:'',
 					inverted:0,	// inverted to that onstate is value 0
 					labels: [],		// 0:onlabel , 1:offlabel
 					action_off: {
@@ -6177,6 +6179,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		
 		DialogManager.dlgAddDevices( dialog , widget.properties.deviceid, function() {
 			DialogManager.dlgAddVariables(dialog, widget, function() {
+				DialogManager.dlgAddLine(dialog,'ValueON', _T('Value ON'),widget.properties.onvalue,"",{placeholder:"Leave empty for 1 or true"});
+				DialogManager.dlgAddLine(dialog,'ValueOFF', _T('Value OFF'),widget.properties.offvalue,"",{placeholder:"Leave empty for 0 or false or null"});
 				DialogManager.dlgAddCheck(dialog,'Inverted',widget.properties.inverted);
 				DialogManager.dlgAddLine(dialog,'OffLabel', _T('OffLabel'),widget.properties.labels[0]);
 				DialogManager.dlgAddActions("altui-widget-action-off",dialog, widget, widget.properties.action_off, _T('Action to switch OFF'), function() {
@@ -6202,7 +6206,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			var selected = MultiBox.getStateByID( real_widget.properties.deviceid,$("#altui-select-variable").val() );
 			real_widget.properties.variable = selected.variable;
 			real_widget.properties.service = selected.service;
-			
+			real_widget.properties.onvalue = trim($("#altui-widget-ValueON").val().toString());
+			real_widget.properties.offvalue = trim($("#altui-widget-ValueOFF").val().toString());
 			real_widget.properties.action_off = DialogManager.getDialogActionValue("altui-widget-action-off");
 			real_widget.properties.labels[0] = $("#altui-widget-OffLabel").val();
 			real_widget.properties.action_on = DialogManager.getDialogActionValue("altui-widget-action-on");
