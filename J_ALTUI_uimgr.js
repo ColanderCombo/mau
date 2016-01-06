@@ -1050,13 +1050,14 @@ var DialogManager = ( function() {
 		});
 	}
 	
-	function _dlgAddLine(dialog, name, label, value,help, options)
+	function _dlgAddLine(dialog, name, label, value,help, options, col_css)
 	{
+		var col_css = col_css || 'col-xs-12';
 		var optstr = _optionsToString($.extend( {type:'text'},options));
 		value = (value==undefined) ? '' : value ;
 		var placeholder = ((options !=undefined) && (options.placeholder==undefined)) ? "placeholder='enter "+name+"'" : "";
 		var propertyline = "";
-		propertyline += "<div class='form-group'>";
+		propertyline += "<div class='form-group {0}'>".format(col_css);
 		propertyline += "	<label for='altui-widget-"+name+"' title='"+(help || '')+"'>"+label+"</label>";
 		if (help)
 			propertyline += "	<span title='"+(help || '')+"'>"+helpGlyph+"</span>";
@@ -6179,12 +6180,12 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		
 		DialogManager.dlgAddDevices( dialog , widget.properties.deviceid, function() {
 			DialogManager.dlgAddVariables(dialog, widget, function() {
-				DialogManager.dlgAddLine(dialog,'ValueON', _T('Value ON'),widget.properties.onvalue,"",{placeholder:"Leave empty for 1 or true"});
-				DialogManager.dlgAddLine(dialog,'ValueOFF', _T('Value OFF'),widget.properties.offvalue,"",{placeholder:"Leave empty for 0 or false or null"});
+				DialogManager.dlgAddLine(dialog,'ValueON', _T('Value ON'),widget.properties.onvalue,"",{placeholder:"Leave empty for 1 or true"},"col-xs-6");
+				DialogManager.dlgAddLine(dialog,'ValueOFF', _T('Value OFF'),widget.properties.offvalue,"",{placeholder:"Leave empty for 0 or false or null"},"col-xs-6");
+				DialogManager.dlgAddLine(dialog,'OnLabel', _T('OnLabel'), widget.properties.labels[1],"",null,"col-xs-6");
+				DialogManager.dlgAddLine(dialog,'OffLabel', _T('OffLabel'),widget.properties.labels[0],"",null,"col-xs-6");
 				DialogManager.dlgAddCheck(dialog,'Inverted',widget.properties.inverted);
-				DialogManager.dlgAddLine(dialog,'OffLabel', _T('OffLabel'),widget.properties.labels[0]);
 				DialogManager.dlgAddActions("altui-widget-action-off",dialog, widget, widget.properties.action_off, _T('Action to switch OFF'), function() {
-					DialogManager.dlgAddLine(dialog,'OnLabel', _T('OnLabel'), widget.properties.labels[1]);
 					DialogManager.dlgAddActions("altui-widget-action-on",dialog, widget, widget.properties.action_on, _T('Action to switch ON'), function() {
 						// run the show
 						$('div#dialogModal').modal();
