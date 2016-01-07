@@ -5891,6 +5891,10 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		}
 	};
 	
+	function _initMultiSelect() {
+		$("title").before("<style type='text/css'>{0}</style>".format(bootstrap_multiselect_css));
+	};
+	
 	function _initUIEngine(css) {
 		$("title").before("<style type='text/css'>{0}</style>".format(css));
 	};	
@@ -5919,6 +5923,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		_initUIEngine(styles);
 		_initDB(devicetypes,cbfunc);
 		_setTheme(themecss);
+		_initMultiSelect();
 		_initBlockly();
 	};
 
@@ -7119,7 +7124,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			var regexp = new RegExp(RegExp.escape(_deviceDisplayFilter.filtername),"i")
 			return ( (parseInt(_deviceDisplayFilter.room) <0) || (device!=null &&  _deviceID2RoomName[device.altuiid] == _roomID2Name[_deviceDisplayFilter.room]) ) 
 				&& ( (_deviceDisplayFilter.invisible == true) || (device.invisible != "1") )	
-				&& ( (_deviceDisplayFilter.category == 0) || (device.category_num == _deviceDisplayFilter.category) ) 
+				&& ( (_deviceDisplayFilter.category == 0) || ( _deviceDisplayFilter.category.in_array(device.category_num)) ) 
 				&& ( ((_deviceDisplayFilter.favorites == false) && (_deviceDisplayFilter.room!=-2) ) || (device.favorite == true) ) 
 				&& ( (_deviceDisplayFilter.filtername.length==0) || (device.name.search( regexp )!=-1) ) 
 				&& ( (batteryLevel != null) || (false == _deviceDisplayFilter.batterydevice));
@@ -7165,7 +7170,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		function endDrawDevice(devices) {
 			_drawDeviceToolbar().done( function() {
 				$("#altui-device-room-filter button").toggleClass("btn-info",_deviceDisplayFilter.isRoomFilterValid());
-				$("#altui-device-category-filter button").toggleClass("btn-info",_deviceDisplayFilter.isCategoryFilterValid());
+				$("#altui-device-category-filter").next(".btn-group").children("button").toggleClass("btn-info",_deviceDisplayFilter.isCategoryFilterValid());
 			});
 			UIManager.refreshUI(true,false);
 		};
@@ -7224,22 +7229,17 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			$.when( _drawRoomFilterButtonAsync(_deviceDisplayFilter.room) )
 			.then( function(html) { 
 				roomfilterHtml = html; 
-
-				categoryfilterHtml+="	<div class='btn-group' id='altui-device-category-filter'>";
-				categoryfilterHtml+="  <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown' aria-expanded='false'>";
-				categoryfilterHtml+=  (tagsGlyph + '&nbsp;' +_T('Category') + "<span class='caret'></span>");
-				categoryfilterHtml+="  </button>";
-				categoryfilterHtml+="  <ul class='dropdown-menu' role='menu'>"
-				categoryfilterHtml+="<li><a href='#' id='{0}' class='{2}'>{1}</a></li>".format(0,_T('All'),(_deviceDisplayFilter.category==0) ? 'bg-primary' : '');
-
+				categoryfilterHtml+='<select id="altui-device-category-filter" multiple="multiple">';
 				$.when( MultiBox.getCategories(
 					function(idx,category) {
-						categoryfilterHtml+="<li><a href='#' id='{0}' class='{2}'>{1}</a></li>".format(category.id,category.name,(_deviceDisplayFilter.category==category.id) ? 'bg-primary' : '');
+						categoryfilterHtml+='<option value="{0}" {2}>{1}</option>'.format(
+							category.id,category.name,
+							((_deviceDisplayFilter.category!=0) && (_deviceDisplayFilter.category.in_array(category.id))) ? 'selected' : ''
+							);
 					},
 					null,
 					function(categories) {
-						categoryfilterHtml+="  </ul>";
-						categoryfilterHtml+="</div>";			
+						categoryfilterHtml+='</select>';
 						categoryfilterHtml+="  <button type='button' class='btn btn-default' id='altui-device-filter' >";
 						categoryfilterHtml+=  (searchGlyph + '&nbsp;' +_T('Filter') + "<span class='caret'></span>");
 						categoryfilterHtml+="  </button>";			
@@ -7249,10 +7249,36 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					}
 				))
 				.then ( function(categories) {
+					function _onChangeItems() {
+						// Get selected options.
+						_deviceDisplayFilter.category = $.map($('#altui-device-category-filter :selected'),function(e)  { return parseInt(e.value); }) 	// array of ints
+						if (_deviceDisplayFilter.category.length==0)
+							_deviceDisplayFilter.category=0;
+						MyLocalStorage.setSettings("CategoryFilter",_deviceDisplayFilter.category);
+						$("#altui-device-category-filter").next(".btn-group").children("button").toggleClass("btn-info",_deviceDisplayFilter.isCategoryFilterValid());
+					};
 					// Display
 					$(".altui-device-toolbar").replaceWith( "<div class='altui-device-toolbar'>"+roomfilterHtml+categoryfilterHtml+filterHtml+"</div>" );
+					$('#altui-device-category-filter').multiselect({
+						enableHTML : true,
+						includeSelectAllOption: true,
+						nonSelectedText: tagsGlyph + '&nbsp;' +_T('Category'),		// non selected text on the button
+						onSelectAll: function() {
+							 _onChangeItems();
+						},
+						onChange: function(element, checked) {
+							 _onChangeItems();
+						},
+						onDropdownShown: function(event) {
+							$("#altui-device-category-filter").next(".btn-group").find(".caret").toggleClass( "caret-reversed" );
+						},
+						onDropdownHidden: function(event) {
+							_drawDevices(deviceFilter);							
+						}
+					});
 					if (categories.length+1>=parseInt(MyLocalStorage.getSettings('Menu2ColumnLimit')))
-						$("#altui-device-category-filter ul").attr('style','columns: 2; -webkit-columns: 2; -moz-columns: 2;');
+						$('#altui-device-category-filter').next(".btn-group").children("ul").attr('style','columns: 2; -webkit-columns: 2; -moz-columns: 2;');
+						// $("#altui-device-category-filter ul").attr('style','columns: 2; -webkit-columns: 2; -moz-columns: 2;');
 
 					$(".altui-pagefilter").css("display","inline");
 					
@@ -7331,13 +7357,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 						$(this).parent().addClass("active");
 						_onClickRoomButton( $(this).prop('id') , $(this).data('altuiid') );
 					});
-					$("#altui-device-category-filter a").click( function() {
-						$(this).closest(".dropdown-menu").find("li.active").removeClass("active");
-						$(this).parent().addClass("active");
-						_deviceDisplayFilter.category = $(this).prop('id');
-						MyLocalStorage.setSettings("CategoryFilter",_deviceDisplayFilter.category);
-						_drawDevices(deviceFilter);
-					});
+
 					dfd.resolve();
 				});
 			});
@@ -8215,6 +8235,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			["ThingSpeak","https://thingspeak.com/","ThingSpeak Data platform for IoT"],
 			["jQuery Colorpicker","http://bgrins.github.io/spectrum/","Spectrum Color Picker"],		
 			["proto io","https://proto.io/freebies/onoff/","switch button"],		
+			["Bootstrap Multiselect","http://davidstutz.github.io/bootstrap-multiselect/","Bootstrap based Multiselect control"],		
 			["amg0","http://forum.micasaverde.com/","reachable as amg0 on this forum "]
 		];
 		
@@ -8260,6 +8281,9 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			   window.location.hash = hash;
 			 });
 
+		   // Highlight
+		   $("dt").removeClass("bg-warning");
+		   $(hash).addClass("bg-warning");
 		});
 	},
 	
