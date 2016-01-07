@@ -310,5 +310,9 @@ Localization.init( {
 	"Use new UI7 behavior for Heater devices":"Use new UI7 behavior for Heater devices",
 	"Show all rows in grid tables":"Show all rows in grid tables",
 	"Table Controllers":"Table Controllers",
-	"Unregistered version for {0}":"Unregistered version for {0}"
+	"Unregistered version for {0}":"Unregistered version for {0}",
+	"Registered Version":"Registered Version",
+	"Hide":"Hide",
+	"Value ON":"Value ON",
+	"Value OFF":"Value OFF"
 	});

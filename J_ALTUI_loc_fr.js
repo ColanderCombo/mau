@@ -311,5 +311,9 @@ Localization.init( {
 	"Use new UI7 behavior for Heater devices":"Utilise le comportement UI7 pour les thermostats",
 	"Show all rows in grid tables":"Voir toutes les lignes dans les tables",
 	"Table Controllers":"Table Controleurs"	,
-	"Unregistered version for {0}":"Version non enregistrée pour {0}"
+	"Unregistered version for {0}":"Version non enregistrée pour {0}",
+	"Registered Version":"Registered Version",
+	"Hide":"Cacher",
+	"Value ON":"Valeur ON",
+	"Value OFF":"Valeur OFF"
 });

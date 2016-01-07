@@ -632,6 +632,7 @@ var ALTUI_Templates = (function() {
 	_dropdownTemplate += "<li><a id='{0}' class='altui-device-variables' href='#' role='menuitem'>Variables</a></li>";
 	_dropdownTemplate += "<li><a id='{0}' class='altui-device-actions' href='#' role='menuitem'>Actions</a></li>";
 	_dropdownTemplate += "<li><a id='{0}' class='altui-device-controlpanelitem' href='#' role='menuitem'>Control Panel</a></li>";
+	_dropdownTemplate += "<li><a id='{0}' class='altui-device-hideshowtoggle' href='#' role='menuitem'>{1}</a></li>";
 	_dropdownTemplate += "</ul></div>";
 	_dropdownTemplate += "<div class='pull-right text-muted'><small>#{0} </small></div>";
 	
@@ -4378,7 +4379,10 @@ var UIManager  = ( function( window, undefined ) {
 				devicebodyHtml,
 				UIManager.jobStatusToColor(device.status),
 				device.altuiid,
-				ALTUI_Templates.dropdownTemplate.format(device.altuiid),
+				ALTUI_Templates.dropdownTemplate.format(
+					device.altuiid,
+					(device.invisible=="1") ? _T("Show") : _T("Hide")
+				),
 				batteryHtml,
 				iconHtml
 				);
@@ -7441,6 +7445,20 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				var altuiid = $(this).parents(".altui-device").data('altuiid');
 				UIManager.pageControlPanel(altuiid);
 			})
+			.on("click",".altui-device-hideshowtoggle",function(){ 
+				var altuiid = $(this).parents(".altui-device").data('altuiid');
+				var device = MultiBox.getDeviceByAltuiID(altuiid);
+				device.invisible = (device.invisible!="1") ? "1" : ""
+				MultiBox.setAttr(device, "invisible", device.invisible ,function(result) {
+					if (result==null) {
+						PageMessage.message( "Set Attribute action failed!", "warning" );				
+					}
+					else {
+						PageMessage.message( "Set Attribute succeeded! a LUUP reload will happen now, be patient", "success" );	
+						_drawDevices(deviceFilter);	
+					}
+				});
+			})			
 			// .off("click",".altui-device-icon")
 			.on("click",".altui-device-icon",function(){ 
 				var altuiid = $(this).parents(".altui-device").data('altuiid');
