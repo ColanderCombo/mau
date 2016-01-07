@@ -40,6 +40,7 @@ UIManager.checkAltuiUpdate("1081,Support multi-select for category filter button
 	'liko':new Date(2016,0,3),
 	'Lorenza':new Date(2016,0,3),
 	'connoleg':new Date(2016,0,4),
+	'rdcohen':new Date(2016,0,7),
 	'vosmont':new Date(2020,0,1),
 	'dklinkman':new Date(2020,0,1),
 	'akbooer':new Date(2020,0,1),
