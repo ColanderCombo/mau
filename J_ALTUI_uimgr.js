@@ -7168,10 +7168,6 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		}
 		
 		function endDrawDevice(devices) {
-			_drawDeviceToolbar().done( function() {
-				$("#altui-device-room-filter button").toggleClass("btn-info",_deviceDisplayFilter.isRoomFilterValid());
-				$("#altui-device-category-filter").next(".btn-group").children("button").toggleClass("btn-info",_deviceDisplayFilter.isCategoryFilterValid());
-			});
 			UIManager.refreshUI(true,false);
 		};
 		
@@ -7256,6 +7252,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 							_deviceDisplayFilter.category=0;
 						MyLocalStorage.setSettings("CategoryFilter",_deviceDisplayFilter.category);
 						$("#altui-device-category-filter").next(".btn-group").children("button").toggleClass("btn-info",_deviceDisplayFilter.isCategoryFilterValid());
+						_drawDevices(deviceFilter,false);	// do not redraw toolbar
 					};
 					// Display
 					$(".altui-device-toolbar").replaceWith( "<div class='altui-device-toolbar'>"+roomfilterHtml+categoryfilterHtml+filterHtml+"</div>" );
@@ -7364,10 +7361,17 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			return dfd.promise();		
 		};
 		
-		function _drawDevices(filterfunc)
+		function _drawDevices(filterfunc,bToolbar)
 		{
-			_domMainPanel = $(".altui-mainpanel").empty();
+			if (bToolbar != false ) {
+				_drawDeviceToolbar().done( function() {
+					$("#altui-device-room-filter button").toggleClass("btn-info",_deviceDisplayFilter.isRoomFilterValid());
+					$("#altui-device-category-filter").next(".btn-group").children("button").toggleClass("btn-info",_deviceDisplayFilter.isCategoryFilterValid());
+				});
+			}
+
 			// Category & Form filter
+			_domMainPanel = $(".altui-mainpanel").empty();
 			MultiBox.getDevices( drawDeviceEmptyContainer , filterfunc, endDrawDevice);
 		};
 		

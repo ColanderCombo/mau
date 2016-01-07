@@ -1,4 +1,4 @@
-UIManager.checkAltuiUpdate("1076,bugfix:plugin compatibility (sonos & Upnp url);bootstrap 3.3.6;display Watts in favorite,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29924",
+UIManager.checkAltuiUpdate("1081,Support multi-select for category filter button in device page;Support textual values for On Off button in custom pages;Support white space in custom pages name,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29961",
 {
 	'amg0':new Date(2014,11,2),
 	'amg1':new Date(2015,10,28),
