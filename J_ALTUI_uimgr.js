@@ -3394,13 +3394,7 @@ var UIManager  = ( function( window, undefined ) {
 						return "";
 					if (widget.properties.deviceid!= NULL_DEVICE)
 					{
-						status = MultiBox.getStatus(device, widget.properties.service, widget.properties.variable);
-						if  ( ( (widget.properties.offvalue=='') && ((status==undefined) || (status==null) ||(status==false) || (status=='0')) ) ||  (status==widget.properties.offvalue) )
-							status = 0;
-						else if ( ((widget.properties.onvalue=='') && ((status=='true') || (status=='1') || (status>=1))) || (status==widget.properties.onvalue) )
-							status = 1;
-						if (widget.properties.inverted==true)
-							status = 1-status;
+						status = _onoffStatus(device,widget);
 					}
 					var htmlLabels=$("<div class='altui-widget-2statebtn-labels'></div>");
 					if ( (status==0) && (widget.properties.labels[0]!=undefined) )
@@ -6499,6 +6493,17 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 	// ------------------------------------------
 	// public Callback
 	// ------------------------------------------
+	function _onoffStatus(device,widget) {
+		var status = MultiBox.getStatus(device, widget.properties.service, widget.properties.variable);
+		if  ( ( (widget.properties.offvalue=='') && ((status==undefined) || (status==null) ||(status==false) || (status=='0')) ) ||  (status==widget.properties.offvalue) )
+			status = 0;
+		else if ( ((widget.properties.onvalue=='') && ((status=='true') || (status=='1') || (status>=1))) || (status==widget.properties.onvalue) )
+			status = 1;
+		if (widget.properties.inverted==true)
+			status = 1-status;
+		return status
+	};
+	
 	function _onoffOnClick(widgetid) {
 		// find the widget
 		var pagename = _getActivePageName();
@@ -6507,14 +6512,10 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		// find the device
 		var device= MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
 		// trigger the right action
-		var status = MultiBox.getStatus(device, widget.properties.service, widget.properties.variable);
-		if  ((status==undefined) || (status==false) || (status=='0') )
-			status = 0;
-		else if ((status=='true') || (status=='1') || (status>=1))
-			status = 1;
-		var actiondescriptor = (status==1) ? widget.properties.action_off : widget.properties.action_on;
+		var status = _onoffStatus(device,widget);
 		if (widget.properties.inverted)
 			status = 1-status;
+		var actiondescriptor = (status==1) ? widget.properties.action_off : widget.properties.action_on;
 		MultiBox.runAction( device, actiondescriptor.service, actiondescriptor.action, actiondescriptor.params);
 	};
 	
