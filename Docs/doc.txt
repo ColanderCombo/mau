@@ -128,7 +128,13 @@ ellipsis glyph , signifying "default drawing"[/li]
 [b]HOW TO USE / LOCAL and REMOTE ACCESS[/b]
 [list]
 [li]UI5 & UI7 local access: http://<yourip>/port_3480/data_request?id=lr_ALTUI_Handler&command=home#[/li]
-[li]optional parameter:  lang=ll for language ( fr,en,it ) , home=xx where xx is one of pageHome, pageUsePages, pageDevices, pageScenes to force a start page[/li]
+[li]optional parameter:  
+[list]
+[li][b]lang[/b]=xx for language ( fr,en,it )[/li]
+[li][b]home[/b]=xx where xx is one of pageHome, pageUsePages, pageDevices, pageScenes to force a start page[/li]
+[li][b]layout[/b]=lean for pageUsePages in case you do not want to see Menu & Message area[/li]
+[/list]
+example : http://192.168.1.16/port_3480/data_request?id=lr_ALTUI_Handler&command=home&lang=en&home=pageUsePages&layout=lean [/li]
 [li]UI7 remote access: https://vera-ui.strongcubedfitness.com/Veralogin.php [/li]
 [li]UI5 remote access : method explained here => http://forum.micasaverde.com/index.php/topic,30310.msg225132.html#msg225132
 [/li]
@@ -182,8 +188,8 @@ ALTUI scene editor will take care of editing this [b]VariablesToWatch[/b] variab
 
 [b]Overall DOC in English[/b] : 
 [list]
-[li][url]http://code.mios.com/trac/mios_alternate_ui/export/1071/Docs/doc.docx[/url][/li]
-[li][url]http://code.mios.com/trac/mios_alternate_ui/export/1071/Docs/doc.pdf[/url][/li]
+[li][url=http://code.mios.com/trac/mios_alternate_ui/export/1071/Docs/doc.docx]http://code.mios.com/trac/mios_alternate_ui/export/1071/Docs/doc.docx[/url][/li]
+[li][url=http://code.mios.com/trac/mios_alternate_ui/export/1071/Docs/doc.pdf]http://code.mios.com/trac/mios_alternate_ui/export/1071/Docs/doc.pdf[/url][/li]
 [/list]
 
 [b]BLOG & Web Magazine[/b]
