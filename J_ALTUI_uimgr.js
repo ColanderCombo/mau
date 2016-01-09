@@ -7252,6 +7252,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 						//_roomID2Name[_deviceDisplayFilter.room]
 						_deviceDisplayFilter.room =  $.map($('#altui-device-room-filter :selected'),function(e)  { return (e.value); }) 	// array of room names
 						MyLocalStorage.setSettings("DeviceRoomFilter",_deviceDisplayFilter.room);
+						if ( MyLocalStorage.getSettings('SyncLastRoom')==1 )
+							MyLocalStorage.setSettings("SceneRoomFilter",_deviceDisplayFilter.room);
 						$("#altui-device-room-filter").next(".btn-group").children("button").toggleClass("btn-info",_deviceDisplayFilter.isRoomFilterValid());
 						_drawDevices(deviceFilter,false);	// do not redraw toolbar
 					};
@@ -7267,6 +7269,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					// Display
 					$(".altui-device-toolbar").replaceWith( "<div class='altui-device-toolbar'>"+roomfilterHtml+categoryfilterHtml+filterHtml+"</div>" );
 					$('#altui-device-room-filter').multiselect({
+						disableIfEmpty: true,
 						enableHTML : true,
 						includeSelectAllOption: true,
 						nonSelectedText: homeGlyph + '&nbsp;' +_T('Room'),		// non selected text on the button
@@ -7283,7 +7286,12 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 							$("#altui-device-room-filter").next(".btn-group").find(".caret").toggleClass( "caret-reversed" );
 						}
 					});
+					var nRooms = $('#altui-device-room-filter').next(".btn-group").find("li").length;
+					if (nRooms+1>=parseInt(MyLocalStorage.getSettings('Menu2ColumnLimit')))
+						$('#altui-device-room-filter').next(".btn-group").children("ul").attr('style','columns: 2; -webkit-columns: 2; -moz-columns: 2;');
+
 					$('#altui-device-category-filter').multiselect({
+						disableIfEmpty: true,
 						enableHTML : true,
 						includeSelectAllOption: true,
 						nonSelectedText: tagsGlyph + '&nbsp;' +_T('Category'),		// non selected text on the button
@@ -7302,7 +7310,6 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					});
 					if (categories.length+1>=parseInt(MyLocalStorage.getSettings('Menu2ColumnLimit')))
 						$('#altui-device-category-filter').next(".btn-group").children("ul").attr('style','columns: 2; -webkit-columns: 2; -moz-columns: 2;');
-						// $("#altui-device-category-filter ul").attr('style','columns: 2; -webkit-columns: 2; -moz-columns: 2;');
 
 					$(".altui-pagefilter").css("display","inline");
 					
@@ -7495,19 +7502,22 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		var _sceneID2RoomName={};
 		var _sceneFilter={
 			room: MyLocalStorage.getSettings("SceneRoomFilter") || -1,
-			isValid: function() { return this.room != -1 }
+			isValid: function() { return ($.isArray(this.room)) ? (this.room.length>0) : (this.room<=0); }
 		};
 		function _sceneInThisRoom(scene) {
 			if ((_sceneID2RoomName[scene.altuiid]==null)&&(scene.room>0)) {
 				var controller = MultiBox.controllerOf(scene.altuiid).controller;
 				_sceneID2RoomName[scene.altuiid] = _roomID2Name["{0}-{1}".format(controller,scene.room)];
 			}
-			return ( (_sceneFilter.room<0) || (scene!=null && _sceneID2RoomName[scene.altuiid]==_roomID2Name[_sceneFilter.room]) ) 
-				&& ( (_sceneFilter.room!=-2) || (scene.favorite==true) )
-				&& ( (scene.notification_only==0) || (scene.notification_only==undefined) ) ;
-		};
+			return ( 
+					 ( $.isArray(_sceneFilter.room) && ((_sceneFilter.room.length==0) || _sceneFilter.room.in_array(_sceneID2RoomName[scene.altuiid])) ) ||
+					 ( (_sceneFilter.room==0) && (scene.room==0) ) ||
+					 (_sceneFilter.room == -1) || 
+					 ( (_sceneFilter.room==-2) && (scene.favorite==true) ) 
+					 && ( (scene.notification_only==0) || (scene.notification_only==undefined) ) );					 
+		}
 		function _onClickRoomButton(htmlid,altuiid) {
-			_sceneFilter.room = (altuiid !="") ? altuiid : htmlid;
+			_sceneFilter.room = (altuiid !="") ? [ _roomID2Name[ altuiid ]  ] : htmlid;
 			UIManager.setLeftnavRoomsActive( _sceneFilter.room );
 			MyLocalStorage.setSettings("SceneRoomFilter",_sceneFilter.room);
 			if ( MyLocalStorage.getSettings('SyncLastRoom')==1 )
@@ -7524,8 +7534,16 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			domPanel.append(scenecontainerTemplate.format(scene.id));	
 		};
 		
-		function afterSceneListDraw(scenes) {
-			// draw toolbar buttons
+		function _onChangeRoomFilter() {
+			//_roomID2Name[_deviceDisplayFilter.room]
+			_sceneFilter.room =  $.map($('#altui-device-room-filter :selected'),function(e)  { return (e.value); }) 	// array of room names
+			MyLocalStorage.setSettings("SceneRoomFilter",_sceneFilter.room);
+			if ( MyLocalStorage.getSettings('SyncLastRoom')==1 )
+				MyLocalStorage.setSettings("DeviceRoomFilter",_sceneFilter.room);
+			$("#altui-device-room-filter").next(".btn-group").children("button").toggleClass("btn-info",_sceneFilter.isValid());
+			_drawScenes(_sceneInThisRoom,false);	// do not redraw toolbar
+		};
+		function _drawSceneToolbar() {
 			var toolbarHtml="";
 			$.when( _drawRoomFilterButtonAsync( _sceneFilter.room ) )
 			.then(function( html) {
@@ -7538,105 +7556,133 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				$("#altui-scene-create").click( function() {
 					UIManager.pageSceneEdit(NULL_SCENE);
 				});
-				$("#altui-device-room-filter button").toggleClass("btn-info",_sceneFilter.isValid());
-				
-				// actions
-				$(".altui-mainpanel")
-					// .off("click",".altui-delscene")
-					.on("click",".altui-delscene",function() {
-						var altuiid = $(this).closest(".altui-scene").data('altuiid');
-						var scene = MultiBox.getSceneByAltuiID(altuiid);
-						DialogManager.confirmDialog(_T("Are you sure you want to delete scene ({0})").format(altuiid),function(result) {
-							if (result==true) {
-								MultiBox.deleteScene( scene );
-							}
-						});
-					})
-					// .off("click",".altui-pausescene")
-					.on("click",".altui-pausescene",function() {
-						var altuiid = $(this).closest(".altui-scene").data('altuiid');
-						var scene = MultiBox.getSceneByAltuiID(altuiid);
-						scene.paused = (scene.paused==1) ? 0 : 1; 
-						MultiBox.editScene( altuiid , scene );
-					})
-					// .off("click",".altui-runscene")
-					.on("click",".altui-runscene",function() {
-						var altuiid = $(this).closest(".altui-scene").data('altuiid');
-						var scene = MultiBox.getSceneByAltuiID(altuiid);
-						$(this).removeClass("btn-primary").addClass("btn-success");
-						MultiBox.runScene( scene );
-					})
-					// .off("click",".altui-editscene")
-					.on("click",".altui-editscene",function() {
-						var altuiid = $(this).closest(".altui-scene").data('altuiid');
-						UIManager.pageSceneEdit( altuiid );
-					})
-					.on("click",".altui-scene-history",function() {
-						var altuiid = $(this).closest(".altui-scene").data('altuiid');
-						var scene = MultiBox.getSceneByAltuiID(altuiid);
-						var dialog =  DialogManager.registerDialog('dialogModal',
-							defaultDialogModalTemplate.format( 
-							_T("Scene History"), 			// title
-							"",				// body
-							"modal-lg"		// size
-							));
-						MultiBox.getSceneHistory( scene, function(history) {
-							var html="";
-							html += "<div class='panel panel-default'> <div class='panel-body'>";
-							html +="<table id='{0}' class='table table-condensed altui-variable-value-history'>".format(altuiid);
-							html +="<thead>";
-							html += ("<tr><th>{0}</th><th>{1}</th></tr>".format(_T("Date"),_T("Name")));
-							html +="</thead>";
-							html +="<tbody>";
-							history.lines.reverse();
-							$.each(history.lines, function(i,e) {
-								html += ("<tr><td>{0}</td><td>{1}</td></tr>".format( e.date, e.name) );
-							});
-							html +="</tbody>";
-							html +="</table>";
-							html += "  </div></div>";
-							$(dialog).find(".row-fluid").append(html);
-							$('div#dialogModal').modal();
-						});
-					})
-					.on("click",".altui-favorite",function(event) { 
-						var altuiid = $(this).closest(".altui-scene").data('altuiid');
-						var scene = MultiBox.getSceneByAltuiID(altuiid);
-						scene.favorite = !scene.favorite;
-						Favorites.set('scene', altuiid, scene.favorite );
-						$(this).replaceWith( (scene.favorite==true) ? starGlyph : staremtpyGlyph );
-					})
-					.on("click",".altui-scene-title-name",function(event) {
-						if ( $(this).find("input").length>=1 )
-							return;
-						var scenedom = $(this).closest(".altui-scene");
-						var altuiid = scenedom.data('altuiid');
-						var scene = MultiBox.getSceneByAltuiID(altuiid);
-						scenedom.addClass("altui-norefresh");
-						$(this).html("<input id='{0}' class='altui-scene-title-input' value='{1}'></input>".format(altuiid,scene.name.escapeXml()));
-					})
-					.on("focusout",".altui-scene-title-input",function(event) {
-						var newname = $(this).val();
-						var namedom = $(this).parent();
-						var scenedom = $(this).closest(".altui-scene");
-						var altuiid = scenedom.data('altuiid');
-						var scene = MultiBox.getSceneByAltuiID(altuiid);
-						namedom.text(newname);
-						MultiBox.renameScene(scene,newname);
-						scenedom.removeClass("altui-norefresh");
-					});
-				
-				$("#altui-device-room-filter a").click( function() {
-					$(this).closest(".dropdown-menu").find("li.active").removeClass("active");
-					$(this).parent().addClass("active");
-					_onClickRoomButton( $(this).prop('id'), $(this).data("altuiid") );
+
+				// multiselect
+				$('#altui-device-room-filter').multiselect({
+					disableIfEmpty: true,
+					enableHTML : true,
+					includeSelectAllOption: true,
+					nonSelectedText: homeGlyph + '&nbsp;' +_T('Room'),		// non selected text on the button
+					onSelectAll: function() {
+						 _onChangeRoomFilter();
+					},
+					onChange: function(element, checked) {
+						 _onChangeRoomFilter();
+					},
+					onDropdownShown: function(event) {
+						$("#altui-device-room-filter").next(".btn-group").find(".caret").toggleClass( "caret-reversed" );
+					},
+					onDropdownHidden: function(event) {
+						$("#altui-device-room-filter").next(".btn-group").find(".caret").toggleClass( "caret-reversed" );
+					}
 				});
+				var nRooms = $('#altui-device-room-filter').next(".btn-group").find("li").length;
+				if (nRooms+1>=parseInt(MyLocalStorage.getSettings('Menu2ColumnLimit')))
+					$('#altui-device-room-filter').next(".btn-group").children("ul").attr('style','columns: 2; -webkit-columns: 2; -moz-columns: 2;');
+
+				$("#altui-device-room-filter").next(".btn-group").children("button").toggleClass("btn-info",_sceneFilter.isValid());
+				// $("#altui-device-room-filter a").click( function() {
+					// $(this).closest(".dropdown-menu").find("li.active").removeClass("active");
+					// $(this).parent().addClass("active");
+					// _onClickRoomButton( $(this).prop('id'), $(this).data("altuiid") );
+				// });
 			});
 		};
+		function afterSceneListDraw(scenes) {
+			$(".altui-mainpanel")
+				.off('click')
+				// .off("click",".altui-delscene")
+				.on("click",".altui-delscene",function() {
+					var altuiid = $(this).closest(".altui-scene").data('altuiid');
+					var scene = MultiBox.getSceneByAltuiID(altuiid);
+					DialogManager.confirmDialog(_T("Are you sure you want to delete scene ({0})").format(altuiid),function(result) {
+						if (result==true) {
+							MultiBox.deleteScene( scene );
+						}
+					});
+				})
+				// .off("click",".altui-pausescene")
+				.on("click",".altui-pausescene",function() {
+					var altuiid = $(this).closest(".altui-scene").data('altuiid');
+					var scene = MultiBox.getSceneByAltuiID(altuiid);
+					scene.paused = (scene.paused==1) ? 0 : 1; 
+					MultiBox.editScene( altuiid , scene );
+				})
+				// .off("click",".altui-runscene")
+				.on("click",".altui-runscene",function() {
+					var altuiid = $(this).closest(".altui-scene").data('altuiid');
+					var scene = MultiBox.getSceneByAltuiID(altuiid);
+					$(this).removeClass("btn-primary").addClass("btn-success");
+					MultiBox.runScene( scene );
+				})
+				// .off("click",".altui-editscene")
+				.on("click",".altui-editscene",function() {
+					var altuiid = $(this).closest(".altui-scene").data('altuiid');
+					UIManager.pageSceneEdit( altuiid );
+				})
+				.on("click",".altui-scene-history",function() {
+					var altuiid = $(this).closest(".altui-scene").data('altuiid');
+					var scene = MultiBox.getSceneByAltuiID(altuiid);
+					var dialog =  DialogManager.registerDialog('dialogModal',
+						defaultDialogModalTemplate.format( 
+						_T("Scene History"), 			// title
+						"",				// body
+						"modal-lg"		// size
+						));
+					MultiBox.getSceneHistory( scene, function(history) {
+						var html="";
+						html += "<div class='panel panel-default'> <div class='panel-body'>";
+						html +="<table id='{0}' class='table table-condensed altui-variable-value-history'>".format(altuiid);
+						html +="<thead>";
+						html += ("<tr><th>{0}</th><th>{1}</th></tr>".format(_T("Date"),_T("Name")));
+						html +="</thead>";
+						html +="<tbody>";
+						history.lines.reverse();
+						$.each(history.lines, function(i,e) {
+							html += ("<tr><td>{0}</td><td>{1}</td></tr>".format( e.date, e.name) );
+						});
+						html +="</tbody>";
+						html +="</table>";
+						html += "  </div></div>";
+						$(dialog).find(".row-fluid").append(html);
+						$('div#dialogModal').modal();
+					});
+				})
+				.on("click",".altui-favorite",function(event) { 
+					var altuiid = $(this).closest(".altui-scene").data('altuiid');
+					var scene = MultiBox.getSceneByAltuiID(altuiid);
+					scene.favorite = !scene.favorite;
+					Favorites.set('scene', altuiid, scene.favorite );
+					$(this).replaceWith( (scene.favorite==true) ? starGlyph : staremtpyGlyph );
+				})
+				.on("click",".altui-scene-title-name",function(event) {
+					if ( $(this).find("input").length>=1 )
+						return;
+					var scenedom = $(this).closest(".altui-scene");
+					var altuiid = scenedom.data('altuiid');
+					var scene = MultiBox.getSceneByAltuiID(altuiid);
+					scenedom.addClass("altui-norefresh");
+					$(this).html("<input id='{0}' class='altui-scene-title-input' value='{1}'></input>".format(altuiid,scene.name.escapeXml()));
+				})
+				.off("focusout")
+				.on("focusout",".altui-scene-title-input",function(event) {
+					var newname = $(this).val();
+					var namedom = $(this).parent();
+					var scenedom = $(this).closest(".altui-scene");
+					var altuiid = scenedom.data('altuiid');
+					var scene = MultiBox.getSceneByAltuiID(altuiid);
+					namedom.text(newname);
+					MultiBox.renameScene(scene,newname);
+					scenedom.removeClass("altui-norefresh");
+				});
+		};
 		
-		function _drawScenes( filterfunc )
+		function _drawScenes( filterfunc,bToolbar )
 		{
 			$(".altui-mainpanel").empty();
+			if (bToolbar != false ) {
+				_drawSceneToolbar();  /*.done( function() {}); */
+			}
 			MultiBox.getScenes( sceneDraw , filterfunc, afterSceneListDraw )
 		}
 		
