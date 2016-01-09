@@ -5586,29 +5586,15 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		_refreshFooterSize();
 	};
 	
-	function _drawRoomFilterButtonAsync( selectedroom ) {
+	function _drawRoomFilterButtonAsync( selectedrooms ) {
 		var dfd = $.Deferred();
 		var toolbarHtml="";
 		var rooms = $.when(MultiBox.getRooms()).then(function(rooms) {
-			toolbarHtml+="	<div class='btn-group' id='altui-device-room-filter'>";
-				toolbarHtml+="  <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown' aria-expanded='false'>";
-				toolbarHtml+=  (homeGlyph + '&nbsp;' +_T('Rooms') + "<span class='caret'></span>");
-				toolbarHtml+="  </button>";
-				toolbarHtml+="  <ul class='dropdown-menu' role='menu' {0}>".format(
-					(rooms.length+2>=parseInt(MyLocalStorage.getSettings('Menu2ColumnLimit'))) ? "style='columns: 2; -webkit-columns: 2; -moz-columns: 2;'" : ""
-					);
-					$.each([{id:-1,name:_T('All')},{id:0,name:_T('No Room')}], function( idx, room) {
-						toolbarHtml+="<li><a href='#' id='{1}' data-altuiid='{2}' class='{3}' >{0}</a></li>".format(room.name,room.id,"",(selectedroom==room.id) ? 'bg-primary' : '');
-					});
-					var namearray = $.map(rooms, function(r) { return r.name;} );
-					var filteredrooms = $.grep(rooms, function(room, idx) {
-						return $.inArray(room.name ,namearray) == idx;
-					});
-					$.each(filteredrooms, function( idx, room) {
-						toolbarHtml+="<li><a href='#' id='{1}' data-altuiid='{2}' class='{3}'>{0}</a></li>".format(room.name,room.id,room.altuiid,(selectedroom==room.altuiid) ? 'bg-primary' : '');
-					});
-					toolbarHtml+="  </ul>";
-			toolbarHtml+="</div>";			
+			toolbarHtml+='<select id="altui-device-room-filter" multiple="multiple">';
+			$.each(rooms, function(i,room){
+				toolbarHtml+='<option value="{0}" {2}>{1}</option>'.format( room.name,room.name, ($.inArray(room.name,selectedrooms)!=-1) ? 'selected':'' );
+			});
+			toolbarHtml+='</select>';
 			dfd.resolve(toolbarHtml);
 		});
 		return dfd.promise();
@@ -6876,13 +6862,18 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 	// ===========================
 
 
-	setLeftnavRoomsActive : function ( selectedRoomId ) {
+	setLeftnavRoomsActive : function ( selectedRoom ) {
 		var button = null;
 		$(".altui-leftbutton").toggleClass("active",false);
-		button = $(".altui-leftbutton[data-altuiid='"+selectedRoomId+"']");			
-		if (button.length==0) 
-			button = $(".altui-leftbutton[id="+selectedRoomId+"]")
-		button.toggleClass("active",true);
+		if ($.isArray(selectedRoom)) {
+			$.each(selectedRoom, function(i,room) {
+				button = $(".altui-leftbutton:contains('"+room+"')");
+				button.toggleClass("active",true);
+			});
+		} else {
+			button = $(".altui-leftbutton[id="+selectedRoom+"]")			
+			button.toggleClass("active",true);
+		}
 	},
 	
 	leftnavRooms : function ( clickFunction , roomLoadedFunction)
@@ -7114,7 +7105,9 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			batterydevice	: (MyLocalStorage.getSettings("ShowBatteryDevice")==true),
 			category		: MyLocalStorage.getSettings("CategoryFilter") || 0,
 			filtername		: MyLocalStorage.getSettings("DeviceFilterName") || "",
-			isRoomFilterValid 		: function() {return this.room!=-1},
+			isRoomFilterValid 		: function() {
+				return ($.isArray(this.room)) ? (this.room.length>0) : (this.room<=0);
+			},
 			isCategoryFilterValid 	: function() {return this.category!=0},
 		}, filter );
 		
@@ -7125,9 +7118,14 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				_deviceID2RoomName[ device.altuiid ] = _roomID2Name["{0}-{1}".format(controller,device.room)];
 			}
 
+			//_deviceID2RoomName[device.altuiid] == _roomID2Name[_deviceDisplayFilter.room]
+			
 			var batteryLevel = MultiBox.getDeviceBatteryLevel(device);
 			var regexp = new RegExp(RegExp.escape(_deviceDisplayFilter.filtername),"i")
-			return ( (parseInt(_deviceDisplayFilter.room) <0) || (device!=null &&  _deviceID2RoomName[device.altuiid] == _roomID2Name[_deviceDisplayFilter.room]) ) 
+			return ( (parseInt(_deviceDisplayFilter.room) <0) || 
+					 ($.isArray(_deviceDisplayFilter.room) && ((_deviceDisplayFilter.room.length==0) || _deviceDisplayFilter.room.in_array(_deviceID2RoomName[device.altuiid]))) ||
+					 ( (_deviceDisplayFilter.room==0) && (device.room==0) )
+					 ) 
 				&& ( (_deviceDisplayFilter.invisible == true) || (device.invisible != "1") )	
 				&& ( (_deviceDisplayFilter.category == 0) || ( _deviceDisplayFilter.category.in_array(device.category_num)) ) 
 				&& ( ((_deviceDisplayFilter.favorites == false) && (_deviceDisplayFilter.room!=-2) ) || (device.favorite == true) ) 
@@ -7250,7 +7248,14 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					}
 				))
 				.then ( function(categories) {
-					function _onChangeItems() {
+					function _onChangeRoomFilter() {
+						//_roomID2Name[_deviceDisplayFilter.room]
+						_deviceDisplayFilter.room =  $.map($('#altui-device-room-filter :selected'),function(e)  { return (e.value); }) 	// array of room names
+						MyLocalStorage.setSettings("DeviceRoomFilter",_deviceDisplayFilter.room);
+						$("#altui-device-room-filter").next(".btn-group").children("button").toggleClass("btn-info",_deviceDisplayFilter.isRoomFilterValid());
+						_drawDevices(deviceFilter,false);	// do not redraw toolbar
+					};
+					function _onChangeCategoryFilter() {
 						// Get selected options.
 						_deviceDisplayFilter.category = $.map($('#altui-device-category-filter :selected'),function(e)  { return parseInt(e.value); }) 	// array of ints
 						if (_deviceDisplayFilter.category.length==0)
@@ -7261,15 +7266,32 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					};
 					// Display
 					$(".altui-device-toolbar").replaceWith( "<div class='altui-device-toolbar'>"+roomfilterHtml+categoryfilterHtml+filterHtml+"</div>" );
+					$('#altui-device-room-filter').multiselect({
+						enableHTML : true,
+						includeSelectAllOption: true,
+						nonSelectedText: homeGlyph + '&nbsp;' +_T('Room'),		// non selected text on the button
+						onSelectAll: function() {
+							 _onChangeRoomFilter();
+						},
+						onChange: function(element, checked) {
+							 _onChangeRoomFilter();
+						},
+						onDropdownShown: function(event) {
+							$("#altui-device-room-filter").next(".btn-group").find(".caret").toggleClass( "caret-reversed" );
+						},
+						onDropdownHidden: function(event) {
+							$("#altui-device-room-filter").next(".btn-group").find(".caret").toggleClass( "caret-reversed" );
+						}
+					});
 					$('#altui-device-category-filter').multiselect({
 						enableHTML : true,
 						includeSelectAllOption: true,
 						nonSelectedText: tagsGlyph + '&nbsp;' +_T('Category'),		// non selected text on the button
 						onSelectAll: function() {
-							 _onChangeItems();
+							 _onChangeCategoryFilter();
 						},
 						onChange: function(element, checked) {
-							 _onChangeItems();
+							 _onChangeCategoryFilter();
 						},
 						onDropdownShown: function(event) {
 							$("#altui-device-category-filter").next(".btn-group").find(".caret").toggleClass( "caret-reversed" );
@@ -7360,7 +7382,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 						_onClickRoomButton( $(this).prop('id') , $(this).data('altuiid') );
 					});
 
-					$("#altui-device-room-filter button").toggleClass("btn-info",_deviceDisplayFilter.isRoomFilterValid());
+					$("#altui-device-room-filter").next(".btn-group").children("button").toggleClass("btn-info",_deviceDisplayFilter.isRoomFilterValid());
 					$("#altui-device-category-filter").next(".btn-group").children("button").toggleClass("btn-info",_deviceDisplayFilter.isCategoryFilterValid());
 					dfd.resolve();
 				});
@@ -7382,7 +7404,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		function _onClickRoomButton(htmlid,altuiid)
 		{
 			// var roomid = $(this).prop('id');
-			_deviceDisplayFilter.room = (altuiid !="") ? altuiid : htmlid;	
+			_deviceDisplayFilter.room = (altuiid !="") ? [ _roomID2Name[ altuiid ]  ] : htmlid;	
 			UIManager.setLeftnavRoomsActive(_deviceDisplayFilter.room);
 			MyLocalStorage.setSettings("DeviceRoomFilter",_deviceDisplayFilter.room);
 			if ( MyLocalStorage.getSettings('SyncLastRoom')==1 )
