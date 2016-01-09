@@ -7925,6 +7925,15 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		// var pages = g_CustomPages;
 		// PageManager.init(g_CustomPages);
 		UIManager.clearPage(_T('Custom Pages'),"",UIManager.oneColumnLayout);
+		
+		// lean layout if requested
+		if ( getQueryStringValue("layout") == 'lean') {
+			$("#altui-pagemessage").remove();
+			$(".navbar-fixed-top").remove();
+			$(".container-fluid").css("margin-top","-60px");
+			$(".container-fluid").find(".col-xs-12").first().removeClass('col-sm-push-1').removeClass('col-sm-10');
+		}
+
 		// $("#altui-pagetitle").text("Your Custom Pages");
 
 		var pageTabs = _createPageTabsHtml();
