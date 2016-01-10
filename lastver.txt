@@ -1,4 +1,4 @@
-UIManager.checkAltuiUpdate("1086,Hide Show device feature;Support multi-select for category filter button in device page;Support textual values for On Off button in custom pages;Support white space in custom pages name,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29972",
+UIManager.checkAltuiUpdate("1094,Room multiselect button;Layout=lean on url for pageUsePage home page;fix for custom page onoff button,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=29996",
 {
 	'amg0':new Date(2014,11,2),
 	'amg1':new Date(2015,10,28),
