@@ -41,6 +41,7 @@ UIManager.checkAltuiUpdate("1086,Hide Show device feature;Support multi-select f
 	'Lorenza':new Date(2016,0,3),
 	'connoleg':new Date(2016,0,4),
 	'rdcohen':new Date(2016,0,7),
+	'ramwal':new Date(2016,0,7),	
 	'vosmont':new Date(2020,0,1),
 	'dklinkman':new Date(2020,0,1),
 	'akbooer':new Date(2020,0,1),
