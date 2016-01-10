@@ -7251,6 +7251,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					function _onChangeRoomFilter() {
 						//_roomID2Name[_deviceDisplayFilter.room]
 						_deviceDisplayFilter.room =  $.map($('#altui-device-room-filter :selected'),function(e)  { return (e.value); }) 	// array of room names
+						UIManager.setLeftnavRoomsActive( _deviceDisplayFilter.room );
 						MyLocalStorage.setSettings("DeviceRoomFilter",_deviceDisplayFilter.room);
 						if ( MyLocalStorage.getSettings('SyncLastRoom')==1 )
 							MyLocalStorage.setSettings("SceneRoomFilter",_deviceDisplayFilter.room);
@@ -7537,6 +7538,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		function _onChangeRoomFilter() {
 			//_roomID2Name[_deviceDisplayFilter.room]
 			_sceneFilter.room =  $.map($('#altui-device-room-filter :selected'),function(e)  { return (e.value); }) 	// array of room names
+			UIManager.setLeftnavRoomsActive( _sceneFilter.room );
 			MyLocalStorage.setSettings("SceneRoomFilter",_sceneFilter.room);
 			if ( MyLocalStorage.getSettings('SyncLastRoom')==1 )
 				MyLocalStorage.setSettings("DeviceRoomFilter",_sceneFilter.room);
