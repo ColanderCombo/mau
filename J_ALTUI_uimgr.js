@@ -5590,8 +5590,14 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		var dfd = $.Deferred();
 		var toolbarHtml="";
 		var rooms = $.when(MultiBox.getRooms()).then(function(rooms) {
+
+			var namearray = $.map(rooms, function(r) { return r.name;} );
+			var filteredrooms = $.grep(rooms, function(room,idx) {
+				return $.inArray(room.name ,namearray) == idx;
+			});
+
 			toolbarHtml+='<select id="altui-device-room-filter" multiple="multiple">';
-			$.each(rooms, function(i,room){
+			$.each(filteredrooms , function(i,room){
 				toolbarHtml+='<option value="{0}" {2}>{1}</option>'.format( room.name,room.name, ($.inArray(room.name,selectedrooms)!=-1) ? 'selected':'' );
 			});
 			toolbarHtml+='</select>';
