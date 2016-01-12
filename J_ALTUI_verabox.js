@@ -210,8 +210,13 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	
 	// Get Rooms  , call a callback function asynchronously, or return array of rooms
 	function _getRooms( func , filterfunc, endfunc) {
-		if (_rooms)
+		if (_rooms != null ) {
 			_asyncResponse( _rooms.sort(altuiSortByName), func , filterfunc, endfunc)
+		}
+		else
+			setTimeout(function(){ 
+				_getRooms( func , filterfunc, endfunc);
+			}, 500);
 		return _rooms;
 	};
 	

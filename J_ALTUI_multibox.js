@@ -208,9 +208,10 @@ var MultiBox = ( function( window, undefined ) {
 				function(rooms) {
 					answers++;
 					if (answers == _controllers.length) {
+						var result = arr.sort(altuiSortByName);
 						if ($.isFunction(endfunc))
-							(endfunc)(arr.sort(altuiSortByName));
-						dfd.resolve(rooms);
+							(endfunc)(result);
+						dfd.resolve(result);
 					}
 				}
 			);
