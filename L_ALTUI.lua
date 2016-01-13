@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local ALTUI_SERVICE = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v1.02"
+local version = "v1.02b"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -1452,6 +1452,43 @@ local function getDefaultConfig()
 	return tbl
 end
 
+--https://api.thingspeak.com/update?key=U1F7T31MHB5O8HZI&field1=0
+local function sendValueToStorage_thingspeak(watch_description,lul_device, lul_service, lul_variable,old, new, lastupdate,param)
+	debug(string.format("sendValueToStorage_thingspeak(%s,%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,old, new, lastupdate, param))
+	local template = watch_description['Data']
+	if (isempty(template)==false) then
+		local data = string.format(template,new)
+		local response_body = {}
+		debug(string.format("Provider:%s Url:%s","thingspeak",data))
+		local response, status, headers = https.request{
+			method="POST",
+			url="https://api.thingspeak.com/update",
+			headers = {
+				["Content-Type"] = "application/x-www-form-urlencoded",
+				["Content-Length"] = string.len(data),
+				-- ["X-THINGSPEAKAPIKEY"] = api_write_key
+			},
+			source = ltn12.source.string(data),
+			sink = ltn12.sink.table(response_body)
+		}
+		debug("https Response=" .. json.encode({res=response,sta=status,hea=headers}) )	
+		return response or 0
+	end
+	return 0
+end
+
+local DataProviders={}
+
+function registerDataProvider(name,func,param)
+	debug(string.format("registerDataProvider(%s,%s)",name or 'nil',json.encode(param)))
+	if (name ~= nil) then
+		DataProviders[name]= {
+			["callback"] = func,
+			["param"] = (param or "")
+		}
+	end
+end
+
 function resetDevice(lul_device,norepeat)
 	lul_device = tonumber(lul_device)
 	log(string.format("resetDevice(%d,%s)",lul_device, tostring(norepeat or "nil")))
@@ -1533,39 +1570,25 @@ function _evaluateUserExpression(lul_device, lul_service, lul_variable,old,new,l
 	return results
 end
 
---https://api.thingspeak.com/update?key=U1F7T31MHB5O8HZI&field1=0
 function sendValueToStorage(watch,lul_device, lul_service, lul_variable,old, new, lastupdate)
 	debug(string.format("sendValueToStorage(%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,old, new, lastupdate))
 	for provider,v  in pairs(watch['DataProviders']) do
+		debug(string.format("Data Provider watch provider:%s v:%s",provider,json.encode(v)))
 		local n = tablelength(watch['DataProviders'][provider])
 		for i=1,n do
-			local template = v[i]['Data']
-			if (isempty(template==nil)==false) then
-				local data = string.format(template,new)
-				local response_body = {}
-				debug(string.format("Provider:%s Url:%s",provider,data))
-				local response, status, headers = https.request{
-					method="POST",
-					url="https://api.thingspeak.com/update",
-					headers = {
-						["Content-Type"] = "application/x-www-form-urlencoded",
-						["Content-Length"] = string.len(data),
-						-- ["X-THINGSPEAKAPIKEY"] = api_write_key
-					},
-					source = ltn12.source.string(data),
-					sink = ltn12.sink.table(response_body)
-				}
-				debug("https Response=" .. json.encode({res=response,sta=status,hea=headers}) )	
-				return response or 0
+			if (DataProviders[provider]~=nil) then
+				DataProviders[provider]["callback"](v[i],lul_device, lul_service, lul_variable,old, new, lastupdate,DataProviders[provider]["param"])
+			else
+				warning(string.format("sendValueToStorage - unknown provider:%s",provider))
 			end
 		end
 	end
 	return 0
 end
 
-function evaluateExpression(lul_device, lul_service, lul_variable,expr,old, new, lastupdate, exp_index, scene)
+function evaluateExpression(watch,lul_device, lul_service, lul_variable,expr,old, new, lastupdate, exp_index, scene)
 	debug(string.format("evaluateExpression(%s,%s,%s,%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,expr,old, new, tostring(lastupdate),exp_index,scene))
-	local watch = findWatch( lul_device, lul_service, lul_variable )
+	-- local watch = findWatch( lul_device, lul_service, lul_variable )
 	if (watch==nil) then
 		return
 	end
@@ -1626,15 +1649,12 @@ function _internalVariableWatchCallback(lul_device, lul_service, lul_variable, l
 			-- watch['Expressions'][k] is a table of object 		{ ["LastEval"] = nil, ["SceneID"] = scene }
 			-- v is an object
 			for exp_index,target in ipairs(watch['Expressions'][k]) do
-				watch['Expressions'][k][exp_index]["LastEval"] = evaluateExpression(lul_device, lul_service, lul_variable,k,lul_value_old, lul_value_new, watch["LastUpdate"], exp_index, target["SceneID"])
+				watch['Expressions'][k][exp_index]["LastEval"] = evaluateExpression(watch,lul_device, lul_service, lul_variable,k,lul_value_old, lul_value_new, watch["LastUpdate"], exp_index, target["SceneID"])
 				debug(string.format(">>>evaluated %s, index:%s LastEval:%s",k,exp_index,tostring(watch['Expressions'][k][exp_index]["LastEval"])))
 			end
 		end
 		debug(string.format("-----> DataProviders() %s",json.encode(watch['DataProviders'])))
-		for k,v  in pairs(watch['DataProviders'] or {}) do
-			debug(string.format("Data Provider watch k:%s v:%s",k,json.encode(v)))
-			sendValueToStorage(watch,lul_device, lul_service, lul_variable,lul_value_old, lul_value_new, watch["LastUpdate"])
-		end
+		sendValueToStorage(watch,lul_device, lul_service, lul_variable,lul_value_old, lul_value_new, watch["LastUpdate"])
 	end
 	debug(string.format("registeredWatches: %s",json.encode(registeredWatches)))
 end
@@ -1682,6 +1702,8 @@ function _addWatch( service, variable, devid, scene, expression, xml, provider, 
 		registeredWatches[devidstr][service][variable]['Expressions'][expression] = {}
 	end
 	local n = tablelength(registeredWatches[devidstr][service][variable]['Expressions'][expression])
+	
+	-- Data Push Configuration 
 	if (scene==-1) then
 		registeredWatches[devidstr][service][variable]['Expressions'][expression][1]= {
 			["LastEval"] = nil,
@@ -1912,7 +1934,6 @@ function delWatch( lul_device, service, variable, deviceid, sceneid, expression,
 end
 
 function fixVariableWatches( lul_device )
-	debug(string.format("fixVariableWatches(%s)",lul_device ))
 	debug(string.format("fixVariableWatches(%s)",lul_device ))
 	local strings = {
 		["VariablesToWatch"]=getSetVariable(ALTUI_SERVICE, "VariablesToWatch", lul_device, ""),
@@ -2164,7 +2185,15 @@ function startupDeferred(lul_device)
 	else
 		luup.set_failure(false,lul_device)	-- should be 0 in UI7
 	end
+
+	registerDataProvider("thingspeak",sendValueToStorage_thingspeak,{
+		["Channel ID"]="number",
+		["Field Number"]="number",
+		["Write API Key"]="text",
+		["Read API Key"]="text",
+	})
 	registerHandlers()
+	
 	log("startup completed")
 end
 		
