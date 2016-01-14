@@ -144,7 +144,7 @@ function altui_Settings(deviceID) {
 		style+
 		'<div class="pane" id="pane"> '+ 
 		'<table class="altui_table" id="altui_table">'+
-		'<tr><td>Open</td><td> '+htmlOpenLocal+htmlRemote+' </td></tr>' +
+		'<tr><td>Open</td><td> <div class="btn-group">'+htmlOpenLocal+htmlRemote+'</div> </td></tr>' +
 		'<tr><td>Theme</td><td> '+htmlTheme+' </td></tr>' +
 		'<tr><td>Home Page Url Parameters</td><td> '+htmlHome+' </td></tr>' +
 		'<tr><td>url options</td><td><ul><li><b>home</b>=(pageHome , pageRooms , pageDevices , pageScenes , pageSceneEdit , pagePlugins , pageUsePages , pageEditPages , pageCredits , pageLuaTest , pageLuaStart , pageOptions , pageEditor , pageZwave , pageLocalization , pagePower , pageChildren , pageRoutes , pageQuality , pageTblDevices , pageOsCommand)</li><li><b>lang</b>=(en , fr , it)</li><li><b>Layout</b>=lean</li></ul></td></tr>' +
