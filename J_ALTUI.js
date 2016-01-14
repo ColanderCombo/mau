@@ -111,6 +111,7 @@ function altui_Settings(deviceID) {
 	var localcdn = get_device_state(deviceID,  altui_Svs, 'LocalCDN',1);
 	var localbootstrap = get_device_state(deviceID,  altui_Svs, 'LocalBootstrap',1);
 	var extraCtrl = get_device_state(deviceID,  altui_Svs, 'ExtraController',1);
+	var remoteUrl = get_device_state(deviceID,  altui_Svs, 'RemoteAccess',1);
 	var style='	<style>\
 	  table.altui_table td:first-child {\
 		width: 140px;\
@@ -128,7 +129,8 @@ function altui_Settings(deviceID) {
 	  }\
 	  </style>';
 
-	var htmltest = '<button class="btn btn-default btn-sm" id="altui-open">Open Window</button>';
+	var htmlOpenLocal= '<button class="btn btn-default btn-sm" id="altui-open-local">Local</button>';
+	var htmlRemote= '<button class="btn btn-default btn-sm" id="altui-open-remote">Remote</button>';
 	var htmlConfig = '<textarea id="altui-config" rows="6" cols="50"></textarea>';
 	var htmlTheme = '<input id="altui-theme" class="altui-ui-input form-control"></input>';
 	var htmlHome = '<input id="altui-home" class="altui-ui-input form-control"></input>';
@@ -142,7 +144,7 @@ function altui_Settings(deviceID) {
 		style+
 		'<div class="pane" id="pane"> '+ 
 		'<table class="altui_table" id="altui_table">'+
-		'<tr><td>Run</td><td> '+htmltest+' </td></tr>' +
+		'<tr><td>Open</td><td> '+htmlOpenLocal+htmlRemote+' </td></tr>' +
 		'<tr><td>Theme</td><td> '+htmlTheme+' </td></tr>' +
 		'<tr><td>Home Page</td><td> '+htmlHome+' </td></tr>' +
 		'<tr><td>url options</td><td><ul><li><b>home</b>=(pageHome , pageRooms , pageDevices , pageScenes , pageSceneEdit , pagePlugins , pageUsePages , pageEditPages , pageCredits , pageLuaTest , pageLuaStart , pageOptions , pageEditor , pageZwave , pageLocalization , pagePower , pageChildren , pageRoutes , pageQuality , pageTblDevices , pageOsCommand)</li><li><b>lang</b>=(en , fr , it)</li></ul></td></tr>' +
@@ -185,7 +187,10 @@ function altui_Settings(deviceID) {
 		var ctrl = jQuery(this).val();
 		saveVar(deviceID,  altui_Svs, "ExtraController", ctrl, true);
 	});
-	jQuery( "#altui-open" ).click(function() {
+	jQuery( "#altui-open-remote" ).click(function() {
+		window.open( remoteUrl, '_blank');
+	});
+	jQuery( "#altui-open-local" ).click(function() {
 		var url = window.location.origin + jQuery( "#altui-home" ).val()
 		window.open( url, '_blank');
 	});
