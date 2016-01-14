@@ -391,6 +391,10 @@ var styles ="						\
 		margin-top: 2px;			\
 		margin-bottom: 2px;			\
 	}		\
+	.altui-device-toolbar .btn-group{		\
+		margin-left: 2px;			\
+		margin-right: 2px;			\
+	}		\
 	div.altui-device-heading, div.altui-scene-heading {	\
 		height:30px;\
 		padding-top: 5px;\
