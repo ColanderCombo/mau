@@ -132,8 +132,8 @@ function altui_Settings(deviceID) {
 	var htmlOpenLocal= '<button class="btn btn-default btn-sm" id="altui-open-local">Local</button>';
 	var htmlRemote= '<button class="btn btn-default btn-sm" id="altui-open-remote">Remote</button>';
 	var htmlConfig = '<textarea id="altui-config" rows="6" cols="50"></textarea>';
-	var htmlTheme = '<input id="altui-theme" class="altui-ui-input form-control"></input>';
-	var htmlHome = '<input id="altui-home" class="altui-ui-input form-control"></input>';
+	var htmlTheme = '<input id="altui-theme" class="altui-ui-input form-control" placeholder="Url to download a theme css"></input>';
+	var htmlHome = '<input id="altui-home" class="altui-ui-input form-control" placeholder="options, see below"></input>';
 	var htmlCDN = '<input id="altui-cdn" class="altui-ui-input form-control" placeholder="optional localcdn pathname, uses internet otherwise"></input>';
 	var htmlBootstrap = '<input id="altui-localbootstrap" class="altui-ui-input form-control" placeholder="optional local bootstrap relative url, use internet otherwise"></input>';
 	var htmlCTRL = '<input id="altui-ctrl" class="altui-ui-input form-control" placeholder="Comma separated list of ip_addr for extra controllers"></input>';
@@ -146,8 +146,8 @@ function altui_Settings(deviceID) {
 		'<table class="altui_table" id="altui_table">'+
 		'<tr><td>Open</td><td> '+htmlOpenLocal+htmlRemote+' </td></tr>' +
 		'<tr><td>Theme</td><td> '+htmlTheme+' </td></tr>' +
-		'<tr><td>Home Page</td><td> '+htmlHome+' </td></tr>' +
-		'<tr><td>url options</td><td><ul><li><b>home</b>=(pageHome , pageRooms , pageDevices , pageScenes , pageSceneEdit , pagePlugins , pageUsePages , pageEditPages , pageCredits , pageLuaTest , pageLuaStart , pageOptions , pageEditor , pageZwave , pageLocalization , pagePower , pageChildren , pageRoutes , pageQuality , pageTblDevices , pageOsCommand)</li><li><b>lang</b>=(en , fr , it)</li></ul></td></tr>' +
+		'<tr><td>Home Page Url Parameters</td><td> '+htmlHome+' </td></tr>' +
+		'<tr><td>url options</td><td><ul><li><b>home</b>=(pageHome , pageRooms , pageDevices , pageScenes , pageSceneEdit , pagePlugins , pageUsePages , pageEditPages , pageCredits , pageLuaTest , pageLuaStart , pageOptions , pageEditor , pageZwave , pageLocalization , pagePower , pageChildren , pageRoutes , pageQuality , pageTblDevices , pageOsCommand)</li><li><b>lang</b>=(en , fr , it)</li><li><b>Layout</b>=lean</li></ul></td></tr>' +
 		'<tr><td>Local CDN ?</td><td> '+htmlCDN+' </td></tr>' +
 		'<tr><td>Local Bootstrap ?</td><td> '+htmlBootstrap+' </td></tr>' +
 		'<tr><td>Extra Controllers</td><td> '+htmlCTRL+' </td></tr>' +
@@ -191,7 +191,7 @@ function altui_Settings(deviceID) {
 		window.open( remoteUrl, '_blank');
 	});
 	jQuery( "#altui-open-local" ).click(function() {
-		var url = window.location.origin + jQuery( "#altui-home" ).val()
+		var url = window.location.origin + "/port_3480/data_request?id=lr_ALTUI_Handler&command=home&" + jQuery( "#altui-home" ).val()
 		window.open( url, '_blank');
 	});
 	jQuery( "#altui-setconfig" ).click(function() {
