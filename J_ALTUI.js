@@ -131,7 +131,7 @@ function altui_Settings(deviceID) {
 
 	var htmlOpenLocal= '<button class="btn btn-default btn-sm" id="altui-open-local">Local</button>';
 	var htmlRemote= '<button class="btn btn-default btn-sm" id="altui-open-remote">Remote</button>';
-	var htmlConfig = '<textarea id="altui-config" rows="6" cols="50"></textarea>';
+	var htmlConfig = '<textarea id="altui-config" rows="6" cols="70"></textarea>';
 	var htmlTheme = '<input id="altui-theme" class="altui-ui-input form-control" placeholder="Url to download a theme css"></input>';
 	var htmlHome = '<input id="altui-home" class="altui-ui-input form-control" placeholder="options, see below"></input>';
 	var htmlCDN = '<input id="altui-cdn" class="altui-ui-input form-control" placeholder="optional localcdn pathname, uses internet otherwise"></input>';
