@@ -5845,7 +5845,6 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 	};
 	
 	function _initOptions(serveroptions) {
-		console.log("serveroptions:",serveroptions);
 		if (isNullOrEmpty(serveroptions))
 			serveroptions="{}";
 		var defaults = JSON.parse(serveroptions);
