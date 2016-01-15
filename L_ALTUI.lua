@@ -1344,6 +1344,10 @@ local function getDefaultConfig()
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawSmoke",
 	}
+	tbl["urn:schemas-micasaverde-com:device:FloodSensor:1"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawFlood",
+	}
 	tbl["urn:schemas-micasaverde-com:device:WindowCovering:1"]= {
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawWindowCover",

@@ -607,6 +607,10 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		return _drawMotion( device);
 	};
 
+	function _drawFlood( device) {
+		return _drawMotion( device);
+	};
+	
 	function _drawGCal( device) {
 		return _drawMotion( device);
 	};
@@ -1019,7 +1023,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawPnPProxy	: _drawPnPProxy,
 	drawProgLogicTimerSwitch: _drawProgLogicTimerSwitch,
 	drawMySensors   : _drawMySensors,
-	drawSmoke 	   : _drawSmoke,
+	drawSmoke 	   	: _drawSmoke,
+	drawFlood		: _drawFlood,
 	drawHumidity   : _drawHumidity,
 	drawLight   	: _drawLight,
 	drawWindowCover : _drawWindowCover,
