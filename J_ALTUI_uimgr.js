@@ -3677,17 +3677,15 @@ var UIManager  = ( function( window, undefined ) {
 		var key="";
 		var fieldnum=0;
 		var params = pushLine.split('#');
-		var re = /^key=([^\&]+)&field(\d)=.*$/; 
-		var m;
-		 
-		if ((m = re.exec(params[6] || "")) !== null) {
-			if (m.index === re.lastIndex) {
-				re.lastIndex++;
-			}
-			// View your result using the m-variable.
-			key = m[1];
-			fieldnum=parseInt(m[2]);
-		}
+		// var re = /^key=([^\&]+)&field(\d)=.*$/; 
+		// var m;		 
+		// if ((m = re.exec(params[6] || "")) !== null) {
+			// if (m.index === re.lastIndex) {
+				// re.lastIndex++;
+			// }
+			// key = m[1];
+			// fieldnum=parseInt(m[2]);
+		// }
 		//service,variable,deviceid,provider,channelid,readkey,data,graphicurl
 		return {
 			service : params[0] || "",
@@ -3696,15 +3694,15 @@ var UIManager  = ( function( window, undefined ) {
 			provider : params[3] || "",
 			channelid : params[4] || "",
 			readkey : params[5] || "",
-			key : key,
-			fieldnum : fieldnum,
-			graphicurl: params[7] || "",
+			key : params[6] || "",
+			fieldnum : params[7] || "",
+			graphicurl: params[8] || "",
 		};
 	}
 	
-	function _setPushLineParams(push) {
-		return "{0}#{1}#{2}#{3}#{4}#{5}#{6}#{7}".format( push.service, push.variable, push.deviceid, push.provider, push.channelid, push.readkey, "key={0}&field{1}=%s".format(push.key,push.fieldnum),push.graphicurl || "");
-	}
+	// function _setPushLineParams(push) {
+		// return "{0}#{1}#{2}#{3}#{4}#{5}#{6}#{7}#{8}".format( push.service, push.variable, push.deviceid, push.provider, push.channelid, push.readkey, push.key,push.fieldnum,push.graphicurl || "");
+	// }
 
 	function _deviceDrawVariables(device) {
 
@@ -3820,8 +3818,8 @@ var UIManager  = ( function( window, undefined ) {
 									)
 								html += "</div>"
 								html += "<div class='form-group'>";
-									html += "<label for='apiKey_{0}'>Write API Key: </label>".format(varid);
-									html += "<input type='text' class='form-control input-sm' id='apiKey_{0}' placeholder='Write key' value='{1}'></input>".format(
+									html += "<label for='writeApiKey_{0}'>Write API Key: </label>".format(varid);
+									html += "<input type='text' class='form-control input-sm' id='writeApiKey_{0}' placeholder='Write key' value='{1}'></input>".format(
 										varid,
 										(pushData!=null) ? pushData.key : ''
 									)
@@ -3893,7 +3891,7 @@ var UIManager  = ( function( window, undefined ) {
 							provider : "thingspeak",
 							channelid : form.find("input#channelID_"+varid).val(),
 							readkey : form.find("input#readApiKey_"+varid).val(),
-							key : form.find("input#apiKey_"+varid).val(),
+							key : form.find("input#writeApiKey_"+varid).val(),
 							fieldnum : form.find("input#fieldNum_"+varid).val(),
 							graphicurl : (tr.closest("tbody").find("input#altui-graphUrl_"+varid).val()) || ""
 						};
@@ -3910,15 +3908,15 @@ var UIManager  = ( function( window, undefined ) {
 						});
 						// delete all old ones
 						$.each(differentWatches , function(i,w) {
-							MultiBox.delWatch( w.service, w.variable, w.deviceid, -1, "true", "", w.provider, w.channelid, w.readkey, "key={0}&field{1}=%s".format(w.key,w.fieldnum), w.graphicurl )
+							MultiBox.delWatch( w.service, w.variable, w.deviceid, -1, "true", "", w.provider, w.channelid, w.readkey, w.key,w.fieldnum, w.graphicurl )
 						});
 						// add new one if it was not there before
 						if (differentWatches.length==previousWatches.length)
-							MultiBox.addWatch( push.service, push.variable, push.deviceid, -1, "true", "", push.provider, push.channelid, push.readkey, "key={0}&field{1}=%s".format(push.key,push.fieldnum), push.graphicurl ) ;
+							MultiBox.addWatch( push.service, push.variable, push.deviceid, -1, "true", "", push.provider, push.channelid, push.readkey, push.key, push.fieldnum, push.graphicurl ) ;
 					} else {
 						// delete all watches that are in the VERA variable and not any more in the scenewatches
 						$.each(previousWatches , function(i,w) {
-							MultiBox.delWatch( w.service, w.variable, w.deviceid, -1, "true", "", w.provider, w.channelid, w.readkey, "key={0}&field{1}=%s".format(w.key,w.fieldnum), w.graphicurl )
+							MultiBox.delWatch( w.service, w.variable, w.deviceid, -1, "true", "", w.provider, w.channelid, w.readkey, w.key,w.fieldnum, w.graphicurl )
 						});
 					}
 					form.closest("tr").remove();

@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local ALTUI_SERVICE = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v1.02b"
+local version = "v1.03beta"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -714,14 +714,14 @@ local function getRemoteWatchParams(str)
 end
 
 -- service#variable#deviceid#provider#data line which is a template sprintf string for params
--- urn:micasaverde-com:serviceId:SceneController1#LastSceneID#208#thingspeak#61186#U1F7T31MHB5O8HZI#key=U1F7T31MHB5O8HZI&field1=0#graphic url
-local function setPushParams(service,variable,deviceid,provider,channelid,readkey,data,url)
-	return string.format("%s#%s#%s#%s#%s#%s#%s#%s",service,variable,deviceid,provider,channelid,readkey,data,url)
+-- urn:micasaverde-com:serviceId:SceneController1#LastSceneID#208#thingspeak#61186#U1F7T31MHB5O8HZI#U1F7T31MHB5O8HZI#0#graphic url
+local function setPushParams(service,variable,deviceid,provider,channelid,readkey,writekey,field,url)
+	return string.format("%s#%s#%s#%s#%s#%s#%s#%s#%s",service,variable,deviceid,provider,channelid,readkey,writekey,field,url)
 end
 
 local function getPushParams(str)
 	local params = str:split("#")
-	return params[1],params[2],params[3],params[4],params[5],params[6],params[7],params[8] or ""
+	return params[1],params[2],params[3],params[4],params[5],params[6],params[7],params[8],params[9] or ""
 end
 
 local function saveRemoteWatch(lul_device,service,variable,devid,ctrlid,ipaddr)
@@ -1089,7 +1089,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 					deviceID,
 					lul_parameters["service"], lul_parameters["variable"], lul_parameters["device"], 
 					tonumber(lul_parameters["scene"]), lul_parameters["expression"], lul_parameters["xml"], 
-					lul_parameters["provider"], lul_parameters["channelid"], lul_parameters["readkey"], lul_parameters["data"], lul_parameters["graphicurl"] )
+					lul_parameters["provider"], lul_parameters["channelid"], lul_parameters["readkey"], lul_parameters["writekey"], lul_parameters["field"], lul_parameters["graphicurl"] )
 				return res, "text/plain"
 			end,
 		["addWatch"] = 
@@ -1098,7 +1098,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 					deviceID,
 					lul_parameters["service"], lul_parameters["variable"], lul_parameters["device"], 
 					tonumber(lul_parameters["scene"]), lul_parameters["expression"], lul_parameters["xml"], 
-					lul_parameters["provider"], lul_parameters["channelid"], lul_parameters["readkey"], lul_parameters["data"], lul_parameters["graphicurl"] )
+					lul_parameters["provider"], lul_parameters["channelid"], lul_parameters["readkey"], lul_parameters["writekey"], lul_parameters["field"], lul_parameters["graphicurl"] )
 				return res, "text/plain"
 			end,
 		["addRemoteWatch"] = 
@@ -1132,12 +1132,8 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				variableWatchCallbackFromRemote(ctrlid, lul_device, lul_service, lul_variable, lul_value_old, lul_value_new)
 				return "ok", "text/plain"
 			end,
-		["readtmp"] = 
+		["readtmp"] = 	-- Command not used anymore, kept here for future in case...
 			function(params)
-				-- local command = lul_parameters["oscommand"]
-				-- local handle = io.popen(command)
-				-- local result = handle:read("*a")
-				-- handle:close()
 				local filename = url_decode( lul_parameters["filename"] )
 				debug("opening file")
 				local file = io.open(tmpprefix..filename,'r')
@@ -1459,9 +1455,10 @@ end
 --https://api.thingspeak.com/update?key=U1F7T31MHB5O8HZI&field1=0
 local function sendValueToStorage_thingspeak(watch_description,lul_device, lul_service, lul_variable,old, new, lastupdate,param)
 	debug(string.format("sendValueToStorage_thingspeak(%s,%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,old, new, lastupdate, param))
-	local template = watch_description['Data']
+	local parts = watch_description['Data']:split('=')
 	if (isempty(template)==false) then
-		local data = string.format(template,new)
+		local strtemplate = string.format("key=%s&field%s=%%s",parts[1],parts[2])
+		local data = string.format(strtemplate,new)
 		local response_body = {}
 		debug(string.format("Provider:%s Url:%s","thingspeak",data))
 		local response, status, headers = https.request{
@@ -1673,10 +1670,11 @@ function variableWatchCallback(lul_device, lul_service, lul_variable, lul_value_
 	_internalVariableWatchCallback(lul_device, lul_service, lul_variable, lul_value_old, lul_value_new)
 end
 
-function _addWatch( service, variable, devid, scene, expression, xml, provider, channelid, readkey, data, graphicurl )
-	debug(string.format("_addWatch(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",service, variable, devid, scene, expression, xml or "", provider or "", channelid or "", readkey or "", data or "", graphicurl or ""))
+function _addWatch( service, variable, devid, scene, expression, xml, provider, channelid, readkey, writekey, field, graphicurl )
+	debug(string.format("_addWatch(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",service, variable, devid, scene, expression, xml or "", provider or "", channelid or "", readkey or "", writekey or "", field or "", graphicurl or ""))
+	local data = string.format("%s=%s",writekey or "",field or "")
 	local result = 1
-	devidstr = tostring(devid)	 -- to inssure it is not a indexed array , but hash table
+	devidstr = tostring(devid)	 -- to inssure it is not a indexed array , but hash table 
 	local parts = devidstr:split("-")
 	if (parts[2]==nil) then
 		devidstr = "0-"..devidstr
@@ -1695,7 +1693,7 @@ function _addWatch( service, variable, devid, scene, expression, xml, provider, 
 			["LastNew"] = nil,
 			["LastUpdate"] = nil
 		}
-	else
+	else 
 		-- a watch was already there
 		bDuplicateWatch = true
 	end
@@ -1712,8 +1710,8 @@ function _addWatch( service, variable, devid, scene, expression, xml, provider, 
 		registeredWatches[devidstr][service][variable]['Expressions'][expression][1]= {
 			["LastEval"] = nil,
 			["SceneID"] = scene
-		}
-		if (provider=="thingspeak") and ( isempty(data)==false ) then
+		}	
+		if (provider=="thingspeak") and ( data~="=" ) then
 			if (registeredWatches[devidstr][service][variable]['DataProviders'] == nil) then
 				registeredWatches[devidstr][service][variable]['DataProviders']={}
 			end
@@ -1783,12 +1781,12 @@ function _addWatch( service, variable, devid, scene, expression, xml, provider, 
 	return result
 end
 
-function addWatch( lul_device, service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl )
-	debug(string.format("addWatch(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",lul_device, service, variable, deviceid, sceneid, expression, xml or "", provider or "", channelid or "", readkey or "", data or "", graphicurl or ""))
+function addWatch( lul_device, service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl )
+	debug(string.format("addWatch(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",lul_device, service, variable, deviceid, sceneid, expression, xml or "", provider or "", channelid or "", readkey or "", writekey or "", field or "", graphicurl or ""))
 	-- 1/ Add Watch in database
 	graphicurl = graphicurl or ""
-	local newwatch = _addWatch( service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl ) 
-	
+	local newwatch = _addWatch( service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl ) 
+
 	-- 2/ Add Watch in persistence list ( device variable )
 	if (sceneid ~=-1) then
 		-- classic watch
@@ -1811,15 +1809,15 @@ function addWatch( lul_device, service, variable, deviceid, sceneid, expression,
 		end
 	else
 		-- data push watch
-		local watchline = setPushParams(service,variable,deviceid,provider,channelid,readkey,data,graphicurl)
+		local watchline = setPushParams(service,variable,deviceid,provider,channelid,readkey,writekey,field,graphicurl)
 		debug(string.format("searching if watchline already exists: %s",watchline))
 		local variableWatch= getSetVariable(ALTUI_SERVICE, "VariablesToSend", lul_device, "")
 		local bFound = false;
 		for k,v  in pairs(variableWatch:split(';')) do
-			local wservice,wvariable,wdevice,wprovider,wchannelid,wreadkey,wdata,wgraphicurl  = getPushParams(v)
-			if (service==wservice) and (variable==wvariable) and (deviceid==wdevice) and (provider==wprovider) and (channelid==wchannelid) and (readkey==wreadkey) and (data==wdata) and (graphicurl==wgraphicurl) then
+			local wservice,wvariable,wdevice,wprovider,wchannelid,wreadkey,wwritekey, wfield ,wgraphicurl  = getPushParams(v)
+			if (service==wservice) and (variable==wvariable) and (deviceid==wdevice) and (provider==wprovider) and (channelid==wchannelid) and (readkey==wreadkey) and (writekey==wwritekey) and (field==wfield) and (graphicurl==wgraphicurl) then
 				bFound = true;
-			end
+			end 
 		end
 		if (bFound==false) then
 			debug(string.format("no, adding watchline %s",watchline))
@@ -1830,9 +1828,10 @@ function addWatch( lul_device, service, variable, deviceid, sceneid, expression,
 	return tostring(newwatch)
 end
 
-function _delWatch(service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl )
-	debug(string.format("_delWatch(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",service, variable, deviceid, sceneid, expression, xml or "", provider or "", channelid or "", readkey or "", data or "", graphicurl or ""))
-	devidstr = tostring(deviceid)	 -- to inssure it is not a indexed array , but hash table
+function _delWatch(service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl )
+	debug(string.format("_delWatch(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",service, variable, deviceid, sceneid, expression, xml or "", provider or "", channelid or "", readkey or "", writekey or "", field or "", graphicurl or ""))
+	local data = string.format("%s=%s",writekey,field)
+	devidstr = tostring(deviceid)	 -- to inssure it is not a indexed array , but hash table 
 	local removed=0
 	local parts = devidstr:split("-")
 	if (parts[2]==nil) then
@@ -1896,12 +1895,12 @@ function _delWatch(service, variable, deviceid, sceneid, expression, xml, provid
 	return removed
 end
 
-function delWatch( lul_device, service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl )
-	debug(string.format("delWatch(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",lul_device, service, variable, deviceid, sceneid, expression, xml or "", provider or "", channelid or "", readkey or "", data or "", graphicurl or ""))
+function delWatch( lul_device, service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl )
+	debug(string.format("delWatch(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",lul_device, service, variable, deviceid, sceneid, expression, xml or "", provider or "", channelid or "", readkey or "", writekey or "", field or "", graphicurl or ""))
 	-- remove from DB and  call the remote controller to remove the watch too
 	graphicurl = graphicurl or ""
-	local removed = _delWatch(service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl  )
-	
+	local removed = _delWatch(service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl  )
+
 	--  remove from persistent list
 	if (sceneid ~=-1) then
 		-- classic watch
@@ -1919,13 +1918,13 @@ function delWatch( lul_device, service, variable, deviceid, sceneid, expression,
 		luup.variable_set(ALTUI_SERVICE, "VariablesToWatch", table.concat(toKeep,";"), lul_device)
 	else
 		-- data push watch
-		local watchline = setPushParams(service,variable,deviceid,provider,channelid,readkey,data,graphicurl)
+		local watchline = setPushParams(service,variable,deviceid,provider,channelid,readkey,writekey,field,graphicurl)
 		debug(string.format("Watch to delete: %s",watchline))
 		local variableWatch= getSetVariable(ALTUI_SERVICE, "VariablesToSend", lul_device, "")
 		local toKeep = {}
 		for k,v  in pairs(variableWatch:split(';')) do
-			local wservice,wvariable,wdevice,wprovider,wchannelid,wreadkey,wdata,wgraphicurl  = getPushParams(v)
-			if not((service==wservice) and (variable==wvariable) and (deviceid==wdevice) and (provider==wprovider) and (channelid==wchannelid) and (readkey==wreadkey) and (data==wdata) and (graphicurl==wgraphicurl)) then
+			local wservice,wvariable,wdevice,wprovider,wchannelid,wreadkey,wwritekey,wfield,wgraphicurl  = getPushParams(v)
+			if not((service==wservice) and (variable==wvariable) and (deviceid==wdevice) and (provider==wprovider) and (channelid==wchannelid) and (readkey==wreadkey) and (writekey==wwritekey) and (field==wfield) and (graphicurl==wgraphicurl)) then
 				debug(string.format("Keeping this watch: %s",v))
 				table.insert(toKeep, v)
 			end
@@ -1937,8 +1936,24 @@ function delWatch( lul_device, service, variable, deviceid, sceneid, expression,
 	return tostring(removed)
 end
 
-function fixVariableWatches( lul_device )
-	debug(string.format("fixVariableWatches(%s)",lul_device ))
+function fixWatches_V_1_2(lul_device)
+	debug(string.format("fixWatches_V_1_2(%s)",lul_device ))
+	local tosend = getSetVariable(ALTUI_SERVICE, "VariablesToSend", lul_device, "")
+	local watches = tosend :split(";")
+	for k,watch in pairs(watches) do
+		local parts = watch:split('#')
+		-- part 7 = key=U1F7T31MHB5O8HZI&field3=%s
+		local key,field = string.match(parts[7],"^key=(.-)&field(.-)=.-$")
+		parts[9]=parts[8]
+		parts[8]=field
+		parts[7]=key
+		watches[k] = table.concat(parts,"#")
+	end
+	luup.variable_set(ALTUI_SERVICE, "VariablesToSend", table.concat(watches,";"), lul_device)
+end
+
+function fixVariableWatchesDeviceID( lul_device )
+	debug(string.format("fixVariableWatchesDeviceID(%s)",lul_device ))
 	local strings = {
 		["VariablesToWatch"]=getSetVariable(ALTUI_SERVICE, "VariablesToWatch", lul_device, ""),
 		["VariablesToSend"]=getSetVariable(ALTUI_SERVICE, "VariablesToSend", lul_device, ""),
@@ -1973,20 +1988,17 @@ function initVariableWatches( lul_device )
 			-- table.insert(toKeep, setWatchParams(service,variable,device,scene,expression,xml or "") )
 		end
 	end
-	-- luup.variable_set(ALTUI_SERVICE, "VariablesToWatch", table.concat(toKeep,";"), lul_device)
 	
 	-- urn:micasaverde-com:serviceId:SceneController1#LastSceneID#208#thingspeak#key=U1F7T31MHB5O8HZI&field1=0
 	watches = dataPushString:split(";")
 	-- toKeep = {}
 	for k,v  in pairs(watches) do
-		local service,variable,device,provider,channelid,readkey,data,graphicurl  = getPushParams(v)
-		_addWatch(  service, variable, device, -1, "true", "", provider, channelid, readkey, data,graphicurl )
-		-- table.insert(toKeep, setPushParams(service,variable,device,provider,channelid,readkey,data,graphicurl or "") )
+		local service,variable,device,provider,channelid,readkey,writekey,field,graphicurl  = getPushParams(v)
+		_addWatch(  service, variable, device, -1, "true", "", provider, channelid, readkey, writekey,field,graphicurl )
 	end
 	-- luup.variable_set(ALTUI_SERVICE, "VariablesToSend", table.concat(toKeep,";"), lul_device)
 	
 	watches = remoteVariableWatch:split(";")
-	-- toKeep = {}
 	for k,v  in pairs(watches) do
 		local service,variable,device,ctrlid,ipaddr = getRemoteWatchParams(v)
 		addRemoteWatch(lul_device,service,variable,device,ctrlid,ipaddr)
@@ -1999,28 +2011,28 @@ end
 -- THINGSPEAK integration
 ------------------------------------------------
 -- data : https://thingspeak.com/docs/channels#api_keys
-function sendToDataStorage(api_write_key,data)
-	require('ltn12')
-	local socket = require("socket")
-	local http = require("socket.http")
+-- function sendToDataStorage(api_write_key,data)
+	-- require('ltn12')
+	-- local socket = require("socket")
+	-- local http = require("socket.http")
 	
-	local base_url = "http://api.thingspeak.com/update"
-	local method = "POST"
+	-- local base_url = "http://api.thingspeak.com/update"
+	-- local method = "POST"
 	 
-	local response_body = {}
-	local response, status, header = http.request{
-		method = method,
-		url = base_url,
-		headers = {
-			["Content-Type"] = "application/x-www-form-urlencoded",
-			["Content-Length"] = string.len(data),
-			["X-THINGSPEAKAPIKEY"] = api_write_key
-		},
-		source = ltn12.source.string(data),
-		sink = ltn12.sink.table(response_body)
-	}
-	return response
-end
+	-- local response_body = {}
+	-- local response, status, header = http.request{
+		-- method = method,
+		-- url = base_url,
+		-- headers = {
+			-- ["Content-Type"] = "application/x-www-form-urlencoded",
+			-- ["Content-Length"] = string.len(data),
+			-- ["X-THINGSPEAKAPIKEY"] = api_write_key
+		-- },
+		-- source = ltn12.source.string(data),
+		-- sink = ltn12.sink.table(response_body)
+	-- }
+	-- return response
+-- end
 
 ------------------------------------------------
 -- STARTUP Sequence
@@ -2168,8 +2180,11 @@ function startupDeferred(lul_device)
 		if ( (newmajor>major) or ( (newmajor==major) and (newminor>minor) ) ) then
 			log ("Version upgrade => Reseting Plugin config to default")
 			setVariableIfChanged(ALTUI_SERVICE, "PluginConfig", defconfigjson, lul_device)		
-			if (newmajor==1) and (newminor==1) then
+			if (newmajor<=1) or ((newmajor == 1) and (newminor <= 1)) then
 				setVariableIfChanged(ALTUI_SERVICE, "ServerOptions", "[]", lul_device)
+			end
+			if (newmajor<=1) or ((newmajor == 1) and (newminor <= 2)) then
+				fixWatches_V_1_2(lul_device)
 			end
 		end
 		
@@ -2179,7 +2194,7 @@ function startupDeferred(lul_device)
 	-- init watches
 	-- init data storages
 
-	fixVariableWatches( lul_device )
+	fixVariableWatchesDeviceID( lul_device )
 	initVariableWatches( lul_device)
 
 	

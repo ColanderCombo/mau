@@ -1238,13 +1238,12 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		}
 	};
 	
-	function _xxxWatch( cmd, service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl ) {
-		var url = "?id=lr_ALTUI_Handler&command={11}&service={0}&variable={1}&device={2}&scene={3}&expression={4}&xml={5}&provider={6}&channelid={7}&readkey={8}&data={9}&graphicurl={10}".format(
+	function _xxxWatch( cmd, service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl ) {
+		var url = "?id=lr_ALTUI_Handler&command={12}&service={0}&variable={1}&device={2}&scene={3}&expression={4}&xml={5}&provider={6}&channelid={7}&readkey={8}&writekey={9}&field={10}&graphicurl={11}".format(
 			service, variable, deviceid, sceneid, 
 			encodeURIComponent(expression), 
 			encodeURIComponent(xml), 
-			provider, channelid, readkey, 
-			encodeURIComponent(data), 
+			provider, channelid, readkey, writekey,field,
 			encodeURIComponent(graphicurl),
 			cmd
 		);
@@ -1258,12 +1257,12 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		return jqxhr;
 	};
 	
-	function _delWatch( service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl ) {
-		return _xxxWatch( 'delWatch', service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl );
+	function _delWatch( service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl ) {
+		return _xxxWatch( 'delWatch', service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl );
 	};
-	function _addWatch( service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl ) {
+	function _addWatch( service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl ) {
 		// http://192.168.1.5/port_3480/data_request?id=lr_ALTUI_Handler&command=addRemoteWatch&device=42&variable=Status&service=urn:upnp-org:serviceId:SwitchPower1&data=192.168.1.16
-		return _xxxWatch( 'addWatch', service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl );
+		return _xxxWatch( 'addWatch', service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl );
 	};
 
 	function _getDeviceDependants(device) {
