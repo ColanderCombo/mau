@@ -43,6 +43,7 @@ UIManager.checkAltuiUpdate("1098,bugfix: Roomfilter duplicate button in multi co
 	'rdcohen':new Date(2016,0,7),
 	'ramwal':new Date(2016,0,7),
 	'thegazelle':new Date(2016,0,15),
+	'powisquare':new Date(2016,0,17),	
 	'vosmont':new Date(2020,0,1),
 	'dklinkman':new Date(2020,0,1),
 	'akbooer':new Date(2020,0,1),
