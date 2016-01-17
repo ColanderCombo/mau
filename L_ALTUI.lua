@@ -1092,6 +1092,11 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 					lul_parameters["provider"], lul_parameters["channelid"], lul_parameters["readkey"], lul_parameters["writekey"], lul_parameters["field"], lul_parameters["graphicurl"] )
 				return res, "text/plain"
 			end,
+		["testWatch"] = 
+			function(params)	-- primary controller beeing called to set a watch
+				log('ALTUI_Handler: parameters is: '..json.encode(lul_parameters["params"]))
+				return res, "text/plain"
+			end,
 		["addWatch"] = 
 			function(params)	-- primary controller beeing called to set a watch
 				local res = addWatch( 
@@ -1480,12 +1485,12 @@ end
 
 local DataProviders={}
 
-function registerDataProvider(name,func,param)
-	debug(string.format("registerDataProvider(%s,%s)",name or 'nil',json.encode(param)))
+function registerDataProvider(name,func,parameters)
+	debug(string.format("registerDataProvider(%s,%s)",name or 'nil',json.encode(parameters)))
 	if (name ~= nil) then
 		DataProviders[name]= {
 			["callback"] = func,
-			["param"] = (param or "")
+			["parameters"] = (parameters or "")
 		}
 	end
 end

@@ -1257,11 +1257,34 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		return jqxhr;
 	};
 	
+	function _testWatch( cmd, service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl ) {
+		var url = "?id=lr_ALTUI_Handler&command={0}&service={1}&variable={2}&device={3}&scene={4}&expression={5}&xml={6}&provider={7}".format(
+			"testWatch",
+			service, variable, deviceid, sceneid, 
+			encodeURIComponent(expression), 
+			encodeURIComponent(xml), 
+			provider
+		);
+		var params=[];
+		params.push(channelid, readkey, writekey, field, graphicurl);
+		url += "&params={0}".format( encodeURIComponent(JSON.stringify(params)) );
+
+		var jqxhr = _httpGet( url, {}, function(data, textStatus, jqXHR) {
+			if ((data!=null) && (data!="ERROR")) {
+				PageMessage.message(_T("Success"), "success");	// need user_data reload on UI5
+			}
+			else 
+				PageMessage.message(_T("Failure"), "warning");
+		});
+		return jqxhr;
+	};
+		
 	function _delWatch( service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl ) {
 		return _xxxWatch( 'delWatch', service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl );
 	};
 	function _addWatch( service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl ) {
 		// http://192.168.1.5/port_3480/data_request?id=lr_ALTUI_Handler&command=addRemoteWatch&device=42&variable=Status&service=urn:upnp-org:serviceId:SwitchPower1&data=192.168.1.16
+		_testWatch( 'addWatch', service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl );
 		return _xxxWatch( 'addWatch', service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl );
 	};
 

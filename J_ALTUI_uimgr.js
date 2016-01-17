@@ -4717,6 +4717,7 @@ var UIManager  = ( function( window, undefined ) {
 									left: paddingleft  + (control.Display.Left  || 0), 
 									"min-width": control.Display.Width+"px",	// forcing bootstrap
 									"max-width": control.Display.Width+"px",	// forcing bootstrap
+									"z-index" : "10",
 									position:'absolute'
 									});
 						}
@@ -4728,6 +4729,8 @@ var UIManager  = ( function( window, undefined ) {
 									"margin-left": "10px",	
 									"margin-right": "10px",	
 									"margin-bottom": "5px",	
+									"z-index" : "10",
+									position:'relative'
 									})
 									
 									.addClass('pull-left');
