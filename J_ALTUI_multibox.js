@@ -180,6 +180,9 @@ var MultiBox = ( function( window, undefined ) {
 			return (_devicetypesDB[0]["info"].ui7Check == "false" );	// we were told by LUA plugin
 		return _controllers[controller].controller.isUI5();
 	};
+	function _getDataProviders(cbfunc) {
+		return _controllers[0].controller.getDataProviders(cbfunc);
+	};
 	function _initializeJsonp(controller) {
 		return _controllers[controller].controller.initializeJsonp();
 	};
@@ -759,6 +762,7 @@ var MultiBox = ( function( window, undefined ) {
 	isUI5				: _isUI5,				// (controller)
 	initializeJsonp		: _initializeJsonp,		// (controller)
 	initializeSysinfo   : _initializeSysinfo,	// (controller)
+	getDataProviders    : _getDataProviders,	// (controller)
 	getWeatherSettings 	: _getWeatherSettings,	// ()
 	runLua				: _runLua,				//(code, cbfunc) 
 	getLuaStartup		: _getLuaStartup,		//()

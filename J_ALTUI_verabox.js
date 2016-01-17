@@ -1238,13 +1238,14 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		}
 	};
 	
-	function _xxxWatch( cmd, service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl ) {
-		var url = "?id=lr_ALTUI_Handler&command={12}&service={0}&variable={1}&device={2}&scene={3}&expression={4}&xml={5}&provider={6}&channelid={7}&readkey={8}&writekey={9}&field={10}&graphicurl={11}".format(
+	function _xxxWatch( cmd, service, variable, deviceid, sceneid, expression, xml, provider, params ) {
+		// for thingspeak = a table of channelid, readkey, writekey, field, graphicurl
+		var url = "?id=lr_ALTUI_Handler&command={8}&service={0}&variable={1}&device={2}&scene={3}&expression={4}&xml={5}&provider={6}&providerparams={7}".format(
 			service, variable, deviceid, sceneid, 
 			encodeURIComponent(expression), 
 			encodeURIComponent(xml), 
-			provider, channelid, readkey, writekey,field,
-			encodeURIComponent(graphicurl),
+			provider, 
+			encodeURIComponent( JSON.stringify(params) ),
 			cmd
 		);
 		var jqxhr = _httpGet( url, {}, function(data, textStatus, jqXHR) {
@@ -1256,36 +1257,17 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		});
 		return jqxhr;
 	};
-	
-	function _testWatch( cmd, service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl ) {
-		var url = "?id=lr_ALTUI_Handler&command={0}&service={1}&variable={2}&device={3}&scene={4}&expression={5}&xml={6}&provider={7}".format(
-			"testWatch",
-			service, variable, deviceid, sceneid, 
-			encodeURIComponent(expression), 
-			encodeURIComponent(xml), 
-			provider
-		);
-		var params=[];
-		params.push(channelid, readkey, writekey, field, graphicurl);
-		url += "&params={0}".format( encodeURIComponent(JSON.stringify(params)) );
-
-		var jqxhr = _httpGet( url, {}, function(data, textStatus, jqXHR) {
-			if ((data!=null) && (data!="ERROR")) {
-				PageMessage.message(_T("Success"), "success");	// need user_data reload on UI5
-			}
-			else 
-				PageMessage.message(_T("Failure"), "warning");
-		});
-		return jqxhr;
-	};
 		
 	function _delWatch( service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl ) {
-		return _xxxWatch( 'delWatch', service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl );
+		var params=[];
+		params.push(channelid, readkey, writekey, field, graphicurl);
+		return _xxxWatch( 'delWatch', service, variable, deviceid, sceneid, expression, xml, provider, params );
 	};
 	function _addWatch( service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl ) {
 		// http://192.168.1.5/port_3480/data_request?id=lr_ALTUI_Handler&command=addRemoteWatch&device=42&variable=Status&service=urn:upnp-org:serviceId:SwitchPower1&data=192.168.1.16
-		_testWatch( 'addWatch', service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl );
-		return _xxxWatch( 'addWatch', service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl );
+		var params=[];
+		params.push(channelid, readkey, writekey, field, graphicurl);
+		return _xxxWatch( 'addWatch', service, variable, deviceid, sceneid, expression, xml, provider, params );
 	};
 
 	function _getDeviceDependants(device) {
@@ -1363,7 +1345,21 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	function _getIpAddr() {
 		return _upnpHelper.getIpAddr();
 	};
-
+	function _getDataProviders(cbfunc) {
+		// for thingspeak = a table of channelid, readkey, writekey, field, graphicurl
+		var url = "?id=lr_ALTUI_Handler&command=getDataProviders";
+		var jqxhr = _httpGet( url, {}, function(data, textStatus, jqXHR) {
+			if ((data!=null) && (data!="ERROR")) {
+				(cbfunc)(data);
+			}
+			else {
+				PageMessage.message(_T("Failure"), "warning");
+				(cbfunc)(null);
+			}
+		});
+		return jqxhr;
+	};
+	
   // explicitly return public methods when this object is instantiated
   return {
 	//---------------------------------------------------------
@@ -1372,6 +1368,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	getUPnPHelper	: _getUPnPHelper,
 	getIpAddr		: _getIpAddr,
 	getUrlHead		: _getUrlHead,
+	getDataProviders    : _getDataProviders,	// (cbfunc)
 	triggerAltUIUpgrade : _triggerAltUIUpgrade,	// (suffix,newrev)  : newrev number in TRAC
 	getIconPath		: _getIconPath,		// ( src )
 	getIcon			: _getIcon, 		// workaround to get image from vera box

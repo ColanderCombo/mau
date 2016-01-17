@@ -3705,7 +3705,6 @@ var UIManager  = ( function( window, undefined ) {
 	// }
 
 	function _deviceDrawVariables(device) {
-
 		function _clickOnValue() {
 			var id = $(this).prop('id');	// idx in variable state array
 			var state =  MultiBox.getStateByID( device.altuiid, id );
@@ -3733,6 +3732,85 @@ var UIManager  = ( function( window, undefined ) {
 				$(this).replaceWith(_enhanceValue(val));					
 			});
 		};
+		function buildPushForm(device,varid) {
+			var dfd = $.Deferred();
+			MultiBox.getDataProviders(function(providers) {
+				var altuidevice = MultiBox.getDeviceByID( 0, g_MyDeviceID );
+				var state = MultiBox.getStateByID( device.altuiid, varid );
+				var varPushes = {};
+				$.each( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend" ) || "").split(';'),function(idx,pushLine) {
+					var push = _getPushLineParams(pushLine);
+					if (device.altuiid == push.deviceid) {	
+						varPushes[push.service+':'+push.variable]=push;
+					}
+				});
+				var pushData = varPushes[state.service+':'+state.variable];
+				var defaultgraphicurlTemplate="//api.thingspeak.com/channels/{0}/charts/{2}?key={1}&width=450&height=260&results=60&dynamic=true";
+				var defaultgraphicurl = "";
+				var html = "";
+				html += "<div class='panel panel-default'> <div class='panel-body'>";
+				html += "<div class='row'>";
+					if (pushData!=null) {
+						defaultgraphicurl = defaultgraphicurlTemplate.format(pushData.channelid,pushData.readkey,pushData.fieldnum);
+						var url = (pushData.graphicurl == "") ?  defaultgraphicurl : pushData.graphicurl;
+						html += "<div class='col-md-8'>";
+						html += "<div class='form-group'>";
+							html += "<label for='altui-graphUrl_{0}' title='{1}'>Visualization Url: </label> ".format(varid,_T("(use size=iframe in your matlab url)"));
+							html += "<input type='text' class='form-control input-sm' id='altui-graphUrl_{0}' placeholder='Visualization Url' value='{1}'></input>".format(
+								varid,
+								url.escapeXml()
+							)
+						html += "</div>"
+						html += "<iframe class='altui-thingspeak-chart' width='100%' height='260' style='border: 1px solid #cccccc;' src='{0}' ></iframe>".format(url);
+						html += "</div>";
+					}
+					html += "<div class='col-md-4'>";
+					html += "<div class='checkbox'>"
+						html += "<label><input type='checkbox' id='altui-enablePush_{0}' {1} {2}>Enable Push to Thingspeak</label>".format(
+							varid, 
+							(pushData!=null) ? 'checked' : '',
+							'' // MultiBox.controllerOf(device.altuiid).controller !=0 ? 'disabled' : ''
+						);
+					html += "</div>"
+					html += "<form id='form_{0}' class='form-inline'>".format(varid);
+						html += "<div class='form-group'>";
+							html += "<label for='channelID_{0}'>Channel ID: </label>".format(varid);
+							html += "<input type='number' min=1 class='form-control input-sm' id='channelID_{0}' placeholder='ID' value='{1}'></input>".format(
+								varid,
+								(pushData!=null) ? pushData.channelid : ''
+							)
+						html += "</div>"
+						html += "<div class='form-group'>";
+							html += "<label for='fieldNum_{0}'>Field Number: </label>".format(varid);
+							html += "<input type='number' min=1 max=8 class='form-control input-sm' id='fieldNum_{0}' placeholder='number' value='{1}'></input>".format(
+								varid,
+								(pushData!=null) ? pushData.fieldnum : ''
+							)
+						html += "</div>"
+						html += "<div class='form-group'>";
+							html += "<label for='writeApiKey_{0}'>Write API Key: </label>".format(varid);
+							html += "<input type='text' class='form-control input-sm' id='writeApiKey_{0}' placeholder='Write key' value='{1}'></input>".format(
+								varid,
+								(pushData!=null) ? pushData.key : ''
+							)
+						html += "</div>"
+						html += "<div class='form-group'>";
+							html += "<label for='readApiKey_{0}'>Read API Key: </label>".format(varid);
+							html += "<input type='text' class='form-control input-sm' id='readApiKey_{0}' placeholder='Read key' value='{1}'></input>".format(
+								varid,
+								(pushData!=null) ? pushData.readkey : ''
+							)
+						html += "</div>"
+
+					html += "</form>"
+					html += "</div>"; //col
+				html += "</div>";	//row
+				html += "</div></div>";
+				dfd.resolve(html)
+			});
+			return dfd.promise();			
+		};
+
 
 		// 0: variable , 1: value , 2: service
 		var deviceVariableLineTemplate = "  <tr>";
@@ -3762,107 +3840,39 @@ var UIManager  = ( function( window, undefined ) {
 			$("button.altui-variable-push").click( function() {
 				var tr = $(this).closest("tr");
 				var varid = tr.find("td.altui-variable-value").prop('id');
-				var defaultgraphicurlTemplate="//api.thingspeak.com/channels/{0}/charts/{2}?key={1}&width=450&height=260&results=60&dynamic=true";
 				var state = MultiBox.getStateByID( device.altuiid, varid );
 				var form = $(this).closest("tbody").find("form#form_"+varid);
 				if (form.length==0) {
 					// change color
 					$(this).removeClass("btn-default").addClass("btn-danger");
-					var varPushes = {};
-					$.each( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend" ) || "").split(';'),function(idx,pushLine) {
-						var push = _getPushLineParams(pushLine);
-						if (device.altuiid == push.deviceid) {	//ctrl 0 only for now !
-							varPushes[push.service+':'+push.variable]=push;
-						}
-					});
-					var pushData = varPushes[state.service+':'+state.variable];
-					var defaultgraphicurl = "";
-					var html = "<tr><td colspan='3'>";
-						html += "<div class='panel panel-default'> <div class='panel-body'>";
-						html += "<div class='row'>";
-							if (pushData!=null) {
-								defaultgraphicurl = defaultgraphicurlTemplate.format(pushData.channelid,pushData.readkey,pushData.fieldnum);
-								var url = (pushData.graphicurl == "") ?  defaultgraphicurl : pushData.graphicurl;
-								html += "<div class='col-md-8'>";
-								html += "<div class='form-group'>";
-									html += "<label for='altui-graphUrl_{0}' title='{1}'>Visualization Url: </label> ".format(varid,_T("(use size=iframe in your matlab url)"));
-									html += "<input type='text' class='form-control input-sm' id='altui-graphUrl_{0}' placeholder='Visualization Url' value='{1}'></input>".format(
-										varid,
-										url.escapeXml()
-									)
-								html += "</div>"
-								html += "<iframe class='altui-thingspeak-chart' width='100%' height='260' style='border: 1px solid #cccccc;' src='{0}' ></iframe>".format(url);
-								html += "</div>";
-							}
-							html += "<div class='col-md-4'>";
-							html += "<div class='checkbox'>"
-								html += "<label><input type='checkbox' id='altui-enablePush_{0}' {1} {2}>Enable Push to Thingspeak</label>".format(
-									varid, 
-									(pushData!=null) ? 'checked' : '',
-									'' // MultiBox.controllerOf(device.altuiid).controller !=0 ? 'disabled' : ''
-								);
-							html += "</div>"
-							html += "<form id='form_{0}' class='form-inline'>".format(varid);
-								html += "<div class='form-group'>";
-									html += "<label for='channelID_{0}'>Channel ID: </label>".format(varid);
-									html += "<input type='number' min=1 class='form-control input-sm' id='channelID_{0}' placeholder='ID' value='{1}'></input>".format(
-										varid,
-										(pushData!=null) ? pushData.channelid : ''
-									)
-								html += "</div>"
-								html += "<div class='form-group'>";
-									html += "<label for='fieldNum_{0}'>Field Number: </label>".format(varid);
-									html += "<input type='number' min=1 max=8 class='form-control input-sm' id='fieldNum_{0}' placeholder='number' value='{1}'></input>".format(
-										varid,
-										(pushData!=null) ? pushData.fieldnum : ''
-									)
-								html += "</div>"
-								html += "<div class='form-group'>";
-									html += "<label for='writeApiKey_{0}'>Write API Key: </label>".format(varid);
-									html += "<input type='text' class='form-control input-sm' id='writeApiKey_{0}' placeholder='Write key' value='{1}'></input>".format(
-										varid,
-										(pushData!=null) ? pushData.key : ''
-									)
-								html += "</div>"
-								html += "<div class='form-group'>";
-									html += "<label for='readApiKey_{0}'>Read API Key: </label>".format(varid);
-									html += "<input type='text' class='form-control input-sm' id='readApiKey_{0}' placeholder='Read key' value='{1}'></input>".format(
-										varid,
-										(pushData!=null) ? pushData.readkey : ''
-									)
-								html += "</div>"
-
-							html += "</form>"
-							html += "</div>"; //col
-						html += "</div>";	//row
-						html += "</div></div>";
-					html += "</td></tr>";
-					tr.after(html);
-					var checked = $("#altui-enablePush_"+varid).is(':checked');
-					$("#form_"+varid).toggle(checked);
-					$("#altui-enablePush_"+varid).change(function() {
-						var checked = $(this).is(':checked');
+					$.when(buildPushForm(device,varid)).then( function(html) {
+						tr.after("<tr><td colspan='3'>"+html+"</td></tr>");
+						var checked = $("#altui-enablePush_"+varid).is(':checked');
 						$("#form_"+varid).toggle(checked);
-					});
-					$("#altui-graphUrl_"+varid).focusout( function() {
-						var url = $(this).val();
-						
-						if (isNullOrEmpty(url) == true) {
-							url = defaultgraphicurl;
-							$(this).val(url);
-						}
-
-						if (isNullOrEmpty(url) == false) {
-							var re = /(http:|https:)*\/\/(.*)/; 
-							var m;
-							 
-							if ((m = re.exec(url)) !== null) {
-								if (m.index === re.lastIndex) {
-									re.lastIndex++;
-								}
-								$(".altui-thingspeak-chart").attr("src","//"+m[2]);
+						$("#altui-enablePush_"+varid).change(function() {
+							var checked = $(this).is(':checked');
+							$("#form_"+varid).toggle(checked);
+						});
+						$("#altui-graphUrl_"+varid).focusout( function() {
+							var url = $(this).val();
+							
+							if (isNullOrEmpty(url) == true) {
+								url = defaultgraphicurl;
+								$(this).val(url);
 							}
-						}
+
+							if (isNullOrEmpty(url) == false) {
+								var re = /(http:|https:)*\/\/(.*)/; 
+								var m;
+								 
+								if ((m = re.exec(url)) !== null) {
+									if (m.index === re.lastIndex) {
+										re.lastIndex++;
+									}
+									$(".altui-thingspeak-chart").attr("src","//"+m[2]);
+								}
+							}
+						});
 					});
 				} else {
 					//change color
