@@ -1468,11 +1468,17 @@ local function getDefaultConfig()
 end
 
 --https://api.thingspeak.com/update?key=U1F7T31MHB5O8HZI&field1=0
+local function sendValueToStorage_toto(watch_description,lul_device, lul_service, lul_variable,old, new, lastupdate, param)
+	debug(string.format("sendValueToStorage_toto(%s,%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,old, new, lastupdate, json.encode(param)))
+	debug(string.format("watch_description:%s",json.encode(watch_description)))
+end
+
 local function sendValueToStorage_thingspeak(watch_description,lul_device, lul_service, lul_variable,old, new, lastupdate, param)
 	debug(string.format("sendValueToStorage_thingspeak(%s,%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,old, new, lastupdate, json.encode(param)))
+	debug(string.format("watch_description:%s",json.encode(watch_description)))
 	local providerparams = json.decode( watch_description['Data'] )
-	if (isempty(template)==false) then
-		local strtemplate = string.format("key=%s&field%s=%%s",providerparams[3],providerparams[4])
+	local strtemplate = string.format("key=%s&field%s=%%s",providerparams[3] or "",providerparams[4] or "")
+	if (isempty(providerparams[3])==false) and ((isempty(providerparams[4])==false)) then
 		local data = string.format(strtemplate,new)
 		local response_body = {}
 		debug(string.format("Provider:%s Url:%s","thingspeak",data))
@@ -1489,6 +1495,8 @@ local function sendValueToStorage_thingspeak(watch_description,lul_device, lul_s
 		}
 		debug("https Response=" .. json.encode({res=response,sta=status,hea=headers}) )	
 		return response or 0
+	else
+		warning("invalid parameters for thingspeak")
 	end
 	return 0
 end
@@ -1724,7 +1732,7 @@ function _addWatch( service, variable, devid, scene, expression, xml, provider, 
 			["LastEval"] = nil,
 			["SceneID"] = scene
 		}	
-		if (provider=="thingspeak") and ( data~="" ) then
+		if (DataProviders[provider]~=nil) and ( data~="" )  then
 			if (registeredWatches[devidstr][service][variable]['DataProviders'] == nil) then
 				registeredWatches[devidstr][service][variable]['DataProviders']={}
 			end
@@ -1827,17 +1835,10 @@ function addWatch( lul_device, service, variable, deviceid, sceneid, expression,
 		local variableWatch= getSetVariable(ALTUI_SERVICE, "VariablesToSend", lul_device, "")
 		local bFound = false;
 		for k,v  in pairs(variableWatch:split(';')) do
-			local wservice,wvariable,wdevice,wprovider,wproviderparams  = getPushParams(v)
-			if (service==wservice) and (variable==wvariable) and (deviceid==wdevice) and (provider==wprovider) then
-			-- and (channelid==wchannelid) and (readkey==wreadkey) and (writekey==wwritekey) and (field==wfield) and (graphicurl==wgraphicurl) 
-				local bSame = true
-				for i,p in pairs(providerparams) do
-					if (p ~= wproviderparams[i]) then 
-						bSame =false 
-					end
-				end
-				bFound = bSame;
-			end 
+			if (v==watchline) then
+				debug(string.format("watch line already exist:%s",v))
+				bFound = true;
+			end
 		end
 		if (bFound==false) then
 			debug(string.format("no, adding watchline %s",watchline))
@@ -1943,23 +1944,11 @@ function delWatch( lul_device, service, variable, deviceid, sceneid, expression,
 		local variableWatch= getSetVariable(ALTUI_SERVICE, "VariablesToSend", lul_device, "")
 		local toKeep = {}
 		for k,v  in pairs(variableWatch:split(';')) do
-			local wservice,wvariable,wdevice,wprovider,wproviderparams  = getPushParams(v)
-			if not((service==wservice) and (variable==wvariable) and (deviceid==wdevice) and (provider==wprovider)) then
-				-- and (channelid==wchannelid) and (readkey==wreadkey) and (writekey==wwritekey) and (field==wfield) and (graphicurl==wgraphicurl)) then
+			if (v ~= watchline) then
 				debug(string.format("Keeping this watch: %s",v))
 				table.insert(toKeep, v)
 			else
-				-- keep it only if one parameter differs
-				local bSame = true
-				for i,p in pairs(providerparams) do
-					if (p ~= wproviderparams[i]) then 
-						bSame =false 
-					end
-				end
-				if (bSame == false) then
-					debug(string.format("Keeping this watch: %s",v))
-					table.insert(toKeep, v)
-				end
+				debug(string.format("Going to delete this watch: %s",v))
 			end
 		end
 		luup.variable_set(ALTUI_SERVICE, "VariablesToSend", table.concat(toKeep,";"), lul_device)
@@ -2233,6 +2222,10 @@ function startupDeferred(lul_device)
 		[3] 	= { ["key"]= "writekey", ["label"]="Write API Key", ["type"]="text" },
 		[4] 	= { ["key"]= "fieldnum", ["label"]="Field Number", ["type"]="number" },
 		[5] 	= { ["key"]= "graphicurl", ["label"]="Graphic Url", ["type"]="url" }
+	})
+	registerDataProvider("dummy",sendValueToStorage_toto,{
+		[1] 	= { ["key"]= "toto", ["label"]="To To", ["type"]="number" },
+		[2] 	= { ["key"]= "graphicurl", ["label"]="Graphic Url", ["type"]="url" }
 	})
 	fixVariableWatchesDeviceID( lul_device )
 	initVariableWatches( lul_device)

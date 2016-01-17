@@ -364,11 +364,11 @@ var MultiBox = ( function( window, undefined ) {
 		var elems = device.altuiid.split("-");
 		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getDeviceVariableHistory( device, varidx, cbfunc);
 	};
-	function _delWatch( service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl ) {
-		return _controllers['0'].controller.delWatch( service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl )
+	function _delWatch( service, variable, deviceid, sceneid, expression, xml, provider, params ) {
+		return _controllers['0'].controller.delWatch( service, variable, deviceid, sceneid, expression, xml, provider, params )
 	};
-	function _addWatch( service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl ) {
-		return _controllers['0'].controller.addWatch( service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl )
+	function _addWatch( service, variable, deviceid, sceneid, expression, xml, provider, params ) {
+		return _controllers['0'].controller.addWatch( service, variable, deviceid, sceneid, expression, xml, provider, params )
 	};
 	function _getStatesByAltuiID(altuiid) {
 		var elems = altuiid.split("-");
@@ -706,8 +706,8 @@ var MultiBox = ( function( window, undefined ) {
 	getDeviceDependants		: _getDeviceDependants,		// (device)
 	getDeviceBatteryLevel 	: _getDeviceBatteryLevel,	// ( device )
 	getDeviceVariableHistory : _getDeviceVariableHistory,//( device, varidx, cbfunc) 
-	addWatch				: _addWatch,				// (  service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl )
-	delWatch				: _delWatch,				// (  service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl )
+	addWatch				: _addWatch,				// (  service, variable, deviceid, sceneid, expression, xml, provider, params)
+	delWatch				: _delWatch,				// (  service, variable, deviceid, sceneid, expression, xml, provider, params )
 	evaluateConditions 		: _evaluateConditions,		// ( device,devsubcat,conditions ) evaluate a device condition table ( AND between conditions )
 	getStates				: _getStates,				// ( device )
 	getStatesByAltuiID		: _getStatesByAltuiID,		// (altuiid)

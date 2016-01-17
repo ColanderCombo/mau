@@ -1258,15 +1258,11 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		return jqxhr;
 	};
 		
-	function _delWatch( service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl ) {
-		var params=[];
-		params.push(channelid, readkey, writekey, field, graphicurl);
+	function _delWatch( service, variable, deviceid, sceneid, expression, xml, provider, params ) {
 		return _xxxWatch( 'delWatch', service, variable, deviceid, sceneid, expression, xml, provider, params );
 	};
-	function _addWatch( service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, writekey, field, graphicurl ) {
+	function _addWatch( service, variable, deviceid, sceneid, expression, xml, provider, params ) {
 		// http://192.168.1.5/port_3480/data_request?id=lr_ALTUI_Handler&command=addRemoteWatch&device=42&variable=Status&service=urn:upnp-org:serviceId:SwitchPower1&data=192.168.1.16
-		var params=[];
-		params.push(channelid, readkey, writekey, field, graphicurl);
 		return _xxxWatch( 'addWatch', service, variable, deviceid, sceneid, expression, xml, provider, params );
 	};
 
@@ -1350,7 +1346,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		var url = "?id=lr_ALTUI_Handler&command=getDataProviders";
 		var jqxhr = _httpGet( url, {}, function(data, textStatus, jqXHR) {
 			if ((data!=null) && (data!="ERROR")) {
-				(cbfunc)(data);
+				(cbfunc)(JSON.parse(data));
 			}
 			else {
 				PageMessage.message(_T("Failure"), "warning");
@@ -1391,8 +1387,8 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	getDeviceActions: _getDeviceActions,
 	getDeviceEvents : _getDeviceEvents,
 	getDeviceDependants : _getDeviceDependants,
-	addWatch				: _addWatch,				// ( lul_device, service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl )
-	delWatch				: _delWatch,				// ( lul_device, service, variable, deviceid, sceneid, expression, xml, provider, channelid, readkey, data, graphicurl )
+	addWatch			: _addWatch,				// ( lul_device, service, variable, deviceid, sceneid, expression, xml, provider, params)
+	delWatch			: _delWatch,				// ( lul_device, service, variable, deviceid, sceneid, expression, xml, provider, params)
 	isDeviceZwave	: _isDeviceZwave,	//(device)
 	getScenes		: _getScenes,
 	getSceneHistory : _getSceneHistory,

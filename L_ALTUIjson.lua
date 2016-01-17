@@ -335,6 +335,9 @@ do
 		:link(true)                  :to "*"
 		
 	function decode (js_string)
+		if (js_string=="[]") then
+			return {}
+		end
 		local pos = 1 -- position in the string
 		
 		-- read the next byte value

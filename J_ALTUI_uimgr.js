@@ -3673,30 +3673,36 @@ var UIManager  = ( function( window, undefined ) {
 	};
 		
 	// -- urn:micasaverde-com:serviceId:SceneController1#LastSceneID#208#thingspeak#61666#U1F7T31MH#key=U1F7T31MHB5O8HZI&field1=%s#graphicurl
+	function _differentWatch(watch,push) {
+		if ((watch.service != push.service) 
+		||  (watch.variable != push.variable)  
+		||  (watch.deviceid != push.deviceid)  
+		||  (watch.provider != push.provider) )
+			return true;
+		// otherwise compare params
+		if (watch.params.length != push.params.length)
+			return true;
+		for (var i=0; i<watch.params.length ; i++) {
+			if ( (watch.params[i]==undefined) || (push.params[i]==undefined) || (watch.params[i] != push.params[i]) )
+				return true;
+		}
+		return false;
+	};
+
 	function _getPushLineParams(pushLine) {
 		var key="";
 		var fieldnum=0;
 		var params = pushLine.split('#');
-		// var re = /^key=([^\&]+)&field(\d)=.*$/; 
-		// var m;		 
-		// if ((m = re.exec(params[6] || "")) !== null) {
-			// if (m.index === re.lastIndex) {
-				// re.lastIndex++;
-			// }
-			// key = m[1];
-			// fieldnum=parseInt(m[2]);
-		// }
-		//service,variable,deviceid,provider,channelid,readkey,data,graphicurl
+		var wparams=[];
+		for (var i=4; i< params.length; i++ ) {
+			wparams.push(params[i]);
+		}
 		return {
 			service : params[0] || "",
 			variable : params[1] || "",
 			deviceid : params[2] || "",
 			provider : params[3] || "",
-			channelid : params[4] || "",
-			readkey : params[5] || "",
-			key : params[6] || "",
-			fieldnum : params[7] || "",
-			graphicurl: params[8] || "",
+			params	 : wparams
 		};
 	}
 	
@@ -3732,19 +3738,50 @@ var UIManager  = ( function( window, undefined ) {
 				$(this).replaceWith(_enhanceValue(val));					
 			});
 		};
-		function buildPushForm(device,varid) {
-			var dfd = $.Deferred();
-			MultiBox.getDataProviders(function(providers) {
-				var altuidevice = MultiBox.getDeviceByID( 0, g_MyDeviceID );
-				var state = MultiBox.getStateByID( device.altuiid, varid );
-				var varPushes = {};
-				$.each( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend" ) || "").split(';'),function(idx,pushLine) {
-					var push = _getPushLineParams(pushLine);
-					if (device.altuiid == push.deviceid) {	
-						varPushes[push.service+':'+push.variable]=push;
+		function _pushFormFields(providers,pushData) {
+			var html ="";
+			var parameters = providers[ pushData.provider ].parameters
+			for (var i=0 ; i<parameters.length ; i++) {
+				html += "<div class='form-group col-xs-12'>";
+					html += "<label for='datapush_{0}'>{1}</label>".format(parameters[i].key, parameters[i].label);
+					html += "<input type='{1}' class='form-control input-sm' id='datapush_{0}' placeholder='{1}' value='{2}'></input>".format(
+						parameters[i].key,
+						parameters[i].type,
+						(pushData!=null) ? (pushData.params[i] || "") : ''
+					)
+				html += "</div>"
+			}
+			return html;
+		};
+		function buildPushForm(providers,pushData,device,varid) {
+			var altuidevice = MultiBox.getDeviceByID( 0, g_MyDeviceID );
+			var state = MultiBox.getStateByID( device.altuiid, varid );
+
+			var html = "";
+			html += "<div class='panel panel-default'> <div class='panel-body'>";
+			html += "<div class='row'>";
+					html += "<div class='checkbox col-xs-12 form-inline'>"
+						html += "<label><input type='checkbox' id='altui-enablePush_{0}' {1}>Enable Push to : </label>".format(
+							varid, 
+							(pushData!=null) ? 'checked' : ''
+						);
+					html += '<select id="altui-provider_{0}" class="form-control">'.format(varid);
+					$.each(providers,function(key,provider) {
+						html += '<option {1}>{0}</option>'.format(key,(pushData.provider==key) ? 'selected' : '');
+					});
+					html += '</select>';
+					html += "</div>"
+						
+					if (pushData!=null) {
+						html += "<form id='form_{0}' class='form'>".format(varid);
+						html += _pushFormFields(providers, pushData );
+						html += "</form>"
 					}
-				});
-				var pushData = varPushes[state.service+':'+state.variable];
+			html += "</div>";	//row
+			html += "</div>";	//panel-body
+			html += "</div>";	//panel
+			
+			if (0) {
 				var defaultgraphicurlTemplate="//api.thingspeak.com/channels/{0}/charts/{2}?key={1}&width=450&height=260&results=60&dynamic=true";
 				var defaultgraphicurl = "";
 				var html = "";
@@ -3765,13 +3802,6 @@ var UIManager  = ( function( window, undefined ) {
 						html += "</div>";
 					}
 					html += "<div class='col-md-4'>";
-					html += "<div class='checkbox'>"
-						html += "<label><input type='checkbox' id='altui-enablePush_{0}' {1} {2}>Enable Push to Thingspeak</label>".format(
-							varid, 
-							(pushData!=null) ? 'checked' : '',
-							'' // MultiBox.controllerOf(device.altuiid).controller !=0 ? 'disabled' : ''
-						);
-					html += "</div>"
 					html += "<form id='form_{0}' class='form-inline'>".format(varid);
 						html += "<div class='form-group'>";
 							html += "<label for='channelID_{0}'>Channel ID: </label>".format(varid);
@@ -3806,9 +3836,8 @@ var UIManager  = ( function( window, undefined ) {
 					html += "</div>"; //col
 				html += "</div>";	//row
 				html += "</div></div>";
-				dfd.resolve(html)
-			});
-			return dfd.promise();			
+			}
+			return html;			
 		};
 
 
@@ -3843,16 +3872,38 @@ var UIManager  = ( function( window, undefined ) {
 				var state = MultiBox.getStateByID( device.altuiid, varid );
 				var form = $(this).closest("tbody").find("form#form_"+varid);
 				if (form.length==0) {
+					var that = $(this);
 					// change color
-					$(this).removeClass("btn-default").addClass("btn-danger");
-					$.when(buildPushForm(device,varid)).then( function(html) {
+					that.removeClass("btn-default").addClass("btn-danger");
+					MultiBox.getDataProviders(function(providers) {
+						//
+						// get this push parameters if they exist
+						//
+						var varPushes = {};
+						$.each( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend" ) || "").split(';'),function(idx,pushLine) {
+							var push = _getPushLineParams(pushLine);
+							if (device.altuiid == push.deviceid) {	
+								varPushes[push.service+':'+push.variable]=push;
+							}
+						});
+						var pushData = varPushes[state.service+':'+state.variable];
+
+						var html = buildPushForm(providers,pushData,device,varid);
 						tr.after("<tr><td colspan='3'>"+html+"</td></tr>");
 						var checked = $("#altui-enablePush_"+varid).is(':checked');
 						$("#form_"+varid).toggle(checked);
+						
 						$("#altui-enablePush_"+varid).change(function() {
 							var checked = $(this).is(':checked');
 							$("#form_"+varid).toggle(checked);
 						});
+						
+						$("#altui-provider_"+varid).change(function() {
+							pushData.provider = $(this).val();
+							pushData.params=[];
+							$("#form_"+varid).html( _pushFormFields(providers,pushData) ) ;
+						});
+						
 						$("#altui-graphUrl_"+varid).focusout( function() {
 							var url = $(this).val();
 							
@@ -3898,35 +3949,30 @@ var UIManager  = ( function( window, undefined ) {
 							service : state.service,
 							variable : state.variable,
 							deviceid : device.altuiid,
-							provider : "thingspeak",
-							channelid : form.find("input#channelID_"+varid).val(),
-							readkey : form.find("input#readApiKey_"+varid).val(),
-							key : form.find("input#writeApiKey_"+varid).val(),
-							fieldnum : form.find("input#fieldNum_"+varid).val(),
-							graphicurl : (tr.closest("tbody").find("input#altui-graphUrl_"+varid).val()) || ""
+							provider : $("#altui-provider_"+varid).val(),
+							params : []
 						};
+						var len="datapush_".length;
+						form.find("input").each(function(idx,elem) {
+							var id = $(elem).prop('id').substring(len);
+							// push[id] = $(elem).val();
+							push.params.push($(elem).val());
+						});
+
 						differentWatches = previousWatches.filter( function(watch) {
-							return (watch.service != push.service) 
-								||  (watch.variable != push.variable)  
-								||  (watch.deviceid != push.deviceid)  
-								||  (watch.provider != push.provider) 
-								||  (watch.channelid != push.channelid)
-								||  (watch.readkey != push.readkey)
-								||  (watch.key != push.key)
-								||  (watch.fieldnum != push.fieldnum)
-								||  (watch.graphicurl != push.graphicurl)
+							return _differentWatch(watch,push);
 						});
 						// delete all old ones
 						$.each(differentWatches , function(i,w) {
-							MultiBox.delWatch( w.service, w.variable, w.deviceid, -1, "true", "", w.provider, w.channelid, w.readkey, w.key,w.fieldnum, w.graphicurl )
+							MultiBox.delWatch( w.service, w.variable, w.deviceid, -1, "true", "", w.provider, w.params )
 						});
 						// add new one if it was not there before
 						if (differentWatches.length==previousWatches.length)
-							MultiBox.addWatch( push.service, push.variable, push.deviceid, -1, "true", "", push.provider, push.channelid, push.readkey, push.key, push.fieldnum, push.graphicurl ) ;
+							MultiBox.addWatch( push.service, push.variable, push.deviceid, -1, "true", "", push.provider, push.params ) ;
 					} else {
 						// delete all watches that are in the VERA variable and not any more in the scenewatches
 						$.each(previousWatches , function(i,w) {
-							MultiBox.delWatch( w.service, w.variable, w.deviceid, -1, "true", "", w.provider, w.channelid, w.readkey, w.key,w.fieldnum, w.graphicurl )
+							MultiBox.delWatch( w.service, w.variable, w.deviceid, -1, "true", "", w.provider, w.params )
 						});
 					}
 					form.closest("tr").remove();
