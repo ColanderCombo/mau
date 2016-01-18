@@ -1250,7 +1250,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		);
 		var jqxhr = _httpGet( url, {}, function(data, textStatus, jqXHR) {
 			if ((data!=null) && (data!="ERROR")) {
-				PageMessage.message(_T("Success"), "success");	// need user_data reload on UI5
+				// PageMessage.message(_T("Success"), "success");	// need user_data reload on UI5
 			}
 			else 
 				PageMessage.message(_T("Failure"), "warning");

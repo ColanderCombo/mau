@@ -3738,18 +3738,28 @@ var UIManager  = ( function( window, undefined ) {
 				$(this).replaceWith(_enhanceValue(val));					
 			});
 		};
-		function _pushFormFields(providers,pushData) {
+		function _pushFormFields(providers,provider, varid, pushData) {
+			var tempPushData = (pushData) ? cloneObject(pushData) : [];
 			var html ="";
-			var parameters = providers[ pushData.provider ].parameters
+			var parameters = provider ? providers[ provider ].parameters : [];
 			for (var i=0 ; i<parameters.length ; i++) {
+				var defvalue = parameters[i].default || "";
+				var value = (pushData!=null) ? (pushData.params[i] || defvalue) : '';
+				tempPushData.params[i]=value;
 				html += "<div class='form-group col-xs-12'>";
-					html += "<label for='datapush_{0}'>{1}</label>".format(parameters[i].key, parameters[i].label);
-					html += "<input type='{1}' class='form-control input-sm' id='datapush_{0}' placeholder='{1}' value='{2}'></input>".format(
+					html += "<label for='datapush-{0}-{1}'>{2}-{3}</label>".format(parameters[i].key, varid, i,parameters[i].label);
+					html += "<input type='{2}' class='form-control input-sm' id='datapush-{0}-{1}' placeholder='{2}' value='{3}'></input>".format(
 						parameters[i].key,
+						varid,
 						parameters[i].type,
-						(pushData!=null) ? (pushData.params[i] || "") : ''
+						value
 					)
 				html += "</div>"
+				if (parameters[i].key=="graphicurl") {
+					var url = String.prototype.format.apply(value,tempPushData.params);
+					html += "<iframe class='altui-thingspeak-chart' data-idx='{1}' width='100%' height='260' style='border: 1px solid #cccccc;' src='{0}' ></iframe>".format(url,i);
+				}
+
 			}
 			return html;
 		};
@@ -3760,23 +3770,21 @@ var UIManager  = ( function( window, undefined ) {
 			var html = "";
 			html += "<div class='panel panel-default'> <div class='panel-body'>";
 			html += "<div class='row'>";
-					html += "<div class='checkbox col-xs-12 form-inline'>"
-						html += "<label><input type='checkbox' id='altui-enablePush_{0}' {1}>Enable Push to : </label>".format(
-							varid, 
-							(pushData!=null) ? 'checked' : ''
-						);
-					html += '<select id="altui-provider_{0}" class="form-control">'.format(varid);
+				html += "<div class='checkbox col-xs-12 form-inline'>"
+					html += "<label><input type='checkbox' id='altui-enablePush-{0}' {1}>Enable Push to : </label>".format(
+						varid, 
+						(pushData!=null) ? 'checked' : ''
+					);
+					html += '<select id="altui-provider-{0}" class="form-control">'.format(varid);
 					$.each(providers,function(key,provider) {
-						html += '<option {1}>{0}</option>'.format(key,(pushData.provider==key) ? 'selected' : '');
+						html += '<option {1}>{0}</option>'.format(key,((pushData!=null) && (pushData.provider==key)) ? 'selected' : '');
 					});
 					html += '</select>';
-					html += "</div>"
-						
-					if (pushData!=null) {
-						html += "<form id='form_{0}' class='form'>".format(varid);
-						html += _pushFormFields(providers, pushData );
-						html += "</form>"
-					}
+				html += "</div>"
+					
+				html += "<form id='form-{0}' class='form'>".format(varid);
+					html += _pushFormFields(providers, (pushData!=null) ? pushData.provider : null ,varid, pushData );
+				html += "</form>"
 			html += "</div>";	//row
 			html += "</div>";	//panel-body
 			html += "</div>";	//panel
@@ -3802,35 +3810,7 @@ var UIManager  = ( function( window, undefined ) {
 						html += "</div>";
 					}
 					html += "<div class='col-md-4'>";
-					html += "<form id='form_{0}' class='form-inline'>".format(varid);
-						html += "<div class='form-group'>";
-							html += "<label for='channelID_{0}'>Channel ID: </label>".format(varid);
-							html += "<input type='number' min=1 class='form-control input-sm' id='channelID_{0}' placeholder='ID' value='{1}'></input>".format(
-								varid,
-								(pushData!=null) ? pushData.channelid : ''
-							)
-						html += "</div>"
-						html += "<div class='form-group'>";
-							html += "<label for='fieldNum_{0}'>Field Number: </label>".format(varid);
-							html += "<input type='number' min=1 max=8 class='form-control input-sm' id='fieldNum_{0}' placeholder='number' value='{1}'></input>".format(
-								varid,
-								(pushData!=null) ? pushData.fieldnum : ''
-							)
-						html += "</div>"
-						html += "<div class='form-group'>";
-							html += "<label for='writeApiKey_{0}'>Write API Key: </label>".format(varid);
-							html += "<input type='text' class='form-control input-sm' id='writeApiKey_{0}' placeholder='Write key' value='{1}'></input>".format(
-								varid,
-								(pushData!=null) ? pushData.key : ''
-							)
-						html += "</div>"
-						html += "<div class='form-group'>";
-							html += "<label for='readApiKey_{0}'>Read API Key: </label>".format(varid);
-							html += "<input type='text' class='form-control input-sm' id='readApiKey_{0}' placeholder='Read key' value='{1}'></input>".format(
-								varid,
-								(pushData!=null) ? pushData.readkey : ''
-							)
-						html += "</div>"
+					html += "<form id='form-{0}' class='form-inline'>".format(varid);
 
 					html += "</form>"
 					html += "</div>"; //col
@@ -3867,10 +3847,28 @@ var UIManager  = ( function( window, undefined ) {
 			// update modal with new text
 			DialogManager.registerDialog('deviceModal',deviceModalTemplate.format( lines.join(''), device.name, device.altuiid ));
 			$("button.altui-variable-push").click( function() {
+				function _getPushFromDialog(frm) 
+				{
+					var push = {
+						service : state.service,
+						variable : state.variable,
+						deviceid : device.altuiid,
+						provider : $("#altui-provider-"+varid).val(),
+						params : []
+					};
+					// var len="datapush_".length;
+					frm.find("input").each(function(idx,elem) {
+						// var id = $(elem).prop('id').substring(len);
+						// push[id] = $(elem).val();
+						push.params.push($(elem).val());
+					});
+					return push;
+				}
+
 				var tr = $(this).closest("tr");
 				var varid = tr.find("td.altui-variable-value").prop('id');
 				var state = MultiBox.getStateByID( device.altuiid, varid );
-				var form = $(this).closest("tbody").find("form#form_"+varid);
+				var form = $(this).closest("tbody").find("form#form-"+varid);
 				if (form.length==0) {
 					var that = $(this);
 					// change color
@@ -3879,57 +3877,53 @@ var UIManager  = ( function( window, undefined ) {
 						//
 						// get this push parameters if they exist
 						//
-						var varPushes = {};
+						var pushData = null;
 						$.each( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend" ) || "").split(';'),function(idx,pushLine) {
 							var push = _getPushLineParams(pushLine);
 							if (device.altuiid == push.deviceid) {	
-								varPushes[push.service+':'+push.variable]=push;
+								pushData=push;
 							}
 						});
-						var pushData = varPushes[state.service+':'+state.variable];
 
 						var html = buildPushForm(providers,pushData,device,varid);
 						tr.after("<tr><td colspan='3'>"+html+"</td></tr>");
-						var checked = $("#altui-enablePush_"+varid).is(':checked');
-						$("#form_"+varid).toggle(checked);
-						
-						$("#altui-enablePush_"+varid).change(function() {
-							var checked = $(this).is(':checked');
-							$("#form_"+varid).toggle(checked);
-						});
-						
-						$("#altui-provider_"+varid).change(function() {
-							pushData.provider = $(this).val();
-							pushData.params=[];
-							$("#form_"+varid).html( _pushFormFields(providers,pushData) ) ;
-						});
-						
-						$("#altui-graphUrl_"+varid).focusout( function() {
-							var url = $(this).val();
-							
-							if (isNullOrEmpty(url) == true) {
-								url = defaultgraphicurl;
-								$(this).val(url);
-							}
 
-							if (isNullOrEmpty(url) == false) {
-								var re = /(http:|https:)*\/\/(.*)/; 
-								var m;
-								 
-								if ((m = re.exec(url)) !== null) {
-									if (m.index === re.lastIndex) {
-										re.lastIndex++;
-									}
-									$(".altui-thingspeak-chart").attr("src","//"+m[2]);
-								}
-							}
+						// display form if needed
+						var checked = $("#altui-enablePush-"+varid).is(':checked');
+						$("#form-"+varid).toggle(checked);
+						
+						//create a default pushData with a default provider if needed
+						pushData = $.extend({
+							provider:$("#altui-provider-"+varid).val(),
+							params:[]
+						},pushData);
+						
+						
+						$("#altui-enablePush-"+varid).change(function() {
+							$("#form-"+varid).html( _pushFormFields(providers,pushData.provider,varid,pushData) ) ;
+							// display form if needed
+							var checked = $("#altui-enablePush-"+varid).is(':checked');
+							$("#form-"+varid).toggle(checked);
+						});
+						
+						$("#altui-provider-"+varid).change(function() {
+							pushData.provider = $("#altui-provider-"+varid).val();
+							pushData.params=[];
+							$("#form-"+varid).html( _pushFormFields(providers,pushData.provider,varid,pushData) ) ;
+						});
+						
+						$("#datapush-graphicurl-"+varid).focusout( function() {
+							var url = $(this).val();
+							var push = _getPushFromDialog( $(this).closest("form") );
+							url = String.prototype.format.apply(url,push.params);
+							$(".altui-thingspeak-chart").attr("src",url);
 						});
 					});
 				} else {
-					//change color
+					// CLOSING the form : change color
 					$(this).addClass("btn-default").removeClass("btn-danger");
 					var nexttr = tr.next("tr");
-					var pushEnabled = nexttr.find("input#altui-enablePush_"+varid).prop('checked');
+					var pushEnabled = nexttr.find("input#altui-enablePush-"+varid).prop('checked');
 					var push = null;
 					var differentWatches=null;
 					// find all watches for this device
@@ -3945,20 +3939,7 @@ var UIManager  = ( function( window, undefined ) {
 
 					// add a new one unless it is already there
 					if (pushEnabled ==true ) {
-						push = {
-							service : state.service,
-							variable : state.variable,
-							deviceid : device.altuiid,
-							provider : $("#altui-provider_"+varid).val(),
-							params : []
-						};
-						var len="datapush_".length;
-						form.find("input").each(function(idx,elem) {
-							var id = $(elem).prop('id').substring(len);
-							// push[id] = $(elem).val();
-							push.params.push($(elem).val());
-						});
-
+						push = _getPushFromDialog(form);
 						differentWatches = previousWatches.filter( function(watch) {
 							return _differentWatch(watch,push);
 						});

@@ -314,12 +314,39 @@ end
 ------------------------------------------------
 -- LUA Utils
 ------------------------------------------------
-function string:split(sep) -- from http://lua-users.org/wiki/SplitJoin
-	local sep, fields = sep or ":", {}
-	local pattern = string.format("([^%s]+)", sep)
-	self:gsub(pattern, function(c) fields[#fields+1] = c end)
-	return fields
+local function Split(str, delim, maxNb)
+    -- Eliminate bad cases...
+    if string.find(str, delim) == nil then
+        return { str }
+    end
+    if maxNb == nil or maxNb < 1 then
+        maxNb = 0    -- No limit
+    end
+    local result = {}
+    local pat = "(.-)" .. delim .. "()"
+    local nb = 0
+    local lastPos
+    for part, pos in string.gfind(str, pat) do
+        nb = nb + 1
+        result[nb] = part
+        lastPos = pos
+        if nb == maxNb then break end
+    end
+    -- Handle the last field
+    if nb ~= maxNb then
+        result[nb + 1] = string.sub(str, lastPos)
+    end
+    return result
 end
+
+function string:split(sep) -- from http://lua-users.org/wiki/SplitJoin   : changed as consecutive delimeters was not returning empty strings
+	return Split(self, sep)
+	-- local sep, fields = sep or ":", {}
+	-- local pattern = string.format("([^%s]+)", sep)
+	-- self:gsub(pattern, function(c) fields[#fields+1] = c end)
+	-- return fields
+end
+
 
 function string:template(variables)
 	return (self:gsub('@(.-)@', 
@@ -2220,12 +2247,12 @@ function startupDeferred(lul_device)
 		[1] 	= { ["key"]= "channelid", ["label"]="Channel ID", ["type"]="number" },
 		[2]		= { ["key"]= "readkey", ["label"]="Read API Key", ["type"]="text" },
 		[3] 	= { ["key"]= "writekey", ["label"]="Write API Key", ["type"]="text" },
-		[4] 	= { ["key"]= "fieldnum", ["label"]="Field Number", ["type"]="number" },
-		[5] 	= { ["key"]= "graphicurl", ["label"]="Graphic Url", ["type"]="url" }
+		[4] 	= { ["key"]= "fieldnum", ["label"]="Field Number", ["type"]="number", ["default"]=1 },
+		[5] 	= { ["key"]= "graphicurl", ["label"]="Graphic Url", ["type"]="url" , ["default"]="//api.thingspeak.com/channels/{0}/charts/{3}?key={1}&width=450&height=260&results=60&dynamic=true"}
 	})
 	registerDataProvider("dummy",sendValueToStorage_toto,{
 		[1] 	= { ["key"]= "toto", ["label"]="To To", ["type"]="number" },
-		[2] 	= { ["key"]= "graphicurl", ["label"]="Graphic Url", ["type"]="url" }
+		[2] 	= { ["key"]= "graphicurl", ["label"]="Graphic Url", ["type"]="url" , ["default"]="//www.google.com/{0}"}
 	})
 	fixVariableWatchesDeviceID( lul_device )
 	initVariableWatches( lul_device)
