@@ -3741,7 +3741,7 @@ var UIManager  = ( function( window, undefined ) {
 		function _pushFormFields(providers,provider, varid, pushData) {
 			var tempPushData = (pushData) ? cloneObject(pushData) : [];
 			var html ="";
-			var parameters = provider ? providers[ provider ].parameters : [];
+			var parameters = ( provider && providers[ provider ] ) ? providers[ provider ].parameters : [];
 			for (var i=0 ; i<parameters.length ; i++) {
 				var defvalue = parameters[i].default || "";
 				var value = (pushData!=null) ? (pushData.params[i] || defvalue) : '';

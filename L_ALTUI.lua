@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local ALTUI_SERVICE = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v1.04"
+local version = "v1.05"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("L_ALTUIjson")
 local mime = require("mime")
@@ -1589,6 +1589,16 @@ local function sendValueToStorage_thingspeak(watch_description,lul_device, lul_s
 	return 0
 end
 
+local function _loadDataProviders()
+	local str = luup.variable_get(ALTUI_SERVICE, "DataProviders",  lul_device) or "{}"
+	DataProviders = json.decode(str)
+end
+
+local function _saveDataProvider() 
+	local lul_device = tonumber(findALTUIDevice() )
+	luup.variable_set(ALTUI_SERVICE, "DataProviders", json.encode(DataProviders), lul_device)
+end
+
 function registerDataProvider(name, func, url, parameters)
 	debug(string.format("registerDataProvider(%s,%s,%s)",name or 'nil',url or 'nil',json.encode(parameters)))
 	if (name ~= nil) then
@@ -1597,6 +1607,7 @@ function registerDataProvider(name, func, url, parameters)
 			["url"] = (url or ""),
 			["parameters"] = (parameters or "")
 		}
+		_saveDataProvider()
 	end
 end
 
@@ -2336,6 +2347,7 @@ function startupDeferred(lul_device)
 	-- init watches
 	-- init data storages
 
+	_loadDataProviders()
 	registerDataProvider("thingspeak",sendValueToStorage_thingspeak, "", {
 		[1] 	= { ["key"]= "channelid", ["label"]="Channel ID", ["type"]="number" },
 		[2]		= { ["key"]= "readkey", ["label"]="Read API Key", ["type"]="text" },
@@ -2343,10 +2355,10 @@ function startupDeferred(lul_device)
 		[4] 	= { ["key"]= "fieldnum", ["label"]="Field Number", ["type"]="number", ["default"]=1 },
 		[5] 	= { ["key"]= "graphicurl", ["label"]="Graphic Url", ["type"]="url" , ["default"]="//api.thingspeak.com/channels/{0}/charts/{3}?key={1}&width=450&height=260&results=60&dynamic=true"}
 	})
-	registerDataProvider("Test - not functional",sendValueToStorage_toto,"", {
-		[1] 	= { ["key"]= "toto", ["label"]="To To", ["type"]="text" },
-		[2] 	= { ["key"]= "graphicurl", ["label"]="Graphic Url", ["type"]="url" , ["default"]="//www.google.com/{0}"}
-	})
+	-- registerDataProvider("Test - not functional",sendValueToStorage_toto,"", {
+		-- [1] 	= { ["key"]= "toto", ["label"]="To To", ["type"]="text" },
+		-- [2] 	= { ["key"]= "graphicurl", ["label"]="Graphic Url", ["type"]="url" , ["default"]="//www.google.com/{0}"}
+	-- })
 	fixVariableWatchesDeviceID( lul_device )
 	initVariableWatches( lul_device)
 
