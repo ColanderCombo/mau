@@ -2312,6 +2312,7 @@ function startupDeferred(lul_device)
 
 		newmajor,newminor = string.match(version,"v(%d+)%.(%d+)")
 		newmajor,newminor = tonumber(newmajor),tonumber(newminor)
+		debug ("Device's New Version is major:"..newmajor.." minor:"..newminor)
 		
 		-- init the configuration table with a valid default if needed
 		local defconfigjson = json.encode( getDefaultConfig() )
@@ -2321,10 +2322,10 @@ function startupDeferred(lul_device)
 		if ( (newmajor>major) or ( (newmajor==major) and (newminor>minor) ) ) then
 			log ("Version upgrade => Reseting Plugin config to default")
 			setVariableIfChanged(ALTUI_SERVICE, "PluginConfig", defconfigjson, lul_device)		
-			if (newmajor<=1) or ((newmajor == 1) and (newminor <= 1)) then
+			if (newmajor<1) or ((newmajor == 1) and (newminor <= 1)) then
 				setVariableIfChanged(ALTUI_SERVICE, "ServerOptions", "[]", lul_device)
 			end
-			if (newmajor<=1) or ((newmajor == 1) and (newminor <= 2)) then
+			if (newmajor<1) or ((newmajor == 1) and (newminor <= 2)) then
 				fixWatches_V_1_2(lul_device)
 			end
 		end
