@@ -1590,13 +1590,13 @@ local function sendValueToStorage_thingspeak(watch_description,lul_device, lul_s
 end
 
 local function _loadDataProviders()
-	local str = luup.variable_get(ALTUI_SERVICE, "DataProviders",  lul_device) or "{}"
+	local str = luup.variable_get(ALTUI_SERVICE, "DataStorageProviders",  lul_device) or "{}"
 	DataProviders = json.decode(str)
 end
 
 local function _saveDataProvider() 
 	local lul_device = tonumber(findALTUIDevice() )
-	luup.variable_set(ALTUI_SERVICE, "DataProviders", json.encode(DataProviders), lul_device)
+	luup.variable_set(ALTUI_SERVICE, "DataStorageProviders", json.encode(DataProviders), lul_device)
 end
 
 function registerDataProvider(name, func, url, parameters)
