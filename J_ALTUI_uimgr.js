@@ -3789,34 +3789,6 @@ var UIManager  = ( function( window, undefined ) {
 			html += "</div>";	//panel-body
 			html += "</div>";	//panel
 			
-			if (0) {
-				var defaultgraphicurlTemplate="//api.thingspeak.com/channels/{0}/charts/{2}?key={1}&width=450&height=260&results=60&dynamic=true";
-				var defaultgraphicurl = "";
-				var html = "";
-				html += "<div class='panel panel-default'> <div class='panel-body'>";
-				html += "<div class='row'>";
-					if (pushData!=null) {
-						defaultgraphicurl = defaultgraphicurlTemplate.format(pushData.channelid,pushData.readkey,pushData.fieldnum);
-						var url = (pushData.graphicurl == "") ?  defaultgraphicurl : pushData.graphicurl;
-						html += "<div class='col-md-8'>";
-						html += "<div class='form-group'>";
-							html += "<label for='altui-graphUrl_{0}' title='{1}'>Visualization Url: </label> ".format(varid,_T("(use size=iframe in your matlab url)"));
-							html += "<input type='text' class='form-control input-sm' id='altui-graphUrl_{0}' placeholder='Visualization Url' value='{1}'></input>".format(
-								varid,
-								url.escapeXml()
-							)
-						html += "</div>"
-						html += "<iframe class='altui-thingspeak-chart' width='100%' height='260' style='border: 1px solid #cccccc;' src='{0}' ></iframe>".format(url);
-						html += "</div>";
-					}
-					html += "<div class='col-md-4'>";
-					html += "<form id='form-{0}' class='form-inline'>".format(varid);
-
-					html += "</form>"
-					html += "</div>"; //col
-				html += "</div>";	//row
-				html += "</div></div>";
-			}
 			return html;			
 		};
 
