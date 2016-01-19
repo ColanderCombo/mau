@@ -106,6 +106,16 @@ local function xml_encode(val)
                 :gsub("'", "&apos;")
 end
 
+function url_encode(str)
+  if (str) then
+    str = string.gsub (str, "\n", "\r\n")
+    str = string.gsub (str, "([^%w %-%_%.%~])",
+        function (c) return string.format ("%%%02X", string.byte(c)) end)
+    str = string.gsub (str, " ", "+")
+  end
+  return str	
+end
+
 function url_decode(str)
   str = string.gsub (str, "+", " ")
   str = string.gsub (str, "%%(%x%x)",
@@ -1122,6 +1132,11 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				debug(string.format("DataProviders:%s",json.encode(DataProviders)))
 				return  json.encode(DataProviders), "application/json"
 			end,
+		["datapush"] = 
+			function(params)	-- return the data providers database in JSON
+				debug(string.format("Data Push Callback:%s",json.encode(lul_parameters)))
+				return "ok", "text/plain"
+			end,
 		["delWatch"] = 
 			function(params)	-- primary controller beeing called to set a watch
 				local providerparams = json.decode(lul_parameters["providerparams"])
@@ -1494,14 +1509,60 @@ local function getDefaultConfig()
 	return tbl
 end
 
+function myhttpget(url)
+	debug(string.format("myhttpget(%s)",url))
+	local response_body = {}
+	local response, status, headers = http.request{
+		method="GET",
+		url=url,
+		-- source = ltn12.source.string(data),
+		sink = ltn12.sink.table(response_body)
+	}
+	debug("https Response=" .. json.encode({res=response,sta=status,hea=headers}) )	
+	return response
+end
+
+local function sendValuetoUrlStorage(url,watch_description,lul_device, lul_service, lul_variable,old, new, lastupdate, provider_params)
+	debug(string.format("sendValuetoUrlStorage(%s,%s,%s,%s,%s,%s,%s,%s)",url,lul_device, lul_service, lul_variable,old, new, lastupdate, json.encode(provider_params)))
+	debug(string.format("watch_description:%s",json.encode(watch_description)))
+	local watchparams = json.decode( watch_description['Data'] )
+	local i = 1
+	local params={}
+	for k,v in pairs(provider_params) do
+		params[#params+1] = (v.key .. "=" .. url_encode(watchparams[i]))
+		i=i+1
+	end
+	for k,v in pairs({lul_device=lul_device,lul_variable=lul_variable,old=old,new=new,lastupdate=lastupdate}) do
+		params[#params+1] = (k .. "=" .. url_encode(v))
+		i=i+1
+	end
+	-- if finish by ? or by & just add to it
+	-- if does not contain ?, then add ? then params
+	-- if does contain ? , then add & then params
+	local parameters = table.concat(params,"&")
+	local lastchar = string.sub(url,-1)
+	if (lastchar=="?") or (lastchar=="&") then
+		url = url .. table.concat(params,"&")
+	else
+		if (string.find(url,"?")~=nil) then
+			url = url .. "&" .. table.concat(params,"&")
+		else
+			url = url .. "?" .. table.concat(params,"&")
+		end
+	end
+	debug(string.format("prepared to call url:%s",url))
+	luup.call_delay("myhttpget",1,url)
+	return 1
+end
+
 --https://api.thingspeak.com/update?key=U1F7T31MHB5O8HZI&field1=0
-local function sendValueToStorage_toto(watch_description,lul_device, lul_service, lul_variable,old, new, lastupdate, param)
-	debug(string.format("sendValueToStorage_toto(%s,%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,old, new, lastupdate, json.encode(param)))
+local function sendValueToStorage_toto(watch_description,lul_device, lul_service, lul_variable,old, new, lastupdate, provider_params)
+	debug(string.format("sendValueToStorage_toto(%s,%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,old, new, lastupdate, json.encode(provider_params)))
 	debug(string.format("watch_description:%s",json.encode(watch_description)))
 end
 
-local function sendValueToStorage_thingspeak(watch_description,lul_device, lul_service, lul_variable,old, new, lastupdate, param)
-	debug(string.format("sendValueToStorage_thingspeak(%s,%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,old, new, lastupdate, json.encode(param)))
+local function sendValueToStorage_thingspeak(watch_description,lul_device, lul_service, lul_variable,old, new, lastupdate, provider_params)
+	debug(string.format("sendValueToStorage_thingspeak(%s,%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,old, new, lastupdate, json.encode(provider_params)))
 	debug(string.format("watch_description:%s",json.encode(watch_description)))
 	local providerparams = json.decode( watch_description['Data'] )
 	local strtemplate = string.format("key=%s&field%s=%%s",providerparams[3] or "",providerparams[4] or "")
@@ -1528,11 +1589,12 @@ local function sendValueToStorage_thingspeak(watch_description,lul_device, lul_s
 	return 0
 end
 
-function registerDataProvider(name,func,parameters)
-	debug(string.format("registerDataProvider(%s,%s)",name or 'nil',json.encode(parameters)))
+function registerDataProvider(name, func, url, parameters)
+	debug(string.format("registerDataProvider(%s,%s,%s)",name or 'nil',url or 'nil',json.encode(parameters)))
 	if (name ~= nil) then
 		DataProviders[name]= {
-			["callback"] = func,
+			["callback"] = (func or ""),
+			["url"] = (url or ""),
 			["parameters"] = (parameters or "")
 		}
 	end
@@ -1549,13 +1611,31 @@ function resetDevice(lul_device,norepeat)
 	debug(string.format("Reseting ALTUI config to %s",default))
 end
 
-function registerPlugin(lul_device,newDeviceType,newScriptFile,newDeviceDrawFunc,newStyleFunc,newDeviceIconFunc,newControlPanelFunc)
+function UPNPregisterDataProvider(lul_device, newName, newUrl, newJsonParameters)
+	newName = newName or ''
+	newUrl = newUrl or ''
+	newJsonParameters = newJsonParameters or ''
+	log(string.format("UPNPregisterDataProvider(%d,%s,%s,%s)",lul_device, newName , newUrl , newJsonParameters ))
+	if (newName=="") or (newUrl=="") or (newJsonParameters=="") then
+		warning("invalid parameters, ignoring request");
+		return 0
+	end
+	local status,obj = pcall( function(newJsonParameters) return json.decode(newJsonParameters) end, newJsonParameters )
+	if (status==true) then
+		registerDataProvider(newName, nil, newUrl, obj )
+		return 1
+	end
+	warning("invalid json parameters, %s",newJsonParameters);
+	return 0
+end
+
+function UPNPregisterPlugin(lul_device,newDeviceType,newScriptFile,newDeviceDrawFunc,newStyleFunc,newDeviceIconFunc,newControlPanelFunc)
 	newScriptFile = newScriptFile or ""
 	newDeviceDrawFunc = newDeviceDrawFunc or ""
 	newStyleFunc = newStyleFunc or ""
 	newDeviceIconFunc = newDeviceIconFunc or ""
 	newControlPanelFunc = newControlPanelFunc or ""
-	log(string.format("registerPlugin(%d,%s,%s,%s,%s,%s,%s)",lul_device,newDeviceType,newScriptFile,newDeviceDrawFunc,newStyleFunc,newDeviceIconFunc,newControlPanelFunc))
+	log(string.format("UPNPregisterPlugin(%d,%s,%s,%s,%s,%s,%s)",lul_device,newDeviceType,newScriptFile,newDeviceDrawFunc,newStyleFunc,newDeviceIconFunc,newControlPanelFunc))
 	if (newDeviceType ~= "") then
 		local tbljson = getSetVariable(ALTUI_SERVICE, "PluginConfig", lul_device, json.encode( getDefaultConfig() ) )
 		local tbl = json.decode(tbljson)
@@ -1626,7 +1706,13 @@ function sendValueToStorage(watch,lul_device, lul_service, lul_variable,old, new
 		local n = tablelength(watch['DataProviders'][provider])
 		for i=1,n do
 			if (DataProviders[provider]~=nil) then
-				DataProviders[provider]["callback"](v[i],lul_device, lul_service, lul_variable,old, new, lastupdate,DataProviders[provider]["parameters"])
+				if (DataProviders[provider]["url"]~="") then
+					if (sendValuetoUrlStorage(DataProviders[provider]["url"],v[i],lul_device, lul_service, lul_variable,old, new, lastupdate,DataProviders[provider]["parameters"]) == nil) then
+						warning(string.format("sendValuetoUrlStorage() failed"))
+					end
+				else
+					DataProviders[provider]["callback"](v[i],lul_device, lul_service, lul_variable,old, new, lastupdate,DataProviders[provider]["parameters"])
+				end
 			else
 				warning(string.format("sendValueToStorage - unknown provider:%s",provider))
 			end
@@ -1759,28 +1845,26 @@ function _addWatch( service, variable, devid, scene, expression, xml, provider, 
 			["LastEval"] = nil,
 			["SceneID"] = scene
 		}	
-		if (DataProviders[provider]~=nil) and ( data~="" )  then
-			if (registeredWatches[devidstr][service][variable]['DataProviders'] == nil) then
-				registeredWatches[devidstr][service][variable]['DataProviders']={}
-			end
-			if (registeredWatches[devidstr][service][variable]['DataProviders'][provider] == nil) then
-				registeredWatches[devidstr][service][variable]['DataProviders'][provider]={}
-			end
-			local n2 = tablelength(registeredWatches[devidstr][service][variable]['DataProviders'][provider])
-			local bFound = false
-			for i=1,n2 do
-				if (registeredWatches[devidstr][service][variable]['DataProviders'][provider][i]['Data']==data) then
-					bFound = true
-				end			
-			end
-			if (bFound==false) then
-				registeredWatches[devidstr][service][variable]['DataProviders'][provider][n2+1] = {
-					['Data']=data
-				}
-			end
-		else
+		if (DataProviders[provider]==nil) or ( data=="" )  then
 			warning(string.format("Unknown data push provider:%s or data:%s",provider or"", data or ""))
-			return 0
+		end
+		if (registeredWatches[devidstr][service][variable]['DataProviders'] == nil) then
+			registeredWatches[devidstr][service][variable]['DataProviders']={}
+		end
+		if (registeredWatches[devidstr][service][variable]['DataProviders'][provider] == nil) then
+			registeredWatches[devidstr][service][variable]['DataProviders'][provider]={}
+		end
+		local n2 = tablelength(registeredWatches[devidstr][service][variable]['DataProviders'][provider])
+		local bFound = false
+		for i=1,n2 do
+			if (registeredWatches[devidstr][service][variable]['DataProviders'][provider][i]['Data']==data) then
+				bFound = true
+			end			
+		end
+		if (bFound==false) then
+			registeredWatches[devidstr][service][variable]['DataProviders'][provider][n2+1] = {
+				['Data']=data
+			}
 		end
 	else
 		local bFound = false
@@ -2249,15 +2333,15 @@ function startupDeferred(lul_device)
 	-- init watches
 	-- init data storages
 
-	registerDataProvider("thingspeak",sendValueToStorage_thingspeak,{
+	registerDataProvider("thingspeak",sendValueToStorage_thingspeak, "", {
 		[1] 	= { ["key"]= "channelid", ["label"]="Channel ID", ["type"]="number" },
 		[2]		= { ["key"]= "readkey", ["label"]="Read API Key", ["type"]="text" },
 		[3] 	= { ["key"]= "writekey", ["label"]="Write API Key", ["type"]="text" },
 		[4] 	= { ["key"]= "fieldnum", ["label"]="Field Number", ["type"]="number", ["default"]=1 },
 		[5] 	= { ["key"]= "graphicurl", ["label"]="Graphic Url", ["type"]="url" , ["default"]="//api.thingspeak.com/channels/{0}/charts/{3}?key={1}&width=450&height=260&results=60&dynamic=true"}
 	})
-	registerDataProvider("dummy",sendValueToStorage_toto,{
-		[1] 	= { ["key"]= "toto", ["label"]="To To", ["type"]="number" },
+	registerDataProvider("Test - not functional",sendValueToStorage_toto,"", {
+		[1] 	= { ["key"]= "toto", ["label"]="To To", ["type"]="text" },
 		[2] 	= { ["key"]= "graphicurl", ["label"]="Graphic Url", ["type"]="url" , ["default"]="//www.google.com/{0}"}
 	})
 	fixVariableWatchesDeviceID( lul_device )

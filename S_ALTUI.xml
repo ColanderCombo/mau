@@ -65,6 +65,18 @@
             <defaultValue></defaultValue>
             <shortCode>controlpanelfunc</shortCode>
         </stateVariable>
+        <stateVariable sendEvents="no">
+            <name>Name</name>
+            <dataType>string</dataType>
+            <defaultValue></defaultValue>
+            <shortCode>name</shortCode>
+        </stateVariable>
+        <stateVariable sendEvents="no">
+            <name>JsonParameters</name>
+            <dataType>string</dataType>
+            <defaultValue></defaultValue>
+            <shortCode>jsonparameters</shortCode>
+        </stateVariable>	
 	</serviceStateTable>
     <actionList>
         <action>
@@ -109,6 +121,26 @@
                     <name>newControlPanelFunc</name>
                     <direction>in</direction>
                     <relatedStateVariable>ControlPanelFunc</relatedStateVariable>
+                </argument>
+            </argumentList>
+        </action>
+        <action>
+            <name>RegisterDataProvider</name>
+            <argumentList>
+                <argument>
+                    <name>newName</name>
+                    <direction>in</direction>
+                    <relatedStateVariable>Name</relatedStateVariable>
+                </argument>
+                <argument>
+                    <name>newUrl</name>
+                    <direction>in</direction>
+                    <relatedStateVariable>Url</relatedStateVariable>
+                </argument>
+                <argument>
+                    <name>newJsonParameters</name>
+                    <direction>in</direction>
+                    <relatedStateVariable>JsonParameters</relatedStateVariable>
                 </argument>
             </argumentList>
         </action>

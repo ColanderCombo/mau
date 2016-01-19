@@ -16,7 +16,14 @@
 		<serviceId>urn:upnp-org:serviceId:altui1</serviceId>
 		<name>RegisterPlugin</name>
 		<run>
-			registerPlugin(lul_device,lul_settings.newDeviceType,lul_settings.newScriptFile,lul_settings.newDeviceDrawFunc,lul_settings.newStyleFunc,lul_settings.newDeviceIconFunc,lul_settings.newControlPanelFunc)
+			UPNPregisterPlugin(lul_device,lul_settings.newDeviceType,lul_settings.newScriptFile,lul_settings.newDeviceDrawFunc,lul_settings.newStyleFunc,lul_settings.newDeviceIconFunc,lul_settings.newControlPanelFunc)
+		</run>    
+	</action>
+	<action>
+		<serviceId>urn:upnp-org:serviceId:altui1</serviceId>
+		<name>RegisterDataProvider</name>
+		<run>
+			UPNPregisterDataProvider(lul_device, lul_settings.newName, lul_settings.newUrl, lul_settings.newJsonParameters)
 		</run>    
 	</action>
 	<action>
