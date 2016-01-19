@@ -2072,17 +2072,19 @@ end
 function fixWatches_V_1_2(lul_device)
 	debug(string.format("fixWatches_V_1_2(%s)",lul_device ))
 	local tosend = getSetVariable(ALTUI_SERVICE, "VariablesToSend", lul_device, "")
-	local watches = tosend :split(";")
-	for k,watch in pairs(watches) do
-		local parts = watch:split('#')
-		-- part 7 = key=U1F7T31MHB5O8HZI&field3=%s
-		local key,field = string.match(parts[7],"^key=(.-)&field(.-)=.-$")
-		parts[9]=parts[8]
-		parts[8]=field
-		parts[7]=key
-		watches[k] = table.concat(parts,"#")
+	if (tosend~="") then
+		local watches = tosend:split(";")
+		for k,watch in pairs(watches) do
+			local parts = watch:split('#')
+			-- part 7 = key=U1F7T31MHB5O8HZI&field3=%s
+			local key,field = string.match(parts[7],"^key=(.-)&field(.-)=.-$")
+			parts[9]=parts[8]
+			parts[8]=field
+			parts[7]=key
+			watches[k] = table.concat(parts,"#")
+		end
+		luup.variable_set(ALTUI_SERVICE, "VariablesToSend", table.concat(watches,";"), lul_device)
 	end
-	luup.variable_set(ALTUI_SERVICE, "VariablesToSend", table.concat(watches,";"), lul_device)
 end
 
 function fixVariableWatchesDeviceID( lul_device )

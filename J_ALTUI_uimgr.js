@@ -3788,7 +3788,7 @@ var UIManager  = ( function( window, undefined ) {
 			html += "</div>";	//row
 			html += "</div>";	//panel-body
 			html += "</div>";	//panel
-			
+
 			return html;			
 		};
 
