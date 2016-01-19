@@ -769,7 +769,7 @@ local function saveRemoteWatch(lul_device,service,variable,devid,ctrlid,ipaddr)
 		end
 	end
 	if (bFound==false) then
-		variableWatch = variableWatch .. ";" .. watchline
+		variableWatch = watchline .. ";" .. variableWatch 
 		luup.variable_set(ALTUI_SERVICE, "RemoteVariablesToWatch", variableWatch, lul_device)
 	end
 end
@@ -1869,7 +1869,7 @@ function addWatch( lul_device, service, variable, deviceid, sceneid, expression,
 		end
 		if (bFound==false) then
 			debug(string.format("no, adding watchline %s",watchline))
-			variableWatch = variableWatch .. ";" .. watchline
+			variableWatch = watchline .. ";" .. variableWatch
 			luup.variable_set(ALTUI_SERVICE, "VariablesToSend", variableWatch, lul_device)
 		end
 	end
@@ -2011,12 +2011,14 @@ function fixVariableWatchesDeviceID( lul_device )
 	for k,v in pairs(strings) do
 		local watches = v:split(";")
 		for k2,v2 in pairs(watches) do
-			local parts = v2:split('#')
-			local deviceid = parts[3]
-			if (string.find(deviceid,"-") == nil) then
-				parts[3] = "0-"..deviceid
+			if (v2 ~= "" ) then
+				local parts = v2:split('#')
+				local deviceid = parts[3]
+				if (string.find(deviceid,"-") == nil) then
+					parts[3] = "0-"..deviceid
+				end
+				watches[k2] = table.concat(parts,"#")
 			end
-			watches[k2] = table.concat(parts,"#")
 		end
 		luup.variable_set(ALTUI_SERVICE, k, table.concat(watches,";"), lul_device)
 	end
@@ -2042,15 +2044,19 @@ function initVariableWatches( lul_device )
 	watches = dataPushString:split(";")
 	-- toKeep = {}
 	for k,v  in pairs(watches) do
-		local service,variable,device,provider,channelid,readkey,writekey,field,graphicurl  = getPushParams(v)
-		_addWatch(  service, variable, device, -1, "true", "", provider, channelid, readkey, writekey,field,graphicurl )
+		if (v~="") then
+			local service,variable,device,provider,providerparams  = getPushParams(v)
+			_addWatch(  service, variable, device, -1, "true", "", provider, providerparams )
+		end
 	end
 	-- luup.variable_set(ALTUI_SERVICE, "VariablesToSend", table.concat(toKeep,";"), lul_device)
 	
 	watches = remoteVariableWatch:split(";")
 	for k,v  in pairs(watches) do
-		local service,variable,device,ctrlid,ipaddr = getRemoteWatchParams(v)
-		addRemoteWatch(lul_device,service,variable,device,ctrlid,ipaddr)
+		if (v~="") then
+			local service,variable,device,ctrlid,ipaddr = getRemoteWatchParams(v)
+			addRemoteWatch(lul_device,service,variable,device,ctrlid,ipaddr)
+		end
 	end
 	-- luup.variable_set(ALTUI_SERVICE, "RemoteVariablesToWatch", table.concat(toKeep,";"), lul_device)
 end

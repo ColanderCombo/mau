@@ -3911,12 +3911,13 @@ var UIManager  = ( function( window, undefined ) {
 							pushData.params=[];
 							$("#form-"+varid).html( _pushFormFields(providers,pushData.provider,varid,pushData) ) ;
 						});
-						
-						$("#datapush-graphicurl-"+varid).focusout( function() {
-							var url = $(this).val();
-							var push = _getPushFromDialog( $(this).closest("form") );
+
+						$("#form-"+varid+" input").change( function() {
+							var url = $("#datapush-graphicurl-"+varid).val();
+							var push = _getPushFromDialog( $("#form-"+varid) );
 							url = String.prototype.format.apply(url,push.params);
-							$(".altui-thingspeak-chart").attr("src",url);
+							if (url.indexOf("{")==-1)
+								$(".altui-thingspeak-chart").attr("src",url);
 						});
 					});
 				} else {
