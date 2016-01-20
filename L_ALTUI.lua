@@ -1568,10 +1568,11 @@ local function sendValueToStorage_emoncms(watch_description,lul_device, lul_serv
 	if (isempty(providerparams[1])==false) and (isempty(providerparams[2])==false) and (isempty(providerparams[3])==false) then
 		local url = string.format("http://emoncms.org/input/post.json?node=%d&json={%s:%s}&apikey=%s",
 			providerparams[1],	-- nodeid
-			providerparams[2],	-- inputkey
+			providerparams[3],	-- inputkey
 			tostring(new),		-- new value
-			providerparams[3]	-- readwritekey
+			providerparams[4]	-- readwritekey
 		)
+		
 		local response_body = {}
 		local response, status, headers = http.request({
 			method="GET",
