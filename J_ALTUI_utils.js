@@ -17,15 +17,6 @@ function isIE11() {
 	var ie11andabove = navigator.userAgent.indexOf('Trident') != -1 && navigator.userAgent.indexOf('MSIE') == -1 // IE11 or above Boolean
 	return ie11andabove;
 }
-
-// function iframeResizeOnLoad(id) {
-  // var iFrameID = document.getElementById(id);
-  // if(iFrameID) {
-		// here you can make the height, I delete it first, then I make it again
-		// iFrameID.height = "";
-		// iFrameID.height = iFrameID.contentWindow.document.body.scrollHeight + "px";
-  // }   
-// }
   
 function Altui_SelectText(element) {
 	var doc = document;
