@@ -928,15 +928,14 @@ var api = {
 			dataType: "text",
 			cache: false
 		})
-		.done(function(data) {
-			var arr = JSON.parse(data);
+		.done(function(data, textStatus, jqXHR) {
 			if ( $.isFunction( onSuccess ) )  {
-				(onSuccess).call(context, arr);
+				(onSuccess).call(context, data, textStatus, jqXHR);
 			}
 		})
-		.fail(function(jqXHR, textStatus) {
+		.fail(function(jqXHR, textStatus, errorThrown) {
 			if ( $.isFunction( onFailure ) )  {
-				(onFailure).call(context, textStatus);
+				(onFailure).call(context, jqXHR, textStatus, errorThrown);
 			}
 		})
 		.always(function() {
@@ -978,7 +977,7 @@ var api = {
 		// return _upnpHelper.UPnPAction( deviceId, service, action, options.actionArguments, function(data,jqXHR){
 		var device = MultiBox.getDeviceByID( _JSAPI_ctx.controllerid, deviceId );
 		return MultiBox.runAction(device, service, action, options.actionArguments,
-			function(data,jqXHR){
+			function(data, textStatus, jqXHR){
 				if (data==null) {
 					if (options.onFailure)
 						(options.onFailure).call(options.context,{

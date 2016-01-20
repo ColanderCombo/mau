@@ -138,13 +138,13 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 			.done(function(data, textStatus, jqXHR) {
 				_unproxifyResult(data, textStatus, jqXHR, function(data,textStatus,jqXHR) {
 					if ($.isFunction( cbfunc )) {
-						cbfunc(data,jqXHR);
+						cbfunc(data, textStatus, jqXHR);
 					}
 				});
 			})
 			.fail(function(jqXHR, textStatus, errorThrown) {
 				if ($.isFunction( cbfunc )) {
-					cbfunc(null,jqXHR);
+					cbfunc(null,textStatus, jqXHR);
 				}
 				else
 					PageMessage.message( formatAjaxErrorMessage(jqXHR, textStatus), "warning" ) ;				
