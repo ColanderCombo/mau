@@ -65,8 +65,7 @@ whose src attribute is that url where the [i]{n}[/i] are replaced by the value o
 
 [u][b]When a variable change happens[/b][/u]
 
-if a DataStorage Provider was selected for that variable, ALTUI will call the url passed as part of the datastorage declaration 
-with the following parameters:
+if a DataStorage Provider was selected for that variable, ALTUI will call the url passed as part of the datastorage declaration with the following parameters:
 [code]-http://url...?lul_device=<n>&lul_variable=<n>&old=<n>&new=<n>&lastupdate=<n>&key=value&...  for all parameters provided on the DataStorage declaration
 -http verb = GET [/code]
 
@@ -81,3 +80,21 @@ In return, when receiving the parameters back from ALTUI when it calls [code]htt
 remember that the parameter values will be urlencoded so you need to urldecode them ( replace + with space etc ) 
 For example ALTUI is calling this hypothetical "toto" data storage provider by 
 [code]http://url?&toto=This+is+a+text&graphicurl=%2F%2Fwww.google.com%2F%7B0%7D[/code]
+
+[code]function url_encode(str)
+  if (str) then
+    str = string.gsub (str, "\n", "\r\n")
+    str = string.gsub (str, "([^%w %-%_%.%~])",
+        function (c) return string.format ("%%%02X", string.byte(c)) end)
+    str = string.gsub (str, " ", "+")
+  end
+  return str	
+end
+
+function url_decode(str)
+  str = string.gsub (str, "+", " ")
+  str = string.gsub (str, "%%(%x%x)",
+      function(h) return string.char(tonumber(h,16)) end)
+  str = string.gsub (str, "\r\n", "\n")
+  return str
+end[/code]
