@@ -3756,8 +3756,9 @@ var UIManager  = ( function( window, undefined ) {
 					)
 				html += "</div>"
 				if (parameters[i].key=="graphicurl") {
+					var height = parameters[i].ifheight || 260;
 					var url = String.prototype.format.apply(value,tempPushData.params);
-					html += "<iframe class='altui-thingspeak-chart' data-idx='{1}' width='100%' height='260' style='border: 1px solid #cccccc;' src='{0}' ></iframe>".format(url,i);
+					html += "<iframe id='altui-iframe-chart-{2}' class='altui-thingspeak-chart' data-idx='{1}' width='100%' height='{3}' style='border: 1px solid #cccccc;' src='{0}' ></iframe>".format(url,i,varid,height);
 				}
 
 			}

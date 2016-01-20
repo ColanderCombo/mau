@@ -1561,6 +1561,29 @@ local function sendValueToStorage_toto(watch_description,lul_device, lul_service
 	debug(string.format("watch_description:%s",json.encode(watch_description)))
 end
 
+local function sendValueToStorage_emoncms(watch_description,lul_device, lul_service, lul_variable,old, new, lastupdate, provider_params)
+	debug(string.format("sendValueToStorage_emoncms(%s,%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,old, new, lastupdate, json.encode(provider_params)))
+	debug(string.format("watch_description:%s",json.encode(watch_description)))
+	local providerparams = json.decode( watch_description['Data'] )
+	if (isempty(providerparams[1])==false) and (isempty(providerparams[2])==false) and (isempty(providerparams[3])==false) then
+		local url = string.format("http://emoncms.org/input/post.json?node=%d&json={%s:%s}&apikey=%s",
+			providerparams[1],	-- nodeid
+			providerparams[2],	-- inputkey
+			tostring(new),		-- new value
+			providerparams[3]	-- readwritekey
+		)
+		local response_body = {}
+		local response, status, headers = http.request({
+			method="GET",
+			url=url,
+			sink = ltn12.sink.table(response_body)
+		})
+		debug(string.format("emoncms http Body=%s Response=%s",table.concat(response_body),json.encode({res=response,sta=status,hea=headers}) ))
+		return response
+	end
+	return nil
+end
+
 local function sendValueToStorage_thingspeak(watch_description,lul_device, lul_service, lul_variable,old, new, lastupdate, provider_params)
 	debug(string.format("sendValueToStorage_thingspeak(%s,%s,%s,%s,%s,%s,%s)",lul_device, lul_service, lul_variable,old, new, lastupdate, json.encode(provider_params)))
 	debug(string.format("watch_description:%s",json.encode(watch_description)))
@@ -2355,6 +2378,15 @@ function startupDeferred(lul_device)
 		[4] 	= { ["key"]= "fieldnum", ["label"]="Field Number", ["type"]="number", ["default"]=1 },
 		[5] 	= { ["key"]= "graphicurl", ["label"]="Graphic Url", ["type"]="url" , ["default"]="//api.thingspeak.com/channels/{0}/charts/{3}?key={1}&width=450&height=260&results=60&dynamic=true"}
 	})
+	
+	registerDataProvider("emoncms",sendValueToStorage_emoncms, "", {
+		[1] 	= { ["key"]= "nodeid", ["label"]="Node ID", ["type"]="number" ,["default"]=1},
+		[2] 	= { ["key"]= "feedid", ["label"]="Feed ID", ["type"]="number" },
+		[3]		= { ["key"]= "inputkey", ["label"]="Input Key name", ["type"]="text" },
+		[4] 	= { ["key"]= "readwritekey", ["label"]="Read/Write API Key", ["type"]="text" },
+		[5] 	= { ["key"]= "graphicurl", ["label"]="Graphic Url", ["type"]="url", ["ifheight"]=460, ["default"]="http://emoncms.org/vis/editrealtime?feedid={1}&embed=1&apikey={3}"}
+	})
+	
 	-- registerDataProvider("Test - not functional",sendValueToStorage_toto,"", {
 		-- [1] 	= { ["key"]= "toto", ["label"]="To To", ["type"]="text" },
 		-- [2] 	= { ["key"]= "graphicurl", ["label"]="Graphic Url", ["type"]="url" , ["default"]="//www.google.com/{0}"}
