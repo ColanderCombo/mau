@@ -3852,7 +3852,7 @@ var UIManager  = ( function( window, undefined ) {
 						var pushData = null;
 						$.each( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend" ) || "").split(';'),function(idx,pushLine) {
 							var push = _getPushLineParams(pushLine);
-							if (device.altuiid == push.deviceid) {	
+							if ((device.altuiid == push.deviceid) && (state.variable==push.variable) && (state.service==push.service)){	
 								pushData=push;
 							}
 						});
