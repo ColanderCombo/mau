@@ -193,7 +193,7 @@ function altui_Settings(deviceID) {
 	jQuery( "#altui-open-local" ).click(function() {
 		var url = window.location.origin + "/port_3480/data_request?id=lr_ALTUI_Handler&command=home&" + jQuery( "#altui-home" ).val()
 		window.open( url, '_blank');
-	});
+	}).prop('disabled', window.location.hostname.indexOf("relay")!=-1 );
 	jQuery( "#altui-setconfig" ).click(function() {
 		var varVal = jQuery( "#altui-config" ).val();
 		saveVar(deviceID,  altui_Svs, 'PluginConfig', varVal, true)
