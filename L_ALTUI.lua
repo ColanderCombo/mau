@@ -1511,15 +1511,16 @@ end
 
 function myhttpget(url)
 	debug(string.format("myhttpget(%s)",url))
-	local response_body = {}
-	local response, status, headers = http.request{
-		method="GET",
-		url=url,
-		-- source = ltn12.source.string(data),
-		sink = ltn12.sink.table(response_body)
-	}
-	debug("https Response=" .. json.encode({res=response,sta=status,hea=headers}) )	
-	return response
+	response,content = luup.inet.wget(url,10)   -- note that 0 is a successful status return for this call
+	-- local response_body = {}
+	-- local response, status, headers = http.request{
+		-- method="GET",
+		-- url=url,
+		-- -- source = ltn12.source.string(data),
+		-- sink = ltn12.sink.table(response_body)
+	-- }
+	-- debug("https Response=" .. json.encode({res=response,sta=status,hea=headers}) )	
+	return (response==0)
 end
 
 local function sendValuetoUrlStorage(url,watch_description,lul_device, lul_service, lul_variable,old, new, lastupdate, provider_params)
@@ -1573,14 +1574,15 @@ local function sendValueToStorage_emoncms(watch_description,lul_device, lul_serv
 			providerparams[4]	-- readwritekey
 		)
 		
-		local response_body = {}
-		local response, status, headers = http.request({
-			method="GET",
-			url=url,
-			sink = ltn12.sink.table(response_body)
-		})
-		debug(string.format("emoncms http Body=%s Response=%s",table.concat(response_body),json.encode({res=response,sta=status,hea=headers}) ))
-		return response
+		local response,response_body = luup.inet.wget(url,10)
+		-- local response_body = {}
+		-- local response, status, headers = http.request({
+			-- method="GET",
+			-- url=url,
+			-- sink = ltn12.sink.table(response_body)
+		-- })
+		debug(string.format("emoncms http Body=%s Response=%s",response_body,response ))
+		return (response==0)
 	end
 	return nil
 end
@@ -1938,7 +1940,7 @@ function _addWatch( service, variable, devid, scene, expression, xml, provider, 
 			debug(string.format("Calling url to set remote watch. url:%s",url))
 			local httpcode,data = luup.inet.wget(url,10)
 			if (httpcode~=0) then
-				error(string.format("failed to connect to url:%s, http.request returned %d", url,httpcode))
+				error(string.format("failed to connect to url:%s, luup.inet.wget returned %d", url,httpcode))
 				return 0
 			end
 			debug(string.format("success httpcode:%s data:%s",httpcode,data))	
