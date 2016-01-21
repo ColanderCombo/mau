@@ -27,6 +27,7 @@ var user_changes=0;		// for PLEG
 
 var data_request_url = window.location.pathname+'?';
 var command_url = window.location.pathname.replace('/port_3480/data_request','/port_49451');
+var send_command_url = window.location.pathname.replace('/port_3480/data_request','/port_3480');
 var _JSAPI_ctx={};
 
 function set_JSAPI_context(ctx) {
@@ -814,6 +815,9 @@ var api = {
 	getCommandURL: function() {
 		return command_url;
 	},
+	getSendCommandURL: function() {
+		return send_command_url;
+	},
 	getDataRequestURL: function() {
 		return data_request_url;
 	},
@@ -930,12 +934,16 @@ var api = {
 		})
 		.done(function(data, textStatus, jqXHR) {
 			if ( $.isFunction( onSuccess ) )  {
-				(onSuccess).call(context, data, textStatus, jqXHR);
+				// jqXHR.status and jqXHR.responseText should exist and be populated
+				// since the dataType is set to "text"
+				var successData={responseText:jqXHR.responseText,status:jqXHR.status};
+				(onSuccess).call(context, successData);
 			}
 		})
 		.fail(function(jqXHR, textStatus, errorThrown) {
 			if ( $.isFunction( onFailure ) )  {
-				(onFailure).call(context, jqXHR, textStatus, errorThrown);
+				var errorData={responseText:jqXHR.responseText,status:jqXHR.status}
+				(onFailure).call(context, errorData );
 			}
 		})
 		.always(function() {
