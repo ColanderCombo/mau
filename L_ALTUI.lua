@@ -1507,6 +1507,10 @@ local function getDefaultConfig()
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawMySensors"
 	}
+	tbl["urn:schemas-micasaverde-com:device:Keypad:1"]= {
+		["ScriptFile"]="J_ALTUI_plugins.js",
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawKeypad"
+	}	
 	tbl["urn:schemas-dcineco-com:device:MSwitch:1"]= {
 		["ScriptFile"]="J_ALTUI_plugins.js",
 		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawMultiswitch"

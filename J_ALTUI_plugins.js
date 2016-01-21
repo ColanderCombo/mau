@@ -30,6 +30,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-temperature-minor  {font-size: 8px;}";
 		style += ".altui-humidity, .altui-light  {font-size: 18px;}";
 		style += ".altui-motion {font-size: 22px;}";
+		style += ".altui-keypad-status {font-size: 12px;}";
 		style += ".altui-weather-text, .altui-lasttrip-text, .altui-vswitch-text {font-size: 11px;}";
 		style += ".altui-red , .btn.altui-red { color:red;}";
 		style += ".altui-blue, .btn.altui-blue { color:blue;}";
@@ -841,6 +842,17 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		return html;
 	};
 	
+	function _drawKeypad(device) {
+		var html = "";
+		
+		var status = parseInt(MultiBox.getStatus( device, 'urn:schemas-micasaverde-com:device:Keypad:1', 'Status' )); 
+		html += _createOnOffButton( status,"altui-onoffbtn-"+device.altuiid, _T("Unlock,Lock") , "pull-right");
+		html += "<script type='text/javascript'>";
+		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleKeypad('{0}','div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
+		html += "</script>";
+		return html;
+	};
+	
 	// return the html string inside the .panel-body of the .altui-device#id panel
 	
 	function _drawBinaryLight( device) {
@@ -1011,6 +1023,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	drawDimmable   : _drawDimmable,
 	onColorPicker  : _onColorPicker,
 	drawDimmableRGB   : _drawDimmableRGB,
+	drawKeypad		: _drawKeypad,
 	drawMotion 	   : _drawMotion,
 	drawGCal       : _drawGCal,
 	drawCombinationSwitch	: _drawCombinationSwitch,
@@ -1040,6 +1053,11 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	toggleOnOffButton : function (altuiid,htmlid) {
 		_toggleButton(altuiid, htmlid, 'urn:upnp-org:serviceId:SwitchPower1', 'Status', function(id,newval) {
 			MultiBox.setOnOff( altuiid, newval);
+		});
+	},
+	toggleKeypad: function (altuiid,htmlid) {
+		ALTUI_PluginDisplays.toggleButton(altuiid, htmlid, 'urn:micasaverde-com:serviceId:DoorLock1', 'Status', function(id,newval) {
+			MultiBox.runActionByAltuiID( altuiid, 'urn:micasaverde-com:serviceId:DoorLock1', 'SetTarget', {newTargetValue:newval} );
 		});
 	},
 	toggleArmed : function (altuiid,htmlid) {
