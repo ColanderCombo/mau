@@ -195,7 +195,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		if ( (lastfour==".xml") && (_veraidx==0) )
 			mimetype = "text/xml";
 		
-		return _exec( _buildUPnPGetFileUrl( devicefile), function(data,jqXHR) {
+		return _exec( _buildUPnPGetFileUrl( devicefile), function(data, textStatus, jqXHR) {
 			if (jqXHR.responseXML) {
 				data = new XMLSerializer().serializeToString(jqXHR.responseXML);
 				jqXHR.responseText=data;
@@ -340,7 +340,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 			params["UpnpImplFilename"]=ifile;
 			params["RoomNum"]=roomnum;
 			params["Reload"]=1;
-			return this.UPnPAction( 0, "urn:micasaverde-com:serviceId:HomeAutomationGateway1", "CreateDevice", params, function(data,jqXHR){
+			return this.UPnPAction( 0, "urn:micasaverde-com:serviceId:HomeAutomationGateway1", "CreateDevice", params, function(data, textStatus, jqXHR){
 				if (data!=null) {
 					PageMessage.message(_T("Create Device succeeded"),"success");
 					if ($.isFunction( cbfunc ))
@@ -495,7 +495,7 @@ var UPnPHelper = (function(ip_addr,veraidx) {
 		} else {
 			if (newscene.id==ALTUI_NEW_SCENE_ID)
 				delete newscene.id;
-			var jq = _exec( _buildSceneCreateUrl(JSON.stringify(newscene)), function(data,jqXHR) {
+			var jq = _exec( _buildSceneCreateUrl(JSON.stringify(newscene)), function(data, textStatus, jqXHR) {
 				if ($.isFunction(cbfunc))
 					(cbfunc)(data,jqXHR);
 			});

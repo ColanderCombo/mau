@@ -982,7 +982,7 @@ var api = {
 			context:null
 		},options);
 		
-		// return _upnpHelper.UPnPAction( deviceId, service, action, options.actionArguments, function(data,jqXHR){
+		// return _upnpHelper.UPnPAction( deviceId, service, action, options.actionArguments, function(data, textStatus, jqXHR){
 		var device = MultiBox.getDeviceByID( _JSAPI_ctx.controllerid, deviceId );
 		return MultiBox.runAction(device, service, action, options.actionArguments,
 			function(data, textStatus, jqXHR){
