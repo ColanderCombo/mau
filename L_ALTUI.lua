@@ -18,6 +18,7 @@ local socket = require("socket")
 local http = require("socket.http")
 local https = require ("ssl.https")
 local ltn12 = require("ltn12")
+local url = require "socket.url"
 local tmpprefix = "/tmp/altui_"		-- prefix for tmp files
 local hostname = ""
 
@@ -106,23 +107,23 @@ local function xml_encode(val)
                 :gsub("'", "&apos;")
 end
 
-function url_encode(str)
-  if (str) then
-    str = string.gsub (str, "\n", "\r\n")
-    str = string.gsub (str, "([^%w %-%_%.%~])",
-        function (c) return string.format ("%%%02X", string.byte(c)) end)
-    str = string.gsub (str, " ", "+")
-  end
-  return str	
-end
+-- function url_encode(str)
+  -- if (str) then
+    -- str = string.gsub (str, "\n", "\r\n")
+    -- str = string.gsub (str, "([^%w %-%_%.%~])",
+        -- function (c) return string.format ("%%%02X", string.byte(c)) end)
+    -- str = string.gsub (str, " ", "+")
+  -- end
+  -- return str	
+-- end
 
-function url_decode(str)
-  str = string.gsub (str, "+", " ")
-  str = string.gsub (str, "%%(%x%x)",
-      function(h) return string.char(tonumber(h,16)) end)
-  str = string.gsub (str, "\r\n", "\n")
-  return str
-end
+-- function url_decode(str)
+  -- str = string.gsub (str, "+", " ")
+  -- str = string.gsub (str, "%%(%x%x)",
+      -- function(h) return string.char(tonumber(h,16)) end)
+  -- str = string.gsub (str, "\r\n", "\n")
+  -- return str
+-- end
 	
 function findALTUIDevice()
 	for k,v in pairs(luup.devices) do
@@ -1080,7 +1081,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 					return "ok", "text/plain"
 				else
 					debug(string.format("ALTUI_Handler: save_data( ) - Not Empty data",name,npage))
-					data = url_decode( data )
+					data = url.unescape( data )
 					debug(string.format("ALTUI_Handler: save_data( ) - url decoded",name,npage))
 					luup.variable_set(ALTUI_SERVICE, variablename, data, deviceID)
 					debug(string.format("ALTUI_Handler: save_data( ) - returns:%s",data))
@@ -1191,7 +1192,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 			end,
 		["readtmp"] = 	-- Command not used anymore, kept here for future in case...
 			function(params)
-				local filename = url_decode( lul_parameters["filename"] )
+				local filename = url.unescape( lul_parameters["filename"] )
 				debug("opening file")
 				local file = io.open(tmpprefix..filename,'r')
 				local result = ''
@@ -1209,7 +1210,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 			function(params)
 				local resultcode=""
 				local result = ""
-				local command = url_decode( lul_parameters["oscommand"] )
+				local command = url.unescape( lul_parameters["oscommand"] )
 				local file = io.popen(command)
 				if file then
 					result = file:read("*a")
@@ -1221,7 +1222,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				-- local result = handle:read("*a")
 				-- handle:close()
 				
-				-- local command = url_decode( lul_parameters["oscommand"] ) .. '> /tmp/oscommand.log'
+				-- local command = url.unescape( lul_parameters["oscommand"] ) .. '> /tmp/oscommand.log'
 				-- local response = os.execute(command)
 				-- local file = io.open('/tmp/oscommand.log','r')
 				-- local result = file:read("*a")
@@ -1530,11 +1531,11 @@ local function sendValuetoUrlStorage(url,watch_description,lul_device, lul_servi
 	local i = 1
 	local params={}
 	for k,v in pairs(provider_params) do
-		params[#params+1] = (v.key .. "=" .. url_encode(watchparams[i]))
+		params[#params+1] = (v.key .. "=" .. url.escape(watchparams[i]))  
 		i=i+1
 	end
 	for k,v in pairs({lul_device=lul_device,lul_variable=lul_variable,old=old,new=new,lastupdate=lastupdate}) do
-		params[#params+1] = (k .. "=" .. url_encode(v))
+		params[#params+1] = (k .. "=" .. url.escape(v))
 		i=i+1
 	end
 	-- if finish by ? or by & just add to it
@@ -2295,7 +2296,6 @@ function registerHandlers()
 	luup.register_handler('ALTUI_LuaRunHandler','ALTUI_LuaRunHandler')
 	]]	
 
-	local url = require "socket.url"
 	local req = "http://127.0.0.1:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunLua&Code="
 	-- code = "require 'L_ALTUI_LuaRunHandler'\n"
 	req = req .. url.escape(code)
