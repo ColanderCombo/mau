@@ -10,19 +10,23 @@ local MSG_CLASS = "ALTUI"
 local ALTUI_SERVICE = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v1.06"
+local version = "v1.07"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
-local json = require("L_ALTUIjson")
+local json = require("dkjson")
+if (type(json) == "string") then
+	json = require("json")
+end
 local mime = require("mime")
 local socket = require("socket")
 local http = require("socket.http")
 local https = require ("ssl.https")
 local ltn12 = require("ltn12")
-local url = require "socket.url"
+local modurl = require "socket.url"
 local tmpprefix = "/tmp/altui_"		-- prefix for tmp files
 local hostname = ""
 
 local DataProviders={}
+local DataProvidersCallbacks={}		-- map names to functions in the local context, only for embedded providers registered within this module in LUA
 local remoteWatches={}
 local registeredWatches = {}
 
@@ -337,7 +341,7 @@ local function Split(str, delim, maxNb)
     local pat = "(.-)" .. delim .. "()"
     local nb = 0
     local lastPos
-    for part, pos in string.gfind(str, pat) do
+    for part, pos in string.gmatch(str, pat) do
         nb = nb + 1
         result[nb] = part
         lastPos = pos
@@ -1081,7 +1085,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 					return "ok", "text/plain"
 				else
 					debug(string.format("ALTUI_Handler: save_data( ) - Not Empty data",name,npage))
-					data = url.unescape( data )
+					data = modurl.unescape( data )
 					debug(string.format("ALTUI_Handler: save_data( ) - url decoded",name,npage))
 					luup.variable_set(ALTUI_SERVICE, variablename, data, deviceID)
 					debug(string.format("ALTUI_Handler: save_data( ) - returns:%s",data))
@@ -1192,7 +1196,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 			end,
 		["readtmp"] = 	-- Command not used anymore, kept here for future in case...
 			function(params)
-				local filename = url.unescape( lul_parameters["filename"] )
+				local filename = modurl.unescape( lul_parameters["filename"] )
 				debug("opening file")
 				local file = io.open(tmpprefix..filename,'r')
 				local result = ''
@@ -1210,7 +1214,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 			function(params)
 				local resultcode=""
 				local result = ""
-				local command = url.unescape( lul_parameters["oscommand"] )
+				local command = modurl.unescape( lul_parameters["oscommand"] )
 				local file = io.popen(command)
 				if file then
 					result = file:read("*a")
@@ -1222,7 +1226,7 @@ function myALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 				-- local result = handle:read("*a")
 				-- handle:close()
 				
-				-- local command = url.unescape( lul_parameters["oscommand"] ) .. '> /tmp/oscommand.log'
+				-- local command = modurl.unescape( lul_parameters["oscommand"] ) .. '> /tmp/oscommand.log'
 				-- local response = os.execute(command)
 				-- local file = io.open('/tmp/oscommand.log','r')
 				-- local result = file:read("*a")
@@ -1531,11 +1535,11 @@ local function sendValuetoUrlStorage(url,watch_description,lul_device, lul_servi
 	local i = 1
 	local params={}
 	for k,v in pairs(provider_params) do
-		params[#params+1] = (v.key .. "=" .. url.escape(watchparams[i]))  
+		params[#params+1] = (v.key .. "=" .. modurl.escape(watchparams[i]))  
 		i=i+1
 	end
-	for k,v in pairs({lul_device=lul_device,lul_variable=lul_variable,old=old,new=new,lastupdate=lastupdate}) do
-		params[#params+1] = (k .. "=" .. url.escape(v))
+	for k,v in pairs({lul_device=lul_device,lul_service=lul_service,lul_variable=lul_variable,old=old,new=new,lastupdate=lastupdate}) do
+		params[#params+1] = (k .. "=" .. modurl.escape(v))
 		i=i+1
 	end
 	-- if finish by ? or by & just add to it
@@ -1623,17 +1627,21 @@ end
 
 local function _saveDataProvider() 
 	local lul_device = tonumber(findALTUIDevice() )
+	debug(string.format("_saveDataProvider() , DataStorageProviders:%s",json.encode(DataProviders)))
 	luup.variable_set(ALTUI_SERVICE, "DataStorageProviders", json.encode(DataProviders), lul_device)
 end
 
-function registerDataProvider(name, func, url, parameters)
-	debug(string.format("registerDataProvider(%s,%s,%s)",name or 'nil',url or 'nil',json.encode(parameters)))
+function registerDataProvider(name, funcname, func, url, parameters)
+	debug(string.format("registerDataProvider(%s,%s,%s,%s)",name or 'nil',funcname or 'nil',url or 'nil',json.encode(parameters)))
 	if (name ~= nil) then
 		DataProviders[name]= {
-			["callback"] = (func or ""),
+			["callback"] = (funcname or ""),
 			["url"] = (url or ""),
 			["parameters"] = (parameters or "")
 		}
+		if (funcname ~= nil) and (func ~=nil) then
+			DataProvidersCallbacks[funcname] = func
+		end
 		_saveDataProvider()
 	end
 end
@@ -1660,7 +1668,7 @@ function UPNPregisterDataProvider(lul_device, newName, newUrl, newJsonParameters
 	end
 	local status,obj = pcall( function(newJsonParameters) return json.decode(newJsonParameters) end, newJsonParameters )
 	if (status==true) then
-		registerDataProvider(newName, nil, newUrl, obj )
+		registerDataProvider(newName, nil, nil, newUrl, obj )
 		return 1
 	end
 	warning("invalid json parameters, %s",newJsonParameters);
@@ -1749,7 +1757,7 @@ function sendValueToStorage(watch,lul_device, lul_service, lul_variable,old, new
 						warning(string.format("sendValuetoUrlStorage() failed"))
 					end
 				else
-					DataProviders[provider]["callback"](v[i],lul_device, lul_service, lul_variable,old, new, lastupdate,DataProviders[provider]["parameters"])
+					(DataProvidersCallbacks[DataProviders[provider]["callback"]])(v[i],lul_device, lul_service, lul_variable,old, new, lastupdate,DataProviders[provider]["parameters"])
 				end
 			else
 				warning(string.format("sendValueToStorage - unknown provider:%s",provider))
@@ -2298,7 +2306,7 @@ function registerHandlers()
 
 	local req = "http://127.0.0.1:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunLua&Code="
 	-- code = "require 'L_ALTUI_LuaRunHandler'\n"
-	req = req .. url.escape(code)
+	req = req .. modurl.escape(code)
 	local httpcode,content = luup.inet.wget(req)
 	return httpcode
 end
@@ -2374,7 +2382,7 @@ function startupDeferred(lul_device)
 	-- init data storages
 
 	_loadDataProviders()
-	registerDataProvider("thingspeak",sendValueToStorage_thingspeak, "", {
+	registerDataProvider("thingspeak","sendValueToStorage_thingspeak",sendValueToStorage_thingspeak, "", {
 		[1] 	= { ["key"]= "channelid", ["label"]="Channel ID", ["type"]="number" },
 		[2]		= { ["key"]= "readkey", ["label"]="Read API Key", ["type"]="text" },
 		[3] 	= { ["key"]= "writekey", ["label"]="Write API Key", ["type"]="text" },
@@ -2382,7 +2390,7 @@ function startupDeferred(lul_device)
 		[5] 	= { ["key"]= "graphicurl", ["label"]="Graphic Url", ["type"]="url" , ["default"]="//api.thingspeak.com/channels/{0}/charts/{3}?key={1}&width=450&height=260&results=60&dynamic=true"}
 	})
 	
-	registerDataProvider("emoncms",sendValueToStorage_emoncms, "", {
+	registerDataProvider("emoncms","sendValueToStorage_emoncms",sendValueToStorage_emoncms, "", {
 		[1] 	= { ["key"]= "nodeid", ["label"]="Node ID", ["type"]="number" ,["default"]=1},
 		[2] 	= { ["key"]= "feedid", ["label"]="Feed ID", ["type"]="number" },
 		[3]		= { ["key"]= "inputkey", ["label"]="Input Key name", ["type"]="text" },
@@ -2411,7 +2419,7 @@ end
 		
 function initstatus(lul_device)
 	lul_device = tonumber(lul_device)
-	log("initstatus("..lul_device..") starting version: "..version)
+	log("initstatus("..lul_device..") starting version: "..version)	
 	checkVersion(lul_device)
 	hostname = getIP()
 	local delay = 1		-- delaying first refresh by x seconds
