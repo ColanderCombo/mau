@@ -30,7 +30,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-temperature-minor  {font-size: 8px;}";
 		style += ".altui-humidity, .altui-light  {font-size: 18px;}";
 		style += ".altui-motion {font-size: 22px;}";
-		style += ".altui-keypad-status {font-size: 12px;}";
+		style += ".altui-keypad-status {font-size: 14px;}";
 		style += ".altui-weather-text, .altui-lasttrip-text, .altui-vswitch-text {font-size: 11px;}";
 		style += ".altui-red , .btn.altui-red { color:red;}";
 		style += ".altui-blue, .btn.altui-blue { color:blue;}";
@@ -846,7 +846,24 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var html = "";
 		
 		var status = parseInt(MultiBox.getStatus( device, 'urn:schemas-micasaverde-com:device:Keypad:1', 'Status' )); 
+		var sl_UserCode = MultiBox.getStatus( device, 'urn:schemas-micasaverde-com:device:Keypad:1', 'sl_UserCode' ); 
+		var sl_PinFailed = MultiBox.getStatus( device, 'urn:schemas-micasaverde-com:device:Keypad:1', 'sl_PinFailed' ); 
 		html += _createOnOffButton( status,"altui-onoffbtn-"+device.altuiid, _T("Unlock,Lock") , "pull-right");
+		if (sl_PinFailed=="1") {
+			html += "<div class='text-danger'><span class='glyphicon glyphicon-warning-sign' aria-hidden='true'></span> Invalid PIN Entered</div>";
+		}
+		if (sl_UserCode != null) {
+			var re = /UserName="(.*)"/;
+			var m;
+			if ((m = re.exec(sl_UserCode)) !== null) {
+				if (m.index === re.lastIndex) {
+					re.lastIndex++;
+				}
+				// View your result using the m-variable.
+				// eg m[0] etc.
+				html+= "<div class='altui-keypad-status'>User {0} Entered</div>".format( m[1] );
+			}
+		}
 		html += "<script type='text/javascript'>";
 		html += " $('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleKeypad('{0}','div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
 		html += "</script>";
