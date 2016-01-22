@@ -626,7 +626,8 @@ var styles ="						\
 	}								\
 ";		
 
-var ALTUI_Templates = (function() {
+var ALTUI_Templates = null;
+var ALTUI_Templates_Factory= function() {
 	var _dropdownTemplate =  "";		
 	_dropdownTemplate +=  "<div class='btn-group pull-right'>";
 	_dropdownTemplate += "<button class='btn btn-default btn-xs dropdown-toggle altui-device-command' type='button' data-toggle='dropdown' aria-expanded='false'>"; 
@@ -658,14 +659,23 @@ var ALTUI_Templates = (function() {
 		_deviceEmptyContainerTemplate	+= 		"<div class='panel panel-default altui-device' data-altuiid='{1}' id='{0}'>"
 		_deviceEmptyContainerTemplate	+= 	  	"</div>";
 		_deviceEmptyContainerTemplate	+= 	"</div>";		
-
+		
+	// 0: variable , 1: value , 2: service , 3: id, 4: push btn color class, 5: watch provider name
+	var _deviceVariableLineTemplate = "  <tr>";
+		// deviceVariableLineTemplate += "         <th scope='row'>1</th>";
+		_deviceVariableLineTemplate += "         <td class='altui-variable-title'><span title='{2}'>{0}</span></td>";
+		_deviceVariableLineTemplate += 	("<td class='altui-variable-buttons'>"+smallbuttonTemplate.format( '{3}', 'altui-variable-history', glyphTemplate.format( "calendar", _T("History"), "" ),_T('History'))+smallbuttonTemplate.format( '{3}', 'altui-variable-push {4}', glyphTemplate.format( "signal", _T("Push to {5}"), "" ),_T("Push to {5}"))+"</td>");
+		_deviceVariableLineTemplate += "         <td id='{3}' class='altui-variable-value' >{1}</td>";
+		_deviceVariableLineTemplate += "     </tr>";
+		
 	return {
+		deviceVariableLineTemplate : _deviceVariableLineTemplate,
 		dropdownTemplate : _dropdownTemplate,
 		batteryHtmlTemplate : _batteryHtmlTemplate,
 		devicecontainerTemplate : _devicecontainerTemplate,
 		deviceEmptyContainerTemplate : _deviceEmptyContainerTemplate
 	};
-})();
+};
 
 
 
@@ -3791,33 +3801,52 @@ var UIManager  = ( function( window, undefined ) {
 			html += "</div>";	//panel
 			return html;			
 		};
-
-
-		// 0: variable , 1: value , 2: service
-		var deviceVariableLineTemplate = "  <tr>";
-		// deviceVariableLineTemplate += "         <th scope='row'>1</th>";
-		deviceVariableLineTemplate += "         <td class='altui-variable-title'><span title='{2}'>{0}</span></td>";
-		deviceVariableLineTemplate += 	("<td class='altui-variable-buttons'>"+smallbuttonTemplate.format( '{3}', 'altui-variable-history', calendarGlyph,'History')+smallbuttonTemplate.format( '{3}', 'altui-variable-push', signalGlyph,'Graph')+"</td>");
-		deviceVariableLineTemplate += "         <td id='{3}' class='altui-variable-value' >{1}</td>";
-		deviceVariableLineTemplate += "     </tr>";
-			
-		// prepare the text for the modal .. .for each variable do a line, add lines to template
-		// var device = MultiBox.getDeviceByID( devid );
-		if (device!=null) {
+		
+		function buildDeviceVariableBody(deviceVariableLineTemplate,model) {
+			/*
+				model[state.id] = { 	
+					val:_enhanceValue(state.value),
+					sendWatches: sendWatches
+				}
+			*/
 			var lines = [];
 			$.each(device.states.sort(_sortByVariableName), function(idx,state) {
+				var row = model[state.id];
 				var str = deviceVariableLineTemplate.format(
-					state.variable, 
-					_enhanceValue(state.value), 
-					state.service,
-					state.id 
+						state.variable, 
+						row.val, 
+						state.service,
+						state.id,
+						(row.sendWatch!=null) ? 'btn-info' : '',
+						(row.sendWatch!=null) ? row.sendWatch.provider : ''
 					);
 				lines.push(  str );
 			});
+			return lines.join('');
+		};
+		
+		// 0: variable , 1: value , 2: service
+		var deviceVariableLineTemplate = ALTUI_Templates.deviceVariableLineTemplate;
+		var model = {};
+		if (device!=null) {
+			var watches = {};
 			var altuidevice = MultiBox.getDeviceByID( 0, g_MyDeviceID );
-
+			$.each((MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend" ) || "").split(';'), function(i,w) {
+				var watch = _getPushLineParams(w);
+				if (watch.deviceid == device.altuiid) {
+					watches[watch.service+'_'+watch.variable] = watch;
+				}
+			});
+			$.each(device.states.sort(_sortByVariableName), function(idx,state) {
+				model[state.id] = { 	
+					val:_enhanceValue(state.value),
+					sendWatch: watches[state.service+'_'+state.variable]
+				}
+			});
+			
 			// update modal with new text
-			DialogManager.registerDialog('deviceModal',deviceModalTemplate.format( lines.join(''), device.name, device.altuiid ));
+			var body = buildDeviceVariableBody(deviceVariableLineTemplate,model);
+			DialogManager.registerDialog('deviceModal',deviceModalTemplate.format( body, device.name, device.altuiid ));
 			$("button.altui-variable-push").click( function() {
 				function _getPushFromDialog(frm) 
 				{
@@ -10828,7 +10857,7 @@ $(document).ready(function() {
 		wrenchGlyph=glyphTemplate.format("wrench", _T("Settings"), "" );
 		optHorGlyph=glyphTemplate.format( "option-horizontal", _T("Option"), "pull-left" );
 		signalGlyph=glyphTemplate.format( "signal", _T("Graph"), "" );
-		calendarGlyph=glyphTemplate.format( "calendar", _T("History"), "" );
+		calendarGlyph=glyphTemplate.format( "calendar",  _T("History"), "" );
 		refreshGlyph=glyphTemplate.format( "refresh", _T("Refresh"), "text-warning" );
 		removeGlyph=glyphTemplate.format( "remove", _T("Remove"), "" );
 		loadGlyph = glyphTemplate.format( "open", _T("Load") , "");
@@ -10932,6 +10961,8 @@ $(document).ready(function() {
 		var clientsideThemecss= MyLocalStorage.getSettings("Theme");
 		if (clientsideThemecss != null)
 			g_CustomTheme = clientsideThemecss;
+		
+		ALTUI_Templates = ALTUI_Templates_Factory();
 		
 		UIManager.initEngine(styles.format(window.location.hostname), g_DeviceTypes, g_CustomTheme, g_Options, function() {
 			UIManager.initCustomPages(g_CustomPages);	
