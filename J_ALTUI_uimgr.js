@@ -498,7 +498,7 @@ var styles ="						\
 	.altui-favorites-watts { 	\
 		float: right;			\
 		text-align: right;		\
-		font-size: 12px;		\
+		font-size: 14px;		\
 		bottom: 0px;			\
 		position: absolute;		\
 		right: 0px;				\
