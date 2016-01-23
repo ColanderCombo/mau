@@ -1238,14 +1238,14 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		}
 	};
 	
-	function _xxxWatch( cmd, service, variable, deviceid, sceneid, expression, xml, provider, params ) {
+	function _xxxWatch( cmd, w ) {
 		// for thingspeak = a table of channelid, readkey, writekey, field, graphicurl
 		var url = "?id=lr_ALTUI_Handler&command={8}&service={0}&variable={1}&device={2}&scene={3}&expression={4}&xml={5}&provider={6}&providerparams={7}".format(
-			service, variable, deviceid, sceneid, 
-			encodeURIComponent(expression), 
-			encodeURIComponent(xml), 
-			provider, 
-			encodeURIComponent( JSON.stringify(params) ),
+			w.service, w.variable, w.deviceid, w.sceneid, 
+			encodeURIComponent(w.luaexpr), 
+			encodeURIComponent(w.xml), 
+			w.provider, 
+			encodeURIComponent( JSON.stringify(w.params) ),
 			cmd
 		);
 		var jqxhr = _httpGet( url, {}, function(data, textStatus, jqXHR) {
@@ -1258,14 +1258,59 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		return jqxhr;
 	};
 		
-	function _delWatch( service, variable, deviceid, sceneid, expression, xml, provider, params ) {
-		return _xxxWatch( 'delWatch', service, variable, deviceid, sceneid, expression, xml, provider, params );
+	function _delWatch( w ) {
+		return _xxxWatch( 'delWatch', w  );
 	};
-	function _addWatch( service, variable, deviceid, sceneid, expression, xml, provider, params ) {
+	function _addWatch( w ) {
 		// http://192.168.1.5/port_3480/data_request?id=lr_ALTUI_Handler&command=addRemoteWatch&device=42&variable=Status&service=urn:upnp-org:serviceId:SwitchPower1&data=192.168.1.16
-		return _xxxWatch( 'addWatch', service, variable, deviceid, sceneid, expression, xml, provider, params );
+		return _xxxWatch( 'addWatch', w );
 	};
-
+	function _getPushLineParams(pushLine) {
+		var key="";
+		var fieldnum=0;
+		var params = pushLine.split('#');
+		var wparams=[];
+		for (var i=4; i< params.length; i++ ) {
+			wparams.push(params[i]);
+		}
+		return {
+			service : params[0] || "",
+			variable : params[1] || "",
+			deviceid : params[2] || "",
+			provider : params[3] || "",
+			params	 : wparams
+		};
+	};
+	function _getWatchLineParams(watchLine) {
+		var params = watchLine.split('#');
+		//service,variable,deviceid,sceneid,lua_expr
+		return {
+			service : params[0],
+			variable : params[1],
+			deviceid : params[2],
+			sceneid : params[3],
+			luaexpr : params[4],
+			xml		: params[5] || ''
+		};
+	};
+	function _setWatchLineParams(watch) {
+		return "{0}#{1}#{2}#{3}#{4}#{5}".format( watch.service, watch.variable, watch.deviceid, watch.sceneid, watch.luaexpr, watch.xml || "");
+	};
+	function _getWatches(whichwatches , filterfunc) {
+		if ((whichwatches!="VariablesToWatch") && (whichwatches!="VariablesToSend")) 
+			return null;
+		var linefunc = (whichwatches=="VariablesToWatch") ? _getWatchLineParams : _getPushLineParams
+		var altuidevice = MultiBox.getDeviceByID( 0, g_MyDeviceID );
+		var variable = MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", whichwatches ) || "";
+		var result=[];
+		$.each(variable.split(';'), function(i,line) {
+			var w = (linefunc)(line);
+			if ($.isFunction(filterfunc) && (filterfunc)(w)) {
+				result.push(w);
+			}
+		});
+		return result;
+	};
 	function _getDeviceDependants(device) {
 		var usedin_objects =[];
 		var scenes = this.getScenesSync();
@@ -1389,6 +1434,7 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	getDeviceDependants : _getDeviceDependants,
 	addWatch			: _addWatch,				// ( lul_device, service, variable, deviceid, sceneid, expression, xml, provider, params)
 	delWatch			: _delWatch,				// ( lul_device, service, variable, deviceid, sceneid, expression, xml, provider, params)
+	getWatches			: _getWatches,				// (whichwatches,filterfunc)
 	isDeviceZwave	: _isDeviceZwave,	//(device)
 	getScenes		: _getScenes,
 	getSceneHistory : _getSceneHistory,

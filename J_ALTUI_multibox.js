@@ -300,6 +300,12 @@ var MultiBox = ( function( window, undefined ) {
 		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.renameDevice( device, newname, roomid);
 	};
 	function _deleteDevice(device) {
+		// delete watches
+		$.each(["VariablesToSend","VariablesToWatch"], function(idx,whichwatch) {
+			$.each( MultiBox.getWatches(whichwatch,function(w) { return (w.deviceid == device.altuiid) }), function(i,watch) {
+				MultiBox.delWatch(watch);
+			});
+		});
 		var elems = device.altuiid.split("-");
 		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.deleteDevice(elems[1]);
 	};
@@ -364,11 +370,18 @@ var MultiBox = ( function( window, undefined ) {
 		var elems = device.altuiid.split("-");
 		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.getDeviceVariableHistory( device, varidx, cbfunc);
 	};
-	function _delWatch( service, variable, deviceid, sceneid, expression, xml, provider, params ) {
-		return _controllers['0'].controller.delWatch( service, variable, deviceid, sceneid, expression, xml, provider, params )
+	function _delWatch( w ) {
+		w = $.extend({sceneid:-1, expression:'true', xml:'', provider:''},w);
+		return _controllers['0'].controller.delWatch( w  )
 	};
-	function _addWatch( service, variable, deviceid, sceneid, expression, xml, provider, params ) {
-		return _controllers['0'].controller.addWatch( service, variable, deviceid, sceneid, expression, xml, provider, params )
+	function _addWatch( w ) {
+		w = $.extend({sceneid:-1, expression:'true', xml:'', provider:''},w);
+		return _controllers['0'].controller.addWatch( w  )
+	};
+	function _getWatches(whichwatches,filterfunc) {
+		if ((whichwatches!="VariablesToWatch") && (whichwatches!="VariablesToSend")) 
+			return null;
+		return _controllers['0'].controller.getWatches( whichwatches,filterfunc );
 	};
 	function _getStatesByAltuiID(altuiid) {
 		var elems = altuiid.split("-");
@@ -478,6 +491,14 @@ var MultiBox = ( function( window, undefined ) {
 	};
 	function _deleteScene(scene) {
 		var elems = scene.altuiid.split("-");
+		// delete watches
+		$.each( MultiBox.getWatches( "VariablesToWatch",
+					function(w) { return (elems[0]==0) && (w.sceneid == elems[1]) }
+				), 
+				function(i,watch) {
+					MultiBox.delWatch(watch);
+				}
+		);
 		return (_controllers[elems[0]]==undefined)  ? null : _controllers[elems[0]].controller.deleteScene(elems[1]);
 	};
 	function _getNewSceneID(controllerid) {
@@ -707,7 +728,8 @@ var MultiBox = ( function( window, undefined ) {
 	getDeviceBatteryLevel 	: _getDeviceBatteryLevel,	// ( device )
 	getDeviceVariableHistory : _getDeviceVariableHistory,//( device, varidx, cbfunc) 
 	addWatch				: _addWatch,				// (  service, variable, deviceid, sceneid, expression, xml, provider, params)
-	delWatch				: _delWatch,				// (  service, variable, deviceid, sceneid, expression, xml, provider, params )
+	delWatch				: _delWatch,				// (  service, variable, deviceid, sceneid, expression, xml, provider, params )getWatches(whichwatches)
+	getWatches				: _getWatches,				// (whichwatches,filterfunc)
 	evaluateConditions 		: _evaluateConditions,		// ( device,devsubcat,conditions ) evaluate a device condition table ( AND between conditions )
 	getStates				: _getStates,				// ( device )
 	getStatesByAltuiID		: _getStatesByAltuiID,		// (altuiid)

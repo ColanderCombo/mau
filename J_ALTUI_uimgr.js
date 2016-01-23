@@ -1555,40 +1555,20 @@ var WatchManager = (function() {
 				watcha.luaexpr == watchb.luaexpr &&
 				watcha.xml == watchb.xml ;
 	};
-	function _getWatchLineParams(watchLine) {
-		var params = watchLine.split('#');
-		//service,variable,deviceid,sceneid,lua_expr
-		return {
-			service : params[0],
-			variable : params[1],
-			deviceid : params[2],
-			sceneid : params[3],
-			luaexpr : params[4],
-			xml		: params[5] || ''
-		};
-	};
-	function _setWatchLineParams(watch) {
-		return "{0}#{1}#{2}#{3}#{4}#{5}".format( watch.service, watch.variable, watch.deviceid, watch.sceneid, watch.luaexpr, watch.xml || "");
-	};
+
 	function _getSceneWatches(scene) {
-		var altuidevice = MultiBox.getDeviceByID( 0, g_MyDeviceID );
 		var scenecontroller = MultiBox.controllerOf(scene.altuiid).controller;
-		var sceneWatches = $.grep( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToWatch" ) || "").split(';'),function(w) {
-			var watch = WatchManager.getWatchLineParams(w);
-			return (watch.sceneid == scene.id) && (scenecontroller==0);
-		});	
-		return $.map(sceneWatches,function(line){
-			return WatchManager.getWatchLineParams(line);
-		});
+		var sceneWatches = MultiBox.getWatches("VariablesToWatch",function(w) { return (watch.sceneid == scene.id) && (scenecontroller==0) } );
+		return sceneWatches;
 	};
 	function _countWatchForScene(scene) {
 		var sceneWatches = _getSceneWatches(scene);
 		return sceneWatches ? sceneWatches.length : 0;
 	};
 	return {
+		// getWatchLineParams: _getWatchLineParams,
+		// setWatchLineParams: _setWatchLineParams,
 		sameWatch: _sameWatch,
-		getWatchLineParams: _getWatchLineParams,
-		setWatchLineParams: _setWatchLineParams,
 		countWatchForScene: _countWatchForScene,
 		getSceneWatches : _getSceneWatches
 	};
@@ -1630,10 +1610,7 @@ var SceneEditor = function (scene) {
 	};
 	var scenecontroller = MultiBox.controllerOf(scene.altuiid).controller;
 	var altuidevice = MultiBox.getDeviceByID( 0, g_MyDeviceID );
-	var scenewatches = $.grep( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToWatch" ) || "").split(';'),function(w) {
-		var watch = WatchManager.getWatchLineParams(w);
-		return (watch.sceneid == scene.id) && (scenecontroller==0);
-	});	
+	var scenewatches = MultiBox.getWatches("VariablesToWatch",function(watch) { return (watch.sceneid == scene.id) && (scenecontroller==0) });
 	
 	function _makeAltuiid(controllerid,id) {
 		return controllerid+"-"+id;
@@ -1724,7 +1701,7 @@ var SceneEditor = function (scene) {
 	};
 	
 	function _editLuaExpression(idxwatch) {
-		var watch = WatchManager.getWatchLineParams( scenewatches[idxwatch]);
+		var watch = scenewatches[idxwatch];
 		// hide scene & scene editor accordeon
 		$(".altui-scene").toggle(false);
 		$(".altui-scene-editor").toggle(false);
@@ -1752,7 +1729,7 @@ var SceneEditor = function (scene) {
 	};
 	
 	function _editWatch( idx, jqButton) {
-		var watch =  (idx!=-1) ? WatchManager.getWatchLineParams( scenewatches[idx] ) : "";
+		var watch =  (idx!=-1) ? scenewatches[idx] : "";
 		var dialog = DialogManager.createPropertyDialog(_T('Watch'));
 		var device = NULL_DEVICE;
 		if (idx!=-1)
@@ -1795,12 +1772,12 @@ var SceneEditor = function (scene) {
 
 			// now update the UI in the scene editor
 			if (idx!=-1) {
-				scenewatches[idx] = WatchManager.setWatchLineParams( newwatch );
+				scenewatches[idx] = newwatch;
 				$(jqButton).closest("tr[data-watch-idx='"+idx+"']").replaceWith( _displayWatch(idx,newwatch) );
 			}
 			else {
 				idx = scenewatches.length;
-				scenewatches.push( WatchManager.setWatchLineParams( newwatch ) );				
+				scenewatches.push( newwatch );				
 				var parent = $(jqButton).closest("tr")
 				parent.before(  _displayWatch(idx , newwatch) );
 			}
@@ -2620,8 +2597,7 @@ var SceneEditor = function (scene) {
 				html +="<table class='table table-condensed'>";
 				html +="<caption>{0}</caption>".format(_T("Device Variable Watches"));
 				html +="<tbody>";
-				$.each( scenewatches, function (idx,watchLine) {				
-					var watch = WatchManager.getWatchLineParams(watchLine);
+				$.each( scenewatches, function (idx,watch) {				
 					html += _displayWatch(idx,watch);
 				});
 				html +=("<tr><td colspan='4'>"
@@ -2783,15 +2759,13 @@ var SceneEditor = function (scene) {
 			.on("click","#altui-save-blockly",function() { 
 				$(".altui-scene").toggle(true);
 				var idxwatch = $(".altui-blockly-editor ").data('idxwatch');
-				var watch = WatchManager.getWatchLineParams(scenewatches[idxwatch]);
 				var workspace = $(".altui-blockly-editor ").data('workspace');
-				watch.luaexpr = trim($("#blocklyDivCode").text());	// remove \n at the end
-				watch.xml = Blockly.Xml.domToText( Blockly.Xml.workspaceToDom(workspace) );
-				scenewatches[idxwatch] = WatchManager.setWatchLineParams(watch);
+				scenewatches[idxwatch].luaexpr = trim($("#blocklyDivCode").text());	// remove \n at the end
+				scenewatches[idxwatch].xml = Blockly.Xml.domToText( Blockly.Xml.workspaceToDom(workspace) );
 
 				$(".altui-scene-editor").toggle(true);
 				$(".altui-scene-editbutton").toggle(true);				
-				$("tr[data-watch-idx='"+idxwatch+"']").replaceWith( _displayWatch(idxwatch,watch) );
+				$("tr[data-watch-idx='"+idxwatch+"']").replaceWith( _displayWatch(idxwatch,scenewatches[idxwatch]) );
 				_showSaveNeeded();
 
 				$(".altui-blockly-editor #blocklyDiv").empty();
@@ -2842,26 +2816,15 @@ var SceneEditor = function (scene) {
 				}
 
 				// prepare table of old and new watches
-				var previousWatches = $.map( $.grep( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToWatch" ) || "").split(';'),
-					function(w) {
-						var watch = WatchManager.getWatchLineParams(w);
-						return (watch.sceneid == scene.id) && (scenecontroller==0);
-					}), 
-					function (watchline) {
-						return WatchManager.getWatchLineParams(watchline);
-					}
-				);
-				var newWatches = $.map(scenewatches, function(watchline) {
-					return WatchManager.getWatchLineParams(watchline);
-				});
+				var previousWatches = MultiBox.getWatches("VariablesToWatch" ,function(watch) { return (watch.sceneid == scene.id) && (scenecontroller==0) });
 				
 				var onlyInPrevious = previousWatches.filter(function(current){
-					return newWatches.filter(function(current_b){
+					return scenewatches.filter(function(current_b){
 						return WatchManager.sameWatch(current,current_b);
 					}).length == 0
 				});
 
-				var onlyInNew = newWatches.filter(function(current){
+				var onlyInNew = scenewatches.filter(function(current){
 					return previousWatches.filter(function(current_a){
 						return WatchManager.sameWatch(current,current_a);
 					}).length == 0
@@ -2869,21 +2832,13 @@ var SceneEditor = function (scene) {
 
 				// delete all watches that are in the VERA variable and not any more in the scenewatches
 				$.each(onlyInPrevious , function(i,w) {
-					MultiBox.delWatch( w.service, w.variable, w.deviceid, w.sceneid, w.luaexpr, w.xml )
+					MultiBox.delWatch( w )
 				});
 				// add all the watches that are in the scenewatches and not in the VERA variable
 				$.each(onlyInNew , function(i,w) {
-					MultiBox.addWatch( w.service, w.variable, w.deviceid, w.sceneid, w.luaexpr, w.xml )
+					MultiBox.addWatch( w )
 				});
 				
-				// save new watches
-				// var watchesToKeep = $.grep( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToWatch" ) || "").split(';'),function(w) {
-					// var watch = WatchManager.getWatchLineParams(w);
-					// return (watch.sceneid != scene.id) && (scenecontroller==0);
-				// });
-				// watchesToKeep = watchesToKeep.concat(scenewatches);
-				// MultiBox.setStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToWatch", watchesToKeep.join(';')); 
-
 				// save the scene
 				MultiBox.editScene(scene.altuiid,scene);
 				_showSaveNeeded(false);
@@ -3699,22 +3654,22 @@ var UIManager  = ( function( window, undefined ) {
 		return false;
 	};
 
-	function _getPushLineParams(pushLine) {
-		var key="";
-		var fieldnum=0;
-		var params = pushLine.split('#');
-		var wparams=[];
-		for (var i=4; i< params.length; i++ ) {
-			wparams.push(params[i]);
-		}
-		return {
-			service : params[0] || "",
-			variable : params[1] || "",
-			deviceid : params[2] || "",
-			provider : params[3] || "",
-			params	 : wparams
-		};
-	}
+	// function _getPushLineParams(pushLine) {
+		// var key="";
+		// var fieldnum=0;
+		// var params = pushLine.split('#');
+		// var wparams=[];
+		// for (var i=4; i< params.length; i++ ) {
+			// wparams.push(params[i]);
+		// }
+		// return {
+			// service : params[0] || "",
+			// variable : params[1] || "",
+			// deviceid : params[2] || "",
+			// provider : params[3] || "",
+			// params	 : wparams
+		// };
+	// }
 	
 	// function _setPushLineParams(push) {
 		// return "{0}#{1}#{2}#{3}#{4}#{5}#{6}#{7}#{8}".format( push.service, push.variable, push.deviceid, push.provider, push.channelid, push.readkey, push.key,push.fieldnum,push.graphicurl || "");
@@ -3831,11 +3786,8 @@ var UIManager  = ( function( window, undefined ) {
 		if (device!=null) {
 			var watches = {};
 			var altuidevice = MultiBox.getDeviceByID( 0, g_MyDeviceID );
-			$.each((MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend" ) || "").split(';'), function(i,w) {
-				var watch = _getPushLineParams(w);
-				if (watch.deviceid == device.altuiid) {
-					watches[watch.service+'_'+watch.variable] = watch;
-				}
+			$.each(MultiBox.getWatches("VariablesToSend",function(watch) { return (watch.deviceid == device.altuiid); }), function(i,watch) {
+				watches[watch.service+'_'+watch.variable] = watch;
 			});
 			$.each(device.states.sort(_sortByVariableName), function(idx,state) {
 				model[state.id] = { 	
@@ -3878,13 +3830,9 @@ var UIManager  = ( function( window, undefined ) {
 						//
 						// get this push parameters if they exist
 						//
-						var pushData = null;
-						$.each( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend" ) || "").split(';'),function(idx,pushLine) {
-							var push = _getPushLineParams(pushLine);
-							if ((device.altuiid == push.deviceid) && (state.variable==push.variable) && (state.service==push.service)){	
-								pushData=push;
-							}
-						});
+						var pushes = MultiBox.getWatches("VariablesToSend",function(push) { return ((device.altuiid == push.deviceid) && (state.variable==push.variable) && (state.service==push.service)) });
+						console.assert(pushes.length<=1)
+						var pushData = (pushes.length==0) ? null : pushes[0];
 
 						var html = buildPushForm(providers,pushData,device,varid);
 						tr.after("<tr><td colspan='3'>"+html+"</td></tr>");
@@ -3929,15 +3877,8 @@ var UIManager  = ( function( window, undefined ) {
 					var push = null;
 					var differentWatches=null;
 					// find all watches for this device
-					var previousWatches = $.map( $.grep( (MultiBox.getStatus( altuidevice, "urn:upnp-org:serviceId:altui1", "VariablesToSend" ) || "").split(';'),
-						function(w) {
-							var watch = _getPushLineParams(w);
-							return (watch.service == state.service) && (watch.variable == state.variable)  && (watch.deviceid == device.altuiid) 
-						}), 
-						function (watchline) {
-							return _getPushLineParams(watchline);
-						}
-					);
+					var previousWatches = MultiBox.getWatches("VariablesToSend",function(watch) { return (watch.service == state.service) && (watch.variable == state.variable)  && (watch.deviceid == device.altuiid) });
+
 
 					// add a new one unless it is already there
 					if (pushEnabled ==true ) {
@@ -3947,15 +3888,17 @@ var UIManager  = ( function( window, undefined ) {
 						});
 						// delete all old ones
 						$.each(differentWatches , function(i,w) {
-							MultiBox.delWatch( w.service, w.variable, w.deviceid, -1, "true", "", w.provider, w.params )
+							MultiBox.delWatch( w )
+							// MultiBox.delWatch( w.service, w.variable, w.deviceid, -1, "true", "", w.provider, w.params )
 						});
 						// add new one if it was not there before
 						if (differentWatches.length==previousWatches.length)
-							MultiBox.addWatch( push.service, push.variable, push.deviceid, -1, "true", "", push.provider, push.params ) ;
+							MultiBox.addWatch( push ) ;
 					} else {
 						// delete all watches that are in the VERA variable and not any more in the scenewatches
 						$.each(previousWatches , function(i,w) {
-							MultiBox.delWatch( w.service, w.variable, w.deviceid, -1, "true", "", w.provider, w.params )
+							MultiBox.delWatch( w )
+							// MultiBox.delWatch( w.service, w.variable, w.deviceid, -1, "true", "", w.provider, w.params )
 						});
 					}
 					form.closest("tr").remove();

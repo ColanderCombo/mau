@@ -1838,7 +1838,9 @@ function _internalVariableWatchCallback(lul_device, lul_service, lul_variable, l
 			end
 		end
 		debug(string.format("-----> DataProviders() %s",json.encode(watch['DataProviders'])))
-		sendValueToStorage(watch,lul_device, lul_service, lul_variable,lul_value_old, lul_value_new, watch["LastUpdate"])
+		if (watch['DataProviders'] ~=nil) then
+			sendValueToStorage(watch,lul_device, lul_service, lul_variable,lul_value_old, lul_value_new, watch["LastUpdate"])
+		end
 	end
 	debug(string.format("registeredWatches: %s",json.encode(registeredWatches)))
 end
@@ -1966,7 +1968,7 @@ function addWatch( lul_device, service, variable, deviceid, sceneid, expression,
 	-- channelid, readkey, writekey, field, graphicurl
 	debug(string.format("addWatch(%s,%s,%s,%s,%s,%s,%s,%s,%s)",lul_device, service, variable, deviceid, sceneid, expression, xml or "", provider or "", json.encode(providerparams or "")))
 	-- 1/ Add Watch in database
-	local newwatch = _addWatch( service, variable, deviceid, sceneid, expression, xml, provider, providerparams ) 
+	local newwatch = _addWatch( service, variable, deviceid, sceneid, expression or '', xml or '', provider or '', providerparams or {} ) 
 
 	-- 2/ Add Watch in persistence list ( device variable )
 	if (sceneid ~=-1) then
@@ -1983,7 +1985,7 @@ function addWatch( lul_device, service, variable, deviceid, sceneid, expression,
 		end
 		if (bFound==false) then
 			debug(string.format("no, adding watchline %s",watchline))
-			variableWatch = variableWatch .. ";" .. watchline
+			variableWatch = watchline .. ";" .. variableWatch
 			luup.variable_set(ALTUI_SERVICE, "VariablesToWatch", variableWatch, lul_device)
 		else
 			debug(string.format("yes, found an existing watchline"))
@@ -2090,9 +2092,10 @@ function delWatch( lul_device, service, variable, deviceid, sceneid, expression,
 		local variableWatch = getSetVariable(ALTUI_SERVICE, "VariablesToWatch", lul_device, "")
 		local toKeep = {}
 		for k,v  in pairs(variableWatch:split(';')) do
-			local wservice,wvariable,wdevice,wscene,wexpression,wxml  = getWatchParams(v)
-			if (service~=wservice) or (variable~=wvariable) or (deviceid~=wdevice) or (sceneid~=wscene) or (expression~=wexpression) or (xml~=wxml) then
-				debug(string.format("Keeping this watch: %s",v))
+			-- local wservice,wvariable,wdevice,wscene,wexpression,wxml  = getWatchParams(v)
+			-- if (service~=wservice) or (variable~=wvariable) or (deviceid~=wdevice) or (sceneid~=wscene) or (expression~=wexpression) or (xml~=wxml) then
+			if (v~=watchline) then
+				debug(string.format("Keeping this watch: [%s], wanting this watch: [%s]",v,watchline))
 				table.insert(toKeep, v)
 			end
 		end
@@ -2105,7 +2108,7 @@ function delWatch( lul_device, service, variable, deviceid, sceneid, expression,
 		local toKeep = {}
 		for k,v  in pairs(variableWatch:split(';')) do
 			if (v ~= watchline) then
-				debug(string.format("Keeping this watch: %s",v))
+				debug(string.format("Keeping this watch: [%s], wanting this watch: [%s]",v,watchline))
 				table.insert(toKeep, v)
 			else
 				debug(string.format("Going to delete this watch: %s",v))
