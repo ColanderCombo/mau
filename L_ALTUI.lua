@@ -10,11 +10,12 @@ local MSG_CLASS = "ALTUI"
 local ALTUI_SERVICE = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v1.08"
+local version = "v1.09"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("dkjson")
 if (type(json) == "string") then
-	json = require("json")
+	luup.log("ALTUI warning dkjson missing, falling back to L_ALTUIjson", 2)
+	json = require("L_ALTUIjson")
 end
 local mime = require("mime")
 local socket = require("socket")
@@ -30,10 +31,8 @@ local DataProvidersCallbacks={}		-- map names to functions in the local context,
 local remoteWatches={}
 local registeredWatches = {}
 
-
 --calling a function from HTTP in the device context
 --http://192.168.1.5/port_3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunLua&DeviceNum=81&Code=getMapUrl(81)
-
 
 ------------------------------------------------
 -- Debug --
@@ -2363,7 +2362,6 @@ function startupDeferred(lul_device)
 		newmajor,newminor = tonumber(newmajor),tonumber(newminor)
 		debug ("Device's New Version is major:"..newmajor.." minor:"..newminor)
 		
-		-- init the configuration table with a valid default if needed
 		local defconfigjson = json.encode( getDefaultConfig() )
 		local config = getSetVariable(ALTUI_SERVICE, "PluginConfig", lul_device, defconfigjson )
 		
