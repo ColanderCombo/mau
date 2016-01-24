@@ -3871,9 +3871,9 @@ var UIManager  = ( function( window, undefined ) {
 					});
 				} else {
 					// CLOSING the form : change color
-					$(this).addClass("btn-default").removeClass("btn-danger");
 					var nexttr = tr.next("tr");
 					var pushEnabled = nexttr.find("input#altui-enablePush-"+varid).prop('checked');
+					$(this).addClass("btn-default").toggleClass("btn-info",pushEnabled).removeClass("btn-danger");
 					var push = null;
 					var differentWatches=null;
 					// find all watches for this device
@@ -3889,7 +3889,6 @@ var UIManager  = ( function( window, undefined ) {
 						// delete all old ones
 						$.each(differentWatches , function(i,w) {
 							MultiBox.delWatch( w )
-							// MultiBox.delWatch( w.service, w.variable, w.deviceid, -1, "true", "", w.provider, w.params )
 						});
 						// add new one if it was not there before
 						if (differentWatches.length==previousWatches.length)
@@ -3898,7 +3897,6 @@ var UIManager  = ( function( window, undefined ) {
 						// delete all watches that are in the VERA variable and not any more in the scenewatches
 						$.each(previousWatches , function(i,w) {
 							MultiBox.delWatch( w )
-							// MultiBox.delWatch( w.service, w.variable, w.deviceid, -1, "true", "", w.provider, w.params )
 						});
 					}
 					form.closest("tr").remove();
@@ -7024,8 +7022,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		//
 		$("#altui-device-attributes-"+altuiid).toggle(false);		// hide them by default;
 		$("#altui-device-config-"+altuiid).toggle(false);			// hide them by default;
-		$(".altui-device-usedin").toggle(false);		// toogle attribute box
-		$(".altui-device-triggers").toggle(false);		// toogle attribute box
+		$(".altui-device-usedin").toggle(false);		// toggle attribute box
+		$(".altui-device-triggers").toggle(false);		// toggle attribute box
 		// $("#altui-device-usedin-"+altuiid).toggle(false);			// hide them by default;
 		// $("#altui-device-triggers-"+altuiid).toggle(false);			// hide them by default;
 		$(".altui-debug-div").toggle(false);						// hide
@@ -7040,22 +7038,22 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					});
 					
 		$("#altui-toggle-attributes").click( function() {
-			$("#altui-device-attributes-"+altuiid).toggle();		// toogle attribute box
+			$("#altui-device-attributes-"+altuiid).toggle();		// toggle attribute box
 			$("#altui-toggle-attributes span.caret").toggleClass( "caret-reversed" );
 		});
 		
 		$("#altui-device-usedin").click( function() {
-			// $("#altui-device-usedin-"+altuiid).toggle();		// toogle attribute box
-			$(".altui-device-usedin").toggle();		// toogle attribute box
+			// $("#altui-device-usedin-"+altuiid).toggle();		// toggle attribute box
+			$(".altui-device-usedin").toggle();		// toggle attribute box
 			$("#altui-device-usedin span.caret").toggleClass( "caret-reversed" );
 		});
 		$("#altui-device-triggers").click( function() {
-			// $("#altui-device-triggers-"+altuiid).toggle();		// toogle attribute box
-			$(".altui-device-triggers").toggle();		// toogle attribute box
+			// $("#altui-device-triggers-"+altuiid).toggle();		// toggle attribute box
+			$(".altui-device-triggers").toggle();		// toggle attribute box
 			$("#altui-device-triggers span.caret").toggleClass( "caret-reversed" );
 		});
 		$("#altui-device-config").click( function() {
-			$("#altui-device-config-"+altuiid).toggle();		// toogle attribute box
+			$("#altui-device-config-"+altuiid).toggle();		// toggle attribute box
 			$("#altui-device-config span.caret").toggleClass( "caret-reversed" );
 		});		
 		
