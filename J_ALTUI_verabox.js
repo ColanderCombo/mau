@@ -1305,7 +1305,10 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 		var result=[];
 		$.each(variable.split(';'), function(i,line) {
 			var w = (linefunc)(line);
-			if ($.isFunction(filterfunc) && (filterfunc)(w)) {
+			if ($.isFunction(filterfunc)) {
+				if ( (filterfunc)(w) )
+					result.push(w);
+			} else {
 				result.push(w);
 			}
 		});

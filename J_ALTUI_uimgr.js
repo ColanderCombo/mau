@@ -594,10 +594,10 @@ var styles ="						\
 	.activated {	\
 	  color: green	\
 	}				\
-	#altui-grid {		\
+	#altui-grid, .altui-grid {		\
 		font-size: 12px;	\
 	}				\
-	#altui-grid th {		\
+	#altui-grid th , .altui-grid th {		\
 		font-size: 12px;	\
 		text-transform: capitalize;	\
 	}				\
@@ -1558,7 +1558,7 @@ var WatchManager = (function() {
 
 	function _getSceneWatches(scene) {
 		var scenecontroller = MultiBox.controllerOf(scene.altuiid).controller;
-		var sceneWatches = MultiBox.getWatches("VariablesToWatch",function(w) { return (watch.sceneid == scene.id) && (scenecontroller==0) } );
+		var sceneWatches = MultiBox.getWatches("VariablesToWatch",function(watch) { return (watch.sceneid == scene.id) && (scenecontroller==0) } );
 		return sceneWatches;
 	};
 	function _countWatchForScene(scene) {
@@ -6700,6 +6700,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			{ id:26, title:_T('Themes'), onclick:'UIManager.pageThemes()', parent:0 },
 			{ id:27, title:_T('TblScenes'), onclick:'UIManager.pageTblScenes()', parent:0 },
 			{ id:28, title:_T('TblControllers'), onclick:'UIManager.pageTblControllers()', parent:0 },
+			{ id:29, title:_T('TblWatches'), onclick:'UIManager.pageTblWatches()', parent:0 },
 		];
 
 		function _parentsOf(child) {
@@ -10127,6 +10128,48 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			$("."+action.id).click( action.onclick );
 		});
 	},
+	pageTblWatches:function() {
+		UIManager.clearPage(_T('TblWatches'),_T("Table Watches"),UIManager.oneColumnLayout);
+		var watches = MultiBox.getWatches( 
+			"VariablesToWatch",	// watch type
+			null);		// no filter
+
+		var model = {
+			domcontainer : $(".altui-mainpanel"),
+			data : watches,
+			default_viscols: [ 'service','variable'],
+			cols: [ 
+				{ name:'service', type:'string', identifier:false, width:120 },
+				{ name:'variable', type:'string', identifier:false, width:80 },
+				{ name:'deviceid', type:'string', identifier:false, width:50 },
+				{ name:'sceneid', type:'string', identifier:false, width:80 },
+				{ name:'luaexpr', type:'string', identifier:false, width:120 },
+				{ name:'xml', type:'string', identifier:false, width:150 }
+			]
+		};
+
+		UIManager.genericTableDraw('Watches','watch',model);
+		
+		watches = MultiBox.getWatches( 
+			"VariablesToSend",	// watch type
+			null);		// no filter
+
+		model = {
+			domcontainer : $(".altui-mainpanel"),
+			data : watches,
+			default_viscols: [ 'service','variable'],
+			// cols: [ 
+				// { name:'service', type:'string', identifier:false, width:120 },
+				// { name:'variable', type:'string', identifier:false, width:80 },
+				// { name:'deviceid', type:'string', identifier:false, width:50 },
+				// { name:'sceneid', type:'string', identifier:false, width:80 },
+				// { name:'luaexpr', type:'string', identifier:false, width:120 },
+				// { name:'xml', type:'string', identifier:false, width:150 }
+			// ]
+		};
+
+		UIManager.genericTableDraw('Pushes','push',model);
+	},
 	pageTblControllers:function() {
 		function _displayControllerInfo(box_info) {
 			return _array2Table(box_info,"PK_AccessPoint",[]);
@@ -10298,94 +10341,119 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			});
 		});			
 	},
+	
+	genericTableDraw : function(type,htmlid,model) {				
+		model.data = cloneObject(model.data );
+		model.cols = model.cols || [];
+		var obj = model.data[0];
+		var viscols = MyLocalStorage.getSettings(type+"VisibleCols") || [];
+		if (viscols.length==0)
+			viscols = model.default_viscols
+		
+		var id_specified = ($.grep( model.cols , function(col) { return (col.identifier==true) } ).length>=1);
+		if (id_specified==false) {
+			model.cols.splice(0, 0, { name:'#', visible:true, type:'numeric', identifier:true, width:35 }) ,
+			viscols.push('#');
+			$.each(model.data, function(idx, obj) {
+				obj['#']=idx;
+			});
+		}
+		$.each(model.cols, function(key,value) {
+			value.visible = ($.inArray(value.name,viscols)!=-1);
+		});
+		
+		$.each( Object.keys(obj), function (idx,key) {
+			if ( !$.isArray(obj[key]) && !$.isPlainObject(obj[key]) && (key!='dirty') ) {
+				if ($.inArray(key, $.map(model.cols,function(o) { return o.name } ))==-1)
+					model.cols.push( { name:key, visible: ($.inArray(key,viscols)!=-1) } );
+			}
+		});
+		var html = "";
+		html+="<div class='col-xs-12'>";
+		html+=("<table id='"+htmlid+"' class='altui-grid table table-condensed table-hover table-striped'>");
+		html+="    <thead>";
+		html+="    <tr>";
+
+		$.each(model.cols, function(idx,col) {
+			html += "<th data-column-id='{0}' data-type='{1}' {2} {3} {4}>{0}</th>".format(
+				col.name, 
+				col.type,
+				col.identifier ? "data-identifier='true'" : "",
+				col.width ? "data-width='{0}'".format(col.width) : "",
+				"data-visible='{0}'".format(col.visible)
+				);
+		});
+		html+="    </tr>";
+		html+="    </thead>";
+		html+="    <tbody>";
+		$.each(model.data, function(idx, obj) {
+			html+="    <tr>";
+			$.each(model.cols, function(i,col) {
+				html += "<td>{0}</td>".format( _enhanceValue(obj[col.name] || '') );
+			});
+			html+="    </tr>";
+		});
+		html+="    </tbody>";
+		html+="</table>";
+		html+="</div>";
+		
+		(model.domcontainer).append( html );
+		
+		var options = (MyLocalStorage.getSettings('ShowAllRows')==1) ? {rowCount:-1	} : {};
+		$("#"+htmlid).bootgrid(
+			$.extend({
+				caseSensitive: false,
+				statusMapping: {}
+			},options)
+		).on("loaded.rs.jquery.bootgrid", function (e){
+			var settings = $("#"+htmlid).bootgrid("getColumnSettings");
+			viscols = $.map($.grep(settings, function (obj) { return obj.visible == true }),function(obj){ return obj.id;});
+			MyLocalStorage.setSettings(type+"VisibleCols",viscols);
+			/* your code goes here */
+		});	
+		
+		// Add CSV export button
+		var glyph = glyphTemplate.format('save',_T("Copy to clipboard"), '');
+		var csvButtonHtml = buttonTemplate.format( 'altui-grid-btn-'+htmlid, 'altui-tbl2csv', glyph,'default');
+		$('#'+htmlid+'-header').find('.actions.btn-group').append(csvButtonHtml);
+		$("#altui-grid-btn-"+htmlid).click( function() {
+			$("#"+htmlid).table2CSV({
+				delivery : function(data) {
+					UIManager.pageEditorForm("CSV text",data,null,_T("Copy to clipboard"),function(text,that) {
+						$(that).prev(".form-group").find("#altui-editor-text").select();
+						document.execCommand('copy');
+						$(that).parents("form").remove();
+						PageMessage.message( _T("Data copied in clipboard"), "info");
+					});
+				}
+			});
+		});
+	},
+	
 	pageTblDevices : function() {
 		UIManager.clearPage(_T('TblDevices'),_T("Table Devices"),UIManager.oneColumnLayout);
 
 		MultiBox.getDevices( 
 			null,	// per device callback not useful here
-			
 			null,	// no filter
-			
 			function (devices) {	// all devices are enumarated
+			
+				var model = {
+					domcontainer : $(".altui-mainpanel"),
+					data : devices,
+					default_viscols: [ 'id','name','manufacturer'],
+					cols: [ 
+						{ name:'id', type:'numeric', identifier:false, width:50 },
+						{ name:'altuiid', type:'string', identifier:true, width:80 },
+						{ name:'altid', type:'string', identifier:false, width:50 },
+						{ name:'id_parent', type:'numeric', identifier:false, width:80 },
+						{ name:'manufacturer', type:'string', identifier:false, width:120 },
+						{ name:'model', type:'string', identifier:false, width:150 },
+						{ name:'name', type:'string', identifier:false, width:150 }
+					]
+				};
 
-				var viscols = MyLocalStorage.getSettings("DevicesVisibleCols") || [];
-				if (viscols.length==0)
-					viscols = [ 'id','name','manufacturer'];
-				
-				var cols = [ 
-					{ name:'id', visible: $.inArray('id',viscols)!=-1, type:'numeric', identifier:true, width:50 },
-					{ name:'altuiid', visible: $.inArray('altuiid',viscols)!=-1, type:'string', identifier:true, width:80 },
-					{ name:'altid', visible: $.inArray('altid',viscols)!=-1, type:'string', identifier:true, width:50 },
-					{ name:'id_parent', visible: $.inArray('id_parent',viscols)!=-1, type:'numeric', identifier:true, width:80 },
-					{ name:'manufacturer', visible: $.inArray('manufacturer',viscols)!=-1, type:'string', identifier:true, width:120 },
-					{ name:'model', visible: $.inArray('model',viscols)!=-1, type:'string', identifier:true, width:150 },
-					{ name:'name', visible: $.inArray('name',viscols)!=-1, type:'string', identifier:true, width:150 }
-				];				
-				
-				var obj = devices[0];
-				$.each( Object.keys(obj), function (idx,key) {
-					if ( !$.isArray(obj[key]) && !$.isPlainObject(obj[key]) && (key!='dirty') ) {
-						if ($.inArray(key, $.map(cols,function(o) { return o.name } ))==-1)
-							cols.push( { name:key, visible: ($.inArray(key,viscols)!=-1) } );
-					}
-				});
-				var html = "";
-				html+="<div class='col-xs-12'>";
-				html+="<table id='altui-grid' class='table table-condensed table-hover table-striped'>";
-				html+="    <thead>";
-				html+="    <tr>";
-				$.each(cols, function(idx,col) {
-					html += "<th data-column-id='{0}' data-type='{1}' {2} {3} {4}>{0}</th>".format(
-						col.name, 
-						col.type,
-						col.identifier ? "data-identifier='true'" : "",
-						col.width ? "data-width='{0}'".format(col.width) : "",
-						"data-visible='{0}'".format(col.visible)
-						);
-				});
-				html+="    </tr>";
-				html+="    </thead>";
-				html+="    <tbody>";
-				$.each(devices, function(idx, device) {
-					html+="    <tr>";
-					$.each(cols, function(i,col) {
-						html += "<td>{0}</td>".format( _enhanceValue(device[col.name] || '') );
-					});
-					html+="    </tr>";
-				});
-				html+="    </tbody>";
-				html+="</table>";
-				html+="</div>";
-				$(".altui-mainpanel").append( html );
-				var options = (MyLocalStorage.getSettings('ShowAllRows')==1) ? {rowCount:-1	} : {};
-				$("#altui-grid").bootgrid(
-					$.extend({
-						caseSensitive: false,
-						statusMapping: {}
-					},options)
-				).on("loaded.rs.jquery.bootgrid", function (e){
-					var settings = $("#altui-grid").bootgrid("getColumnSettings");
-					viscols = $.map($.grep(settings, function (obj) { return obj.visible == true }),function(obj){ return obj.id;});
-					MyLocalStorage.setSettings("DevicesVisibleCols",viscols);
-					/* your code goes here */
-				});	
-				
-				// Add CSV export button
-				var glyph = glyphTemplate.format('save',_T("Copy to clipboard"), '');
-				var csvButtonHtml = buttonTemplate.format( 'altui-grid-btn', 'altui-tbl2csv', glyph,'default');
-				$(".actions.btn-group").append(csvButtonHtml);
-				$("#altui-grid-btn").click( function() {
-					$('#altui-grid').table2CSV({
-						delivery : function(data) {
-							UIManager.pageEditorForm("CSV text",data,null,_T("Copy to clipboard"),function(text,that) {
-								$(that).prev(".form-group").find("#altui-editor-text").select();
-								document.execCommand('copy');
-								$(that).parents("form").remove();
-								PageMessage.message( _T("Data copied in clipboard"), "info");
-							});
-						}
-					});
-				});
+				UIManager.genericTableDraw('Devices','dev',model);
 			}
 		);
 	},
@@ -10652,6 +10720,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				.on( "click", "#altui-energy", UIManager.pagePower )	
 				.on( "click", "#altui-tbl-device", UIManager.pageTblDevices )
 				.on( "click", "#altui-tbl-scene", UIManager.pageTblScenes )
+				.on( "click", "#altui-tbl-watches", UIManager.pageTblWatches )				
 				.on( "click", "#altui-tbl-controllers", UIManager.pageTblControllers )				
 				.on( "click", "#altui-optimize", UIManager.pageOptions )
 				.on( "click", "#altui-theme-selector", UIManager.pageThemes )
@@ -10851,6 +10920,7 @@ $(document).ready(function() {
 		body+="				<li class='dropdown-header'>Tables</li>";
 		body+="				<li><a id='altui-tbl-device' href='#' >"+_T("Devices")+"</a></li>";
 		body+="				<li><a id='altui-scene-triggers' href='#' >"+_T("Triggers")+"</a></li>";
+		body+="				<li><a id='altui-tbl-watches' href='#' >"+_T("Watches")+"</a></li>";
 		body+="				<li><a id='altui-tbl-scene' href='#' >"+_T("Scenes")+"</a></li>";
 		body+="				<li><a id='altui-tbl-controllers' href='#' >"+_T("Controllers")+"</a></li>";
 		body+="			<li class='divider'></li>";
