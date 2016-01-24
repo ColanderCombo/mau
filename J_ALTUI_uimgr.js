@@ -8384,7 +8384,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		});
 	},
 	
-	pageEditorForm: function (title,txt,outputarea,button,onClickCB) {
+	pageEditorForm: function (domparent, htmlid, title,txt,outputarea,button,onClickCB) {
 		var html = "";
 		html +="<form class='altui-editor-form col-sm-11' role='form' action='javascript:void(0);'>";
 		html +="  <div class='form-group'>";
@@ -8395,27 +8395,27 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			var glyph = glyphTemplate.format('save',_T("Copy to clipboard"), '');
 			html +="  <div class='form-group'>";
 			html +="    <label for='altui-editor-result'>"+_T("Return Result")+":</label>";
-			html +=  buttonTemplate.format( 'altui-copyresult-clipboard', 'altui-copy-clipboard', glyph,'default',_T("Copy"));
+			html +=  buttonTemplate.format( 'altui-copyresult-clipboard-'+htmlid, 'altui-copy-clipboard', glyph,'default',_T("Copy"));
 			html +="    <pre id='altui-editor-result'></pre>";
 			html +="  </div>";			
 			html +="  <div class='form-group'>";
 			html +="    <label for='altui-editor-output'>"+_T("Console Output")+":</label>";
-			html +=  buttonTemplate.format( 'altui-copyoutput-clipboard', 'altui-copy-clipboard', glyph,'default',_T("Copy"));
+			html +=  buttonTemplate.format( 'altui-copyoutput-clipboard-'+htmlid, 'altui-copy-clipboard', glyph,'default',_T("Copy"));
 			html +="    <pre id='altui-editor-output'></pre>";
 			html +="  </div>";			
 		}
-		html +="  <button id='altui-luaform-button' type='submit' class='btn btn-default'>"+button+"</button>";
+		html +=("  <button id='altui-luaform-button-"+htmlid+"' type='submit' class='btn btn-default'>"+button+"</button>");
 		html +="</form>";
-		$(".altui-mainpanel").append(html);
-		$("#altui-copyresult-clipboard").click( function() {
+		domparent.append(html);
+		$("#altui-copyresult-clipboard-"+htmlid).click( function() {
 			Altui_SelectText( "altui-editor-result" );
 			document.execCommand('copy');
 		});
-		$("#altui-copyoutput-clipboard").click( function() {
+		$("#altui-copyoutput-clipboard-"+htmlid).click( function() {
 			Altui_SelectText( "altui-editor-output" );
 			document.execCommand('copy');
 		});
-		$("#altui-luaform-button").click( function() {
+		$("#altui-luaform-button-"+htmlid).click( function() {
 			var txt = $("textarea#altui-editor-text").val();
 			onClickCB(txt,$(this));
 		});
@@ -8425,7 +8425,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 	{
 		UIManager.clearPage(_T('Editor'), filename,UIManager.oneColumnLayout);
 		$(".altui-mainpanel").append("<p> </p>");
-		UIManager.pageEditorForm(filename,txt,null,button,function(newtxt) {
+		UIManager.pageEditorForm($(".altui-mainpanel"),'altui-page-editor',filename,txt,null,button,function(newtxt) {
 			if ($.isFunction(cbfunc)) 
 				cbfunc(newtxt);
 		});
@@ -8436,7 +8436,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		UIManager.clearPage(_T('LuaTest'),_T("LUA Code Test"),UIManager.oneColumnLayout);
 		$(".altui-mainpanel").append("<p>"+_T("This test code will succeed if it is syntactically correct. It must be the body of a function and can return something. The return object and console output will be displayed)")+"</p>");
 		var lastOne = MyLocalStorage.getSettings("LastOne_LuaTest") || "return true";
-		UIManager.pageEditorForm("Lua Test Code",lastOne,true,_T("Submit"),function(lua) {
+		UIManager.pageEditorForm($(".altui-mainpanel"),'altui-page-editor',"Lua Test Code",lastOne,true,_T("Submit"),function(lua) {
 			MyLocalStorage.setSettings("LastOne_LuaTest",lua);
 			MultiBox.runLua(0,lua, function(res) {
 				res = $.extend({success:false, result:"",output:""},res);
@@ -8648,7 +8648,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 	{
 		function _prepareUI( ctrlid ) {
 			var lua = MultiBox.getLuaStartup(ctrlid );
-			UIManager.pageEditorForm("Lua Startup Code",lua,null,"Submit",function(newlua) {
+			UIManager.pageEditorForm($(".altui-mainpanel"),'altui-page-editor',"Lua Startup Code",lua,null,"Submit",function(newlua) {
 				if (newlua!=lua) {
 					DialogManager.confirmDialog(_T("do you want to change lua startup code ? if yes, it will generate a LUA reload, be patient..."),function(result) {
 						if (result==true) {
@@ -10330,7 +10330,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			$("#altui-grid-btn").click( function() {
 				$('#altui-grid').table2CSV({
 					delivery : function(data) {
-						UIManager.pageEditorForm("CSV text",data,null,_T("Copy to clipboard"),function(text,that) {
+						UIManager.pageEditorForm($(".altui-mainpanel"),'altui-page-editor',"CSV text",data,null,_T("Copy to clipboard"),function(text,that) {
 							$(that).prev(".form-group").find("#altui-editor-text").select();
 							document.execCommand('copy');
 							$(that).parents("form").remove();
@@ -10396,6 +10396,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		html+="    </tbody>";
 		html+="</table>";
 		html+="</div>";
+		html+="<div id='altui-aftertable-"+htmlid+"' class='col-xs-12'>";
+		html+="</div>";
 		
 		(model.domcontainer).append( html );
 		
@@ -10417,16 +10419,18 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		var csvButtonHtml = buttonTemplate.format( 'altui-grid-btn-'+htmlid, 'altui-tbl2csv', glyph,'default');
 		$('#'+htmlid+'-header').find('.actions.btn-group').append(csvButtonHtml);
 		$("#altui-grid-btn-"+htmlid).click( function() {
-			$("#"+htmlid).table2CSV({
-				delivery : function(data) {
-					UIManager.pageEditorForm("CSV text",data,null,_T("Copy to clipboard"),function(text,that) {
-						$(that).prev(".form-group").find("#altui-editor-text").select();
-						document.execCommand('copy');
-						$(that).parents("form").remove();
-						PageMessage.message( _T("Data copied in clipboard"), "info");
-					});
-				}
-			});
+			if ($('#altui-aftertable-'+htmlid).find('form').length==0) {
+				$("#"+htmlid).table2CSV({
+					delivery : function(data) {
+						UIManager.pageEditorForm($('#altui-aftertable-'+htmlid),'altui-page-editor-'+htmlid,"CSV text",data,null,_T("Copy to clipboard"),function(text,that) {
+							$(that).prev(".form-group").find("#altui-editor-text").select();
+							document.execCommand('copy');
+							$(that).parents("form").remove();
+							PageMessage.message( _T("Data copied in clipboard"), "info");
+						});
+					}
+				});
+			}
 		});
 	},
 	

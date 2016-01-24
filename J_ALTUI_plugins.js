@@ -960,12 +960,25 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		var newsrc = (conditionGroup!=null) ? "http://icons.wxug.com/i/c/i/"+conditionGroup+".gif" : defaultIconSrc;
 		return "<img class='altui-device-icon pull-left img-rounded' src='"+newsrc+"' alt='"+conditionGroup+"' onerror='UIManager.onDeviceIconError(\""+device.altuiid+"\")' ></img>";
 	};
-
+	
 	function _drawDataMine( device) {
 		var html ="";
-		var ipaddr = MultiBox.getIpAddr(device.altuiid);
-		var hostname = (ipaddr=='') ? window.location.hostname : ipaddr;
-		var url = window.location.protocol+'//'+hostname+"/dm/index.html";
+		var url = "";
+		if (MultiBox.isRemoteAccess()==true) {
+			var controller = MultiBox.controllerOf(device.altuiid).controller;
+			var isUI5 = MultiBox.isUI5(controller);
+			if (isUI5 == false) {
+				var main_url = window.location.href;
+				var url_parts = main_url.split("?");
+				url = url_parts[0]+"?id=lr_dmPage"
+			} else {
+				url = 'https://'+hostname+"/port_3480/data_request?id=lr_dmPage";
+			}
+		} else {
+			var ipaddr = MultiBox.getIpAddr(device.altuiid);
+			var hostname = (ipaddr=='') ? window.location.hostname : ipaddr;
+			url = 'http://'+hostname+"/dm/index.html";
+		}
 		html+= ("<button id='altui-datamine-{0}' type='button' class='pull-right altui-datamine-open btn btn-default btn-sm ' >{1}</button>" .format( device.altuiid,_T("Open") )) ;
 		html += "<script type='text/javascript'>";
 		html += " $('button#altui-datamine-{0}.altui-datamine-open').on('click', function() { window.open('{1}','_blank'); } );".format(device.altuiid,url);
