@@ -379,13 +379,13 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 				function doItNow(obj) {
 					var params = {}; params[obj.name]=obj.value;
 					MultiBox.runActionByAltuiID(obj.altuiid, obj.service, obj.action, params);			
-					// console.log("timer doItNow() :" + JSON.stringify(obj));
+					console.log("timer doItNow() :" + JSON.stringify(obj));
 					$(obj.button).data("timer",null);
 				};
 				var timer = $(this).data("timer");
 				if (timer!=undefined) {
 					clearTimeout(timer);
-					// console.log("clear Timeout({0})".format(timer));
+					console.log("clear Timeout({0})".format(timer));
 				}
 				timer = setTimeout(doItNow,1500,{
 						button: $(this),
@@ -395,7 +395,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 						action: action,
 						value : value+incr
 				});
-				// console.log("set Timeout({0})  params:{1}".format(timer,value+incr));
+				console.log("set Timeout({0})  params:{1}".format(timer,value+incr));
 				$(this).data("timer",timer);
 			}	
 		);

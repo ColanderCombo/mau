@@ -7097,7 +7097,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			category		: MyLocalStorage.getSettings("CategoryFilter") || 0,
 			filtername		: MyLocalStorage.getSettings("DeviceFilterName") || "",
 			isRoomFilterValid 		: function() {
-				return ($.isArray(this.room)) ? (this.room.length>0) : (this.room<=0);
+				return ($.isArray(this.room)) ? (this.room.length>0) : (this.room!=-1);
 			},
 			isCategoryFilterValid 	: function() {return this.category!=0},
 		}, filter );
