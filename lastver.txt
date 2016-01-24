@@ -44,6 +44,7 @@ UIManager.checkAltuiUpdate("1155,Table for Watches;Prevent a crash with keypad d
 	'ramwal':new Date(2016,0,7),
 	'thegazelle':new Date(2016,0,15),
 	'powisquare':new Date(2016,0,17),	
+	'jonasstolt':new Date(2016,0,24),	
 	'vosmont':new Date(2020,0,1),
 	'dklinkman':new Date(2020,0,1),
 	'akbooer':new Date(2020,0,1),
