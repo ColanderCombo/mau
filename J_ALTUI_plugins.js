@@ -872,7 +872,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	function _drawKeypadControlPanel( device, domparent) {
 		var html="";
 		html +="<div class=''>";
-		html += "<span class='text-warn'>this panel is <mark>not functional</mark>, it requires a brave developper to finish it to mananage pin codes etc using device UPNP actions</span>";
+		html += "<span class='text-warn'>this panel is <mark>not functional</mark>, it requires a brave developper to finish it to manage pin codes etc using device UPNP actions</span>";
 		html += "<table id='altui-cplus-keytbl'>";
 		html += "<tbody>";
 		html+="<tr><td><button class='altui-cplus-button btn btn-default' id='1'>1</button></td><td><button class='altui-cplus-button btn btn-default' id='2'>2</button></td><td><button class='altui-cplus-button btn btn-default' id='3'>3</button></td></tr>";
