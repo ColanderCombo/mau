@@ -1,4 +1,4 @@
-UIManager.checkAltuiUpdate("1141,keypad dashboard;bugfix: data push fixes for parameter-less providers;bugfix: Data push configuration different per variable;change of json module,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=30151",
+UIManager.checkAltuiUpdate("1151,Room filter button color bugfix;visual hint on variable when a data-push is set;delete associated watches when deleting a device or a scene;fix json load problem;disable local access button in UIx settings tab when accessed remotely;Increase Watts display size in favorite tile;wip on Keypad device dashboard,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=30170",
 {
 	'amg0':new Date(2014,11,2),
 	'amg1':new Date(2015,10,28),
