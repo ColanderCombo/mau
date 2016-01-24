@@ -10,7 +10,7 @@ local MSG_CLASS = "ALTUI"
 local ALTUI_SERVICE = "urn:upnp-org:serviceId:altui1"
 local devicetype = "urn:schemas-upnp-org:device:altui:1"
 local DEBUG_MODE = false
-local version = "v1.09"
+local version = "v1.10"
 local UI7_JSON_FILE= "D_ALTUI_UI7.json"
 local json = require("dkjson")
 if (type(json) == "string") then
@@ -1508,7 +1508,8 @@ local function getDefaultConfig()
 	}
 	tbl["urn:schemas-micasaverde-com:device:Keypad:1"]= {
 		["ScriptFile"]="J_ALTUI_plugins.js",
-		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawKeypad"
+		["DeviceDrawFunc"]="ALTUI_PluginDisplays.drawKeypad",
+		["ControlPanelFunc"]="ALTUI_PluginDisplays.drawKeypadControlPanel"
 	}	
 	tbl["urn:schemas-dcineco-com:device:MSwitch:1"]= {
 		["ScriptFile"]="J_ALTUI_plugins.js",

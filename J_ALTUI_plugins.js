@@ -869,6 +869,31 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		html += "</script>";
 		return html;
 	};
+	function _drawKeypadControlPanel( device, domparent) {
+		var html="";
+		html +="<div class=''>";
+		html += "<span class='text-warn'>this panel is <mark>not functional</mark>, it requires a brave developper to finish it to mananage pin codes etc using device UPNP actions</span>";
+		html += "<table id='altui-cplus-keytbl'>";
+		html += "<tbody>";
+		html+="<tr><td><button class='altui-cplus-button btn btn-default' id='1'>1</button></td><td><button class='altui-cplus-button btn btn-default' id='2'>2</button></td><td><button class='altui-cplus-button btn btn-default' id='3'>3</button></td></tr>";
+		html+="<tr><td><button class='altui-cplus-button btn btn-default' id='4'>4</button></td><td><button class='altui-cplus-button btn btn-default' id='5'>5</button></td><td><button class='altui-cplus-button btn btn-default' id='6'>6</button></td></tr>";
+		html+="<tr><td><button class='altui-cplus-button btn btn-default' id='7'>7</button></td><td><button class='altui-cplus-button btn btn-default' id='8'>8</button></td><td><button class='altui-cplus-button btn btn-default' id='9'>9</button></td></tr>";
+		html+="<tr><td colspan='3'><button class='altui-cplus-button btn btn-default' id='0'>0</button></td></tr>";
+		html += "</tbody>";
+		html += "</table>";
+		html +="</div>";
+		// html +="<div id='altui-cplus-divcontainer' class='pull-left'>";
+		// html +="</div>";
+		$(domparent).append(html);
+		
+		// also display the default
+		// UIManager.defaultDeviceDrawControlPanel(devid, device, domparent.find("div#altui-cplus-divcontainer").width(400));
+		
+		$(".altui-cplus-button").click( function() {
+			var id = $(this).prop('id');
+			// MultiBox.runAction( device, 'urn:upnp-org:serviceId:cplus1', 'SendKey', {keyStream:id} );
+		});
+	};	
 	
 	// return the html string inside the .panel-body of the .altui-device#id panel
 	
@@ -1041,6 +1066,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 	onColorPicker  : _onColorPicker,
 	drawDimmableRGB   : _drawDimmableRGB,
 	drawKeypad		: _drawKeypad,
+	drawKeypadControlPanel : _drawKeypadControlPanel,
 	drawMotion 	   : _drawMotion,
 	drawGCal       : _drawGCal,
 	drawCombinationSwitch	: _drawCombinationSwitch,

@@ -3193,6 +3193,10 @@ var PageMessage = (function(window, undefined ) {
 })();
 
 var UIManager  = ( function( window, undefined ) {  
+	// there scripts cannot be loaded by ALTUI and cannot be executed, so if a device uses them, we do not load/use it
+	// meaning we lose functionality
+	var _forbiddenScripts=["shared.js","interface.js"];
+
 	// in English, we will apply the _T() later, at display time
 	var _checkOptions = [
 		{ id:'ShowVideoThumbnail', type:'checkbox', label:"Show Video Thumbnail in Local mode", _default:1, help:'In Local access mode, show camera in video stream mode' },
@@ -4497,7 +4501,7 @@ var UIManager  = ( function( window, undefined ) {
 	function _codifyName(name)
 	{
 		return name.replace(/:/g,"_").replace(/-/g,"_");
-	}
+	};
 	
 	function  _deviceDrawControlPanelJSTab( device, tab, domparent ) {
 		var devid = device.altuiid;
@@ -4505,7 +4509,7 @@ var UIManager  = ( function( window, undefined ) {
 		$(domparent).addClass("altui-norefresh");	// javascript tabs are not refreshed
 		
 		var script = tab.ScriptName;
-		if (script =="shared.js")
+		if ( $.inArray( script, _forbiddenScripts) != -1)
 			return;	// do not want UI5 tool pages !
 		var func = tab.Function;
 		set_JSAPI_context( {
@@ -4933,7 +4937,7 @@ var UIManager  = ( function( window, undefined ) {
 			var ui_static_data = MultiBox.getDeviceStaticData(device);
 			if (ui_static_data!=null) {
 				var tab = ui_static_data.Tabs[tabidx-1];
-				if ((tab.TabType!="javascript") || (tab.ScriptName!="shared.js")) {
+				if ((tab.TabType!="javascript") || ( $.inArray( tab.ScriptName, _forbiddenScripts) == -1))  {
 					if ( tab.TabType=="flash") {
 						_deviceDrawControlPanelTab( device, tab, parent );		// row for Flash Panel
 					} else {
@@ -5323,7 +5327,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				}
 				if (tabs!=undefined)
 					$.each( tabs, function( idx,tab) {
-						if ((tab.TabType!="javascript") || (tab.ScriptName!="shared.js")) {
+						if ((tab.TabType!="javascript") || ( $.inArray( tab.ScriptName, _forbiddenScripts) == -1)) {
 							lines.push( "<li id='altui-devtab-{1}' role='presentation' ><a href='#altui-devtab-content-{1}' aria-controls='{0}' role='tab' data-toggle='tab'>{0}</a></li>".format(tab.Label.text,idx+1) );
 						}
 					});
@@ -5335,7 +5339,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				}
 				if (tabs!=undefined)
 					$.each( tabs, function( idx,tab) {
-						if ((tab.TabType!="javascript") || (tab.ScriptName!="shared.js")) {
+						if ((tab.TabType!="javascript") || ( $.inArray( tab.ScriptName, _forbiddenScripts) == -1)) {
 							html += "<div id='altui-devtab-content-{0}' class='tab-pane bg-info altui-devtab-content'>".format(idx+1);
 							html += "</div>";
 						}
@@ -5431,7 +5435,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			var scripts = {};
 			if (ui_static_data.Tabs != undefined) 
 				$.each( ui_static_data.Tabs, function( idx,tab) {
-					if (tab.TabType=="javascript" && tab.ScriptName!="shared.js")
+					if (tab.TabType=="javascript" && ( $.inArray( tab.ScriptName, _forbiddenScripts) == -1))
 					{
 						var script = tab.ScriptName;
 						var func = tab.Function;
@@ -7746,7 +7750,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				if ( ui_static_data && ui_static_data.Tabs )
 				{
 					$.each( ui_static_data.Tabs, function( idx,tab) {
-						if (tab.TabType=="javascript" && tab.ScriptName!="shared.js")
+						if (tab.TabType=="javascript" && ( $.inArray( tab.ScriptName, _forbiddenScripts) == -1))
 						{
 							var script = tab.ScriptName;
 							var func = tab.Function;
