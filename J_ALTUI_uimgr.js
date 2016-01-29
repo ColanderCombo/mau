@@ -8837,9 +8837,9 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			var service="urn:micasaverde-com:serviceId:ZWaveDevice1"
 			var PollNoReply = parseInt(MultiBox.getStatus(device,service,"PollNoReply"));
 			var PollOk = parseInt(MultiBox.getStatus(device,service,"PollOk"));
-			if (PollOk+PollNoReply>0)
+			if ( (isNaN(PollOK)==false) && (isNaN(PollNoReply)==false) && ((PollOk+PollNoReply)>0) )
 				return ( PollOk / (PollOk+PollNoReply) );
-			return 1;
+			return -1;
 		};
 		function _countNeighbors(device) {
 			var n=0;
@@ -8974,7 +8974,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					.attr("height",y.rangeBand())
 					// .style("fill",c(_commQuality(d)))
 					.style("fill",function(d) { 
-						return c(_commQuality(d3.select(this.parentNode).datum().altuiid));
+						var cq = _commQuality(d3.select(this.parentNode).datum().altuiid);
+						return (cq<0) ? "grey" : c(_commQuality(d3.select(this.parentNode).datum().altuiid));
 						})
 					.on("mouseover", function(p) {
 						var lignedatum = d3.select(this.parentNode).datum();
