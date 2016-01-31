@@ -127,8 +127,9 @@ var VeraBox = ( function( uniq_id, ip_addr ) {
 	
 	function _reboot()
 	{
-		return this.runLua("os.execute('reboot')", function(result) {
-			if ( result == "Passed")
+		return this.runLua("os.execute('reboot')", function(res) {
+			res = $.extend({success:false, result:"",output:""},res);
+			if ( res.success ==true )
 				PageMessage.message( "Reboot request succeeded", "success");
 			else
 				PageMessage.message( "Reboot request failed", "danger");
