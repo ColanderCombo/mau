@@ -10180,16 +10180,6 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		html+="<div>";
 		html+="  <ul class='nav nav-tabs' role='tablist'>";
 		var controllers = MultiBox.getControllers();
-		// var arr = [];
-		// $.each(controllers, function( idx, controller) {
-			// var ip = (controller.ip == "" ) ? "Main" : controller.ip ;
-			// $.each(controller.box_info,function(key,val) {
-				// if (arr[key]==undefined)
-					// arr[key]={};
-				// arr[key][ip]=val;
-			// });
-		// });
-
 		var bFirst=true;
 		$.each(controllers, function( idx, controller) {
 			var name  = (controller.ip == "" ) ? "Main" : controller.ip ;
@@ -10217,139 +10207,63 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 	pageTblScenes: function() {
 		UIManager.clearPage(_T('TblScenes'),_T("Table Scenes"),UIManager.oneColumnLayout);
 		MultiBox.getScenes(null, null, function (scenes) {
-			var viscols = MyLocalStorage.getSettings("ScenesVisibleCols") || [];
-			if (viscols.length==0)
-				viscols = [ 'id','name','last_run'];
-
-			var cols = [ 
-				{ name:'id', visible: $.inArray('id',viscols)!=-1, type:'numeric', identifier:false, width:50 },
-				{ name:'altuiid', visible: $.inArray('altuiid',viscols)!=-1, type:'string', identifier:true, width:80 },
-				{ name:'name', visible: $.inArray('name',viscols)!=-1, type:'string', identifier:false, width:150 },
-				{ name:'last_run', visible: $.inArray('last_run',viscols)!=-1, type:'numeric', formatter:"last_run", identifier:false, width:150 }
-			];		
-			var obj = scenes[0];
-			if (obj == undefined)
-				return;
-			$.each( Object.keys(obj), function (idx,key) {
-				if ( !$.isArray(obj[key]) && !$.isPlainObject(obj[key]) && (key!='dirty') ) {
-					if ($.inArray(key, $.map(cols,function(o) { return o.name } ))==-1)
-						cols.push( { name:key, visible: ($.inArray(key,viscols)!=-1) } );
-				}
-			});			
-			var html = "";
-			html+="<div class='col-xs-12'>";
-			html+="<table id='altui-grid' class='table table-condensed table-hover table-striped'>";
-			html+="    <thead>";
-			html+="    <tr>";
-			$.each(cols, function(idx,col) {
-			html += "<th data-column-id='{0}' data-type='{1}' {2} {3} {4} {5}>{0}</th>".format(
-					col.name, 
-					col.type,
-					col.identifier ? "data-identifier='true'" : "",
-					col.width ? "data-width='{0}'".format(col.width) : "",
-					"data-visible='{0}'".format(col.visible),
-					col.formatter ? ("data-formatter='"+col.formatter+"'") : ''
-					);
-			});
-			// add other  count
-			html += "<th data-column-id='{0}' data-type='{1}' {2} {3} {4}>{0}</th>".format(
-				"triggers", 
-				"numeric",
-				"",
-				50,
-				"data-visible='{0}'".format($.inArray('triggers',viscols)!=-1)
-				);
-			html += "<th data-column-id='{0}' data-type='{1}' {2} {3} {4}>{0}</th>".format(
-				"watches", 
-				"numeric",
-				"",
-				50,
-				"data-visible='{0}'".format($.inArray('watches',viscols)!=-1)
-				);
-			html += "<th data-column-id='{0}' data-type='{1}' {2} {3} {4}>{0}</th>".format(
-				"timers", 
-				"numeric",
-				"",
-				50,
-				"data-visible='{0}'".format($.inArray('timers',viscols)!=-1)
-				);
-			html += "<th data-column-id='commands' data-formatter='commands' data-sortable='false'>Commands</th>";
-			html+="</tr>";
-			html+="</thead>";
-			html+="<tbody>";
-			$.each(scenes, function(idx, scene) {
-				html+="    <tr>";
-				$.each(cols, function(i,col) {
-					html += "<td>{0}</td>".format( scene[col.name] || '' );
-				});
-				html += "<td>{0}</td>".format( scene.triggers ? scene.triggers.length : 0 );
-				html += "<td>{0}</td>".format( WatchManager.countWatchForScene(scene) );
-				html += "<td>{0}</td>".format( scene.timers ? scene.timers.length : 0 );
-				html += "<td></td>";	// commands
-				html+="    </tr>";
-			});
-			html+="</tbody>";
-			html+="</table>";
-			html+="</div>";
-			$(".altui-mainpanel").append( html );
-
-			var options = (MyLocalStorage.getSettings('ShowAllRows')==1) ? { rowCount:-1 } : {};
-			var grid = $("#altui-grid").bootgrid( 
-				$.extend(
-					true,
-					{
-						caseSensitive: false,
-						statusMapping: {},
-						formatters: {
-							"commands": function(column, row)
-							{
-								return "<button type=\"button\" class=\"btn btn-xs btn-default altui-command-edit\" data-row-id=\"" + row.altuiid + "\">"+editGlyph+"</button>" + 
-									"<button type=\"button\" class=\"btn btn-xs btn-default altui-command-delete\" data-row-id=\"" + row.altuiid + "\">"+deleteGlyph+"</button>";
-							},
-							"last_run": function(column, row) {
-								return _enhanceValue(row.last_run);
-							}
+			var model = {
+				domcontainer : $(".altui-mainpanel"),
+				data : scenes,
+				default_viscols: [ 'id','name','last_run'],
+				cols: [ 
+					{ name:'id', type:'numeric', identifier:true, width:50 },
+					{ name:'altuiid', type:'string', identifier:false, width:80 },
+					{ name:'name', type:'string', identifier:false, width:150 },
+					{ name:'last_run', type:'numeric', formatter:'last_run', identifier:false, width:150 },
+					{ name:'triggers', type:'numeric', computer:'triggers', identifier:false, width:80 },
+					{ name:'watches', type:'numeric', computer:'watches', identifier:false, width:80 },
+					{ name:'timers', type:'numeric', computer:'timers', identifier:false, width:80 },
+				],
+				formatters: {
+					"last_run": function(column, row) {
+						return _enhanceValue(row.last_run);
+					},
+				},
+				computers: {
+					"triggers": function(row) {
+						var scene = MultiBox.getSceneByAltuiID(row.altuiid);
+						return scene.triggers ? scene.triggers.length : 0;
+					},					
+					"watches": function(row) {
+						var scene = MultiBox.getSceneByAltuiID(row.altuiid);
+						return WatchManager.countWatchForScene(scene);
+					},
+					"timers": function(row) {
+						var scene = MultiBox.getSceneByAltuiID(row.altuiid);
+						return scene.timers ? scene.timers.length : 0
+					},					
+				},
+				commands: {
+					'altui-command-edit': {
+						glyph:editGlyph,
+						onclick: function(e) {
+							var id = $(this).data("row-id");
+							UIManager.pageSceneEdit(id);
 						}
 					},
-					options
-				)
-			).on("loaded.rs.jquery.bootgrid", function (e) {
-				var settings = $("#altui-grid").bootgrid("getColumnSettings");
-				viscols = $.map($.grep(settings, function (obj) { return obj.visible == true }),function(obj){ return obj.id;});
-				MyLocalStorage.setSettings("ScenesVisibleCols",viscols);
-				/* your code goes here */
-				grid.find(".altui-command-edit").on('click',function(){
-					var id = $(this).data("row-id");
-					UIManager.pageSceneEdit(id);
-				});
-				grid.find(".altui-command-delete").on('click',function(){
-					var altuiid = $(this).data("row-id");
-					var scene = MultiBox.getSceneByAltuiID(altuiid);
-					DialogManager.confirmDialog(_T("Are you sure you want to delete scene ({0})").format(altuiid),function(result) {
-						if (result==true) {
-							MultiBox.deleteScene( scene );
-							grid.bootgrid("remove", [scene.altuiid]);
+					'altui-command-delete': {
+						glyph:deleteGlyph,
+						onclick: function(e) {
+							var altuiid = $(this).data("row-id");
+							var scene = MultiBox.getSceneByAltuiID(altuiid);
+							DialogManager.confirmDialog(_T("Are you sure you want to delete scene ({0})").format(altuiid),function(result) {
+								if (result==true) {
+									MultiBox.deleteScene( scene );
+									grid.bootgrid("remove", [scene.altuiid]);
+								}
+							});							
 						}
-					});
-				});
-			});	
-			
-			// Add CSV export button
-			var glyph = glyphTemplate.format('save',_T("Copy to clipboard"), '');
-			var csvButtonHtml = buttonTemplate.format( 'altui-grid-btn', 'altui-tbl2csv', glyph,'default');
-			$(".actions.btn-group").append(csvButtonHtml);
-			$("#altui-grid-btn").click( function() {
-				$('#altui-grid').table2CSV({
-					delivery : function(data) {
-						UIManager.pageEditorForm($(".altui-mainpanel"),'altui-page-editor',"CSV text",data,null,_T("Copy to clipboard"),function(text,that) {
-							$(that).prev(".form-group").find("#altui-editor-text").select();
-							document.execCommand('copy');
-							$(that).parents("form").remove();
-							PageMessage.message( _T("Data copied in clipboard"), "info");
-						});
-					}
-				});
-			});
+					},
+				},
+			};
+
+			UIManager.genericTableDraw('Scenes','scene',model);
 		});			
 	},
 	
@@ -10386,22 +10300,45 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		html+="    <tr>";
 
 		$.each(model.cols, function(idx,col) {
-			html += "<th data-column-id='{0}' data-type='{1}' {2} {3} {4}>{0}</th>".format(
+			html += "<th data-column-id='{0}' data-type='{1}' {2} {3} {4} {5}>{0}</th>".format(
 				col.name, 
 				col.type,
 				col.identifier ? "data-identifier='true'" : "",
 				col.width ? "data-width='{0}'".format(col.width) : "",
-				"data-visible='{0}'".format(col.visible)
+				"data-visible='{0}'".format(col.visible),
+				col.formatter ? ("data-formatter='{0}'".format(col.formatter) ) : ''
 				);
 		});
+		if (model.commands)		{ // commands
+			html += "<th data-column-id='commands' data-formatter='commands' data-sortable='false'>Commands</th>";
+			model.formatters = $.extend( {
+				"commands": function(column, row)
+					{
+						var cmds="";
+						$.each(model.commands, function(key,cmd) {
+							cmds += "<button type=\"button\" class=\"btn btn-xs btn-default {0}\" data-row-id=\"{1}\">{2}</button>".format(
+								key,
+								row.altuiid,
+								cmd.glyph
+							);
+						});
+						return cmds;
+					},				
+				}, 
+				model.formatters 
+			);
+		}
 		html+="    </tr>";
 		html+="    </thead>";
 		html+="    <tbody>";
 		$.each(model.data, function(idx, obj) {
 			html+="    <tr>";
 			$.each(model.cols, function(i,col) {
-				html += "<td>{0}</td>".format( _enhanceValue(obj[col.name] || '') );
+				var value = (col.computer && $.isFunction(model.computers[col.computer])) ? model.computers[col.computer](obj) : (obj[col.name] || '')
+				html += "<td>{0}</td>".format( value );
 			});
+			if (model.commands)
+				html += "<td></td>";	// commands
 			html+="    </tr>";
 		});
 		html+="    </tbody>";
@@ -10413,16 +10350,26 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		(model.domcontainer).append( html );
 		
 		var options = (MyLocalStorage.getSettings('ShowAllRows')==1) ? {rowCount:-1	} : {};
-		$("#"+htmlid).bootgrid(
+		var grid = $("#"+htmlid).bootgrid(
 			$.extend({
 				caseSensitive: false,
-				statusMapping: {}
+				statusMapping: {},
+				formatters: model.formatters || {}
 			},options)
 		).on("loaded.rs.jquery.bootgrid", function (e){
 			var settings = $("#"+htmlid).bootgrid("getColumnSettings");
 			viscols = $.map($.grep(settings, function (obj) { return obj.visible == true }),function(obj){ return obj.id;});
 			MyLocalStorage.setSettings(type+"VisibleCols",viscols);
 			/* your code goes here */
+			if (model.commands) {
+				$.each(model.commands, function(cmd,descr) {
+					grid.find("."+cmd).on('click',function(e){
+						if ($.isFunction(descr.onclick)) {
+							(descr.onclick).bind($(this),e)();		// bind this then call					
+						}
+					});
+				});
+			}	
 		});	
 		
 		// Add CSV export button
