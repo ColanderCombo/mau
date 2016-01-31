@@ -10142,11 +10142,21 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			cols: [ 
 				{ name:'service', type:'string', identifier:false, width:120 },
 				{ name:'variable', type:'string', identifier:false, width:80 },
-				{ name:'deviceid', type:'string', identifier:false, width:50 },
-				{ name:'sceneid', type:'string', identifier:false, width:80 },
+				{ name:'deviceid', type:'string', formatter:'devicename', identifier:false, width:200 },
+				{ name:'sceneid', type:'string', formatter:'scenename', identifier:false, width:200 },
 				{ name:'luaexpr', type:'string', identifier:false, width:120 },
 				{ name:'xml', type:'string', identifier:false, width:150 }
 			],
+			formatters: {
+				"devicename": function(column, row) {
+					var device = MultiBox.getDeviceByAltuiID(row.deviceid);
+					return "#{1}-{0}".format(device.name,device.altuiid);
+				},
+				"scenename": function(column, row) {
+					var scene = MultiBox.getSceneByID(0,row.sceneid);
+					return "#{1}-{0}".format(scene.name,scene.altuiid);
+				},
+			},
 			commands: {
 				'altui-command-edit': {
 					glyph:editGlyph,
@@ -10186,6 +10196,18 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			domcontainer : $(".altui-mainpanel"),
 			data : watches,
 			default_viscols: [ 'service','variable'],
+			cols: [ 
+				{ name:'service', type:'string', identifier:false, width:120 },
+				{ name:'variable', type:'string', identifier:false, width:80 },
+				{ name:'deviceid', type:'string', formatter:'devicename', identifier:false, width:220 },
+				{ name:'provider', type:'string', identifier:false, width:100 },
+			],
+			formatters: {
+				"devicename": function(column, row) {
+					var device = MultiBox.getDeviceByAltuiID(row.deviceid);
+					return device ? "#{1}-{0}".format(device.name,device.altuiid) : "";
+				},
+			},
 			commands: {
 				'altui-command-edit': {
 					glyph:editGlyph,
