@@ -10220,10 +10220,12 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			var viscols = MyLocalStorage.getSettings("ScenesVisibleCols") || [];
 			if (viscols.length==0)
 				viscols = [ 'id','name','last_run'];
+
 			var cols = [ 
 				{ name:'id', visible: $.inArray('id',viscols)!=-1, type:'numeric', identifier:false, width:50 },
 				{ name:'altuiid', visible: $.inArray('altuiid',viscols)!=-1, type:'string', identifier:true, width:80 },
-				{ name:'name', visible: $.inArray('name',viscols)!=-1, type:'string', identifier:false, width:150 }
+				{ name:'name', visible: $.inArray('name',viscols)!=-1, type:'string', identifier:false, width:150 },
+				{ name:'last_run', visible: $.inArray('last_run',viscols)!=-1, type:'numeric', formatter:"last_run", identifier:false, width:150 }
 			];		
 			var obj = scenes[0];
 			if (obj == undefined)
@@ -10240,12 +10242,13 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			html+="    <thead>";
 			html+="    <tr>";
 			$.each(cols, function(idx,col) {
-				html += "<th data-column-id='{0}' data-type='{1}' {2} {3} {4}>{0}</th>".format(
+			html += "<th data-column-id='{0}' data-type='{1}' {2} {3} {4} {5}>{0}</th>".format(
 					col.name, 
 					col.type,
 					col.identifier ? "data-identifier='true'" : "",
 					col.width ? "data-width='{0}'".format(col.width) : "",
-					"data-visible='{0}'".format(col.visible)
+					"data-visible='{0}'".format(col.visible),
+					col.formatter ? ("data-formatter='"+col.formatter+"'") : ''
 					);
 			});
 			// add other  count
@@ -10277,7 +10280,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			$.each(scenes, function(idx, scene) {
 				html+="    <tr>";
 				$.each(cols, function(i,col) {
-					html += "<td>{0}</td>".format( _enhanceValue(scene[col.name] || '') );
+					html += "<td>{0}</td>".format( scene[col.name] || '' );
 				});
 				html += "<td>{0}</td>".format( scene.triggers ? scene.triggers.length : 0 );
 				html += "<td>{0}</td>".format( WatchManager.countWatchForScene(scene) );
@@ -10290,19 +10293,26 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			html+="</div>";
 			$(".altui-mainpanel").append( html );
 
-			var options = (MyLocalStorage.getSettings('ShowAllRows')==1) ? {rowCount:-1	} : {};
+			var options = (MyLocalStorage.getSettings('ShowAllRows')==1) ? { rowCount:-1 } : {};
 			var grid = $("#altui-grid").bootgrid( 
-				$.extend({
-					caseSensitive: false,
-					statusMapping: {},
-					formatters: {
-						"commands": function(column, row)
-						{
-							return "<button type=\"button\" class=\"btn btn-xs btn-default altui-command-edit\" data-row-id=\"" + row.altuiid + "\">"+editGlyph+"</button>" + 
-								"<button type=\"button\" class=\"btn btn-xs btn-default altui-command-delete\" data-row-id=\"" + row.altuiid + "\">"+deleteGlyph+"</button>";
+				$.extend(
+					true,
+					{
+						caseSensitive: false,
+						statusMapping: {},
+						formatters: {
+							"commands": function(column, row)
+							{
+								return "<button type=\"button\" class=\"btn btn-xs btn-default altui-command-edit\" data-row-id=\"" + row.altuiid + "\">"+editGlyph+"</button>" + 
+									"<button type=\"button\" class=\"btn btn-xs btn-default altui-command-delete\" data-row-id=\"" + row.altuiid + "\">"+deleteGlyph+"</button>";
+							},
+							"last_run": function(column, row) {
+								return _enhanceValue(row.last_run);
+							}
 						}
-					}
-				},options)
+					},
+					options
+				)
 			).on("loaded.rs.jquery.bootgrid", function (e) {
 				var settings = $("#altui-grid").bootgrid("getColumnSettings");
 				viscols = $.map($.grep(settings, function (obj) { return obj.visible == true }),function(obj){ return obj.id;});
