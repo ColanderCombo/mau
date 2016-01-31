@@ -621,6 +621,16 @@ var styles ="						\
 	.altui-room-name  {		\
 		cursor: pointer;	\
 	}						\
+	.altui-quality-color  {		\
+		height: 15px;	\
+		width: 30px;	\
+		background: linear-gradient(to right, red , green);	\
+	}						\
+	.altui-quality-grey {		\
+		height: 15px;	\
+		width: 30px;	\
+		background: grey;	\
+	}						\
 	.table .table {					\
 	background-color:transparent;	\
 	}								\
@@ -8837,7 +8847,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			var service="urn:micasaverde-com:serviceId:ZWaveDevice1"
 			var PollNoReply = parseInt(MultiBox.getStatus(device,service,"PollNoReply"));
 			var PollOk = parseInt(MultiBox.getStatus(device,service,"PollOk"));
-			if ( (isNaN(PollOK)==false) && (isNaN(PollNoReply)==false) && ((PollOk+PollNoReply)>0) )
+			if ( (isNaN(PollOk)==false) && (isNaN(PollNoReply)==false) && ((PollOk+PollNoReply)>0) )
 				return ( PollOk / (PollOk+PollNoReply) );
 			return -1;
 		};
@@ -8888,6 +8898,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				html += "</select>";
 			html += "</div>";
 			html += ("<button type='button' id='altui-reset-pollcounters' class='btn btn-default' >"+_T("Reset Poll Counters")+"</button>");
+			html += "<div class='form-group altui-quality-color'></div><span class=''>: {0}</span>".format(_T("Poll Success Rate"))
+			html += "<div class='form-group altui-quality-grey'></div><span class=''>: {0}</span>".format(_T("No Poll"))
 		html += "</form>";
 			html += "<div class='altui-zwavechart-container'>";
 				html += "<svg class='d3chart'></svg>";
