@@ -10152,12 +10152,12 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			data : watches,
 			default_viscols: [ 'service','variable'],
 			cols: [ 
-				{ name:'service', type:'string', identifier:false, width:120 },
+				{ name:'service', type:'string', identifier:false,  },
 				{ name:'variable', type:'string', identifier:false, width:80 },
-				{ name:'deviceid', type:'string', formatter:'devicename', identifier:false, width:200 },
-				{ name:'sceneid', type:'string', formatter:'scenename', identifier:false, width:200 },
-				{ name:'luaexpr', type:'string', identifier:false, width:120 },
-				{ name:'xml', type:'string', identifier:false, width:150 }
+				{ name:'deviceid', type:'string', formatter:'devicename', identifier:false,  },
+				{ name:'sceneid', type:'string', formatter:'scenename', identifier:false,  },
+				// { name:'luaexpr', type:'string', identifier:false, width:120 },
+				// { name:'xml', type:'string', identifier:false, width:150 }
 			],
 			formatters: {
 				"devicename": function(column, row) {
@@ -10209,9 +10209,9 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			data : watches,
 			default_viscols: [ 'service','variable'],
 			cols: [ 
-				{ name:'service', type:'string', identifier:false, width:120 },
+				{ name:'service', type:'string', identifier:false,  },
 				{ name:'variable', type:'string', identifier:false, width:80 },
-				{ name:'deviceid', type:'string', formatter:'devicename', identifier:false, width:220 },
+				{ name:'deviceid', type:'string', formatter:'devicename', identifier:false,  },
 				{ name:'provider', type:'string', identifier:false, width:100 },
 			],
 			formatters: {
