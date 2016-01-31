@@ -10146,7 +10146,30 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				{ name:'sceneid', type:'string', identifier:false, width:80 },
 				{ name:'luaexpr', type:'string', identifier:false, width:120 },
 				{ name:'xml', type:'string', identifier:false, width:150 }
-			]
+			],
+			commands: {
+				'altui-command-edit': {
+					glyph:editGlyph,
+					onclick: function(grid,e,row,ident) {
+						var scene = MultiBox.getSceneByID(0,row.sceneid);
+						UIManager.pageSceneEdit( scene.altuiid );	
+					}
+				},
+				'altui-command-delete': {
+					glyph:deleteGlyph,
+					onclick: function(grid,e,row,ident) {
+						// return 	watcha.service == watchb.service && 
+						// watcha.variable == watchb.variable &&
+						// watcha.deviceid == watchb.deviceid &&
+						// watcha.sceneid == watchb.sceneid &&
+						// watcha.luaexpr == watchb.luaexpr &&
+						// watcha.xml == watchb.xml ;
+						// row and watch have same structure
+						MultiBox.delWatch( row );
+						grid.bootgrid("remove",[ident]);
+					}
+				},
+			},
 		};
 
 		UIManager.genericTableDraw('Watches','watch',model);
@@ -10159,14 +10182,24 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			domcontainer : $(".altui-mainpanel"),
 			data : watches,
 			default_viscols: [ 'service','variable'],
-			// cols: [ 
-				// { name:'service', type:'string', identifier:false, width:120 },
-				// { name:'variable', type:'string', identifier:false, width:80 },
-				// { name:'deviceid', type:'string', identifier:false, width:50 },
-				// { name:'sceneid', type:'string', identifier:false, width:80 },
-				// { name:'luaexpr', type:'string', identifier:false, width:120 },
-				// { name:'xml', type:'string', identifier:false, width:150 }
-			// ]
+			commands: {
+				'altui-command-edit': {
+					glyph:editGlyph,
+					onclick: function(grid,e,row,ident) {
+						var altuiid = row.deviceid;
+						var device = MultiBox.getDeviceByAltuiID(altuiid);
+						UIManager.deviceDrawVariables(device);		
+					}
+				},
+				'altui-command-delete': {
+					glyph:deleteGlyph,
+					onclick: function(grid,e,row,ident) {
+						// row and watch have same structure
+						MultiBox.delWatch( row );
+						grid.bootgrid("remove",[ident]);
+					}
+				},
+			},
 		};
 
 		UIManager.genericTableDraw('Pushes','push',model);
@@ -10212,8 +10245,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				data : scenes,
 				default_viscols: [ 'id','name','last_run'],
 				cols: [ 
-					{ name:'id', type:'numeric', identifier:true, width:50 },
-					{ name:'altuiid', type:'string', identifier:false, width:80 },
+					{ name:'id', type:'numeric', identifier:false, width:50 },
+					{ name:'altuiid', type:'string', identifier:true, width:80 },
 					{ name:'name', type:'string', identifier:false, width:150 },
 					{ name:'last_run', type:'numeric', formatter:'last_run', identifier:false, width:150 },
 					{ name:'triggers', type:'numeric', computer:'triggers', identifier:false, width:80 },
@@ -10242,16 +10275,14 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				commands: {
 					'altui-command-edit': {
 						glyph:editGlyph,
-						onclick: function(e) {
-							var id = $(this).data("row-id");
-							UIManager.pageSceneEdit(id);
+						onclick: function(grid,e,row,ident) {
+							UIManager.pageSceneEdit(ident);
 						}
 					},
 					'altui-command-delete': {
 						glyph:deleteGlyph,
-						onclick: function(e) {
-							var altuiid = $(this).data("row-id");
-							var scene = MultiBox.getSceneByAltuiID(altuiid);
+						onclick: function(grid,e,row,ident) {
+							var scene = MultiBox.getSceneByAltuiID(ident);
 							DialogManager.confirmDialog(_T("Are you sure you want to delete scene ({0})").format(altuiid),function(result) {
 								if (result==true) {
 									MultiBox.deleteScene( scene );
@@ -10275,13 +10306,18 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 		if (viscols.length==0)
 			viscols = model.default_viscols
 		
-		var id_specified = ($.grep( model.cols , function(col) { return (col.identifier==true) } ).length>=1);
-		if (id_specified==false) {
+		var identifier = $.grep( model.cols , function(col) { return (col.identifier==true) } );
+		var id_specified = (identifier.length>=1);
+		if (id_specified==true) {
+			identifier = identifier[0].name;
+		}
+		else {
 			model.cols.splice(0, 0, { name:'#', visible:true, type:'numeric', identifier:true, width:35 }) ,
 			viscols.push('#');
 			$.each(model.data, function(idx, obj) {
 				obj['#']=idx;
 			});
+			identifier = "#";
 		}
 		$.each(model.cols, function(key,value) {
 			value.visible = ($.inArray(value.name,viscols)!=-1);
@@ -10316,10 +10352,10 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					{
 						var cmds="";
 						$.each(model.commands, function(key,cmd) {
-							cmds += "<button type=\"button\" class=\"btn btn-xs btn-default {0}\" data-row-id=\"{1}\">{2}</button>".format(
+							cmds += "<button type=\"button\" class=\"btn btn-xs btn-default {0}\" data-row-id=\"{2}\">{1}</button>".format(
 								key,
-								row.altuiid,
-								cmd.glyph
+								cmd.glyph,
+								row[identifier]
 							);
 						});
 						return cmds;
@@ -10365,7 +10401,10 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				$.each(model.commands, function(cmd,descr) {
 					grid.find("."+cmd).on('click',function(e){
 						if ($.isFunction(descr.onclick)) {
-							(descr.onclick).bind($(this),e)();		// bind this then call					
+							var ident = $(this).data("row-id")
+							var rows = $("#"+htmlid).bootgrid("getCurrentRows");
+							var row = $.grep(rows, function(row) { return (row[identifier]==ident) })[0];
+							(descr.onclick).bind($(this),grid,e,row,ident)();		// bind this then call					
 						}
 					});
 				});
@@ -10411,8 +10450,14 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 						{ name:'id_parent', type:'numeric', identifier:false, width:80 },
 						{ name:'manufacturer', type:'string', identifier:false, width:120 },
 						{ name:'model', type:'string', identifier:false, width:150 },
-						{ name:'name', type:'string', identifier:false, width:150 }
-					]
+						{ name:'name', type:'string', identifier:false, width:150 },
+						{ name:'time_created', type:'numeric', formatter:'enhancer', identifier:false, width:150 }
+					],
+					formatters: {
+						"enhancer": function(column, row) {
+							return _enhanceValue(row[column.id]);
+						},
+					},
 				};
 
 				UIManager.genericTableDraw('Devices','dev',model);
