@@ -297,6 +297,7 @@ Localization.init( {
 	"Support":"Support",
 	"TblScenes":"TblScenes",
 	"TblControllers":"TblControllers",
+	"TblWatches":"TblWatches",
 	"Save":"Save",
 	"Frame Properties":"Frame Properties",
 	"Frame Label":"Frame Label",
@@ -314,5 +315,9 @@ Localization.init( {
 	"Registered Version":"Registered Version",
 	"Hide":"Hide",
 	"Value ON":"Value ON",
-	"Value OFF":"Value OFF"
+	"Value OFF":"Value OFF",
+	"Push to {5}":"Push to {5}",
+	"Table Watches":"Table Watches",
+	"Are you sure you want to delete scene watch ({0})":"Are you sure you want to delete scene watch ({0})",
+	"Are you sure you want to delete data push ({0})":"Are you sure you want to delete data push ({0})"
 	});

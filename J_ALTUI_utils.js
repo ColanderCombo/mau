@@ -89,7 +89,7 @@ var Localization = ( function (undefined) {
 			JSON.stringify(_unknown_terms),
 			getQueryStringValue("lang")
 		);
-		UIManager.pageEditorForm(_T("Localization information"),text,null,_T("Close"),function() {
+		UIManager.pageEditorForm($(".altui-mainpanel"),'altui-page-editor',_T("Localization information"),text,null,_T("Close"),function() {
 			UIManager.pageHome();
 		});
 	};

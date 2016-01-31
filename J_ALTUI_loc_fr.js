@@ -298,6 +298,7 @@ Localization.init( {
 	"Support":"Support",
 	"TblScenes":"Table Scènes",
 	"TblControllers":"Table Controleurs",
+	"TblWatches":"TblWatches",
 	"Save":"Sauver",
 	"Frame Properties":"Propriétés du Cadre",
 	"Frame Label":"Label du Cadre",
@@ -315,5 +316,10 @@ Localization.init( {
 	"Registered Version":"Registered Version",
 	"Hide":"Cacher",
 	"Value ON":"Valeur ON",
-	"Value OFF":"Valeur OFF"
+	"Value OFF":"Valeur OFF",
+	"Watches":"Variables Suivies",
+	"Push to {5}":"Pousser vers {5}",
+	"Table Watches":"Table Variables Suivies",
+	"Are you sure you want to delete scene watch ({0})":"Etes vous sur de vouloir effacer le trigger de la scene ({0})",
+	"Are you sure you want to delete data push ({0})":"Etes vous sur de vouloir supprimer le \"data push\" ({0})"
 });

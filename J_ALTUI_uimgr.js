@@ -10158,15 +10158,19 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				'altui-command-delete': {
 					glyph:deleteGlyph,
 					onclick: function(grid,e,row,ident) {
-						// return 	watcha.service == watchb.service && 
-						// watcha.variable == watchb.variable &&
-						// watcha.deviceid == watchb.deviceid &&
-						// watcha.sceneid == watchb.sceneid &&
-						// watcha.luaexpr == watchb.luaexpr &&
-						// watcha.xml == watchb.xml ;
-						// row and watch have same structure
-						MultiBox.delWatch( row );
-						grid.bootgrid("remove",[ident]);
+						DialogManager.confirmDialog(_T("Are you sure you want to delete scene watch ({0})").format(ident),function(result) {
+							if (result==true) {
+								// return 	watcha.service == watchb.service && 
+								// watcha.variable == watchb.variable &&
+								// watcha.deviceid == watchb.deviceid &&
+								// watcha.sceneid == watchb.sceneid &&
+								// watcha.luaexpr == watchb.luaexpr &&
+								// watcha.xml == watchb.xml ;
+								// row and watch have same structure
+								MultiBox.delWatch( row );
+								grid.bootgrid("remove",[ident]);
+							}
+						});
 					}
 				},
 			},
@@ -10194,9 +10198,19 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				'altui-command-delete': {
 					glyph:deleteGlyph,
 					onclick: function(grid,e,row,ident) {
-						// row and watch have same structure
-						MultiBox.delWatch( row );
-						grid.bootgrid("remove",[ident]);
+						DialogManager.confirmDialog(_T("Are you sure you want to delete data push ({0})").format(ident),function(result) {
+							if (result==true) {
+								// return 	watcha.service == watchb.service && 
+								// watcha.variable == watchb.variable &&
+								// watcha.deviceid == watchb.deviceid &&
+								// watcha.sceneid == watchb.sceneid &&
+								// watcha.luaexpr == watchb.luaexpr &&
+								// watcha.xml == watchb.xml ;
+								// row and watch have same structure
+								MultiBox.delWatch( row );
+								grid.bootgrid("remove",[ident]);
+							}
+						});
 					}
 				},
 			},
@@ -10283,7 +10297,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 						glyph:deleteGlyph,
 						onclick: function(grid,e,row,ident) {
 							var scene = MultiBox.getSceneByAltuiID(ident);
-							DialogManager.confirmDialog(_T("Are you sure you want to delete scene ({0})").format(altuiid),function(result) {
+							DialogManager.confirmDialog(_T("Are you sure you want to delete scene ({0})").format(ident),function(result) {
 								if (result==true) {
 									MultiBox.deleteScene( scene );
 									grid.bootgrid("remove", [scene.altuiid]);
@@ -10458,7 +10472,27 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 							return _enhanceValue(row[column.id]);
 						},
 					},
-				};
+					commands: {
+						'altui-command-edit': {
+							glyph:editGlyph,
+							onclick: function(grid,e,row,ident) {
+								UIManager.pageControlPanel(ident);	
+							}
+						},
+						'altui-command-delete': {
+							glyph:deleteGlyph,
+							onclick: function(grid,e,row,ident) {
+								var device = MultiBox.getDeviceByAltuiID(ident);
+								DialogManager.confirmDialog(_T("Are you sure you want to delete device ({0})").format(ident+":"+device.name),function(result) {
+									if (result==true) {
+										MultiBox.deleteDevice(device);
+										grid.bootgrid("remove",[ident]);
+									}
+								});
+							}
+						},
+					},
+			};
 
 				UIManager.genericTableDraw('Devices','dev',model);
 			}
