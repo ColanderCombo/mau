@@ -6711,6 +6711,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			{ id:27, title:_T('TblScenes'), onclick:'UIManager.pageTblScenes()', parent:0 },
 			{ id:28, title:_T('TblControllers'), onclick:'UIManager.pageTblControllers()', parent:0 },
 			{ id:29, title:_T('TblWatches'), onclick:'UIManager.pageTblWatches()', parent:0 },
+			{ id:30, title:_T('WatchDisplay'), onclick:'UIManager.pageWatchDisplay()', parent:0 },
 		];
 
 		function _parentsOf(child) {
@@ -10532,7 +10533,65 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			}
 		);
 	},
-	
+	pageWatchDisplay: function() {
+		function _buildWatchUrl(watch,provider) {
+			if (provider) {
+				var url_param_idx = -1;
+				$.each(provider.parameters, function(idx,p) { 
+					if (p.key=='graphicurl') {
+						url_param_idx = idx;
+						return false;
+					}
+				});
+				if (url_param_idx>=0) {
+					var value = watch.params[url_param_idx] || provider.parameters[url_param_idx].default || '';
+					return {
+						url:String.prototype.format.apply(value,watch.params),
+						height:provider.parameters[url_param_idx].ifheight
+					}
+				}
+			}
+			return {
+				url:'no url',
+				height:null
+			}
+		};
+		
+		function _displayWatches(domparent, model) {
+			var model = model;
+			var html = "";
+			$.each(model.watches, function(idx,watch) {
+				html += "<div class='col-xs-12'>";
+					html += "<p>{0} - {1} - <small>{2}</small></p>".format(watch.devicename,watch.variable,watch.service);
+				html += "</div>";
+				html += "<div class='col-xs-12'>";
+					html += "<iframe id='altui-iframe-chart-{2}' class='altui-thingspeak-chart' data-idx='{1}' width='100%' height='{3}' style='border: 1px solid #cccccc;' src='{0}' ></iframe>".format(watch.url,idx,idx,watch.height);
+				html += "</div>";
+			});
+			$(domparent).append(html);
+		}
+
+		UIManager.clearPage(_T('WatchDisplay'),_T("Watch Display"),UIManager.oneColumnLayout);
+		MultiBox.getDataProviders(function(providers) {
+			var model={
+				watches:[]
+			};
+			$.each(MultiBox.getWatches("VariablesToSend",null), function(idx,watch) {
+				var device = MultiBox.getDeviceByAltuiID(watch.deviceid);
+				if (device && providers[watch.provider] ) {
+					var urlinfo = _buildWatchUrl(watch,providers[watch.provider]);
+					model.watches.push( {
+						service:watch.service,
+						variable:watch.variable,
+						devicename: device.name, 
+						url:urlinfo.url,
+						height:urlinfo.height || 260
+					})
+				}
+			});
+			_displayWatches($(".altui-mainpanel"),model);
+		});
+	},
 	pageThemes: function() {
 		UIManager.clearPage(_T('Themes'),_T("Themes"),UIManager.oneColumnLayout);
 		PageMessage.message( "Select a theme by clicking on it and refresh your browser", "info");
@@ -10796,6 +10855,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				.on( "click", "#altui-tbl-device", UIManager.pageTblDevices )
 				.on( "click", "#altui-tbl-scene", UIManager.pageTblScenes )
 				.on( "click", "#altui-tbl-watches", UIManager.pageTblWatches )				
+				.on( "click", "#altui-graph-watches", UIManager.pageWatchDisplay )				
 				.on( "click", "#altui-tbl-controllers", UIManager.pageTblControllers )				
 				.on( "click", "#altui-optimize", UIManager.pageOptions )
 				.on( "click", "#altui-theme-selector", UIManager.pageThemes )
@@ -11000,6 +11060,7 @@ $(document).ready(function() {
 		body+="				<li><a id='altui-tbl-controllers' href='#' >"+_T("Controllers")+"</a></li>";
 		body+="			<li class='divider'></li>";
 		body+="				<li class='dropdown-header'>Graphic</li>";
+		body+="				<li><a id='altui-graph-watches' href='#' >"+_T("Watch Display")+"</a></li>";
 		body+="				<li><a id='altui-energy' href='#' >"+_T("Power Chart")+"</a></li>";
 		body+="				<li><a id='altui-childrennetwork' href='#' >"+_T("Parent/Child Network")+"</a></li>";
 		body+="				<li><a id='altui-zwavenetwork' href='#' >"+_T("zWave Network")+"</a></li>";
