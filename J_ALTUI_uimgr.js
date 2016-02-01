@@ -11053,9 +11053,9 @@ $(document).ready(function() {
 		body+="				<li><a id='menu_plugins' href='#'  >"+_T("Plugins")+"</a></li>";
 		body+="			<li class='divider'></li>";
 		body+="				<li class='dropdown-header'>Tables</li>";
+		body+="				<li><a id='altui-tbl-watches' href='#' >"+_T("Watches")+"</a></li>";
 		body+="				<li><a id='altui-tbl-device' href='#' >"+_T("Devices")+"</a></li>";
 		body+="				<li><a id='altui-scene-triggers' href='#' >"+_T("Triggers")+"</a></li>";
-		body+="				<li><a id='altui-tbl-watches' href='#' >"+_T("Watches")+"</a></li>";
 		body+="				<li><a id='altui-tbl-scene' href='#' >"+_T("Scenes")+"</a></li>";
 		body+="				<li><a id='altui-tbl-controllers' href='#' >"+_T("Controllers")+"</a></li>";
 		body+="			<li class='divider'></li>";

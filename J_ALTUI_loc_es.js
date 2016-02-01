@@ -319,5 +319,6 @@ Localization.init( {
 	"Push to {5}":"Push to {5}",
 	"Table Watches":"Table Watches",
 	"Are you sure you want to delete scene watch ({0})":"Are you sure you want to delete scene watch ({0})",
-	"Are you sure you want to delete data push ({0})":"Are you sure you want to delete data push ({0})"
+	"Are you sure you want to delete data push ({0})":"Are you sure you want to delete data push ({0})",
+	"Watch Display":"Watch Display","WatchDisplay":"WatchDisplay",
 	});

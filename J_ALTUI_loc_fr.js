@@ -321,5 +321,7 @@ Localization.init( {
 	"Push to {5}":"Pousser vers {5}",
 	"Table Watches":"Table Variables Suivies",
 	"Are you sure you want to delete scene watch ({0})":"Etes vous sur de vouloir effacer le trigger de la scene ({0})",
-	"Are you sure you want to delete data push ({0})":"Etes vous sur de vouloir supprimer le \"data push\" ({0})"
+	"Are you sure you want to delete data push ({0})":"Etes vous sur de vouloir supprimer le \"data push\" ({0})",
+	"Watch Display":"Graphs Variables Suivies",
+	"WatchDisplay":"WatchDisplay",
 });
