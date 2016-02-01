@@ -75,6 +75,7 @@ var downGlyph = "";
 var uncheckedGlyph ="";
 var runGlyph = "";
 var editGlyph = "";
+var eyeOpenGlyph = "";
 var cameraGlyph = "";
 var onoffGlyph = "";
 var scaleGlyph = "";
@@ -10222,6 +10223,12 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				},
 			},
 			commands: {
+				'altui-command-see': {
+					glyph:eyeOpenGlyph,
+					onclick: function(grid,e,row,ident) {
+						UIManager.pageWatchDisplay(e,ident);
+					}
+				},
 				'altui-command-edit': {
 					glyph:editGlyph,
 					onclick: function(grid,e,row,ident) {
@@ -10533,7 +10540,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			}
 		);
 	},
-	pageWatchDisplay: function() {
+	// optional idx in watches VariablesToSend
+	pageWatchDisplay: function( event, watchidx ) {
 		function _buildWatchUrl(watch,provider) {
 			if (provider) {
 				var url_param_idx = -1;
@@ -10576,19 +10584,25 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			var model={
 				watches:[]
 			};
-			$.each(MultiBox.getWatches("VariablesToSend",null), function(idx,watch) {
-				var device = MultiBox.getDeviceByAltuiID(watch.deviceid);
-				if (device && providers[watch.provider] ) {
-					var urlinfo = _buildWatchUrl(watch,providers[watch.provider]);
-					model.watches.push( {
-						service:watch.service,
-						variable:watch.variable,
-						devicename: device.name, 
-						url:urlinfo.url,
-						height:urlinfo.height || 260
-					})
+			$.each(MultiBox.getWatches("VariablesToSend",
+				function(w,i) {
+					return (watchidx==null) || (watchidx==i);
+				} ), 
+				function(idx,watch) {
+					var device = MultiBox.getDeviceByAltuiID(watch.deviceid);
+					if (device && providers[watch.provider] ) {
+						var urlinfo = _buildWatchUrl(watch,providers[watch.provider]);
+						model.watches.push( {
+							service:watch.service,
+							variable:watch.variable,
+							devicename: device.name, 
+							url:urlinfo.url,
+							height:urlinfo.height || 260
+						})
+					}
 				}
-			});
+			);
+			
 			_displayWatches($(".altui-mainpanel"),model);
 		});
 	},
@@ -11017,6 +11031,7 @@ $(document).ready(function() {
 		uncheckedGlyph= glyphTemplate.format( "unchecked", _T("Frame") , "");
 		runGlyph = glyphTemplate.format( "play", _T("Run Scene") , "");
 		editGlyph = glyphTemplate.format( "pencil", _T("Edit") , "");
+		eyeOpenGlyph = glyphTemplate.format( "eye-open", _T("See") , "");
 		cameraGlyph = glyphTemplate.format( "facetime-video", _T("Camera") , "");
 		onoffGlyph = glyphTemplate.format( "off", _T("On Off") , "");
 		scaleGlyph = glyphTemplate.format( "scale", _T("Gauge") , "");
