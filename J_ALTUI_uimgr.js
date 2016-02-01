@@ -1588,7 +1588,6 @@ var WatchManager = (function() {
 
 var SceneEditor = function (scene) {
 	var xsbuttonTemplate = "<button id='{0}' type='button' class='{1} btn btn-default btn-xs' aria-label='tbd' title='{3}'>{2}</button>";
-	var jsonButton = xsbuttonTemplate.format('','altui-toggle-json pull-right','json','json');
 	var _timerTypes = [
 		{value:0,text:_T('**Illegal**')},
 		{value:1,text:_T('interval')},
@@ -2284,7 +2283,6 @@ var SceneEditor = function (scene) {
 		});	
 
 		//scene options room, name, modes
-
 		var panels = [
 			{id:'Header', title:_T("Header"), html:_displayHeader()},
 			{id:'Triggers', title:_T("Triggers"), html:_displayTriggersAndWatches()},
@@ -2292,31 +2290,7 @@ var SceneEditor = function (scene) {
 			{id:'Lua', title:_T("Lua"), html:_displayLua()},
 			{id:'Actions', title:_T("Actions"), html:_displayActions()},
 		];
-		function _createAccordeon(panels) {
-			var bFirst = true;
-			var html="";
-			html += "<div class='altui-scene-editor'>";
-			html += "    <div class='panel-group' id='accordion'>";
-			$.each( panels, function (idx,panel){
-				html += "        <div class='panel panel-default' id='"+panel.id+"'>";
-				html += "            <div class='panel-heading'>";
-				html += 				jsonButton;
-				html += "                <h4 class='panel-title'>";
-				html += "                    <a data-toggle='collapse' data-parent='#accordion' href='#collapse"+panel.id+"'>"+panel.title+"</a><span class='altui-hint' id='altui-hint-"+panel.id+"'></span><span id='trigger' class='caret'></span>";
-				html += "                </h4>";
-				html += "            </div>";
-				html += "            <div id='collapse"+panel.id+"' class='panel-collapse collapse {0}'>".format(bFirst ? 'in':'');
-				html += "                <div class='panel-body'>";
-				html += 					panel.html || _T('Empty');
-				html += "                </div>";
-				html += "            </div>";
-				html += "        </div>";
-				bFirst = false;
-			})
-			html += "    </div>";
-			html += "</div>";
-			return html
-		};
+
 		function _createBlocklyArea()
 		{
 			var html="";
@@ -2709,9 +2683,10 @@ var SceneEditor = function (scene) {
 			return html;
 		}
 
+		var jsonbutton = {id:'', class:'altui-toggle-json pull-right', label:'json', title:'json' };
 		var htmlSceneEditButton = "  <button type='submit' class='btn btn-default altui-scene-editbutton'>"+_T("Submit")+"</button>";
 		var html="";
-		html += _createAccordeon(panels);
+		html += HTMLUtils.createAccordeon(panels,jsonbutton );
 		html += _createBlocklyArea();
 		html +=  htmlSceneEditButton;
 		return html;
@@ -4382,16 +4357,18 @@ var UIManager  = ( function( window, undefined ) {
 		return deviceHtml;
 	};
 
+	function _findSceneNextRun(scene) {
+		var nextrun=0;
+		if (scene.timers != undefined) {
+			$.each( scene.timers , function(idx, timer) {
+				nextrun = (nextrun==0) ? timer.next_run : Math.min(nextrun,timer.next_run);
+			});
+		}
+		return nextrun;
+	};
+	
 	function _sceneDraw(scene,norefresh) {
-		function _findSceneNextRun(scene) {
-			var nextrun=0;
-			if (scene.timers != undefined) {
-				$.each( scene.timers , function(idx, timer) {
-					nextrun = (nextrun==0) ? timer.next_run : Math.min(nextrun,timer.next_run);
-				});
-			}
-			return nextrun;
-		};
+
 		var delButtonHtml = buttonTemplate.format( scene.altuiid, 'btn-xs altui-delscene pull-right', deleteGlyph,'default',_T("Delete"));
 		var pauseButtonHtml = glyphTemplate.format( "off", _T("Pause Scene") , 'altui-pausescene ' + ((scene.paused>0) ? 'paused':'activated'));
 		var favoriteHtml = (scene.favorite==true) ? starGlyph : staremtpyGlyph;
@@ -7981,7 +7958,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 			viscols = [ 'lastrun','scene','trigger','device','condition','id','lua'];
 		var options = (MyLocalStorage.getSettings('ShowAllRows')==1) ? {rowCount:-1	} : {};
 		
-		$(".altui-mainpanel").append( _array2Table(arr,'id',viscols) );
+		$(".altui-mainpanel").append( HTMLUtils.array2Table(arr,'id',viscols) );
 		$("#altui-grid").bootgrid( 
 			$.extend({
 				caseSensitive: false,
@@ -10262,7 +10239,7 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 	},
 	pageTblControllers:function() {
 		function _displayControllerInfo(box_info) {
-			return _array2Table(box_info,"PK_AccessPoint",[]);
+			return HTMLUtils.array2Table(box_info,"PK_AccessPoint",[]);
 		};
 		UIManager.clearPage(_T('TblControllers'),_T("Table Controllers"),UIManager.oneColumnLayout);
 		var html="";
@@ -10304,17 +10281,23 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 					{ name:'id', type:'numeric', identifier:false, width:50 },
 					{ name:'altuiid', type:'string', identifier:true, width:80 },
 					{ name:'name', type:'string', identifier:false, width:150 },
-					{ name:'last_run', type:'numeric', formatter:'last_run', identifier:false, width:150 },
+					{ name:'last_run', type:'numeric', formatter:'_enhanceValue', identifier:false, width:150 },
+					{ name:'next_run', type:'numeric', computer:'next_run',  formatter:'_enhanceValue', identifier:false, width:150 },
 					{ name:'triggers', type:'numeric', computer:'triggers', identifier:false, width:80 },
 					{ name:'watches', type:'numeric', computer:'watches', identifier:false, width:80 },
 					{ name:'timers', type:'numeric', computer:'timers', identifier:false, width:80 },
 				],
 				formatters: {
-					"last_run": function(column, row) {
-						return _enhanceValue(row.last_run);
+					"_enhanceValue": function(column, row) {
+						return _enhanceValue(row[column.id]);
 					},
 				},
 				computers: {
+					"next_run": function(row) {
+						var scene = MultiBox.getSceneByAltuiID(row.altuiid);
+						var next_run = _findSceneNextRun(scene);
+						return (next_run==0) ? '' : next_run;
+					},					
 					"triggers": function(row) {
 						var scene = MultiBox.getSceneByAltuiID(row.altuiid);
 						return scene.triggers ? scene.triggers.length : 0;
@@ -10564,19 +10547,53 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				height:null
 			}
 		};
-		
+		function _displayWatchGraph(idx,model) {
+			if ( $("span#altui-watch-placeholder-"+idx).text() =="loading..." ) {
+				var watch = model.watches[idx];
+				var html = "";
+				html += "<div class='col-xs-12'>";
+					html += "<iframe id='altui-iframe-chart-{2}' class='altui-thingspeak-chart' data-idx='{1}'  width='100%' height='{3}' style='border: 1px solid #cccccc;' src='{0}' ></iframe>".format(watch.url,idx,idx,watch.height);
+				html += "</div>";
+				$("span#altui-watch-placeholder-"+idx).html(html);
+			}
+		};
 		function _displayWatches(domparent, model) {
 			var model = model;
-			var html = "";
+			var panels = [
+				// {id:'Header', title:_T("Header"), html:_displayHeader()},
+				// {id:'Triggers', title:_T("Triggers"), html:_displayTriggersAndWatches()},
+				// {id:'Timers', title:_T("Timers"), html:_displayTimers()},
+				// {id:'Lua', title:_T("Lua"), html:_displayLua()},
+				// {id:'Actions', title:_T("Actions"), html:_displayActions()},
+			];
 			$.each(model.watches, function(idx,watch) {
+				var html = "";
+				// html += "<div class='col-xs-12'>";
+					// html += "<p>{0} - {1} - <small>{2}</small></p>".format(watch.devicename,watch.variable,watch.service);
+				// html += "</div>";
 				html += "<div class='col-xs-12'>";
-					html += "<p>{0} - {1} - <small>{2}</small></p>".format(watch.devicename,watch.variable,watch.service);
+					html += "<iframe id='altui-iframe-chart-{2}' class='altui-thingspeak-chart' data-idx='{1}'  width='100%' height='{3}' style='border: 1px solid #cccccc;' src='{0}' ></iframe>".format(watch.url,idx,idx,watch.height);
 				html += "</div>";
-				html += "<div class='col-xs-12'>";
-					html += "<iframe id='altui-iframe-chart-{2}' class='altui-thingspeak-chart' data-idx='{1}' width='100%' height='{3}' style='border: 1px solid #cccccc;' src='{0}' ></iframe>".format(watch.url,idx,idx,watch.height);
-				html += "</div>";
+				
+				panels.push({
+						id:'watchidx_'+idx, 
+						title:"<span>{0} - {1} - <small>{2}</small></span>".format(watch.devicename,watch.variable,watch.service),
+						html: "<span id='altui-watch-placeholder-"+idx+"'>loading...</span>"
+				});
 			});
+			
+			var html = HTMLUtils.createAccordeon(panels);	
 			$(domparent).append(html);
+			_displayWatchGraph(0,model);
+			$('.panel').on('shown.bs.collapse', function (e) {
+				e.stopPropagation();
+				var idx = parseInt(e.currentTarget.id.substring("watchidx_".length));
+				_displayWatchGraph(idx,model);
+			});
+			
+			// $.each(model.watches, function(idx,watch) {
+			// });
+			// $(domparent).find(".altui-collapse-later").addClass("collapse");
 		}
 
 		UIManager.clearPage(_T('WatchDisplay'),_T("Watch Display"),UIManager.oneColumnLayout);

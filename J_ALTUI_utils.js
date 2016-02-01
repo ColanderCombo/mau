@@ -257,47 +257,87 @@ function _toIso(date,sep) {
 	return iso;
 };
 
-function _array2Table(arr,idcolumn,viscols) {
-	var html="";
-	var idcolumn = idcolumn || 'id';
-	var viscols = viscols || [idcolumn];
-	html+="<div class='col-xs-12'>";
-	if ( (arr) && ($.isArray(arr) && (arr.length>0)) ) {
-		var bFirst=true;
-		html+="<table id='altui-grid' class='table table-condensed table-hover table-striped'>";
-		$.each(arr, function(idx,obj) {
-			if (bFirst) {
-				html+="<thead>"
+var HTMLUtils = (function() {
+	function _array2Table(arr,idcolumn,viscols) {
+		var html="";
+		var idcolumn = idcolumn || 'id';
+		var viscols = viscols || [idcolumn];
+		html+="<div class='col-xs-12'>";
+		if ( (arr) && ($.isArray(arr) && (arr.length>0)) ) {
+			var bFirst=true;
+			html+="<table id='altui-grid' class='table table-condensed table-hover table-striped'>";
+			$.each(arr, function(idx,obj) {
+				if (bFirst) {
+					html+="<thead>"
+					html+="<tr>"
+					$.each(obj, function(k,v) {
+						html+="<th data-column-id='{0}' {1} {2}>".format(
+							k,
+							(k==idcolumn) ? "data-identifier='true'" : "",
+							"data-visible='{0}'".format( $.inArray(k,viscols)!=-1 )
+						)
+						html+=k;
+						html+="</th>"
+					});
+					html+="</tr>"
+					html+="</thead>"
+					html+="<tbody>"
+					bFirst=false;
+				}
 				html+="<tr>"
 				$.each(obj, function(k,v) {
-					html+="<th data-column-id='{0}' {1} {2}>".format(
-						k,
-						(k==idcolumn) ? "data-identifier='true'" : "",
-						"data-visible='{0}'".format( $.inArray(k,viscols)!=-1 )
-					)
-					html+=k;
-					html+="</th>"
+					html+="<td>"
+					html+=v;
+					html+="</td>"
 				});
 				html+="</tr>"
-				html+="</thead>"
-				html+="<tbody>"
-				bFirst=false;
-			}
-			html+="<tr>"
-			$.each(obj, function(k,v) {
-				html+="<td>"
-				html+=v;
-				html+="</td>"
 			});
-			html+="</tr>"
-		});
-		html+="</tbody>"
-		html+="</table>";		
+			html+="</tbody>"
+			html+="</table>";		
+		}
+		html+="</div>";
+		return html;
+	};
+	
+	// var panels = [
+	// {id:'Header', title:_T("Header"), html:_displayHeader()},
+	// {id:'Triggers', title:_T("Triggers"), html:_displayTriggersAndWatches()},
+	// {id:'Timers', title:_T("Timers"), html:_displayTimers()},
+	// {id:'Lua', title:_T("Lua"), html:_displayLua()},
+	// {id:'Actions', title:_T("Actions"), html:_displayActions()},
+	// ];
+	function _createAccordeon(panels,button) {
+		var bFirst = true;
+		var html="";
+		html += "<div class='altui-scene-editor'>";
+		html += "    <div class='panel-group' id='accordion'>";
+		$.each( panels, function (idx,panel){
+			html += "        <div class='panel panel-default' id='"+panel.id+"'>";
+			html += "            <div class='panel-heading'>";
+			if (button) {
+				html += xsbuttonTemplate.format(button.id, button.class, button.label, button.title);
+			}
+			html += "                <h4 class='panel-title'>";
+			html += "                    <a data-toggle='collapse' data-parent='#accordion' href='#collapse"+panel.id+"'>"+panel.title+"</a><span class='altui-hint' id='altui-hint-"+panel.id+"'></span><span id='trigger' class='caret'></span>";
+			html += "                </h4>";
+			html += "            </div>";
+			html += "            <div id='collapse"+panel.id+"' class='panel-collapse collapse {0}'>".format(bFirst ? 'in':'');
+			html += "                <div class='panel-body'>";
+			html += 					panel.html || _T('Empty');
+			html += "                </div>";
+			html += "            </div>";
+			html += "        </div>";
+			bFirst = false;
+		})
+		html += "    </div>";
+		html += "</div>";
+		return html
+	};	
+	return {
+		array2Table : _array2Table,						// (arr,idcolumn,viscols)
+		createAccordeon : _createAccordeon,		// (panels)
 	}
-	html+="</div>";
-	return html;
-};
-
+})();
 
 function isObject(obj)
 {
