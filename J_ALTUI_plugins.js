@@ -502,8 +502,6 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 
 		var html = "";
 		var onebody = $(".altui-device-body:first");
-		// var sliderwidth = (onebody.length>=1) ? onebody.first().width()-65-70-(colorpicker?45:0)  : 95;
-		// var bodywidth=onebody.width();
 		
 		// load level
 		var level = parseInt(MultiBox.getStatus( device, 'urn:upnp-org:serviceId:Dimming1', 'LoadLevelTarget' )); 
@@ -537,7 +535,6 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		}
 		
 		// dimming
-		// html+=("<div id='slider-{0}' class='altui-dimmable-slider' style='width: {1}px;' ></div>").format(device.altuiid,sliderwidth);
 		html+=("<div id='slider-{0}' class='altui-dimmable-slider' ></div>").format(device.altuiid);
 		
 		// on off 
@@ -557,12 +554,10 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		html += "$('div#altui-onoffbtn-{0}').on('click touchend', function() { ALTUI_PluginDisplays.toggleOnOffButton('{0}','div#altui-onoffbtn-{0}'); } );".format(device.altuiid);
 		html += "$('div#slider-{0}.altui-dimmable-slider').slider({ max:100,min:0,value:{1},change:ALTUI_PluginDisplays.onSliderChange });".format(device.altuiid,level);
 		if (colorpicker) { // color picker 
-			// html += "$('input#altui-colorpicker-{0}').on('change', function(e,color) {  ALTUI_PluginDisplays.onColorPicker(e,'{0}',color); }).siblings('.altui-colorpicker-replacer').first().css('background-color','rgba(0,0,0,0)');".format(device.altuiid);
 			html += "$('div#slider-{0}.altui-dimmable-slider').css('margin-right','120px');".format(device.altuiid)
 			html += "$('input#altui-colorpicker-{0}').on('change', function(e,color) {  ALTUI_PluginDisplays.onColorPicker(e,'{0}',color); });".format(device.altuiid);
 		}
 		html += "</script>";
-		//"+getCSS('color','bg-info')+"
 		$(".altui-mainpanel").off("slide","#slider-"+device.altuiid).on("slide","#slider-"+device.altuiid,function( event, ui ){ 
 			$("#slider-val-"+device.altuiid).text( ui.value+'%');
 		});
