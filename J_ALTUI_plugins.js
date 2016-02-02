@@ -40,7 +40,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		style += ".altui-heater-container { position:absolute; left:71px; right:16px; } .altui-heater-container .row { padding-top:1px; padding-bottom:1px; margin-left:0px; margin-right:0px;} .altui-heater-container .col-xs-3 { padding-left:1px; padding-right:1px; text-align:center;}  .altui-heater-btn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; width: 100%; max-width: 100% }";
 		style += ".altui-heater-container select.input-sm { height:22px; padding:0;}"; 
 		style += ".altui-cyan { color:cyan;}";
-		style += ".altui-dimmable-slider { margin-left: 60px; }";	
+		style += ".altui-dimmable-slider { margin-left: 60px; margin-right: 70px;}";	
 		style += ".altui-colorpicker { margin-top: 2px; width:30px; margin-right: 15px; }";	
 		style += ".altui-infoviewer-log-btn,.altui-infoviewer-btn,.altui-window-btn,.altui-datamine-open { margin-top: 10px; }";	
 		style += ".altui-infoviewer-pattern { font-size: 14px; }";	
@@ -502,8 +502,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 
 		var html = "";
 		var onebody = $(".altui-device-body:first");
-		var sliderwidth = (onebody.length>=1) ? onebody.first().width()-65-70-(colorpicker?45:0)  : 95;
-		var bodywidth=onebody.width();
+		// var sliderwidth = (onebody.length>=1) ? onebody.first().width()-65-70-(colorpicker?45:0)  : 95;
+		// var bodywidth=onebody.width();
 		
 		// load level
 		var level = parseInt(MultiBox.getStatus( device, 'urn:upnp-org:serviceId:Dimming1', 'LoadLevelTarget' )); 
@@ -537,7 +537,8 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		}
 		
 		// dimming
-		html+=("<div id='slider-{0}' class='altui-dimmable-slider' style='width: {1}px;' ></div>").format(device.altuiid,sliderwidth);
+		// html+=("<div id='slider-{0}' class='altui-dimmable-slider' style='width: {1}px;' ></div>").format(device.altuiid,sliderwidth);
+		html+=("<div id='slider-{0}' class='altui-dimmable-slider' ></div>").format(device.altuiid);
 		
 		// on off 
 		$('#altui-colorpicker-{0}'.format(device.altuiid,current)).spectrum('destroy');
@@ -557,6 +558,7 @@ var ALTUI_PluginDisplays= ( function( window, undefined ) {
 		html += "$('div#slider-{0}.altui-dimmable-slider').slider({ max:100,min:0,value:{1},change:ALTUI_PluginDisplays.onSliderChange });".format(device.altuiid,level);
 		if (colorpicker) { // color picker 
 			// html += "$('input#altui-colorpicker-{0}').on('change', function(e,color) {  ALTUI_PluginDisplays.onColorPicker(e,'{0}',color); }).siblings('.altui-colorpicker-replacer').first().css('background-color','rgba(0,0,0,0)');".format(device.altuiid);
+			html += "$('div#slider-{0}.altui-dimmable-slider').css('margin-right','120px');".format(device.altuiid)
 			html += "$('input#altui-colorpicker-{0}').on('change', function(e,color) {  ALTUI_PluginDisplays.onColorPicker(e,'{0}',color); });".format(device.altuiid);
 		}
 		html += "</script>";
