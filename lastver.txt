@@ -47,6 +47,7 @@ UIManager.checkAltuiUpdate("1175,next_run col in scenes table;Data push graphics
 	'jonasstolt':new Date(2016,0,24),
 	'Schtruck':new Date(2016,1,1),
 	'gerardosamara':new Date(2016,1,2),
+	'colandercombo':new Date(2016,1,2),
 	'vosmont':new Date(2020,0,1),
 	'dklinkman':new Date(2020,0,1),
 	'akbooer':new Date(2020,0,1),
