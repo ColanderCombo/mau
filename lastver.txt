@@ -1,4 +1,4 @@
-UIManager.checkAltuiUpdate("1184,next_run col in scenes table;Data push graphics page;View button in data pushes table;bootgrid version update;jquery version update;bugfix: improper reboot error code;cosmetics,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=30336",
+UIManager.checkAltuiUpdate("1184,Romm filter button color fix;dimmer slider width fix;refresh button for variable graphs,?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreatePlugin&PluginNum=8246&Version=30336",
 {
 	'amg0':new Date(2014,11,2),
 	'amg1':new Date(2015,10,28),
