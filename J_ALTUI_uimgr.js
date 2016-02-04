@@ -10547,8 +10547,8 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				height:null
 			}
 		};
-		function _displayWatchGraph(idx,model) {
-			if ( $("span#altui-watch-placeholder-"+idx).text() =="loading..." ) {
+		function _displayWatchGraph(idx,model,force) {
+			if ( (force==true) || ($("span#altui-watch-placeholder-"+idx).text() =="loading..." ) ) {
 				var watch = model.watches[idx];
 				var html = "";
 				html += "<div class='col-xs-12'>";
@@ -10581,8 +10581,9 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 						html: "<span id='altui-watch-placeholder-"+idx+"'>loading...</span>"
 				});
 			});
-			
-			var html = HTMLUtils.createAccordeon(panels);	
+			'glyphicon-refresh'
+			var refreshbutton = {id:'', class:'altui-graph-refresh pull-right', label:refreshGlyph+' '+_T('Refresh'), title:'refresh' };
+			var html = HTMLUtils.createAccordeon(panels,refreshbutton);	
 			$(domparent).append(html);
 			_displayWatchGraph(0,model);
 			$('.panel').on('shown.bs.collapse', function (e) {
@@ -10590,10 +10591,13 @@ http://192.168.1.16/port_3480/data_request?id=lu_reload&rand=0.7390809273347259&
 				var idx = parseInt(e.currentTarget.id.substring("watchidx_".length));
 				_displayWatchGraph(idx,model);
 			});
+			$('.altui-graph-refresh').click( function() {
+				var panel = $(this).parent().parent()
+				var id = $(panel).prop('id').substr("watchidx_".length);
+				// var placeholder = $(panel).find("span#altui-watch-placeholder-"+id);
+				_displayWatchGraph(id,model,true);
+			})
 			
-			// $.each(model.watches, function(idx,watch) {
-			// });
-			// $(domparent).find(".altui-collapse-later").addClass("collapse");
 		}
 
 		UIManager.clearPage(_T('WatchDisplay'),_T("Watch Display"),UIManager.oneColumnLayout);
