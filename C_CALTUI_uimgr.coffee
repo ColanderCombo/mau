@@ -1,42 +1,42 @@
-##  sourceURL=J_ALTUI_uimgr.js
-# "use strict" 
-# http://192.168.1.16:3480/data_request?id=lr_ALTUI_Handler&command=home
-# ALTUI: This program is free software: you can redistribute it and/or modify
-# it under the condition that it is for private or home useage and 
-# this whole comment is reproduced in the source code file
-# Commercial utilisation is not authorized without the appropriate
-# written devagreement from amg0 / alexis . mermet @ gmail . com
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+# ##  sourceURL=J_ALTUI_uimgr.js
+# # "use strict" 
+# # http://192.168.1.16:3480/data_request?id=lr_ALTUI_Handler&command=home
+# # ALTUI: This program is free software: you can redistribute it and/or modify
+# # it under the condition that it is for private or home useage and 
+# # this whole comment is reproduced in the source code file
+# # Commercial utilisation is not authorized without the appropriate
+# # written devagreement from amg0 / alexis . mermet @ gmail . com
+# # This program is distributed in the hope that it will be useful,
+# # but WITHOUT ANY WARRANTY; without even the implied warranty of
+# # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
   
-### The MIT License (MIT)
-BOOTGRID: Copyright (c) 2014-2015 Rafael J. Staib
+# ### The MIT License (MIT)
+# BOOTGRID: Copyright (c) 2014-2015 Rafael J. Staib
 
-Permission is hereby granted, free of charge, to any person obtaining a copy 
-of this software and associated documentation files (the "Software"), to deal 
-in the Software without restriction, including without limitation the rights 
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-copies of the Software, and to permit persons to whom the Software is 
-furnished to do so, subject to the following conditions:
+# Permission is hereby granted, free of charge, to any person obtaining a copy 
+# of this software and associated documentation files (the "Software"), to deal 
+# in the Software without restriction, including without limitation the rights 
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+# copies of the Software, and to permit persons to whom the Software is 
+# furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in 
-all copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in 
+# all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
-THE SOFTWARE.
-###
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+# THE SOFTWARE.
+# ###
 
-# Blakc iphone6 //drive.google.com/uc?id=0B6TVdm2A9rnNakxEdDdYVWVxMnM&authuser=0&export=download
-# Black : //docs.google.com/uc?authuser=0&id=0B6TVdm2A9rnNLWlIeEZDN1ZGU0k&export=download    
-# Transparent : //drive.google.com/uc?id=0B6TVdm2A9rnNMkx5M0FsLWk2djg&authuser=0&export=download
+# # Blakc iphone6 //drive.google.com/uc?id=0B6TVdm2A9rnNakxEdDdYVWVxMnM&authuser=0&export=download
+# # Black : //docs.google.com/uc?authuser=0&id=0B6TVdm2A9rnNLWlIeEZDN1ZGU0k&export=download    
+# # Transparent : //drive.google.com/uc?id=0B6TVdm2A9rnNMkx5M0FsLWk2djg&authuser=0&export=download
 
-# UIManager.loadScript('https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["corechart","table","gauge"]}]}');
+# # UIManager.loadScript('https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["corechart","table","gauge"]}]}');
 
 AltUI_revision = "$Revision$"
 NULL_DEVICE = "0-0"
@@ -90,7 +90,7 @@ buttonDebugHtml = "<button type='button' class='btn btn-default' id='altui-debug
 cameraURI="data:image/png;base64,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"
 defaultIconSrc="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAASJSURBVHja7Jp7aI5RHMff123CMOYyMmFY5LZYI5umFmHhD2pyyYzYkju5hCWX0jZKM9rEkCy5tJostxWRIteZe5FLyW2Y68z35Pfq9Os8z573eT3vu9fOr76d5zzn8jyf59x+57yvu6amxlWfrIGrnpkG1sAaWANrYA2sgTWwBnbKGnmT2e12/7MHb8vOaYhgEJQA9YN6Qj2g5lCoSFu4eNF1K3V5sx9o5M+vC0jxvCRoKjQOalmnW9gH0BYI5kKLoE5B06Vttug8KBMKqyX7S+g+9Ab6SGHwAAN2MIICqL9BlifQMegcdAHj9X1QtjBAxcy2BNoENWbJ1VARtAO6BMiaoO7SgG2C4AA0SZF8CFoDyMf/xRgGbCsExVA8S3oEzQJomUG5AQgSoSFQNNSZlqZ4q8uS34Hx0s0MYA+KSQsv/pHlD0eQQctTVFC1MDkQRQrYtQDdoOgFa6F0qGmwdun10Fh2Lx2wOxnseAS7ofZGDhP0DHoAVUJvnQB2e+OWcdcSEKMRnGTZlgN2K+sBWdACRZXfoBPQYeg8ytmC9IrBLjB5T+VQFynLXrz0TDZrC5gJrKrv0HYoG/lf+dpq/vKlMxnsbRqbcsuqYC9B0wH6MGi2h4CJRDCfjT+x9HyR7mUpYIXDkRAoWF9aeBXzovIAcUX6IBMVYzYTedZb+JghCCIo+gFl3gV00sILtcalGHchdPsr1B0v9lJaeiqgjlLRXKRnmED2QpAGjYH6iEdJyeJZp6FCEarcUW8Y7HTpKRKssD0eWLLVDPYqbQtVoGFQAX2gZVBfBuuiuoSDUgpdRv4Yf4/haSxewDyodLZZSMUH+a6AFXDCdUxVQBpZrJj0UHamX4DxoDb0UI/dAsw1KZ5KfrDH9iP9pqKe3mLdhSJtvLNY6vbYhfa2hRNZmRKWPoPFtxhMSkehcJb0ArpRi2THJA91DXR6lo5j8dMSSFeacDx2Ea17T1HHQpbPRSccscj/3KR3tUVwl7V0LjTMyRaOZnG5O49gacUGrbtUUe8KM1iyHKgduzcUdSY62cK9pOvXzPftx/JeUJRPUnRl8dEO03L3t8VRd7X0oUYpJkuPpdAxkSPAHaTrpyytG4uXK8onKO7FsAM74YWJQ4EqyWffZfJO8U526VA27mRrK13/NPCQult4xmyUrZLiG6GuJvmjnOzS8oa+QnG6USZ5XyprVkv9wiM7L3XlOOaz+8zgVWYzXxhp+Raq+GSSJjb/K9kEl2/BKfkRkEM8i3bfJC0NH61SioufYdawPJsVK0V5XQY+S742t32ALWU95jWC4+yIKFpRtszx/bAPVqaY3V+RM2Lm0rYkJ0NlhX4707J5eDCHLTPF1PJmNhJKVtwvQU8YW2d/LiXLJydiOMWTDWBqs0oLM3jAu7QYm78QTHb9+UXCromZOcXOzzYB+csDHRiMoMMBb004NMmoo8RfBwD/Cvo57XTWQZ8tFjsi3E6UPeW3My0njDYOU+hMS/jWEZL7egc6Q4cJqu2mcwfx/4Pp/2lpYA2sgTWwBtbAGlgDO2W/BRgADRV6RjlErQoAAAAASUVORK5CYII="
 
-var styles ="""
+styles ="""
     html {
         position: relative;
         min-height: 100%;  
@@ -721,8 +721,8 @@ class ALTUI_Templates_Factory
         </span>
     </td>
     <td class='altui-variable-buttons'>
-        #{@smallbuttonTemplate.format('{3}', 'altui-variable-history', glyphTemplate.format( "calendar", _T("History"), "" ),_T('History'))}
-        #{@smallbuttonTemplate.format( '{3}', 'altui-variable-push {4}', glyphTemplate.format( "signal", _T("Push to {5}"), "" ),_T("Push to {5}"))}
+        #{smallbuttonTemplate.format('{3}', 'altui-variable-history', glyphTemplate.format( "calendar", _T("History"), "" ),_T('History'))}
+        #{smallbuttonTemplate.format( '{3}', 'altui-variable-push {4}', glyphTemplate.format( "signal", _T("Push to {5}"), "" ),_T("Push to {5}"))}
     </td>
     <td id='{3}' class='altui-variable-value' >
         {1}
@@ -757,9 +757,9 @@ class LuaEditor
                 </div>
             </div>
             <div class='modal-footer'>
-                <!--<button type='button' class='btn btn-default' data-dismiss='modal'>"+_T("Close")+"</button>-->
-                <!--<button type='button' class='btn btn-default altui-luacode-test' >"+_T("Test Code")+"</button>-->
-                <!--<button type='button' class='btn btn-primary altui-luacode-save' data-dismiss='modal'>"+_T("Save Changes")+"</button>-->
+                <!--<button type='button' class='btn btn-default' data-dismiss='modal'>#{_T("Close")}</button>-->
+                <!--<button type='button' class='btn btn-default altui-luacode-test' >#{_T("Test Code")}</button>-->
+                <!--<button type='button' class='btn btn-primary altui-luacode-save' data-dismiss='modal'>#{_T("Save Changes")}</button>-->
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
@@ -786,7 +786,7 @@ class LuaEditor
         dialog.on "click touchend", ".altui-luacode-text", () ->
             lua = $("#altui-luacode-text").val()
             MultiBox.runLua 0, lua, (result) -> alert(JSON.stringify(result))
-        .on("click touchend", ".altui-luacode-save", () ->
+        .on "click touchend", ".altui-luacode-save", () ->
             code = $("#altui-luacode-text").val()
             onSaveCB(code)
         dialog.modal()
@@ -853,7 +853,7 @@ class DialogManager
 <option value='#{state.id}' #{isSelected}>
     #{state.variable} : (#{state.service})
 </option>
-                """
+                """)
         return select.wrap( "<div></div>" ).parent().html();    
 
     @getDeviceActionSelect: (id, device, actiondescriptor, cbfunc) ->
@@ -880,7 +880,7 @@ class DialogManager
                                     actiondescriptor.action,
                                     actiondescriptor,
                                     (parameters) ->
-                                        cbfunc(select.wrap("<div></div>").parent().html()+parameters)
+                                        cbfunc(select.wrap("<div></div>").parent().html()+parameters))
 
 
     @createSpinningDialog: (message, glyph) ->
@@ -914,7 +914,7 @@ class DialogManager
         # buttons
         $('div#dialogs')
             .off('submit', "div#dialogModal form")
-            .on('submit', 'div#dialogModel form', () ->
+            .on 'submit', 'div#dialogModel form', () ->
                 result = true
                 dialog.modal('hide')
             .off('hide.bs.modal', 'div#dialogModal')
@@ -963,7 +963,7 @@ class DialogManager
         , (device) -> # filter
             MultiBox.controllerOf(device.altuiid).controller == controller
         )
-        $('div#dialogs').on('submit', 'div#dialogModal form', (event) ->
+        $('div#dialogs').on 'submit', 'div#dialogModal form', (event) ->
             trigger.name = $('#altui-widget-TriggerName').val()
             trigger.enabled = 1
             trigger.device = parseInt(MultiBox.controllerOf($('#altui-select-device').val()), id)
@@ -998,7 +998,7 @@ class DialogManager
         $('div#dialogs')    
             .off('submit',"div#dialogModal form")
             .on( 'submit',"div#dialogModal form", (event) ->
-                var lines=[]
+                lines=[]
                 for check, idx in $('.altui-notify-user')
                     if $(check).prop('checked') == true
                         id = $(check).prop('id').substring("altui-widget-user-".length)
@@ -1016,7 +1016,7 @@ class DialogManager
 
     @createPropertyDialog: (title) ->
         dialog = DialogManager.registerDialog('dialogModel',
-                                              defaultDialogModalemplate.format title, '' 'modal-lg')
+                                              defaultDialogModalemplate.format(title, '', 'modal-lg'))
         DialogManager.dlgAddDialogButton dialog, true, _T("Save Changes")
         return dialog
 
@@ -1025,7 +1025,7 @@ class DialogManager
         typ = if bSubmit then 'submit' else 'button'
         cls = if bSubmit then 'primary' else 'default'
         html = """
-<button type='#{typ}' class='btn btn-#{cls'} #{extraclass or ''}' #{ea}>
+<button type='#{typ}' class='btn btn-#{cls}' #{extraclass or ''}' #{ea}>
     #{label}
 </button>
         """
@@ -1060,7 +1060,7 @@ class DialogManager
      type='checkbox' 
      class='altui-widget-TimerDayOfWeek' 
      id='altui-widget-#{name+element.value}'
-     #{if $.inArray(element.value.toString(),selected_days)!=-1) then 'checked' else ''}
+     #{if $.inArray(element.value.toString(),selected_days)!=-1 then 'checked' else ''}
      value='#{element.value}' />
     #{element.text}
  </label>
@@ -1073,26 +1073,394 @@ class DialogManager
                                                 '',
                                                 removeGlyph,
                                                 _T("None"))
-        propertyline += "</div>";
+        propertyline += "</div>"
         $(dialog).find(".row-fluid").append(propertyline)
         $("#altui-TimerDayOfWeek-setAll").click () ->
             $(".altui-widget-TimerDayOfWeek").each (i,e) ->
-                id = parseInt($(e).prop('id').substring("altui-widget-#{name}".length)
+                id = parseInt($(e).prop('id').substring("altui-widget-#{name}".length))
                 if id < 8
                     $(e).prop('checked', true)
 
         $("#altui-TimerDayOfWeek-clearAll").click () ->
             $(".altui-widget-TimerDayOfWeek").each (i,e) ->
-                id = parseInt($(e).prop('id').substring("altui-widget-#{name}".length)
+                id = parseInt($(e).prop('id').substring("altui-widget-#{name}".length))
                 if  id < 8
                     $(e).prop('checked', false)
 
+    @dlgAddColorPicker: (dialog, name, label, help, value, options) ->
+        optstr = @optionsToString(options)
+        vale = value or ''
+        propertyline = """
+<div class='form-group'>
+    <label for='altui-widget-#{name}' title='#{help or ''}'>
+        #{label}
+    </label>   
+        """
+        if help
+            propertyline += """
+    <span title='#{help or ''}>#{helpGlyph}</span>
+            """
+        propertyline += """
+    <input id='altui-widget-#{name}' name='#{name}' value='#{value}' #{optstr}>
+    </input>
+</div>
+        """
+        $(dialog).find(".row-fluid").append(propertyline)
+        $("#altui-widget-#{name}").spectrum {
+            preferredFormat: 'hex'
+            replacerClassName: 'altui-colorpicker-replacer'
+        }
+
+    @dlgAddBlockly: (dialog, name, label, value, xml, help, options) ->
+        opstr = @optionsToString($.extend({type:'text'}, options))
+        xml = xml or ""
+        value = value or ''
+        placeholder = ''
+        if options? and not options.placeholder?
+            placeholder = "placeholder: 'enter #{name}'"
+        propertyline = """
+<div class='form-group'>
+   <label for='altui-widget-#{name}' title='#{help or ''}'>#{label}</label>
+        """
+        if help
+           propertyline += """
+    <span title='#{help or ''}>#{helpGlyph}</span>
+            """
+        propertyline += """
+    <div class='input-group'>
+        <input 
+         id='altui-widget-#{name}' 
+         class='form-control' 
+         #{optstr} 
+         value='#{value.escapeXml()}' 
+         #{placeholder} >
+        </input>
+        <span class='input-group-btn'>
+            #{buttonTemplate.format( "altui-edit-"+name, 'btn-default', "Blockly "+editGlyph,'default',_T('Edit Watch Expression'))}
+        </span>
+        <input 
+         type='hidden' 
+         id='altui-xml-#{name}' 
+         class='form-control' 
+         value='#{xml.escapeXml()}' >
+        </input>
+    </div>
+</div>
+        """
+        $(dialog).find(".row-fluid").append(propertyline)
+
+        $("#altui-widget-LuaExpression").on "change", () ->
+            $("#altui-xml-LuaExpression").val("")
+
+    #@dlgAddLine: (dialog, name, label, value, help, options, col_css) ->
+
+
+class UIManager
+    # there scripts cannot be loaded by ALTUI and cannot be executed, so if a device uses them, we do not load/use it
+    # meaning we lose functionality
+    forbiddenScripts: ["shared.js","interface.js"]
+
+    # in English, we will apply the _T() later, at display time
+    checkOptions: [
+        { id:'ShowVideoThumbnail'
+          type:'checkbox'
+          label:"Show Video Thumbnail in Local mode"
+          _default:1
+          help:'In Local access mode, show camera in video stream mode' },
+        { id:'FixedLeftButtonBar', type:'checkbox', label:"Left Buttons are fixed on the page", _default:1, help:'choose whether or not the selection Buttons on the left are scrolling with the page' },
+        { id:'ShowWeather', type:'checkbox', label:"Show Weather on home page", _default:1, help:'display or not the weather widget on home page' },
+        { id:'UseVeraFavorites', type:'checkbox', label:"Use Vera Favorites", _default:0, help:'use the same favorites as set on your VERA box but prevent to have different favorites per client device' },
+        { id:'SyncLastRoom', type:'checkbox', label:"Same Room for Devices/Scenes", _default:1, help:'keep the same last selected room between the device and the scene pages'},
+        { id:'StickyFooter', type:'checkbox', label:"Sticky Footer to bottom", _default:0, help:'Fixes the footer at the bottom of the page but could have performance issues on mobile browsers'},
+        { id:'UseUI7Heater', type:'checkbox', label:"Use new UI7 behavior for Heater devices", _default:0, help:'technical option to trigger the UI7 behavior for heater'},
+        { id:'ShowAllRows', type:'checkbox', label:"Show all rows in grid tables", _default:0, help:'allways show all the lines in the grid tables, or have a row count selector instead'},
+        { id:'Menu2ColumnLimit', type:'number', label:"2-columns Menu's limit", _default:15, min:2, max:30, help:'if a menu has more entries than this number then show the menu entries in 2 columns'  },
+        { id:'TempUnitOverride', type:'select', label:"Weather Temp Unit (UI5)", _default:'c', choices:'c|f', help:'Unit for temperature'  }
+    ]
+
+
+
+
+
+
+
+
+
+$(document).ready () ->
+    _initLocalizedGlobals: () ->
+        @_HouseModes = [
+            {id:1, text:_T("Home"), cls:"preset_home"},
+            {id:2, text:_T("Away"), cls:"preset_away"},
+            {id:3, text:_T("Night"), cls:"preset_night"},
+            {id:4, text:_T("Vacation"), cls:"preset_vacation"}
+        ]
+        # 0: table  1: devicename 2: id
+        deviceModalTemplate = """
+<div id='deviceModal' class='modal fade'>
+    <div class='modal-dialog modal-lg'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <button 
+                 type='button' 
+                 class='close' 
+                 data-dismiss='modal' 
+                 aria-label='Close'>
+                    <span aria-hidden='true'>&times;</span>
+                </button>
+                <h4 class='modal-title'>{1} <small>#{2}</small> - Variables</h4>
+            </div>
+            <div class='modal-body'>
+            <div class='row' >
+            <div class='col-xs-12' style='overflow-x: auto;'>
+                <table class='table table-condensed'>
+                    <thead>
+         <tr>
+           <th>#{_T("Variable")}</th>
+           <th></th>
+           <th>#{_T("Value")}</th>
+         </tr>
+       </thead>
+       <tbody>
+       {0}                    // lines goes here
+       </tbody>
+     </table>
+      </div>  // col
+      </div>  // row
+      </div>  // body
+      <div class='modal-footer'>
+        <button type='button' class='btn btn-primary' data-dismiss='modal'>#{_T("Close")}</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+        """
+
+        # 0: table  1: devicename 2: id
+        deviceActionModalTemplate = """
+<div id='deviceActionModal' class='modal fade'>
+    <div class='modal-dialog'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <button 
+                 type='button' 
+                 class='close' 
+                 data-dismiss='modal'  
+                 aria-label='Close'>
+                    <span aria-hidden='true'>&times</span>
+                </button>
+                <h4 class='modal-title'>
+                    {1} <small>#{2}</small> - Actions
+                </h4>
+            </div>
+            <div class='modal-body'>
+                <table class='table table-condensed' >
+                    <thead>
+                        <tr>
+                            <th>#{_T("Action")}</th>
+                            <th>"#{T("Parameters")}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {0}
+                    </tbody>
+                </table>
+            </div>
+            <div class='modal-footer'>
+                {3}
+                <button 
+                 type='button' 
+                 class='btn btn-primary' 
+                 data-dismiss='modal'>
+                    #{_T("Close")}
+                </button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+        """
+
+        # 0: title, 1: body, 2: class size
+        defaultDialogModalTemplate = """
+<div id='dialogModal' class='modal fade'>
+    <div class='modal-dialog {2}'>
+        <form class='form' data-toggle='validator' onsubmit='return false;'>
+            <div class='modal-content'>
+                <div class='modal-header'>
+                    <button 
+                     type='button' 
+                     class='close' 
+                     data-dismiss='modal' 
+                     aria-label='Close'>
+                        <span aria-hidden='true'>&times;</span>
+                    </button>
+                    <h4 class='modal-title'>
+                        {0} 
+                    </h4>
+                </div>
+                <div class='modal-body'>
+                    <div class='row-fluid'>
+                        {1}
+                    </div>
+                </div>
+                <div class='modal-footer'>
+                    <button 
+                     type='button' 
+                     class='btn btn-default' 
+                     data-dismiss='modal'>#{_T("Close")}</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </form>
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+    """
+
+    staremtpyGlyph = glyphTemplate.format("star-empty", 
+                                          _T("Favorite"),
+                                          "altui-favorite text-muted")
+    starGlyph = glyphTemplate.format("star",
+                                     _T("Favorite"),
+                                     "altui-favorite text-warning")
+
+
+    body = """
+<!-- Fixed navbar -->
+    <div id='dialogs'></div>
+    <nav class='navbar navbar-default navbar-fixed-top'>
+        <div class='container'>
+            <div class='navbar-header'>
+                <button type='button' class='navbar-toggle collapsed pull-left' data-toggle='collapse' data-target='#navbar' aria-expanded='false' aria-controls='navbar'>
+                    <span class='sr-only'>Toggle navigation</span>
+                    <span class='icon-bar'></span>
+                    <span class='icon-bar'></span>
+                    <span class='icon-bar'></span>
+                </button>       
+                <a class='navbar-brand' href='#'></a>
+            </div>
+            <div id='navbar' class='navbar-collapse collapse'>
+                <ul class='nav navbar-nav'>
+                    <li class='active'>
+                        <div class='imgLogo'></div>
+                    </li>
+                    <li>
+                        <a id='menu_device' href='#'  >#{_T("Devices")}</a>
+                    </li>
+                    <li>
+                        <a id='menu_scene' href='#'  >#{_T("Scenes")}</a>
+                    </li>
+                    <li class='dropdown'>
+                        <a 
+                         href='#' 
+                         class='dropdown-toggle' 
+                         data-toggle='dropdown' 
+                         role='button' 
+                         aria-expanded='false'>
+                            #{_T("More")} <span class='caret'></span>
+                        </a>
+                 <ul class='dropdown-menu' role='menu'>
+                     <li><a id='menu_room' href='#'  >#{_T("Rooms")}</a></li>
+                     <li><a id='menu_plugins' href='#'  >#{_T("Plugins")}</a></li>
+                 <li class='divider'></li>
+                     <li class='dropdown-header'>Tables</li>
+                     <li><a id='altui-tbl-watches' href='#' >#{_T("Watches")}</a></li>
+                     <li><a id='altui-tbl-device' href='#' >#{_T("Devices")}</a></li>
+                     <li><a id='altui-scene-triggers' href='#' >#{_T("Triggers")}</a></li>
+                     <li><a id='altui-tbl-scene' href='#' >#{_T("Scenes")}</a></li>
+                     <li><a id='altui-tbl-controllers' href='#' >#{_T("Controllers")}</a></li>
+                 <li class='divider'></li>
+                     <li class='dropdown-header'>Graphic</li>
+                     <li><a id='altui-graph-watches' href='#' >#{_T("Watch Display")}</a></li>
+                     <li><a id='altui-energy' href='#' >#{_T("Power Chart")}</a></li>
+                     <li><a id='altui-childrennetwork' href='#' >#{_T("Parent/Child Network")}</a></li>
+                     <li><a id='altui-zwavenetwork' href='#' >#{_T("zWave Network")}</a></li>
+                     <li><a id='altui-zwaveroutes' href='#' >#{_T("zWave Routes")}</a></li>
+                     <li><a id='altui-quality' href='#' >#{_T("Network Quality")}</a></li>
+                 </ul>
+             </li>
+             <li class='dropdown'>
+                 <a href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-expanded='false'>#{_T("Panels")} <span class='caret'></span></a>
+                 <ul class='dropdown-menu' role='menu'>
+                     <li><a id='altui-pages-see' href='#' >#{_T("Use Custom Pages")}</a></li>
+                     <li><a id='altui-pages-edit' href='#' >#{_T("Edit Custom Pages")}</a></li>
+                 </ul>
+             </li>
+             <li class='dropdown'>
+               <a href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-expanded='false'>#{_T("Misc")}<span class='caret'></span></a>
+               <ul class='dropdown-menu' role='menu'>
+                 <li class='dropdown-header'>Access</li>
+                 <li><a id='altui-remoteaccess' href='#' >#{_T("Remote Access Login")}</a></li>
+                 <li class='divider'></li>
+                 <li class='dropdown-header'>Lua</li>
+                 <li><a id='altui-reload' href='#' >#{_T("Reload Luup Engine")}</a></li>
+                 <li><a id='altui-reboot' href='#' >#{_T("Reboot Vera")}</a></li>
+                 <li><a id='altui-luastart' href='#' >#{_T("Lua Startup Code")}</a></li>
+                 <li><a id='altui-luatest' href='#' >#{_T("Lua Test Code")}</a></li>
+                 <li><a id='altui-oscommand' href='#' >#{_T("OS Command")}</a></li>
+                 <li class='divider'></li>
+                 <li class='dropdown-header'>Admin</li>
+                 <li><a id='altui-optimize' href='#'>#{_T("Options")}</a></li>
+                 <li><a id='altui-theme-selector' href='#'>#{_T("Themes")}</a></li>
+                 <li><a id='altui-localize' href='#'>#{_T("Localization")}</a></li>
+                 <li><a id='altui-debugtools' href='#'>#{_T("Debug")}</a></li>
+                 <li class='divider'></li>
+                 <li class='dropdown-header'>About</li>
+                 <li><a id='altui-credits' href='#'>#{_T("Credits")}</a></li>
+                 <li><a href='http://forum.micasaverde.com/index.php/topic,33308.msg244110.html#msg244110'>#{_T("Evolutions")}</a></li>
+                 <li><a href='http://forum.micasaverde.com/index.php?board=78.0'>#{_T("Support")}</a></li>
+               </ul>
+             </li>
+           </ul>
+         </div><!--/.nav-collapse -->
+          </div>
+        </nav>
+        <div class='container-fluid theme-showcase' role='main'>
+        </div> <!-- /container -->
+        <div id='altui-background'></div>
+    """
+
+    $("#wrap").prepend(body)
+
+    # client side override of theme if defined
+    clientsideThemecss = MyLocalStorage.getSettings("Theme")
+    if clientsideThemecss?
+        g_CustomTheme = clientsideThemecss
+
+    ALTUI_Templates = ALTUI_Templates_Factory()
+
+    UIManager.initEngine styles.format(window.location.hostname),
+                         g_DeviceTypes,
+                         g_customTheme,
+                         g_Options,
+                         () ->
+                            UIManager.initCustomPages(g_CustomPages)
+                            MultiBox.initEngine(g_ExtraController, g_FirstUserData)
+                            EventBus.publishEvent("on_ui_initFinished")
     
+    AltuiDebug.SetDebug(g_DeviceTypes.info["debug"])
+    AltuiDebug.debug("starting engines")
+    AltuiDebug.debug("Configureation: #{JSON.stringify(g_DeviceTypes)}")
+    AltuiDebug.debug("Custom Pages: #{JSON.stringify(g_CustomPages)}")
 
+    EventBus.registerEventHandler("on_ui_initFinished", UIManager, UIManager.signal)
+    EventBus.registerEventHandler("on_ui_userDataLoaded", UIManager, UIManager.signal)
+    EventBus.registerEventHandler("on_ui_deviceStatusChanged", UIManager, "refreshUIPerDevice")
 
+    language = getQueryStringValue("lang") or window.navigator.userLanguage or window.navigator.language
+    AltuiDebug.debug("language:#{language}")
 
-
-
+    # if lang is on the url, the js is already loaded by the LUA module. 
+    if language.substring(0,2) != 'en' and getQueryStringBalue("lang") == ""
+        scriptLocationAndName = "J_ALTUI_loc_#{language.substring(0,2)}.js"
+        head = document.getElementsByTagName('head')[0]
+        script = document.createElement('script')
+        script.type = 'text/javascript'
+        script.src = scriptLocationAndName
+        AltuiDebug.debug("Loading script :#{scriptLocationAndName}")
+        # once script is loaded, we can call style function in it
+        $(script).load () -> _initLocalizedGlobals()
+        head.appendChild(script)
+    else
+        AltuiDebug.debug("Locale file not needed")
+        _initLocalizedGlobals()
 
 
 

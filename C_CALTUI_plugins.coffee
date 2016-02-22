@@ -865,84 +865,84 @@ div.altui-windowcover button.btn-sm { width: 4em; }
         MLS_SETTING = "MULTISTRINGUISTATE#{device.altuiid}"
         S_VCONT = 'urn:upnp-org:serviceId:VContainer1'
 
-    if not $("button#altui-morebtn-#{device.altuiid}").html()?
-        MyLocalStorage.setSettings MLS_SETTING, { devicestate: 0 }
-    state = MyLocalStorage.getSettings(MLS_SETTING)
-    display = if state? then state['devicestate'] else 0
+        if not $("button#altui-morebtn-#{device.altuiid}").html()?
+            MyLocalStorage.setSettings MLS_SETTING, { devicestate: 0 }
+        state = MyLocalStorage.getSettings(MLS_SETTING)
+        display = if state? then state['devicestate'] else 0
 
-    html = ""
-    html += """
- <div class='btn-group pull-right'>
-    <button 
-     id='altui-allbtn-#{device.altuiid}' 
-     type='button' 
-     class='altui-window-btn btn btn-default btn-xs'>
-        #{sAll}
-    </button>
-    <button 
-     id='altui-morebtn-#{device.altuiid}' 
-     type='button' 
-     class='altui-window-btn btn btn-default btn-xs'>
-        #{if display != 2 then sMore else sLess}
-    </button>
- </div>
- <div class='altui-multistring-text-div'>
-    """
-    for v in [1..5]
-        label = MultiBox.getStatus(device, S_VCONT, "VariableName#{v}")
-        value = MultiBox.getStatus(device, S_VCONT, "Variable#{v}")
-        style = ""
-        if display != 2
-            textCls = 'altui-multistring-text-some'
-        else
-            textCls = 'altui-multistring-text-all'
-        if v <= 3
-            style = "class='#{textCls} altui-multistring-text-1 text-muted'"
-        else
-            style = "class='#{textCls} altui-multstring-text-2 text-muted'"
-            if display != 2
-                style += " style='display: none;'"
-        if label? and value?
-            html += $("<div #{style}></div>")
-                        .text("#{label}:#{value}")
-                        .wrap("<div></div>")
-                        .parent()
-                        .html()
+        html = ""
         html += """
-</div>
-<script type='text/javascript'>
-    state = MyLocalStorage.getSettings('#{MLS_SETTING}');
-    if (state['devicestate'] == 1) { 
-        $('.altui-multistring-text-1').toggle(); 
-        $('.altui-multistring-text-2').toggle(); 
-    }
-    $('button#altui-allbtn-#{device.altuiid}').on('click', function() { 
-        $('.altui-multistring-text-some')
-            .removeClass('altui-multistring-text-some')
-            .addClass('altui-multistring-text-all')
-            .show();
-        $('#altui-morebtn-#{device.altuiid}').html('#{sLess}'); 
-        state['devicestate'] = 2; 
-        MyLocalStorage.setSettings('#{MLS_SETTING}', state); 
-    });
-    $('button#altui-morebtn-#{device.altuiid}')
-        .on('click', function() { 
-            if ($(this).html() == '#{sLess}') { 
-                $('.altui-multistring-text-all')
-                    .removeClass('altui-multistring-text-all')
-                    .addClass('altui-multistring-text-some'); 
-                $('.altui-multistring-text-2').hide(); 
-                $('#altui-morebtn-#{device.altuiid}').html('#{sMore}'); 
-                state['devicestate'] = 0; 
-                MyLocalStorage.setSettings('MULTISTRINGUISTATE#{device.altuiid}', state); 
-            } else { 
-                $('.altui-multistring-text-1').toggle(); 
-                $('.altui-multistring-text-2').toggle(); 
-                state['devicestate'] = state['devicestate'] == 0 ? 1 : 0; 
-                MyLocalStorage.setSettings('#{MLS_SETTING}', state); 
-            } });
-</script>
+     <div class='btn-group pull-right'>
+        <button 
+         id='altui-allbtn-#{device.altuiid}' 
+         type='button' 
+         class='altui-window-btn btn btn-default btn-xs'>
+            #{sAll}
+        </button>
+        <button 
+         id='altui-morebtn-#{device.altuiid}' 
+         type='button' 
+         class='altui-window-btn btn btn-default btn-xs'>
+            #{if display != 2 then sMore else sLess}
+        </button>
+     </div>
+     <div class='altui-multistring-text-div'>
         """
+        for v in [1..5]
+            label = MultiBox.getStatus(device, S_VCONT, "VariableName#{v}")
+            value = MultiBox.getStatus(device, S_VCONT, "Variable#{v}")
+            style = ""
+            if display != 2
+                textCls = 'altui-multistring-text-some'
+            else
+                textCls = 'altui-multistring-text-all'
+            if v <= 3
+                style = "class='#{textCls} altui-multistring-text-1 text-muted'"
+            else
+                style = "class='#{textCls} altui-multstring-text-2 text-muted'"
+                if display != 2
+                    style += " style='display: none;'"
+            if label? and value?
+                html += $("<div #{style}></div>")
+                            .text("#{label}:#{value}")
+                            .wrap("<div></div>")
+                            .parent()
+                            .html()
+            html += """
+    </div>
+    <script type='text/javascript'>
+        state = MyLocalStorage.getSettings('#{MLS_SETTING}');
+        if (state['devicestate'] == 1) { 
+            $('.altui-multistring-text-1').toggle(); 
+            $('.altui-multistring-text-2').toggle(); 
+        }
+        $('button#altui-allbtn-#{device.altuiid}').on('click', function() { 
+            $('.altui-multistring-text-some')
+                .removeClass('altui-multistring-text-some')
+                .addClass('altui-multistring-text-all')
+                .show();
+            $('#altui-morebtn-#{device.altuiid}').html('#{sLess}'); 
+            state['devicestate'] = 2; 
+            MyLocalStorage.setSettings('#{MLS_SETTING}', state); 
+        });
+        $('button#altui-morebtn-#{device.altuiid}')
+            .on('click', function() { 
+                if ($(this).html() == '#{sLess}') { 
+                    $('.altui-multistring-text-all')
+                        .removeClass('altui-multistring-text-all')
+                        .addClass('altui-multistring-text-some'); 
+                    $('.altui-multistring-text-2').hide(); 
+                    $('#altui-morebtn-#{device.altuiid}').html('#{sMore}'); 
+                    state['devicestate'] = 0; 
+                    MyLocalStorage.setSettings('MULTISTRINGUISTATE#{device.altuiid}', state); 
+                } else { 
+                    $('.altui-multistring-text-1').toggle(); 
+                    $('.altui-multistring-text-2').toggle(); 
+                    state['devicestate'] = state['devicestate'] == 0 ? 1 : 0; 
+                    MyLocalStorage.setSettings('#{MLS_SETTING}', state); 
+                } });
+    </script>
+            """
 
 
     @drawPnPProxy: (device) ->

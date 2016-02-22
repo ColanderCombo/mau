@@ -10,14 +10,14 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 
-getQueryStringValue = (key) ->
+@getQueryStringValue = (key) ->
     return unescape(window.location.search.replace(new RegExp("^(?:.*[&\\?]" + escape(key).replace(/[\.\+\*]/g, "\\$&") + "(?:\\=([^&]*))?)?.*$", "i"), "$1"))
 
-isIE11 = () ->
+@isIE11 = () ->
     return navigator.userAgent.indexOf('Trident') != -1 \
         and navigator.userAgent.indexOf('MSIE') == -1
 
-Altui_SelectText = (element) ->
+@Altui_SelectText = (element) ->
     doc = document
     text = doc.getElementById element
     if doc.body.createTextRange
@@ -31,7 +31,7 @@ Altui_SelectText = (element) ->
         selection.removeAllRanges()
         selection.addRange range
 
-Altui_LoadStyle = (styleFunctionName) ->
+@Altui_LoadStyle = (styleFunctionName) ->
     title = document.getElementsByTagName('title')[0]
     style = document.createElement 'style'
     style.type = 'text/css'
@@ -39,7 +39,7 @@ Altui_LoadStyle = (styleFunctionName) ->
     style.appendChild(document.createTextNode(css))
     title.parentNode.insertBefore(style,title)
 
-Altui_ExecuteFunctionByName = (functionName, context, device, extraparam) ->
+@Altui_ExecuteFunctionByName = (functionName, context, device, extraparam) ->
     namespaces = functionName.split('.')
     func = namespaces.pop()
     for namespace in namespaces
@@ -47,29 +47,29 @@ Altui_ExecuteFunctionByName = (functionName, context, device, extraparam) ->
     return context[func].call(context, device, extraparam)
 
 class Localization
-    @_unknown_terms: {}
-    @_terms: {}
+    _unknown_terms: {}
+    _terms: {}
 
     @_T: (t) ->
-        if t in @_terms
+        if t in Localization::_terms
             return v
         else
-            @_unknown_terms[t] = t
+            Localization::_unknown_terms[t] = t
         return t
 
     @init: (terms) ->
-        @_terms = $.extend({}, terms)
-        @_unknown_terms = {}
+        Localization::_terms = $.extend({}, terms)
+        Localization::_unknown_terms = {}
 
     @dump: () ->
         if AltuiDebug.IsDebug()
-            console.log JSON.stringify @_unknown_terms
-            console.log JSON.stringify @_terms
+            console.log JSON.stringify Localization::_unknown_terms
+            console.log JSON.stringify Localization::_terms
             nav = window.navigator
         text = 
             """
 browser query:#{getQueryStringValue("lang")} userlanguage:#{nav.userLanguage or ""}     language:#{nav.language or ""}
-Unknown terms:#{JSON.stringify(@_uknown_terms)}
+Unknown terms:#{JSON.stringify(Localization::_uknown_terms)}
 """
         UIManager.pageEditorForm($(".altui-mainpanel"),
                                 'altui-page-editor',
@@ -79,7 +79,8 @@ Unknown terms:#{JSON.stringify(@_uknown_terms)}
                                 _T("Close"), 
                                 () -> UIManager.pageHome())
 
-_T = Localization._T
+@Localization = Localization
+@_T = @Localization._T
 
 if not RegExp.escape?
     RegExp.escape = (string) -> string.replace /[-\/\\^$*+?.()|[\]{}]/g, '\\$&'
@@ -132,12 +133,13 @@ String::escapeXml = () ->
     }
     @replace /[<>&"']/g, (ch) -> XML_CHAR_MAP[ch]
 
-String::format = (args...) ->
-    tmp = @
-    for arg,i in args
-        replacement = ///\{#{i}\}///g
-        tmp @replace(replacement, arg)
-    tmp
+if not String::format?
+    String::format = (args...) ->
+        tmp = @
+        for arg,i in args
+            replacement = ///\{#{i}\}///g
+            @replace(replacement, arg)
+        tmp
 
 String::startsWith = (str) -> @indexOf(str) == 0
 
@@ -274,8 +276,9 @@ class AltuiDebug
     @SetDebug: (bDebug) -> @g_debug = bDebug
     @IsDebug: () -> @g_debug
 
+@AltuiDebug = AltuiDebug
 
-formatAjaxErrorMessage = (jqXHR, exception) ->
+@formatAjaxErrorMessage = (jqXHR, exception) ->
     if jqXHR.status == 0
         ('Not connected. Please verify your network connection.')
     else if jqXHR.status == 404
@@ -321,6 +324,7 @@ class MyLocalStorage
         settings = @get("ALTUI_Settings")
         settings = if settings? then settings[key] else null
 
+@MyLocalStorage = MyLocalStorage
 
 class Favorites
     @_favorites: $.extend { device: {}, scene:{} }, MyLocalStorage.getSettings("Favorites")
@@ -352,24 +356,28 @@ class Favorites
                     @_favorites[type][id] = (scene.onDashboard==1)
         return @_favorites[type][id] or false                    
 
+@Favorites = Favorites
+
 
 class EventBus
-    @_subscriptions: {
-        # altui specific ones              # parameters
-        on_altui_deviceTypeLoaded : []  # table of { func, object }
-        
-        # global ones 
-        on_ui_deviceStatusChanged : []  # table of { func, object }
-        on_ui_initFinished :        []
-        on_ui_userDataFirstLoaded : []
-        on_ui_userDataLoaded :      []
-        on_startup_luStatusLoaded : []
-        
-        # ctrl specific ones , 0 is the master then other are going to be added dynamically
-        on_ui_userDataFirstLoaded_0 :   []
-        on_ui_userDataLoaded_0 :        []
-        on_startup_luStatusLoaded_0 :   []
-    }
+
+    constructor: () ->
+        @_subscriptions =  {
+            # altui specific ones              # parameters
+            on_altui_deviceTypeLoaded : []  # table of { func, object }
+            
+            # global ones 
+            on_ui_deviceStatusChanged : []  # table of { func, object }
+            on_ui_initFinished :        []
+            on_ui_userDataFirstLoaded : []
+            on_ui_userDataLoaded :      []
+            on_startup_luStatusLoaded : []
+            
+            # ctrl specific ones , 0 is the master then other are going to be added dynamically
+            on_ui_userDataFirstLoaded_0 :   []
+            on_ui_userDataLoaded_0 :        []
+            on_startup_luStatusLoaded_0 :   []
+        }
 
     @_allSet: (tbl) ->
         for k,v in tbl
@@ -378,6 +386,8 @@ class EventBus
         return true
 
     @registerEventHandler: (eventname, object, funcname) ->
+        console.log eventname
+        console.log @_subscriptions
         if not @_subscriptions[eventname]?
             @_subscriptions[eventname] = []
         for sub,idx in @_subscriptions[eventname]
@@ -402,9 +412,15 @@ class EventBus
             @registerEventHandler(event, @, _signal)
 
     @publishEvent: (eventname) ->
+        console.log eventname
+        console.log @_subscriptions
+
         if @_subscriptions[eventname]
             theArgs = arguments
             for sub, idx in @_subscriptions[eventname]
+                console.log sub
+                console.log sub.funcname
+
                 if $.isFunction(sub.funcname)
                     (sub.funcname).apply(sub.object,theArgs)
                 else
@@ -415,19 +431,20 @@ class EventBus
 
     @getEventSupported: () -> Object.keys(@_subscriptions)
 
+@EventBus = EventBus
 
-class PageManager
-    @_pages: null
+# class PageManager
+#     @_pages: null
 
-    @_fixMyPage: (page) ->
+#     @_fixMyPage: (page) ->
 
-    @init: (pages) ->
-    @recoverFromStorage: () ->
-    @clearStorage: () ->
-    @savePages: () ->
-    @addPage: () ->
-    @deletePage: (name) ->
-    @getPageFromName: (name) ->
-    @updateChildrenInPage: (page, widgetid, position, size, zindex) ->
-    @insertChildrenInPage: (page, tool, position, zindex) ->
-    @remove
+#     @init: (pages) ->
+#     @recoverFromStorage: () ->
+#     @clearStorage: () ->
+#     @savePages: () ->
+#     @addPage: () ->
+#     @deletePage: (name) ->
+#     @getPageFromName: (name) ->
+#     @updateChildrenInPage: (page, widgetid, position, size, zindex) ->
+#     @insertChildrenInPage: (page, tool, position, zindex) ->
+#     @remove

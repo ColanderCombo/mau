@@ -604,7 +604,7 @@ local htmlLocalScripts = [[
 	<script src="C_CALTUI_utils.coffee" ></script>
 	<script src="C_CALTUI_verabox.coffee" ></script> 
 	<script src="C_CALTUI_multibox.coffee" ></script> 
-	<script src="C_CALTUI_uimgr.coffee" defer ></script> 
+	<script src="C_CALTUI_uimgr.coffee" defer ></script>
 ]]
     -- <script src="@localcdn@/d3.min.js"></script> 	
 
@@ -617,12 +617,13 @@ local htmlScripts = [[
 	<script type="text/javascript"  
 	  src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["gauge","table"]}]}' >
 	</script>
-	<script src="C_CALTUI_utils.coffee" ></script>
-	<script src="C_CALTUI_api.coffee" ></script>
-	<script src="C_CALTUI_upnp.coffee" ></script>
-	<script src="C_CALTUI_verabox.coffee" ></script> 
-	<script src="C_CALTUI_multibox.coffee" ></script> 
-	<script src="C_CALTUI_uimgr.coffee" defer ></script> 
+    <script type="text/javascript" src="http://coffeescript.org/extras/coffee-script.js"></script>
+	<script type="text/coffeescript" src="C_CALTUI_utils.coffee" ></script>
+	<script type="text/coffeescript" src="C_CALTUI_api.coffee" ></script>
+	<script type="text/coffeescript" src="C_CALTUI_upnp.coffee" ></script>
+	<script type="text/coffeescript" src="C_CALTUI_verabox.coffee" ></script> 
+	<script type="text/coffeescript" src="C_CALTUI_multibox.coffee" ></script> 
+	<script type="text/coffeescript" src="C_CALTUI_uimgr.coffee" defer ></script>
 ]]
     -- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script> 	
 
@@ -947,7 +948,7 @@ function myCALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 		command ="default"
 	end
 	
-	local deviceID = tonumber(lul_parameters["DeviceNum"] or findALTUIDevice() )
+	local deviceID = tonumber(lul_parameters["DeviceNum"] or findCALTUIDevice() )
 	
 	-- switch table
 	local action = {
@@ -1022,7 +1023,7 @@ function myCALTUI_Handler(lul_request, lul_parameters, lul_outputformat)
 						str = str .. "_loadStyle('"..styles[scripts[i]].."');"
 					end
 					optional_scripts = optional_scripts  .. string.format(
-						"<script type='text/javascript' data-src='%s' >%s</script>",
+						"<script type='text/coffeescript' data-src='%s' >%s</script>",
 						scripts[i],
 						"//<!-- \n".. str .. "\n// // -->\n"
 						)

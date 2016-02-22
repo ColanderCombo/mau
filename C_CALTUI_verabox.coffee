@@ -377,7 +377,7 @@ class VeraBox
         return jqxhr
 
     runLua: (code, cbfunc) ->
-        jqxhr = @httpGet("?"+$.params {
+        jqxhr = @httpGet "?"+$.params {
                 id: "lr_ALTUI_LuaRunHandler"
                 command: "run_lua"
                 lua: code
@@ -393,7 +393,7 @@ class VeraBox
                         cbfunc({success:success, result:lines[1], output:lines[2]}, jqXHR)
                 else
                    PageMessage.message(
-                    _T("Lua Command execution request failed. (returned #{textStatus})").format(textStatus) , "danger"); 
+                        _T("Lua Command execution request failed. (returned #{textStatus})").format(textStatus) , "danger")
 
     renameDevie: (device, newname, roomid) ->
     deleteDevice: (id) ->
@@ -467,10 +467,7 @@ class VeraBox
             xml: params[5] or ''
         }
 
-    _setWatchLineParams: (watch) ->
-        "#{watch.service}##{watch.variable}##{watch.deviceid}#" \
-        "#{watch.sceneid}##{watch.luaexpr}##{watch.xml or ''}"
-
+    _setWatchLineParams: (watch) -> """#{watch.service}##{watch.variable}##{watch.deviceid}##{watch.sceneid}##{watch.luaexpr}##{watch.xml or ''}"""
     _getWatches: (whichwatches, filterfunc) ->
         if whichwatches not in ['VariablesToWatch', 'VariablesToSend']
             return null
@@ -539,8 +536,8 @@ class VeraBox
                 @setStatus id, service, "PollNoReply", 0
             if not isNaN PollOk
                 @setStatus id, service, "PollOk", 0
-        , (device) -> (device.id_parent==1)
-        , (device) -> if $.isFunction cbfunc then cbfunc()
+        , ((device) -> (device.id_parent==1))
+        , ((device) -> if $.isFunction cbfunc then cbfunc())
 
     getUPnPHelper: () -> @_upnpHelper
     gerUrlHead: () -> @_upnpHelper.getUrlHead()
