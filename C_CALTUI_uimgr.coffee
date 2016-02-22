@@ -1162,11 +1162,12 @@ class UIManager
 
     # in English, we will apply the _T() later, at display time
     checkOptions: [
-        { id:'ShowVideoThumbnail'
-          type:'checkbox'
-          label:"Show Video Thumbnail in Local mode"
-          _default:1
-          help:'In Local access mode, show camera in video stream mode' },
+        { 
+            id:'ShowVideoThumbnail'
+            type:'checkbox'
+            label:"Show Video Thumbnail in Local mode"
+            _default:1
+            help:'In Local access mode, show camera in video stream mode' },
         { id:'FixedLeftButtonBar', type:'checkbox', label:"Left Buttons are fixed on the page", _default:1, help:'choose whether or not the selection Buttons on the left are scrolling with the page' },
         { id:'ShowWeather', type:'checkbox', label:"Show Weather on home page", _default:1, help:'display or not the weather widget on home page' },
         { id:'UseVeraFavorites', type:'checkbox', label:"Use Vera Favorites", _default:0, help:'use the same favorites as set on your VERA box but prevent to have different favorites per client device' },
@@ -1177,8 +1178,21 @@ class UIManager
         { id:'Menu2ColumnLimit', type:'number', label:"2-columns Menu's limit", _default:15, min:2, max:30, help:'if a menu has more entries than this number then show the menu entries in 2 columns'  },
         { id:'TempUnitOverride', type:'select', label:"Weather Temp Unit (UI5)", _default:'c', choices:'c|f', help:'Unit for temperature'  }
     ]
+    edittools = []
+    tools = []
 
+    @initLocalizedGlobals: () ->
 
+    @initUIEngine: (css) ->
+        $("title").before("<style type='text/css'>#{css}</style>")
+
+    @initEngine: (styles, devicetypes, themecss, serveroptions, cbfunc) ->
+        @initOptions(serveroptions)
+        @initUIEngine(styles)
+        @initDB(devicetypes, cbfunc)
+        @setTheme(themecss)
+        @initMultiSelect()
+        @initBlockly()
 
 
 
@@ -1428,7 +1442,7 @@ $(document).ready () ->
 
     UIManager.initEngine styles.format(window.location.hostname),
                          g_DeviceTypes,
-                         g_customTheme,
+                         g_CustomTheme,
                          g_Options,
                          () ->
                             UIManager.initCustomPages(g_CustomPages)
