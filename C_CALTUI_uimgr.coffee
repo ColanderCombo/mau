@@ -1152,7 +1152,163 @@ class DialogManager
         $("#altui-widget-LuaExpression").on "change", () ->
             $("#altui-xml-LuaExpression").val("")
 
-    #@dlgAddLine: (dialog, name, label, value, help, options, col_css) ->
+    @dlgAddLine: (dialog, name, label, value, help, options, col_css) ->
+        col_css = col_css or 'col-xs-12'
+        optstr = @optionsToString($.extend({type:'text'}, options))
+        value = value or ''
+        placeholder = if options? and not options.placeholder? then "placeholder:'enter #{name}'" else ""
+
+        propertyline = """
+
+        """
+    @dlgAddUrl: (dialog, name, label, value, help, options) ->
+        optstr = _optionsToString($.extend( {type:'text'},options))
+        value = value or ''
+        placeholder = if options? and not options.placeholder? then "placeholder:'enter #{name}'" else ""
+        if help
+            helpline = "<span title='#{help}'>#{helpGlyph}</span>"
+        propertyline = """
+<div class='form-group'>
+    <label for='altui-widget-"+name+"' title='#{help or ''}''>#{label}</label>
+    #{helpline or ''}
+    <input 
+     type='url' 
+     id='altui-widget-#{name}' 
+     class='form-control' 
+     #{optstr} 
+     value='#{value+}' #{placeholder}/>
+</div>
+        """
+        $(dialog).find(".row-fluid").append(propertyline)
+
+    @dlgAddSelect: (dialog, name, label, value, lines, htmloptions) ->
+        optstr = @optionsToString(htmloptions)
+        value = value or ''
+        propertyline = """
+<div class='form-group'>
+    <label for='altui-widget-#{name}' title='#{name}'>#{label}</label>
+    <select id='altui-widget-#{name}' class='form-control' #{optstr}>
+        """
+        for line,idx in lines
+            propertyline += """
+        <option 
+         value='#{line.value}' 
+         #{if unit==line.value then 'selected' else ''}>
+            #{line.text}
+        </option>
+            """
+
+        propertline += """
+    </select>
+</div>
+        """
+        $(dialog).find('.row-fluid').append(propertyline)
+
+
+
+    @dlgAddTimeInterval: (dialog, name, label, value, lines) ->
+        unit = (value or ' ').split(-1)
+        value = parseInt(value)
+        propertyline = """
+<div class='form-group'>
+    <label for='altui-widget-#{name}' title=''>#{label}</label>
+    <div class='form-inline'>
+        <input 
+         id='altui-widget-#{name}' 
+         class='form-control' 
+         type='number' 
+         value='#{value}' 
+         placeholder='enter #{name}'></input>
+        <select id='altui-widget-#{name}Unit' class='form-control'>
+        """
+        for line, idx in lines
+            propertyline += """
+            <option value='#{line.value}' 
+             #{if unit==line.value then 'selected' else ''}>
+                #{line.text}
+            </option>
+            """
+        propertyline += """
+        </select>
+    </div>
+</div>
+        """
+        $(dialog).find(".row-fluid").append(propertyline)
+
+
+    @dlgAddTime: (dialog, name, value, _timerRelative) ->
+        @_decomposeTimer = (value) ->
+            iKind = 0
+            newvalue = ''
+            if value.substring(0,8) == "00:00:00")
+                newvalue = "00:00:00"
+                if value.slice(-1) == "R"
+                    iKind = 1
+                else if value.slice(-1) == "T"
+                    iKind = 4
+                else
+                    iKind = 0
+            else
+                if value.substring(0,1) == "-"
+                    if value.slice(-1) == "R"
+                        iKind = 2
+                        newvalue = value.substr(1,value.length-2)
+                    else if value.slice(-1) == "T"
+                        iKind = 5
+                        newvalue = value.substr(1,value.length-2)
+                    else
+                        iKind = 0
+                        newvalue = value.substr(1,value.length-1)
+                else
+                    if value.slice(-1) == "R"
+                        iKind = 3
+                        newvalue = value.substr(0, value.length-1)
+                    else if value.slice(-1) == "T"
+                        iKind = 6
+                        newvalue = value.substr(0, value.length-1)
+                    else
+                        iKind = 0
+                        newvalue = value
+            return {value: newvalue, iKind: iKind}
+
+        pattern = "^[0-2][0-9][:]{1}[0-5][0-9][:][0-5][0-9]$"; 
+        res = _decomposeTimer((value==undefined) ? '' : value );
+        propertyline = """
+<div class='form-group'>
+    <label for='altui-widget-"+name+"' title='hh:mm:ss'>"+name+"</label>
+    <span title='hh:mm:ss'>#{helpGlyph}</span>
+    <div class='form-inline'>
+        <input 
+         id='altui-widget-#{name}' 
+         class='form-control' 
+         pattern='#{pattern}' 
+         value='#{res.value}' 
+         placeholder='hh:mm:ss' />
+        <select id='altui-widget-type-"+name+"' class='form-control'>
+        """
+
+        for line, idx in @timerRelative
+            propertyline += """
+                <option 
+                 value='#{line.value}' 
+                 #{if idx==res.iKind then 'selected' else ''}>
+                    #{line.text}
+                </option>
+            """
+        propertyline += """
+        </select>
+    </div>
+</div>
+        """
+        $(dialog).find(".row-fluid").append(propertyline)
+
+    @dlgAddTimer: (dialog, name, label, value, htmloptions) ->
+        
+
+
+
+
+
 
 
 class UIManager
@@ -1182,6 +1338,841 @@ class UIManager
     tools = []
 
     @initLocalizedGlobals: () ->
+        edittools = [
+            {id:1000, glyph:'object-align-top' , onclick: onAlignTop},
+            {id:1010, glyph:'object-align-horizontal', onclick: onAlignHorizontal },
+            {id:1020, glyph:'object-align-bottom' , onclick: onAlignBottom },
+            {id:1030, glyph:'object-align-left' , onclick: onAlignLeft },
+            {id:1040, glyph:'object-align-vertical' , onclick: onAlignVertical},
+            {id:1050, glyph:'object-align-right' , onclick: onAlignRight}
+        ]
+
+        tools = [ {
+            id: 10
+            cls: 'altui-widget-label'
+            no_refresh: true
+            html: _toolHtml(labelGlyph,_T("Label"))
+            property: _onPropertyLabel
+            widgetdisplay: (widget, bEdit) ->
+                 "<p style='color:#{widget.properties.color}; '>#{widget.properties.label}</p>"
+            properties: {
+                label: 'Default Label'
+                color: $(".altui-mainpanel").css("color")
+            }
+        },
+        {   
+            id: 20
+            cls: 'altui-widget-variable'
+            html: _toolHtml(infoGlyph,_T("Variable"))
+            property: _onPropertyVariable,
+            widgetdisplay: (widget,bEdit) ->
+                device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid)
+                if not device?
+                    return ""
+                if widget.properties.deviceid != NULL_DEVICE
+                    content = MultiBox.getStatus(device, 
+                                                 widget.properties.service, 
+                                                 widget.properties.variable) or ''
+                else
+                    content = 'not defined'
+                return "<p style='color:#{widget.properties.color}'>#{content}</p>"
+            },
+            properties: {
+                deviceid:NULL_DEVICE,
+                service:'',
+                variable:'',
+                color:$(".altui-mainpanel").css("color")
+            } 
+        },
+            {   id:30, 
+                cls:'altui-widget-image', 
+                no_refresh:true,
+                html: _toolHtml(picGlyph,_T("Image")),
+                property: _onPropertyImage, 
+                onWidgetResize: _onResizeStub,
+                aspectRatio: true,
+                widgetdisplay: function(widget,bEdit)   { 
+                    return "<img src='{0}' style='max-height:100%; max-width:100%; height:100%; width:100%; '></img>".format( widget.properties.url);
+                },
+                properties: {
+                    url:'data:image/png;base64,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'
+                } 
+            },
+            {   id:35, 
+                cls:'altui-widget-frame', 
+                no_refresh:true,
+                aspectRatio: false,
+                html: _toolHtml(uncheckedGlyph,_T("Frame")),
+                property: _onPropertyFrame, 
+                onWidgetResize: _onResizeStub,
+                widgetdisplay: function(widget,bEdit)   { 
+                    var content = (widget.properties.url=='') ? widget.properties.label : "<iframe class='altui-widget-iframe' src='{0}'></iframe>".format(widget.properties.url);
+                    return "<div class='altui-widget-frame-div' style='max-height:100%; max-width:100%; height:100%; width:100%; background:{1}; '>{0}</div>".format( content,widget.properties.css );
+                },
+                defaultSize: { width:50, height:50 },
+                zindex: -1,
+                properties: {
+                    label:'',
+                    css:'',
+                    url:'',
+                } 
+            },
+            {   id:40, 
+                cls:'altui-widget-icon', 
+                html: _toolHtml(picGlyph,_T("Device Icon")),
+                property: _onPropertyIcon, 
+                widgetdisplay: function(widget,bEdit)   { 
+                    var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
+                    if (device==null)
+                        return "";
+                    return (widget.properties.deviceid==NULL_DEVICE) ? ("<p>"+picGlyph+"</p>") : _deviceIconHtml( device );
+                },
+                properties: {
+                    deviceid:NULL_DEVICE
+                } 
+            },
+            {   id:50, 
+                cls:'altui-widget-runscene', 
+                no_refresh:true,
+                html: _toolHtml(runGlyph,_T("Scene")),
+                property: _onPropertyRunscene, 
+                onWidgetResize: _onResizeStub,
+                widgetdisplay: function(widget,bEdit)   { 
+                    var scene = MultiBox.getSceneByAltuiID(widget.properties.sceneid);
+                    return "<button type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='{3}' style='{5}'>{4}{2}</button>".format(
+                            scene ? scene.altuiid : NULL_DEVICE,
+                            'altui-widget-runscene-button',
+                            runGlyph.replace('glyphicon','pull-right glyphicon'),
+                            (bEdit==true)?'':'MultiBox.runSceneByAltuiID("{0}")'.format(scene ? scene.altuiid : NULL_DEVICE),
+                            widget.properties.label,
+                            "height: 100%; width: 100%;"
+                            );
+                },
+                properties: {
+                    sceneid:NULL_SCENE,
+                    label:''
+                } 
+            },
+            {   id:60, 
+                cls:'altui-widget-upnpaction', 
+                no_refresh:true,
+                html: _toolHtml(runGlyph,_T("Action")),
+                property: _onPropertyUpnpAction, 
+                onWidgetResize: _onResizeStub,
+                widgetdisplay: function(widget,bEdit)   { 
+                    var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
+                    if (device==null)
+                        return "";
+                    return "<button type='button' class='{1} btn btn-default' aria-label='Run Scene' onclick='{3}' style='{5}' >{4}{2}</button>".format(
+                        device ? device.altuiid : NULL_DEVICE,
+                        'altui-widget-upnpaction-button',
+                        runGlyph.replace('glyphicon','pull-right glyphicon'),
+                        (bEdit==true)?'':'MultiBox.runActionByAltuiID("{0}", "{1}", "{2}", {3} )'.format(
+                            device ? device.altuiid : NULL_DEVICE,
+                            widget.properties.service,
+                            widget.properties.action,
+                            JSON.stringify(widget.properties.params)
+                        ),
+                        widget.properties.label,
+                        "height: 100%; width: 100%;"
+                        );
+                },
+                properties: {   //( deviceID, service, action, params, cbfunc )
+                    deviceid:NULL_DEVICE,
+                    label:'',
+                    service:'',
+                    action:'',
+                    params:{}
+                } 
+            },
+            {   id:65, 
+                cls:'altui-widget-2statebtn', 
+                html: _toolHtml(onoffGlyph,_T("Multi State")),
+                property: _onPropertyOnOffButton, 
+                widgetdisplay: function(widget,bEdit)   {
+                    var status=0;
+                    var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
+                    if (device==null)
+                        return "";
+                    if (widget.properties.deviceid!= NULL_DEVICE)
+                    {
+                        status = _onoffStatus(device,widget);
+                    }
+                    var htmlLabels=$("<div class='altui-widget-2statebtn-labels'></div>");
+                    if ( (status==0) && (widget.properties.labels[0]!=undefined) )
+                        htmlLabels.append( $("<small class='pull-right'></small>").text(widget.properties.labels[0]));
+                    if ( (status==1) && (widget.properties.labels[1]!=undefined) )
+                        htmlLabels.append( $("<small class='pull-left'></small>").text(widget.properties.labels[1]));
+                    htmlLabels = htmlLabels.wrap( "<div></div>" ).parent().html();
+                    
+                    return "<button  type='button' style='color:{4};' class='{1} btn btn-default' aria-label='Run Scene' onclick='{3}' >{2}</button>".format(
+                        widget.properties.deviceid,                 // id
+                        'altui-widget-2statebtn',                   // class
+                        onoffGlyph,                                 // content
+                        (bEdit==true)? '' : 'UIManager.onoffOnClick( {0})'.format(widget.id),               // editmode
+                        // widget.properties.service,                   // action service
+                        // widget.properties.action,                    // action name
+                        // JSON.stringify(widget.properties.params),    // action parameter
+                        (status==0) ? 'red' : 'green'               // status & color of button
+                        )+htmlLabels;
+                },
+                properties: {   //( deviceID, service, action, params, cbfunc )
+                    deviceid:NULL_DEVICE,
+                    service:'',     // display state service
+                    variable:'',    // display state variable
+                    onvalue:'',
+                    offvalue:'',
+                    inverted:0, // inverted to that onstate is value 0
+                    labels: [],     // 0:onlabel , 1:offlabel
+                    action_off: {
+                        service:'',
+                        action:'',
+                        params:{}
+                    },
+                    action_on: {
+                        service:'',
+                        action:'',
+                        params:{}
+                    }
+                } 
+            },
+            {   id:70, 
+                cls:'altui-widget-camera', 
+                no_refresh:true,
+                html: _toolHtml(cameraGlyph,_T("Camera")),
+                onWidgetResize: _onResizeCamera,
+                aspectRatio: true,
+                property: _onPropertyCamera, 
+                widgetdisplay: function(widget,bEdit)   { 
+                    var device = MultiBox.getDeviceByAltuiID(widget.properties.deviceid);
+                    if (device==null)
+                        return "";
+                    return ((device!=null) && (device.altuiid!=NULL_DEVICE)) ? _cameraDraw(device,widget.size) : "<img src='{0}' style='max-height:100%; max-width:100%;'></img>".format(cameraURI);    //"<div class='altui-camera-div'>xxx</div>";
+                },
+                properties: {   //( deviceID, service, action, params, cbfunc )
+                    deviceid:NULL_DEVICE
+                } 
+            }
+            ,{  id:80, 
+                cls:'altui-widget-gauge', 
+                html: _toolHtml(scaleGlyph,_T("Gauge")),
+                property: _onPropertyGauge, 
+                onWidgetResize: _onResizeGauge,
+                widgetdisplay: function(widget,bEdit)   { 
+                    return "<div class='altui-gauge-div' id='altui-gauge-{0}' ></div>".format( widget.id );
+                },
+                onWidgetDisplay: _onDisplayGauge,
+                properties: {   //( deviceID, service, action, params, cbfunc )
+                    label:'',
+                    deviceid:NULL_DEVICE,
+                    min:0,
+                    max:100,
+                    greenfrom:'',
+                    orangefrom:'',
+                    redfrom:'',
+                    majorTicks:[],
+                    service:'',
+                    variable:''
+                } 
+            }   
+            ]
+ 
+ # ---------------------------------------------------------
+ #  private functions
+ # ---------------------------------------------------------
+
+    @ui7Check = true
+    @version = ""
+    @remoteAccessUrl = ""
+
+    @createScript: (scriptName) ->
+        container = $(".altui-scripts")[0]
+        script = document.createElement('script')
+        script.type = 'text/javascript'
+        script.setAttribute("data-src", scriptName)
+        container.appendChild(script)
+
+    @loadScript: (scriptLocationAndName, cbfunc) ->
+        head = document.getElementsByTagName('head')[0]
+        script = document.createElement('script')
+        script.type = 'text/javascript'
+        script.src = scriptLocationAndName
+        script.setAttribute("data-src", scriptLocationAndName)
+
+        # once script is loaded, we can call style function in it
+        $(script).load(cbfunc)
+        head.appendChild(script)
+
+    @loadD3Script: (drawfunc) ->
+        altuidevice = MultiBox.getDeviceByID(0, g_MyDeviceID)
+        localcdn = MultiBox.getStatus(altuidevice, "urn:upnp-org:serviceId:altui1", "LocalCDN").trim() or ""
+        if localcdn
+            scriptname = localcdn+"/d3.min.js"
+        else 
+            scriptname = "//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"
+        len = $('script[src="#{scriptname}"]').length
+        if len == 0
+            UIManager.loadSCript scriptname, () -> drawFunc()
+            return
+        drawfunc()
+    
+    # func is the function to call, if it contains module.funcname it is a 
+    # UI7 style. otherwise it is assumed UI5 style UI7 style already uses 
+    # jquery normally
+    #
+    @fixScriptPostLoad: (name, code, ui7style) ->
+        if not ui7style
+            re = /\#\((.*?)\).value\s*=(.*);/g;
+            subst = '$(\'#\'+$1).val($2);'
+            code = code.replace(re,subst)
+            
+            re = /\$\((.*?)\).value/g
+            subst = '$(\'#\'+$1).val()'
+            code = code.replace(re, subst)
+            
+            re = /\$\((.*?)\).innerHTML\s*?=\s*?(.*);/g
+            subst = '$(\'#\'+$1).html($2)'
+            code = code.replace(re, subst)
+
+            re = /\$\((.*?)\).innerHTML/g
+            subst = '$(\'#\'+$1).html()'
+            code = code.replace(re, subst)
+
+            re = /\$\((.*?)\).checked/g
+            subst = '$(\'#\'+$1).is(\':checked\')'
+            code = code.replace(re, subst)
+
+            re = /\(\$\(([^#]*?)\)\)?/g
+            subst = '($(\'#\'+$1).length>0)'
+            code = code.replace(re, subst)
+
+            if name == 'J_ProgramLogicC.js"
+                re = /!\$\((selectedEventObj)\)/g
+                subst = '($("#"+selectedEventObj).length==0)'
+                code = code.replace(re, subst)
+                
+                re = /\$\$\((.*?)\)/g 
+                subst = '$($1)' 
+                code = code.replace(re, subst)
+            if name == 'J_OWServer.js'
+                # J_OWServer.js & others
+                re = /=\s*new\s+Hash\(\);/g
+                subst = '= {};'
+                code = code.replace(re, subst)
+                re = /.set\((.*),(.*)\)/g
+                subst = '[$1]=$2'
+                code = code.replace(re, subst)
+        if name == "J_RGBController1.js"
+            re = /#RGBController_red .ui-slider-range, #RGBController_red .ui-slider-handle { background-color: (#(\d|[a-f]|[A-F]){6}) !important; }/
+            subst = '#RGBController_red .ui-slider-range, #RGBController_red .ui-slider-handle,#RGBController_red .ui-widget-header, #RGBController_red .ui-state-default { background-image:url(\'\'); background-color: $1 !important; }'
+            code = code.replace(re, subst)
+            re = /#RGBController_green .ui-slider-range, #RGBController_green .ui-slider-handle { background-color: (#(\d|[a-f]|[A-F]){6}) !important; }/
+            subst = '#RGBController_green .ui-slider-range, #RGBController_green .ui-slider-handle,#RGBController_green .ui-widget-header, #RGBController_green .ui-state-default { background-image:url(\'\'); background-color: $1 !important; }'
+            code = code.replace(re, subst)
+            re = /#RGBController_blue .ui-slider-range, #RGBController_blue .ui-slider-handle { background-color: (#(\d|[a-f]|[A-F]){6}) !important; }/
+            subst = '#RGBController_blue .ui-slider-range, #RGBController_blue .ui-slider-handle,#RGBController_blue .ui-widget-header, #RGBController_blue .ui-state-default { background-image:url(\'\'); background-color: $1 !important; }'
+            code = code.replace(re, subst)
+            re = /#RGBController_white .ui-slider-range, #RGBController_white .ui-slider-handle { background-color: (#(\d|[a-f]|[A-F]){6}) !important; }/
+            subst = '#RGBController_white .ui-slider-range, #RGBController_white .ui-slider-handle,#RGBController_white .ui-widget-header, #RGBController_white .ui-state-default { background-image:url(\'\'); background-color: $1 !important; }'
+            code = code.replace(re, subst)
+      return code
+      
+    @initDB: (devicetypes, cbfunc) ->
+        EventBus.registerEventHandler "on_altui_deviceTypeLoaded", UIManager, () -> cbfunc()
+
+        _devicetypesDB = MultiBox.initDB(devicetypes).getALTUITypesDB()
+        @ui7Check = (_devicetypesDB["info"].ui7Check == "true")
+        @version - _devicetypesDB["info"].PluginVersion
+        @removeAccessUrl = _devicetypesDB["info"].RemoteAccess
+
+        # foreach load the module if needed
+
+        _toload = 0
+        for devtype,obj in _devicetypesDB
+            if obj? and obj.ScriptFile?
+                len = $('script[data-src="'+obj.ScriptFile+'"]').length
+                if len == 0
+                    # not loaded yet
+                    _toload++
+                    @loadScript obj.ScriptFile, () ->
+                        # script has been loaded, check if style needs to be loaded 
+                        # and if so, load them
+                        for dt, idx in _devicetypesDB
+                            if dt.ScriptFile == obj.ScriptFile and dt.StyleFunc?
+                                Altui_LoadStyle(dt.StyleFunc)
+                                break
+                        _toload--
+        if $.isFunction(cbfunc)
+            notifyTermination = () ->
+                if _toload == 0
+                    EventBus.publishEvent("on_altui_deviceTypeLoaded")
+                else
+                    setTimeout(notifyTermination, 500)
+            notifyTermination()
+
+    @enhanceValue: (value) ->
+        # try to guess what is the value
+        if not value?
+            return ""
+        valuetype = $.type(value)
+        if $.isNumeric(value)
+            if value >= 900000000 and value <= 4035615941
+                date = new Date(value*1000)
+                return date.toLocaleString()
+            return value
+        else if (valuetype=='string' 
+                 and ((value.indexOf('http') == 0) 
+                      or (value.indexOf('https') == 0)
+                      or (value.indexOf('ftp') == 0)))
+            return "<a href='#{value}'>#{value}</a>"
+        return value.toString().htmlEncode()
+
+    @enhanceEditorValue: (id, value, altuiid) ->
+        extradata = if altuiid then ("data-altuiid='#{altuiid}'") else ""
+        if $.isNumeric(value) and value>=900000000 and value <= 4035615941
+            date = new Date(value*1000)
+            str = value.toString().escapeXml()
+            return """
+                <input #{extradata}
+                 type='datetime-local' 
+                 class='form-control' 
+                 id='#{id}' 
+                 name='#{id}' 
+                 value='#{@toIso(date)}'>"""
+        str = value.toString().escapeXMl()
+        return """
+            <input #{extradata}
+             id='#{id}' 
+             class='form-control' 
+             type='text' 
+             value='#{str}'></input>"""
+
+    @differentWatch: (watch,push) ->
+        if (watch.service != push.service 
+            or  watch.variable != push.variable
+            or  watch.deviceid != push.deviceid  
+            or  watch.provider != push.provider)
+            return true;
+        # otherwise compare params
+        if watch.params.length != push.params.length
+            return true
+        for i in [0..watch.params.length]
+            wp = watch.params[i]
+            pp = push.params[i]
+            if not wp? or not pp? or wp != pp
+                return true
+        return false
+    
+    @deviceDrawVariable: (device) ->
+        _clickOnValue = () ->
+            id = $(this).prop('id') # idx in variable state array
+            state = MultiBox.getStateByID(device.altuiid, id)
+            tbl = [state.service, state.variable]
+            value = MultiBox.getStatus(device, tbl[0], tbl[1])
+            $(this).off("click")
+            $(this).html(@enhanceEditorVAlue(id,value))
+            $(this).find("input##{id}")
+                .focus()
+                .focusout () ->
+                    id = $(this).prop('id')
+                    state = MultiBox.getStateByID(device.altuiid, id)
+                    tbl = [state.service, state.variable]
+                    oldval = $(this).attr("value")
+                    val = $(this).val()
+                    if oldval != val
+                        if $(this).attr('type') == 'datetime-local'
+                            d = new Date(val) # input returns in UTC but we want in locale
+                            locale = d.getTime() + (d.getTimezoneOffset()*60000)
+                            val = locale/1000.
+                        MultiBox.setStatus(device, tbl[0], tbl[1], val)
+                    $(this).parent().click(_clickOnValue)
+                    $(this).replaceWith(@enhanceVAlue(val))
+
+
+    @pushFormFields: (providers, provider, varid, pushData) ->
+        tempPushData = if pushData then cloneObject(pushData) else []
+        html = ""
+        parameters = if provider and providers[provider] then providers[provider].parameters else []
+        for param,i in parameters
+            defvalue = param.default or ""
+            value = if pushData? then pushData.params[i] or defvalue else ''
+            tempPushData.params[i] = value
+            html += """
+<div class='form-group col-xs-12'>
+    <label for='datapush-#{param.key}-#{varid}'>#{i}-#{param.label}</label>
+    <input 
+     type='#{param.key}' 
+     class='form-control input-sm' 
+     id='datapush-#{param.key}-#{varid}'
+     placeholder='#{param.type}'
+     value='#{value}'>
+    </input>
+</div>
+            """
+            if param.key == 'graphicurl'
+                height = param.ifheight or 260
+                url = String.prototype.format.apply(value, tempPushData.params)
+                html += """
+<iframe 
+ id='altui-iframe-chart-#{varid}'
+ class='altui-thingspeak-chart'
+ data-idx='#{i}'
+ width='100%'
+ height='#{height}'
+ style='border: 1px solid #cccccc;'
+ src='#{url}'>
+</iframe>
+                """
+        return html
+
+    @buildPushForm: (providers, pushData, device, varid) ->
+        altuidevice = MultiBox.getDeviceByID(0, g_MyDeviceID)
+        state = MultiBox.getStateByID(device.altuiid, varid)
+
+        checked = if pushData? then 'checked' else ''
+
+        html = """
+<div class='panel panel-default'> 
+    <div class='panel-body'>
+        <div class='row'>
+            <div class='checkbox col-xs-12 form-inline'>
+                <label>
+                    <input type='checkbox' id='altui-enablePush-#{varid}' #{checked}>
+                    Enable Push to : 
+                </label>
+                <select id="altui-provider-#{varid}" class="form-control">         
+        """
+        for key,provider in providers
+            selected = if pushData? and pushData.provider==key then 'selected' else ''
+            html += "<option #{selected}>#{key}</option>"
+        html += """
+                </select>
+            </div>
+            <form id='form=#{varid}' class='form'>
+                #{@pushFormFields(providers, if pushData? then pushData.provider else null, varid, pushData)}
+            </form>
+        </div>
+    </div>
+</div>
+        """
+        return html
+
+    @buildDeviceVariableBody: (deviceVariableLineTemplate, model) ->
+        lines = []
+        for state,idx in device.states.sort(@sortByVariableName)
+            rot = model[state.id]
+            str = deviceVariableLineTemplate.format(
+                    state.variable,
+                    row.val,
+                    state.service,
+                    state.id,
+                    if row.sendWatch? then 'btn-info' else '',
+                    if row.sendWatch? then row.sendWatch.provider else ''
+                )
+            lines.push(str)
+        return lines.join('')
+
+        # 0: variable , 1: value , 2: service
+        deviceVariableLineTemplate = ALTUI_Templates.deviceVariableLineTemplate
+        model = {}
+        if device?
+            watches = {}
+            altuidevice = MultiBox.getDeviceByID(0, g_MyDeviceID)
+            for watch,i in MultiBox.getWatch("VariablesToSend", ((watch) -> watch.deviceid == device.altuiid))
+                watches[watch.service+"_"+watch.variable] = watch
+            for state,idx in devices.states.sort(@sortByVariableName)
+                model[state.id] = {
+                    val: @enhanceValue(state.value)
+                    sendWatch: watches[state.service+'_'+state.variable]
+
+            # update modal with new text
+            body = buildDeviceVariableBody(deviceVariableLineTemplate,model)
+            DialogManager.registerDialog('deviceModal',
+                                         deviceModalTemplate.format(body, 
+                                                                    device.name, 
+                                                                    device.altuiid))
+            $("button.altui-variable-push").click( () ->
+                _getPushFromDialog = (frm)  ->
+                    push = {
+                        service : state.service
+                        variable : state.variable
+                        deviceid : device.altuiid
+                        provider : $("#altui-provider-"+varid).val()
+                        params : []
+                    }
+                    # var len="datapush_".length;
+                    for elem in frm.find("input")
+                        push.params.push $(elem).val()
+                    return push
+
+                tr = $(this).closest("tr")
+                varid = tr.find("td.altui-variable-value").prop('id')
+                state = MultiBox.getStateByID(device.altuiid, varid)
+                form = $(this).closest("tbody").find("form#form-#{varid}")
+                if form.length == 0
+                    that = $(this)
+                    # change color
+                    that.removeClass("btn-default").addClass("btn-danger")
+                    MultiBox.getDataProviders (providers) ->
+                        #
+                        # get this push parameters if they exist
+                        #
+                        pushes = MultiBox.getWatches "VariablesToSend", (push) -> (device.altuiid == push.deviceid) and (state.variable == push.variable) and (state.service == push.service)
+                        console.assert(pushes.length<=1)
+                        pushData = if pushes.length==0 then null else pushes[0]
+
+                        html = buildPushForm(providers, pushData, device, varid)
+                        tr.after("<tr><td colspan='3'>#{html}</td></tr>")
+
+                        # display form if needed
+                        checked = $("#altui-enablePush-#{varid}").is(":checked")
+                        tr.after("#form-#{varid}").toggle(checked)
+
+                        # create a default pushData with a default provider if needed
+                        pushData = $.extend {
+                            provider: $("#altui-provider-#{varid}").val()
+                            params: []
+                        }, pushData
+    
+                        $("#altui-enablePush-#{varid}").change () ->
+                            $("#form-#{varid}").html(_pushFormFields(providers,pushData.provider,varid,pushData))
+                            # display form if needed
+                            checked = $("#altui-enablePush-"+varid).is(':checked')
+                            $("#form-#{varid}").toggle(checked)
+                        
+                        $("#altui-provider-#{varid}").change () ->
+                            pushData.provider = $("#altui-provider-#{varid}").val()
+                            pushData.params=[]
+                            $("#form-#{varid}").html(_pushFormFields(providers,pushData.provider,varid,pushData))
+
+                        $("#form-#{varid} input").change () ->
+                            var url = $("#datapush-graphicurl-#{varid}").val()
+                            var push = _getPushFromDialog($("#form-#{varid}"))
+                            url = String.prototype.format.apply(url,push.params)
+                            if url.indexOf("{")==-1
+                                $(".altui-thingspeak-chart").attr("src",url)
+                else
+                    # CLOSING the form : change color
+                    nexttr = tr.next("tr")
+                    pushEnabled = nexttr.find("input#altui-enablePush-#{varid}").prop('checked')
+                    $(this).addClass("btn-default").toggleClass("btn-info",pushEnabled).removeClass("btn-danger")
+                    push = null
+                    differentWatches=null;
+                    # find all watches for this device
+                    previousWatches = MultiBox.getWatches("VariablesToSend",(watch) -> 
+                        (watch.service == state.service) and (watch.variable == state.variable)  and (watch.deviceid == device.altuiid)
+
+
+                    # add a new one unless it is already there
+                    if pushEnabled
+                        push = _getPushFromDialog(form)
+                        differentWatches = previousWatches.filter (watch) -> _differentWatch(watch,push)
+                        # delete all old ones
+                        for w in differentWatches
+                            MultiBox.delWatch(w)
+                        # add new one if it was not there before
+                        if differentWatches.length == previousWatches.length
+                            MultiBox.addWatch(push)
+                    else
+                        # delete all watches that are in the VERA variable and not any 
+                        # more in the scenewatches
+                        for w in previousWatches
+                            MultiBox.delWatch(w)
+                    form.closest("tr").remove()
+
+            $("button.altui-variable-history").click () ->
+                tr = $(this).closest("tr")
+                varid = tr.find("td.altui-variable-value").prop('id')
+                historypre = $(this).closest("tbody").find("table##{varid}")
+                width = tr.width()
+                if historypre.length==0 
+                    MultiBox.getDeviceVariableHistory  device, varid, (history) ->
+                        AltuiDebug.debug("getDeviceVariableHistory returned :#{history.result}")
+                        html = """
+<tr>
+    <td colspan='3'>
+        <div class='panel panel-default'>
+            <div class='panel-body'>
+                <div class='table-responsive'>
+                    <table id='#{varid}' class='table table-condensed altui-variable-value-history'>
+                        <thead>";
+                            <tr>
+                                <th>#{_T('Date')}</th>
+                                <th>#{_T('Old')}</th>
+                                <th>#{_T('New')}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        """
+                        history.lines.reverse()
+                        for e, i in history.lines
+                            html += """
+                                <tr>
+                                    <td>#{e.date}</td>
+                                    <td>#{@enhanceValue(e.oldv)}</td>
+                                    <td>#{@enhanceValue(e.newv)}</td>
+                                </tr>
+                            """
+                        html += """
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </td>
+    </tr>
+                        """
+                        tr.after(html)
+                else
+                    historypre.closest("tr").remove()
+
+            $(".altui-variable-value").click(_clickOnValue)
+            # show the modal
+            $('#deviceModal').modal()
+    
+    @deviceCreate: () ->
+        # prepare model
+        # show
+        $('#deviceCreateModel button.btn-primary').off('click').on 'click', () ->
+            if confirm("Are you sure you want to create this device")
+                MultiBox.createDevice 0, # only on main controller for now
+                    {
+                        dfile: $("#altui-input-dfile").val()
+                        ifile: $("#altui-input-ifile").val()
+                        descr: $("#altui-input-dtitle").val()
+                    }, (newid) ->
+                        $("#deviceCreateModal").modal('hide')
+                        if newid?
+                            PageMessage.message _T("Device {0} created successfully").format(newid), "info"
+                        else
+                            PageMessage.message _T("Device creation failed"), "danger"
+        $('#deviceCreateModal').modal()
+
+    @deviceDrawActions: (device) ->
+        # 0: name 1:name
+        deviceActionParamTemplate = """
+<div class='input-group input-group-sm'>
+    <span class='input-group-addon' id='sizing-addon3'>
+        {0}
+    </span>
+    <input 
+     type='text' 
+     class='form-control' 
+     placeholder='{1}' 
+     aria-describedby='sizing-addon3'>
+</div>
+        """
+
+        # 0: action 1: value 2: service 3: devid
+        deviceActionLineTemplate = """
+<tr>
+    <td>
+        <span title='{2}'>
+            <button class='btn btn-default btn-sm altui-run-action' data-altuiid='{3}' data-service='{2}'>
+                {0}
+            </button>
+        </span>
+    </td>
+</tr>
+        """
+        # for each services for that device type
+        # enumerate actions name & parameters      
+        # var device = MultiBox.getDeviceByID( devid );
+        
+        MultiBox.getDeviceActions device, (services) ->
+            AltuiDebug.debug "MultiBox.getDeviceActions => returns services:#{JSON.stringify(services)}"
+            lines = []
+            for service in services
+                for action in service.Actions
+                    params = []
+                    for param in action.input
+                        params.push deviceActionParamTemplate.format(param,param)
+                    lines.push deviceActionLineTemplate.format(action.name,params.join(''),service.ServiceId, device.altuiid)
+
+            # update modal with new text
+            extrabuttons = ""
+            if MultiBox.isDeviceZwave(device)
+                extrabuttons = buttonTemplate.format(device.altuii, 
+                                                     "altui-update-neighbors",
+                                                     _T("Update Neighbors"),
+                                                     "default",
+                                                     _T("Update Neighbors"))
+            DialogManager.registerDialog('deviceActionModal',
+                                         deviceActionModalTemplate.format(lines.join(''),
+                                                                          device.name,
+                                                                          device.altuiid,
+                                                                          extrabuttons))
+
+            $('div#deviceActionModal button.altui-run-action').click () ->
+                service = $(this).data().service # better than this.dataset.service 
+                                                 # in case of old browsers
+                altuiid = $(this).data().altuiid
+                device = MultiBox.getDeviceByAltuiID(altuiid)
+                action = $(this).text()
+                # search parameters
+                inputs = $(this).parents("tr").find("td:nth-child(2) div.input-group")
+                parameters = {}
+                for param in inputs
+                    paramname = $(param).find("input").prop("placeholder")
+                    paramvalue = $(param).find("input").val()
+                    if paramname?
+                        parameters[paramname] = paramvalue
+
+                MultiBox.runAction device, service, action, parameters, (result) -> alert(result)
+
+            $('div#deviceActionModal button.altui-update-neighbors').click () ->
+                altuiid = $(this).prop('id')
+                device = MultiBox.getDeviceByAltuiID(altuiid)
+                MultiBox.updateNeighbors(device)
+
+            $('#deviceActionModal').modal()
+
+    # This is the list with all job statuses and their meaning:
+    # -1: No job, i.e. job doesn't exist.
+    # 0: Job waiting to start.
+    # 1: Job in progress.
+    # 2: Job error.
+    # 3: Job aborted.
+    # 4: Job done.
+    # 5: Job waiting for callback. Used in special cases.
+    # 6: Job requeue. If the job was aborted and needs to be started, use this special value.
+    # 7: Job in progress with pending data. This means the job is waiting for data, but can't take it now. 
+    # job_None=-1, // no icon
+    # job_WaitingToStart=0, // gray icon
+    # job_InProgress=1, // blue icon
+    # job_Error=2, // red icon
+    # job_Aborted=3, // red icon
+    # job_Done=4, // green icon
+    # job_WaitingForCallback=5 // blue icon - Special case used in certain derived classes
+    @jobStatusToColor: (status) ->
+        status = parseInt(status)
+        switch status
+            when 1,5,6,7
+                return "info"
+            when 0
+                return "active"
+            when 2, 3
+                return "danger"
+            when 4
+                return "success"
+            when -1
+                return "default"
+
+    @enhancedDeviceTitle: (device) ->
+        glyphs = []
+        glyphs.push( if device.favorite then starGlyph else staremptyGlyph )
+
+        if device.hidden
+            glyphs.push hiddenGlyph
+        if device.invisible
+            glyphs.push invisibleGlyph
+
+        return "#{glyphs.join(' ')} <small class='altui-device-title-name'>#{device.name}</small>"
+
+
+ 
+
+    
+
 
     @initUIEngine: (css) ->
         $("title").before("<style type='text/css'>#{css}</style>")
