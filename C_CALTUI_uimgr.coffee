@@ -2168,10 +2168,160 @@ class UIManager
 
         return "#{glyphs.join(' ')} <small class='altui-device-title-name'>#{device.name}</small>"
 
+    @defaultDeviceDrawWatts: (device) ->
+        METERING = 'urn:micasaverde-com:serviceId:EnergyMetering1'
+        watts = parseFloat(MultiBox.getStatus(device, METERING, 'Watts'))
+        if not isNaN watts
+            return wattTemplate.format(watts)
+        else
+            watts = parseFloat(MultiBox.getStatus(device, METERING, 'UserSuppliedWattage'))
+            if not isNaN watts
+                return wattTemplate.format(watts)
+        return ""
 
- 
+    @defaultDeviceDrawAltuiStrings: (device) ->
+        html = ""
+        for v in ['DisplayLine1', 'DisplayLine2']
+            dl1 = MultiBox.getStatus(device, 'urn:upnp-org:serviceId:altui1', v)
+            if dl1?
+                html =+ $("<div class='altui-#{v}'></div>").text(dl1).wrap("<div></div>").parent().html()
+        return (html or optHorGlyph) 
 
-    
+    @defaultDeviceDraw: (device) ->
+        @defaultDeviceDrawWatts(device) + @defaultDeviceDrawAltuiStrings(device)
+
+    @hasObjectProperty: (obj) ->
+        for val in obj
+            if isObject(val)
+                return true
+        return false
+
+#  icons http://192.168.1.16/cmh/skins/default/img/devices/device_states/binary_light_default.png
+# _devicetypesDB[ device.device_type ][json].ui_static_data.flashicon
+# _devicetypesDB[ device.device_type ][json].ui_static_data.default_icon
+# 
+# 192.168.1.5/cmh/skins/default/img/devices/device_states/../../../icons/intro.png
+# 192.168.1.16/cmh/skins/default/img/devices/device_states/../../../icons/intro.png
+# 192.168.1.16/cmh/skins/default/img/icons/intro.png
+
+    @getDeviceIconPath: (device) ->
+        id = device.altuiid
+        controller = MultiBox.controllerOf(id).controller
+        ui5 = MultiBox.isUI5(controller)
+        icon = ''
+        if device.device_type == 'urn:schemas-futzle-com:device:CountdownTimer:1'
+            return '//apps.mios.com/plugins/icons/1588.png'
+
+        str = ''
+        src = defaultIconSrc
+        ui_static_data = MultiBox.getDeviceStaticData(device)
+        AltuiDebug.debug("Icon for device altuiid:#{device.altuiid} device.type:#{device.device_type}")
+        if ui_static_data?
+            if ui_static_data.state_icons?
+                si = ui_static_data.state_icons
+                if @hasObjectProperty(si)
+                    bFound = false
+                    for obj in si
+                        if isObject(obj) and obj.img?
+                            if MultiBox.evaluateConditions(device, device.subcategory_num or -1, obj.conditions)
+                                bFound = true
+                                str = obj.img
+                                break
+                else if ui_static_data.flashicon?
+                    # The filename in flashicon undergoes a special transformation 
+                    # for variable icons. The extension ".png" is changed to 
+                    # "_0.png", "_25.png", "_50.png", "_75.png" or "_100.png" 
+                    # depending on the value of the service variable, linearly 
+                    # scaled from its range of 0:(MaxValue-MinValue) to 0:100. 
+                    # Values round up; 1-25 produces the "_25" image; 26-50 
+                    # produces the "_50" image, and so on. For images which are 
+                    # not found (for instance, if the web server returns 404 Not 
+                    # Found) the default image is used.
+
+                    #  mostlikely in UI5 icons are not located in devicestates 
+                    # folder, so let's fix it
+                    baseIconName = ui_static_data.flashicon
+                    AltuiDebug.debug("UI5 style static baseIconName:#{baseIconName}")
+                    dot = baseIconName.lastIndexOf('.')
+                    if dot >= 0
+                        baseIconName = baseIconName.substr(0, dot)
+                    if baseIconName.substring(0,4) != 'http'
+                        baseIconName = "../../../#{baseIconName}"
+                    AltuiDebug.debug("UI5 style static baseIconName modified : #{baseIconName}")
+                    ds = ui_static_data.DisplayStatus
+                    if ds? and ds.Service? and ds.Variable?
+                        variable = MultiBox.getStatus(device, ds.Service, ds.Variable)
+                        if not variable?
+                            variable = 0
+                        status = variable / (ds.MaxValue - ds.MinValue)
+                        val = Math.ceil(status*4)
+                        val25 =  if isNaN(val*25) then 0 else (val*25)
+                        str = "#{baseIconName}_#{val25}.png"
+                    else
+                        str = "#{baseIconName}.png"
+                else
+                    str = si[0] or defaultIconSrc
+                AltuiDebug.debug("Icon for device id:#{id} str: #{str}")
+            else
+                # no state icons found
+                if ui5
+                    str = ui_static_data.flashicon or ui_static_data.default_icon
+                else
+                    str = ui_static_data.default_icon or ui_static_data.flashicon 
+                AltuiDebug.debug("Icon for device id:#{id} string from json: #{str}")
+                if not str?
+                    AltuiDebug.debug("Undefined icon in ui_static_data, device.type:#{device.device_type}")
+                    AltuiDebug.debug("ui_static_data:#{JSON.stringify(ui_static_data)}")
+                    AltuiDebug.debug("Setting default icon")
+                    str = "icons/generic_sensor.png"
+                str = str.replace(".swf",".png")
+                if str == "icons/generic_sensor.png" or str == "icons/Light_Sensor.png"
+                    str = defaultIconSrc
+                else if str == "icons/Window_Covering.png"
+                    if MultiBox.isUI5(controller)
+                        str = "../../../icons/Window_Covering.png"
+                    else
+                        str = "../../icons/Window_Covering.png"
+                # //192.168.1.16/cmh/skins/default/img/devices/device_states/../../icons/Window_Covering.png
+                else if str.substr(0,6) == "icons/"
+                    str = "../../../#{str}"
+                AltuiDebug.debug("Icon for device id:#{id} string after correction: #{str}")
+        else
+            AltuiDebug.debug("Icon for device id:#{id} DeviceType unknown or not static data")
+            str = defaultIconSrc
+
+        if str.substring(0,4) == 'http'
+            AltuiDebug.debug("Icon for device id:#{id} IconPath:#{str}")
+            return str
+
+        if str.substring(0,14) == 'data:image/png'
+            icon = str
+        else
+            icon = MultiBox.getIconPath(controller, str)
+
+        AltuiDebug.debug("Icon for device id:#{id} IconPath:#{icon}")
+        break
+    return icon
+
+    @deviceIconHtml: (device, zindex) ->
+        controller = MultiBox.controllerOf(device.altuiid).controller
+        #
+        # get ALTUI plugin definition to see if we have a custom icon drawing, 
+        # so allways on master controller => 0!
+        #
+        _devicetypedDB = MultiBox.getALTUITypesDB()
+
+        if not device?
+            return """
+<img 
+ class='altui-device-icon pull-left img-rounded'
+ data-org-src='/err'
+ src='#{defaultIconSrc}'
+ alt='_todo_'
+ onerror='UIManager.onDeviceIconError("#{device.altuiid}")'
+ #{if zindex then "style='z-index:"+zindex else ""}>
+</img>
+            """
 
 
     @initUIEngine: (css) ->
