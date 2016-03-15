@@ -2322,7 +2322,37 @@ class UIManager
  #{if zindex then "style='z-index:"+zindex else ""}>
 </img>
             """
+        # if there is a custom function, use it
+        if @devicetypesDB[device.device_type]? and @devicetypesDB[device.device_type].DeviceIconFunc?
+            return Altui_ExecuteFunctionByName(@devicetypesDB[device.device_type].DeviceIconFunc, window, device)
 
+        # otherwise
+        iconPath = @getDeviceIconPath(device)
+        iconDataSrc = ""
+        if MultiBox.isRemoteAccess()
+            iconDataSrc = IconDB.getIconContent controller, iconPath, (data) ->
+                $("img[data-org-src='#{iconPath}']").attr('src',data)
+        else
+            iconDataSrc = iconPath
+        return "<img class='altui-device-icon pull-left img-rounded' data-org-src='#{iconPath}' src='#{iconDataSrc}' alt='_todo_' onerror='UIManager.onDeviceIconError(\"#{device.altuiid}\")'></img>"
+
+    @deviceDraw: (device) ->
+        id = device.altuiid
+        iconHtml = @deviceIconHtml(device)
+        batteryHtml = ""
+        batteryLevel = MultiBox.getDeviceBatteryLevel(device)
+        if batteryLevel?
+            color = "danger"
+            if batteryLevel >= 80
+                color = "success"
+            else if batteryLevel >= 30
+                color = "info"
+            else if batteryLevel >= 10
+                color = "warning"
+            color = "progress-bar-#{color}"
+            batteryHtml = ALTUI_Templates.batteryHtmlTemplate.format(batteryLevel, color)
+
+        
 
     @initUIEngine: (css) ->
         $("title").before("<style type='text/css'>#{css}</style>")
